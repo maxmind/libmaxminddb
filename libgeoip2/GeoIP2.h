@@ -1,5 +1,3 @@
-
-
 #ifndef GEOIP2_H
 #define GEOIP2_H
 
@@ -11,13 +9,12 @@ extern "C" {
 //#include <sys/socket.h>
 #include <netinet/in.h>
 //#include <arpa/inet.h>
- 
+
 //#include<stdio.h>
 //#include<stdlib.h>
 //#include<string.h>
 //#include <sys/types.h> /* for fstat */
 //#include <sys/stat.h>   /* for fstat */
-
 
 # define GEOIP2_DTYPE_EXT (0)
 # define GEOIP2_DTYPE_PTR (1)
@@ -33,7 +30,6 @@ extern "C" {
 # define GEOIP2_DTYPE_CONTAINER (11)
 # define GEOIP2_DTYPE_END_MARKER (12)
 
-
 /* GEOIP2 flags */
 #define GEOIP2_MODE_STANDARD (1)
 #define GEOIP2_MODE_MEMORY_CACHE (2)
@@ -47,52 +43,47 @@ extern "C" {
 #define GEOIP2_IOERROR (-4)
 #define GEOIP2_OUTOFMEMORY (-5)
 
+	typedef struct GeoIP2_entry_s {
+		GeoIP2_database *gi;
+		GeoIP2_struct_ptr *sptr;	/* usually pointer to the struct */
+	} GeoIP2_entry_s;
 
-struct GeoIP2_Lookup{
- U32 ptr;
- int netmask;
-};
-
-struct GeoIP2_Perl_Lookup {
-  SV* sv;
-  int netmask;
-};
-
-/* 128 bit address in network order */
-typedef struct in6_addr geoipv6_t;
+	typedef struct {
+		GeoIP2_entry_s entry;
+		int netmask;
+	} GeoIP2_root_entry_s;
 
 
-struct GeoIP2_Decode_Value {
-  SV * sv;
-  int new_offset;
-};
+#if 0
+	struct GeoIP2_Decode_Value {
+		SV *sv;
+		int new_offset;
+	};
+	struct GeoIP2_Decode_Key {
+		const char *ptr;
+		int size;
+		int new_offset;
+	};
+#endif
 
-struct GeoIP2_Decode_Key {
-  const char * ptr;
-  int size;
-  int new_offset;
-};
+	typedef struct GeoIP2_database {
+		uint32_t flags;
+		int fd;
+		const unsigned char *file_in_mem_ptr;
+		const char *info;
+		int file_format;
+		int database_type;
+		int minor_database_type;
+		int recbits;
+		int depth;
+		int segments;
+		const unsigned char *dataptr;
+	} GeoIP2_database;
 
-typedef struct GeoIP2 {
-  U32 flags;
-  int fd;
-  const unsigned char * file_in_mem_ptr;
-  const char * info;
-  int file_format;
-  int database_type;
-  int minor_database_type;
-  int recbits;
-  int depth;
-  int segments;
-  const unsigned char * dataptr;
-} GEOIP2_T;
-
-unsigned int _lookup( struct GeoIP2 * gi, unsigned int ipnum );
-void _decode( struct GeoIP2 * gi, int offset );
+	unsigned int _lookup(GeoIP2_database *gi, unsigned int ipnum);
+	void _decode(GeoIP2_database *gi, int offset);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* GEOIP2_H */
-
+#endif				/* GEOIP2_H */
