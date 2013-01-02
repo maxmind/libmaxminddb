@@ -406,39 +406,6 @@ _lookup_by_ipnum(struct GeoIP2 * gi, uint32_t ipnum, struct GeoIP2_Lookup * res)
     return GEOIP2_CORRUPTDATABASE;
 }
 
-static          uint32_t
-_addr_to_num(const uint8_t * addr)
-{
-  uint32_t             c, octet, t;
-  uint32_t             ipnum;
-  int             i = 3;
-  octet = ipnum = 0;
-  while ((c = *addr++)) {
-    if (c == '.') {
-      if (octet > 255)
-	return 0;
-      ipnum <<= 8;
-      ipnum += octet;
-      i--;
-      octet = 0;
-    }
-    else {
-      t = octet;
-      octet <<= 3;
-      octet += t;
-      octet += t;
-      c -= '0';
-      if (c > 9)
-	return 0;
-      octet += c;
-    }
-  }
-  if ((octet > 255) || (i != 0))
-    return 0;
-  ipnum <<= 8;
-  return ipnum + octet;
-}
-
 static int
 _lookup_by_addr(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
 {
