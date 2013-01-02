@@ -1,11 +1,10 @@
-#include "GeoIP2.h"
+#include "GeoIPDB.h"
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include <string.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <netdb.h>
-
 
 static geoipv6_t IPV6_NULL;
 
@@ -16,46 +15,6 @@ static int __GEOIP_V6_IS_NULL(geoipv6_t v6) {
                         return 0;
         }
         return 1;
-}
-
-geoipv6_t
-GeoIP2_lookupaddress_v6(const char *host)
-{
-    geoipv6_t       ipnum;
-    int             gaierr;
-    struct addrinfo hints, *aifirst;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET6;
-    hints.ai_socktype = SOCK_STREAM;
-
-    if ((gaierr = getaddrinfo(host, NULL, &hints, &aifirst)) != 0) {
-        return IPV6_NULL;
-    }
-    memcpy(ipnum.s6_addr, ((struct sockaddr_in6 *) aifirst->ai_addr)->sin6_addr.s6_addr, sizeof(geoipv6_t));
-    freeaddrinfo(aifirst);
-
-    return ipnum;
-}
-
-U32
-GeoIP2_lookupaddress(const char *host)
-{
-    U32       ipnum;
-    int             gaierr;
-    struct addrinfo hints, *aifirst;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-
-    if ((gaierr = getaddrinfo(host, NULL, &hints, &aifirst)) != 0) {
-        return 0;
-    }
-    ipnum = ((struct sockaddr_in *) aifirst->ai_addr)->sin_addr.s_addr;
-    freeaddrinfo(aifirst);
-
-    return htonl(ipnum);
 }
 
 static U32 _get_uint32( const U8 * p){
@@ -183,25 +142,6 @@ _fddecode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key
 
 #define GEOIP_CHKBIT_V6(bit,ptr) ((ptr)[((127UL - (bit)) >> 3)] & (1UL << (~(127UL - (bit)) & 7)))
 
-static int
-_GeoIP2_inet_pton(int af, const char *src, void *dst)
-{
-  return inet_pton(af, src, dst);
-}
-static const char *
-_GeoIP2_inet_ntop(int af, const void *src, char *dst, socklen_t cnt)
-{
-  return inet_ntop(af, src, dst, cnt);
-}
-
-static          geoipv6_t
-_addr_to_num_v6(const U8 *addr)
-{
-  geoipv6_t       ipnum;
-  if (1 == _GeoIP2_inet_pton(AF_INET6, (char*)addr, &ipnum.s6_addr[0]))
-    return ipnum;
-  return IPV6_NULL;
-}
 
 void
 GeoIP2_free_all(struct GeoIP2 * gi)
