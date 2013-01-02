@@ -45,7 +45,7 @@ extern "C" {
     typedef struct MMIPDB_s {
         uint32_t flags;
         int fd;
-        const unsigned char *file_in_mem_ptr;
+        const uint8_t *file_in_mem_ptr;
         const char *info;
         int file_format;
         int database_type;
@@ -53,7 +53,7 @@ extern "C" {
         int recbits;
         int depth;
         int segments;
-        const unsigned char *dataptr;
+        const uint8_t *dataptr;
     } MMIPDB_s;
 
     typedef struct MMIPDB_entry_s {
@@ -78,8 +78,8 @@ extern "C" {
     };
 #endif
 
-    unsigned int _lookup(GEOIPDB * gi, unsigned int ipnum);
-    void _decode(GEOIPDB * gi, int offset);
+    uint32_t _lookup(GEOIPDB_s * ipdb, uint32_t ipnum);
+    void _decode(GEOIPDB_s * ipdb, int offset);
 
 #ifdef __cplusplus
 }

@@ -538,7 +538,7 @@ static int _init(MMIPDB_s * ipdb, char *fname, uint32_t flags)
 
 MMIPDB_s *MMIPDB_open(char *fname, uint32_t flags)
 {
-    IPDB *ipdb = calloc(1, sizeof(IPDB));
+    MMIPDB_s *ipdb = calloc(1, sizeof(MMIPDB_s));
     if (MMIPDB_SUCCESS != _init(ipdb, fname, flags)) {
         MMIPDB_free_all(ipdb);
         return NULL;
