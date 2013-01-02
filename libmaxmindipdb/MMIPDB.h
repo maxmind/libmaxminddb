@@ -1,5 +1,5 @@
-#ifndef IPDB_H
-#define IPDB_H
+#ifndef MMIPDB_H
+#define MMIPDB_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,33 +16,33 @@ extern "C" {
 //#include <sys/types.h> /* for fstat */
 //#include <sys/stat.h>   /* for fstat */
 
-# define IPDB_DTYPE_EXT (0)
-# define IPDB_DTYPE_PTR (1)
-# define IPDB_DTYPE_UTF8_STRING (2)
-# define IPDB_DTYPE_DOUBLE (3)
-# define IPDB_DTYPE_BYTES (4)
-# define IPDB_DTYPE_UINT16 (5)
-# define IPDB_DTYPE_UINT32 (6)
-# define IPDB_DTYPE_HASH (7)
-# define IPDB_DTYPE_INT32 (8)
-# define IPDB_DTYPE_UINT64 (9)
-# define IPDB_DTYPE_UINT128 (10)
-# define IPDB_DTYPE_CONTAINER (11)
-# define IPDB_DTYPE_END_MARKER (12)
+# define MMIPDB_DTYPE_EXT (0)
+# define MMIPDB_DTYPE_PTR (1)
+# define MMIPDB_DTYPE_UTF8_STRING (2)
+# define MMIPDB_DTYPE_DOUBLE (3)
+# define MMIPDB_DTYPE_BYTES (4)
+# define MMIPDB_DTYPE_UINT16 (5)
+# define MMIPDB_DTYPE_UINT32 (6)
+# define MMIPDB_DTYPE_HASH (7)
+# define MMIPDB_DTYPE_INT32 (8)
+# define MMIPDB_DTYPE_UINT64 (9)
+# define MMIPDB_DTYPE_UINT128 (10)
+# define MMIPDB_DTYPE_CONTAINER (11)
+# define MMIPDB_DTYPE_END_MARKER (12)
 
 /* GEOIPDB flags */
-#define IPDB_MODE_STANDARD (1)
-#define IPDB_MODE_MEMORY_CACHE (2)
-#define IPDB_MODE_MASK (7)
+#define MMIPDB_MODE_STANDARD (1)
+#define MMIPDB_MODE_MEMORY_CACHE (2)
+#define MMIPDB_MODE_MASK (7)
 
 /* GEOIPDB err codes */
-#define IPDB_SUCCESS (0)
-#define IPDB_OPENFILEERROR (-1)
-#define IPDB_CORRUPTDATABASE (-2)
-#define IPDB_INVALIDDATABASE (-3)
-#define IPDB_IOERROR (-4)
-#define IPDB_OUTOFMEMORY (-5)
-    typedef struct IPDB_s {
+#define MMIPDB_SUCCESS (0)
+#define MMIPDB_OPENFILEERROR (-1)
+#define MMIPDB_CORRUPTDATABASE (-2)
+#define MMIPDB_INVALIDDATABASE (-3)
+#define MMIPDB_IOERROR (-4)
+#define MMIPDB_OUTOFMEMORY (-5)
+    typedef struct MMIPDB_s {
         uint32_t flags;
         int fd;
         const unsigned char *file_in_mem_ptr;
@@ -54,24 +54,24 @@ extern "C" {
         int depth;
         int segments;
         const unsigned char *dataptr;
-    } IPDB_s;
+    } MMIPDB_s;
 
-    typedef struct IPDB_entry_s {
-        IPDB_s *ipdb;
+    typedef struct MMIPDB_entry_s {
+        MMIPDB_s *ipdb;
         void *sptr;             /* usually pointer to the struct */
-    } IPDB_entry_s;
+    } MMIPDB_entry_s;
 
     typedef struct {
-        IPDB_entry_s entry;
+        MMIPDB_entry_s entry;
         int netmask;
-    } IPDB_root_entry_s;
+    } MMIPDB_root_entry_s;
 
 #if 0
-    struct IPDB_Decode_Value {
+    struct MMIPDB_Decode_Value {
         SV *sv;
         int new_offset;
     };
-    struct IPDB_Decode_Key {
+    struct MMIPDB_Decode_Key {
         const char *ptr;
         int size;
         int new_offset;
@@ -84,4 +84,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif                          /* IPDB_H */
+#endif                          /* MMIPDB_H */
