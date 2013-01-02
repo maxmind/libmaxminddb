@@ -42,10 +42,23 @@ extern "C" {
 #define GEOIP2_INVALIDDATABASE (-3)
 #define GEOIP2_IOERROR (-4)
 #define GEOIP2_OUTOFMEMORY (-5)
+	typedef struct GeoIP2_database {
+		uint32_t flags;
+		int fd;
+		const unsigned char *file_in_mem_ptr;
+		const char *info;
+		int file_format;
+		int database_type;
+		int minor_database_type;
+		int recbits;
+		int depth;
+		int segments;
+		const unsigned char *dataptr;
+	} GeoIP2_database;
 
 	typedef struct GeoIP2_entry_s {
 		GeoIP2_database *gi;
-		GeoIP2_struct_ptr *sptr;	/* usually pointer to the struct */
+		void *sptr;	/* usually pointer to the struct */
 	} GeoIP2_entry_s;
 
 	typedef struct {
@@ -65,20 +78,6 @@ extern "C" {
 		int new_offset;
 	};
 #endif
-
-	typedef struct GeoIP2_database {
-		uint32_t flags;
-		int fd;
-		const unsigned char *file_in_mem_ptr;
-		const char *info;
-		int file_format;
-		int database_type;
-		int minor_database_type;
-		int recbits;
-		int depth;
-		int segments;
-		const unsigned char *dataptr;
-	} GeoIP2_database;
 
 	unsigned int _lookup(GeoIP2_database *gi, unsigned int ipnum);
 	void _decode(GeoIP2_database *gi, int offset);
