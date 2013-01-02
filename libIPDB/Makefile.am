@@ -1,6 +1,6 @@
-lib_LTLIBRARIES = libIPDB.la
+lib_LTLIBRARIES = libmaxmindipdb.la
 
-libGeoIPDB_la_SOURCES = IPDB_Core.c
+libmaxmindipdb_la_SOURCES = MMIPDB_Core.c
 
-IPDB.lo IPDB.o: IPDB_Core.c IPDB.h
+MMIPDB_Core.lo MMIPDB_Core.o: MMIPDB_Core.c MMIPDB.h
 
