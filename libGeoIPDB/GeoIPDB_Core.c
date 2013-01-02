@@ -17,20 +17,20 @@ static int __GEOIP_V6_IS_NULL(geoipv6_t v6) {
         return 1;
 }
 
-static U32 _get_uint32( const U8 * p){
+static uint32_t _get_uint32( const uint8_t * p){
   return (p[0] * 16777216UL +  p[1] * 65536 + p[2] * 256 + p[3]);
 }
 
-static U32 _get_uint24(const U8 * p){
+static uint32_t _get_uint24(const uint8_t * p){
   return (p[0] * 65536UL + p[1] * 256 + p[2]);
 }
 
-static U32 _get_uint16(const U8 * p){
+static uint32_t _get_uint16(const uint8_t * p){
   return (p[0] * 256UL + p[1]);
 }
 
-static U32 _get_uintX(const U8 * p, int length){
-  U32 r = 0;
+static uint32_t _get_uintX(const uint8_t * p, int length){
+  uint32_t r = 0;
   while ( length-- > 0 ){
     r <<= 8;
     r += *p++;
@@ -38,7 +38,7 @@ static U32 _get_uintX(const U8 * p, int length){
   return r;
 }
 
-static double _get_double( const U8 * ptr, int length){
+static double _get_double( const uint8_t * ptr, int length){
     char fmt[256];
     double d;
     sprintf(fmt, "%%%dlf", length);
@@ -47,7 +47,7 @@ static double _get_double( const U8 * ptr, int length){
 }
 
 static int
-_read(int fd, U8 * buffer, ssize_t to_read, off_t offset)
+_read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
 {
   while (to_read > 0) {
     ssize_t         have_read = pread(fd, buffer, to_read, offset);
@@ -66,9 +66,9 @@ static int
 _fddecode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key)
 {
   const int       segments = gi->segments * gi->recbits * 2 / 8;;
-  U8              ctrl;
+  uint8_t              ctrl;
   int             type;
-  U8              b[4];
+  uint8_t              b[4];
   int             fd = gi->fd;
   if (_read(fd, &ctrl, 1, segments + offset++) != GEOIP2_SUCCESS)
     return GEOIP2_IOERROR;
@@ -156,16 +156,16 @@ GeoIP2_free_all(struct GeoIP2 * gi)
 }
 
 static int
-_fdlookup_by_ipnum(struct GeoIP2 * gi, U32 ipnum, struct GeoIP2_Lookup * result)
+_fdlookup_by_ipnum(struct GeoIP2 * gi, uint32_t ipnum, struct GeoIP2_Lookup * result)
 {
   int             segments = gi->segments;
   off_t             offset = 0;
   int             byte_offset;
   int             rl = gi->recbits * 2 / 8;
   int             fd = gi->fd;
-  U32             mask = 0x80000000UL;
+  uint32_t             mask = 0x80000000UL;
   int             depth;
-  U8              b[4];
+  uint8_t              b[4];
 
 
   if (rl == 6) {
@@ -227,12 +227,12 @@ _fdlookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum, struct GeoIP2_Lookup 
   int             rl = gi->recbits * 2 / 8;
   int             fd = gi->fd;
   int             depth;
-  U8              b[4];
+  uint8_t              b[4];
   if (rl == 6) {
 
     for (depth = gi->depth - 1; depth >= 0; depth--) {
       byte_offset = offset * rl;
-      if (GEOIP_CHKBIT_V6(depth, (U8 *) & ipnum))
+      if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
 	byte_offset += 3;
       if ( _read(fd, &b[0], 3, byte_offset) != GEOIP2_SUCCESS )
 	return GEOIP2_IOERROR;
@@ -247,7 +247,7 @@ _fdlookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum, struct GeoIP2_Lookup 
   else if (rl == 7) {
     for (depth = gi->depth - 1; depth >= 0; depth--) {
       byte_offset = offset * rl;
-      if (GEOIP_CHKBIT_V6(depth, (U8 *) & ipnum)) {
+      if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum)) {
 	byte_offset += 3;
         if ( _read(fd, &b[0], 4, byte_offset) != GEOIP2_SUCCESS )
 	  return GEOIP2_IOERROR;
@@ -270,7 +270,7 @@ _fdlookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum, struct GeoIP2_Lookup 
   else if (rl == 8) {
     for (depth = gi->depth - 1; depth >= 0; depth--) {
       byte_offset = offset * rl;
-      if (GEOIP_CHKBIT_V6(depth, (U8 *) & ipnum))
+      if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
 	byte_offset += 4;
       if ( _read(fd, &b[0], 4, byte_offset) != GEOIP2_SUCCESS )
         return GEOIP2_IOERROR;
@@ -292,14 +292,14 @@ _lookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum,  struct GeoIP2_Lookup *
   int             segments = gi->segments;
   int             offset = 0;
   int             rl = gi->recbits * 2 / 8;
-  const U8       *mem = gi->file_in_mem_ptr;
-  const U8       *p;
+  const uint8_t       *mem = gi->file_in_mem_ptr;
+  const uint8_t       *p;
   int             depth;
   if (rl == 6) {
 
     for (depth = gi->depth - 1; depth >= 0; depth--) {
       p = &mem[offset * rl];
-      if (GEOIP_CHKBIT_V6(depth, (U8 *) & ipnum))
+      if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
 	p += 3;
       offset = _get_uint24(p);
       if (offset >= segments) {
@@ -312,7 +312,7 @@ _lookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum,  struct GeoIP2_Lookup *
   else if (rl == 7) {
     for (depth = gi->depth - 1; depth >= 0; depth--) {
       p = &mem[offset * rl];
-      if (GEOIP_CHKBIT_V6(depth, (U8 *) & ipnum)) {
+      if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum)) {
 	p += 3;
 	offset = _get_uint32(p);
 	offset &= 0xfffffff;
@@ -331,7 +331,7 @@ _lookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum,  struct GeoIP2_Lookup *
   else if (rl == 8) {
     for (depth = gi->depth - 1; depth >= 0; depth--) {
       p = &mem[offset * rl];
-      if (GEOIP_CHKBIT_V6(depth, (U8 *) & ipnum))
+      if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
 	p += 4;
         offset = _get_uint32(p);
       if (offset >= segments) {
@@ -346,14 +346,14 @@ _lookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum,  struct GeoIP2_Lookup *
 }
 
 static int
-_lookup_by_ipnum(struct GeoIP2 * gi, U32 ipnum, struct GeoIP2_Lookup * res)
+_lookup_by_ipnum(struct GeoIP2 * gi, uint32_t ipnum, struct GeoIP2_Lookup * res)
 {
   int             segments = gi->segments;
   int             offset = 0;
   int             rl = gi->recbits * 2 / 8;
-  const U8       *mem = gi->file_in_mem_ptr;
-  const U8       *p;
-  U32             mask = 0x80000000UL;
+  const uint8_t       *mem = gi->file_in_mem_ptr;
+  const uint8_t       *p;
+  uint32_t             mask = 0x80000000UL;
   int             depth;
   if (rl == 6) {
     for (depth = 32 - 1; depth >= 0; depth--) {
@@ -406,11 +406,11 @@ _lookup_by_ipnum(struct GeoIP2 * gi, U32 ipnum, struct GeoIP2_Lookup * res)
     return GEOIP2_CORRUPTDATABASE;
 }
 
-static          U32
-_addr_to_num(const U8 * addr)
+static          uint32_t
+_addr_to_num(const uint8_t * addr)
 {
-  U32             c, octet, t;
-  U32             ipnum;
+  uint32_t             c, octet, t;
+  uint32_t             ipnum;
   int             i = 3;
   octet = ipnum = 0;
   while ((c = *addr++)) {
@@ -440,24 +440,24 @@ _addr_to_num(const U8 * addr)
 }
 
 static int
-_lookup_by_addr(struct GeoIP2 * gi, const U8 * addr, struct GeoIP2_Lookup * result)
+_lookup_by_addr(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
 {
   return _lookup_by_ipnum(gi, _addr_to_num(addr), result);
 }
 
 static int
-_fdlookup_by_addr(struct GeoIP2 * gi, const U8 * addr, struct GeoIP2_Lookup * result)
+_fdlookup_by_addr(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
 {
   return _fdlookup_by_ipnum(gi, _addr_to_num(addr), result);
 }
 static int
-_lookup_by_addr_v6(struct GeoIP2 * gi, const U8 * addr, struct GeoIP2_Lookup * result)
+_lookup_by_addr_v6(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
 {
   return _lookup_by_ipnum_v6(gi, _addr_to_num_v6(addr), result);
 }
 
 static int
-_fdlookup_by_addr_v6(struct GeoIP2 * gi, const U8 * addr, struct GeoIP2_Lookup * result)
+_fdlookup_by_addr_v6(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
 {
   return _fdlookup_by_ipnum_v6(gi, _addr_to_num_v6(addr), result);
 }
@@ -467,8 +467,8 @@ _decode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key)
 {
   //int           segments = gi->segments;
   const int       segments = 0;
-  const U8       *mem = gi->dataptr;
-  U8              ctrl, type;
+  const uint8_t       *mem = gi->dataptr;
+  uint8_t              ctrl, type;
   ctrl = mem[segments + offset++];
   type = (ctrl >> 5) & 7;
   if (type == GEOIP2_DTYPE_EXT) {
@@ -530,11 +530,11 @@ _decode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key)
 
 
 static int
-_init(GEOIP2_T * gi, char *fname, U32 flags)
+_init(GEOIP2_T * gi, char *fname, uint32_t flags)
 {
   struct stat     s;
   int             fd;
-  U8             *ptr;
+  uint8_t             *ptr;
   ssize_t         iread;
   ssize_t         size;
   off_t         offset;
@@ -559,7 +559,7 @@ _init(GEOIP2_T * gi, char *fname, U32 flags)
 
   iread = pread(fd, ptr, size, offset);
 
-  const U8       *p = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
+  const uint8_t       *p = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
   if (p == NULL) {
     free(ptr);
     return GEOIP2_INVALIDDATABASE;
@@ -580,7 +580,7 @@ _init(GEOIP2_T * gi, char *fname, U32 flags)
     close(fd);
   }
   else {
-    gi->dataptr = (const U8 *) 0 + (gi->segments * gi->recbits * 2 / 8);
+    gi->dataptr = (const uint8_t *) 0 + (gi->segments * gi->recbits * 2 / 8);
     free(ptr);
   }
   return GEOIP2_SUCCESS;
@@ -589,7 +589,7 @@ _init(GEOIP2_T * gi, char *fname, U32 flags)
 
 
 GEOIP2_T       *
-GeoIP2_open(char *fname, U32 flags)
+GeoIP2_open(char *fname, uint32_t flags)
 {
   GEOIP2_T       *gi = calloc(1, sizeof(GEOIP2_T));
   if (GEOIP2_SUCCESS != _init(gi, fname, flags)) {
