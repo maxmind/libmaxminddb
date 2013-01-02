@@ -1,5 +1,5 @@
-#ifndef GEOIP2_H
-#define GEOIP2_H
+#ifndef GEOIPDB_H
+#define GEOIPDB_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,33 +16,33 @@ extern "C" {
 //#include <sys/types.h> /* for fstat */
 //#include <sys/stat.h>   /* for fstat */
 
-# define GEOIP2_DTYPE_EXT (0)
-# define GEOIP2_DTYPE_PTR (1)
-# define GEOIP2_DTYPE_UTF8_STRING (2)
-# define GEOIP2_DTYPE_DOUBLE (3)
-# define GEOIP2_DTYPE_BYTES (4)
-# define GEOIP2_DTYPE_UINT16 (5)
-# define GEOIP2_DTYPE_UINT32 (6)
-# define GEOIP2_DTYPE_HASH (7)
-# define GEOIP2_DTYPE_INT32 (8)
-# define GEOIP2_DTYPE_UINT64 (9)
-# define GEOIP2_DTYPE_UINT128 (10)
-# define GEOIP2_DTYPE_CONTAINER (11)
-# define GEOIP2_DTYPE_END_MARKER (12)
+# define GEOIPDB_DTYPE_EXT (0)
+# define GEOIPDB_DTYPE_PTR (1)
+# define GEOIPDB_DTYPE_UTF8_STRING (2)
+# define GEOIPDB_DTYPE_DOUBLE (3)
+# define GEOIPDB_DTYPE_BYTES (4)
+# define GEOIPDB_DTYPE_UINT16 (5)
+# define GEOIPDB_DTYPE_UINT32 (6)
+# define GEOIPDB_DTYPE_HASH (7)
+# define GEOIPDB_DTYPE_INT32 (8)
+# define GEOIPDB_DTYPE_UINT64 (9)
+# define GEOIPDB_DTYPE_UINT128 (10)
+# define GEOIPDB_DTYPE_CONTAINER (11)
+# define GEOIPDB_DTYPE_END_MARKER (12)
 
-/* GEOIP2 flags */
-#define GEOIP2_MODE_STANDARD (1)
-#define GEOIP2_MODE_MEMORY_CACHE (2)
-#define GEOIP2_MODE_MASK (7)
+/* GEOIPDB flags */
+#define GEOIPDB_MODE_STANDARD (1)
+#define GEOIPDB_MODE_MEMORY_CACHE (2)
+#define GEOIPDB_MODE_MASK (7)
 
-/* GEOIP2 err codes */
-#define GEOIP2_SUCCESS (0)
-#define GEOIP2_OPENFILEERROR (-1)
-#define GEOIP2_CORRUPTDATABASE (-2)
-#define GEOIP2_INVALIDDATABASE (-3)
-#define GEOIP2_IOERROR (-4)
-#define GEOIP2_OUTOFMEMORY (-5)
-	typedef struct GeoIP2_database {
+/* GEOIPDB err codes */
+#define GEOIPDB_SUCCESS (0)
+#define GEOIPDB_OPENFILEERROR (-1)
+#define GEOIPDB_CORRUPTDATABASE (-2)
+#define GEOIPDB_INVALIDDATABASE (-3)
+#define GEOIPDB_IOERROR (-4)
+#define GEOIPDB_OUTOFMEMORY (-5)
+	typedef struct GeoIPDB {
 		uint32_t flags;
 		int fd;
 		const unsigned char *file_in_mem_ptr;
@@ -54,35 +54,35 @@ extern "C" {
 		int depth;
 		int segments;
 		const unsigned char *dataptr;
-	} GeoIP2_database;
+	} GeoIPDB;
 
-	typedef struct GeoIP2_entry_s {
-		GeoIP2_database *gi;
+	typedef struct GeoIPDB_entry_s {
+		GEOIPDB *gi;
 		void *sptr;	/* usually pointer to the struct */
-	} GeoIP2_entry_s;
+	} GeoIPDB_entry_s;
 
 	typedef struct {
-		GeoIP2_entry_s entry;
+		GeoIPDB_entry_s entry;
 		int netmask;
-	} GeoIP2_root_entry_s;
+	} GeoIPDB_root_entry_s;
 
 
 #if 0
-	struct GeoIP2_Decode_Value {
+	struct GeoIPDB_Decode_Value {
 		SV *sv;
 		int new_offset;
 	};
-	struct GeoIP2_Decode_Key {
+	struct GeoIPDB_Decode_Key {
 		const char *ptr;
 		int size;
 		int new_offset;
 	};
 #endif
 
-	unsigned int _lookup(GeoIP2_database *gi, unsigned int ipnum);
-	void _decode(GeoIP2_database *gi, int offset);
+	unsigned int _lookup(GEOIPDB *gi, unsigned int ipnum);
+	void _decode(GEOIPDB *gi, int offset);
 
 #ifdef __cplusplus
 }
 #endif
-#endif				/* GEOIP2_H */
+#endif				/* GEOIPDB_H */

@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([libGeoIP2], [0.1], [support@maxmind.com])
-AC_CONFIG_SRCDIR([libgeoip2/GeoIP2.h])
+AC_INIT([libGeoIPDB], [0.1], [support@maxmind.com])
+AC_CONFIG_SRCDIR([libiGeoIPDB/GeoIPDB.h])
 AC_CONFIG_HEADERS([config.h])
 
 LT_INIT
@@ -25,5 +25,6 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile
-                 libgeoip2/Makefile])
+                 libGeoIPDB/Makefile
+		 apps/Makefile])
 AC_OUTPUT

@@ -1,7 +1,6 @@
 SUBDIRS = \
-  libGeoIP2	\
+  libGeoIPDB\
   apps		\
   t		\
   examples
-
 
