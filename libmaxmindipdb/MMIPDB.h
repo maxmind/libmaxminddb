@@ -42,47 +42,46 @@ extern "C" {
 #define IPDB_INVALIDDATABASE (-3)
 #define IPDB_IOERROR (-4)
 #define IPDB_OUTOFMEMORY (-5)
-	typedef struct IPDB_s {
-		uint32_t flags;
-		int fd;
-		const unsigned char *file_in_mem_ptr;
-		const char *info;
-		int file_format;
-		int database_type;
-		int minor_database_type;
-		int recbits;
-		int depth;
-		int segments;
-		const unsigned char *dataptr;
-	} IPDB_s;
+    typedef struct IPDB_s {
+        uint32_t flags;
+        int fd;
+        const unsigned char *file_in_mem_ptr;
+        const char *info;
+        int file_format;
+        int database_type;
+        int minor_database_type;
+        int recbits;
+        int depth;
+        int segments;
+        const unsigned char *dataptr;
+    } IPDB_s;
 
-	typedef struct IPDB_entry_s {
-		IPDB_s *ipdb;
-		void *sptr;	/* usually pointer to the struct */
-	} IPDB_entry_s;
+    typedef struct IPDB_entry_s {
+        IPDB_s *ipdb;
+        void *sptr;             /* usually pointer to the struct */
+    } IPDB_entry_s;
 
-	typedef struct {
-		IPDB_entry_s entry;
-		int netmask;
-	} IPDB_root_entry_s;
-
+    typedef struct {
+        IPDB_entry_s entry;
+        int netmask;
+    } IPDB_root_entry_s;
 
 #if 0
-	struct IPDB_Decode_Value {
-		SV *sv;
-		int new_offset;
-	};
-	struct IPDB_Decode_Key {
-		const char *ptr;
-		int size;
-		int new_offset;
-	};
+    struct IPDB_Decode_Value {
+        SV *sv;
+        int new_offset;
+    };
+    struct IPDB_Decode_Key {
+        const char *ptr;
+        int size;
+        int new_offset;
+    };
 #endif
 
-	unsigned int _lookup(GEOIPDB *gi, unsigned int ipnum);
-	void _decode(GEOIPDB *gi, int offset);
+    unsigned int _lookup(GEOIPDB * gi, unsigned int ipnum);
+    void _decode(GEOIPDB * gi, int offset);
 
 #ifdef __cplusplus
 }
 #endif
-#endif				/* IPDB_H */
+#endif                          /* IPDB_H */
