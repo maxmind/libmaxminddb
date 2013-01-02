@@ -42,7 +42,7 @@ extern "C" {
 #define IPDB_INVALIDDATABASE (-3)
 #define IPDB_IOERROR (-4)
 #define IPDB_OUTOFMEMORY (-5)
-	typedef struct IPDB {
+	typedef struct IPDB_s {
 		uint32_t flags;
 		int fd;
 		const unsigned char *file_in_mem_ptr;
@@ -54,10 +54,10 @@ extern "C" {
 		int depth;
 		int segments;
 		const unsigned char *dataptr;
-	} IPDB;
+	} IPDB_s;
 
 	typedef struct IPDB_entry_s {
-		GEOIPDB *gi;
+		IPDB_s *ipdb;
 		void *sptr;	/* usually pointer to the struct */
 	} IPDB_entry_s;
 

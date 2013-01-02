@@ -68,7 +68,7 @@ static int _read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
 }
 
 static int
-_fddecode_key(IPDB * gi, int offset, struct IPDB_Decode_Key *ret_key)
+_fddecode_key(IPDB_s * ipdb, int offset, struct IPDB_Decode_Key *ret_key)
 {
 	const int segments = gi->segments * gi->recbits * 2 / 8;;
 	uint8_t ctrl;
@@ -151,7 +151,7 @@ _fddecode_key(IPDB * gi, int offset, struct IPDB_Decode_Key *ret_key)
 
 #define GEOIP_CHKBIT_V6(bit,ptr) ((ptr)[((127UL - (bit)) >> 3)] & (1UL << (~(127UL - (bit)) & 7)))
 
-void IPDB_free_all(IPDB * gi)
+void IPDB_free_all(IPDB_s * ipdb)
 {
 	if (gi) {
 		if (gi->fd >= 0)
@@ -163,7 +163,7 @@ void IPDB_free_all(IPDB * gi)
 }
 
 static int
-_fdlookup_by_ipnum(IPDB * gi, uint32_t ipnum, struct IPDB_Lookup *result)
+_fdlookup_by_ipnum(IPDB_s * ipdb, uint32_t ipnum, struct IPDB_Lookup *result)
 {
 	int segments = gi->segments;
 	off_t offset = 0;
@@ -231,7 +231,7 @@ _fdlookup_by_ipnum(IPDB * gi, uint32_t ipnum, struct IPDB_Lookup *result)
 }
 
 static int
-_fdlookup_by_ipnum_128(IPDB * gi, struct in6_addr ipnum,
+_fdlookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 		       struct IPDB_Lookup *result)
 {
 	int segments = gi->segments;
@@ -301,7 +301,7 @@ _fdlookup_by_ipnum_128(IPDB * gi, struct in6_addr ipnum,
 }
 
 static int
-_lookup_by_ipnum_128(IPDB * gi, struct in6_addr ipnum,
+_lookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 		     struct IPDB_Lookup *result)
 {
 	int segments = gi->segments;
@@ -360,7 +360,7 @@ _lookup_by_ipnum_128(IPDB * gi, struct in6_addr ipnum,
 }
 
 static int
-_lookup_by_ipnum(IPDB * gi, uint32_t ipnum, struct IPDB_Lookup *res)
+_lookup_by_ipnum(IPDB_s * ipdb, uint32_t ipnum, struct IPDB_Lookup *res)
 {
 	int segments = gi->segments;
 	int offset = 0;
@@ -420,7 +420,7 @@ _lookup_by_ipnum(IPDB * gi, uint32_t ipnum, struct IPDB_Lookup *res)
 }
 
 static void
-_decode_key(IPDB * gi, int offset, struct IPDB_Decode_Key *ret_key)
+_decode_key(IPDB_s * ipdb, int offset, struct IPDB_Decode_Key *ret_key)
 {
 	//int           segments = gi->segments;
 	const int segments = 0;
@@ -488,7 +488,7 @@ _decode_key(IPDB * gi, int offset, struct IPDB_Decode_Key *ret_key)
 	return;
 }
 
-static int _init(IPDB * gi, char *fname, uint32_t flags)
+static int _init(IPDB_s * ipdb, char *fname, uint32_t flags)
 {
 	struct stat s;
 	int fd;
