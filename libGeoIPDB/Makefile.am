@@ -1,6 +1,6 @@
-lib_LTLIBRARIES = libGeoIPDB.la
+lib_LTLIBRARIES = libIPDB.la
 
-libGeoIPDB_la_SOURCES = GeoIPDB_Core.c
+libGeoIPDB_la_SOURCES = IPDB_Core.c
 
-GeoIPDB.lo GeoIPDB.o: GeoIPDB_Core.c GeoIPDB.h
+IPDB.lo IPDB.o: IPDB_Core.c IPDB.h
 
