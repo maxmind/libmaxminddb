@@ -6,9 +6,9 @@
 #include <stdio.h>
 #include <netdb.h>
 
-static geoipv6_t IPV6_NULL;
+static struct in6_addr IPV6_NULL;
 
-static int __GEOIP_V6_IS_NULL(geoipv6_t v6) {
+static int __GEOIP_V6_IS_NULL(struct in6_addr v6) {
         int i;
         for (i=0;i<16;i++) {
                 if (v6.s6_addr[i])
@@ -219,7 +219,7 @@ _fdlookup_by_ipnum(GeoIPDB * gi, uint32_t ipnum, struct GeoIPDB_Lookup * result)
 
 
 static int
-_fdlookup_by_ipnum_128(GeoIPDB * gi, geoipv6_t ipnum, struct GeoIPDB_Lookup * result)
+_fdlookup_by_ipnum_128(GeoIPDB * gi, struct in6_addr ipnum, struct GeoIPDB_Lookup * result)
 {
   int             segments = gi->segments;
   int             offset = 0;
@@ -287,7 +287,7 @@ _fdlookup_by_ipnum_128(GeoIPDB * gi, geoipv6_t ipnum, struct GeoIPDB_Lookup * re
 }
 
 static int
-_lookup_by_ipnum_128(GeoIPDB * gi, geoipv6_t ipnum,  struct GeoIPDB_Lookup * result)
+_lookup_by_ipnum_128(GeoIPDB * gi, struct in6_addr ipnum,  struct GeoIPDB_Lookup * result)
 {
   int             segments = gi->segments;
   int             offset = 0;
