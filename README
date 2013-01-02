@@ -1,0 +1,5 @@
+# when autotools get weird for some reason, try this
+./config.status --recheck && make -i clean all
+
+#
+autoreconf -vi
