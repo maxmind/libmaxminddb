@@ -63,7 +63,7 @@ _read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
 }
 
 static int
-_fddecode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key)
+_fddecode_key(GeoIPDB * gi, int offset, struct GeoIPDB_Decode_Key * ret_key)
 {
   const int       segments = gi->segments * gi->recbits * 2 / 8;;
   uint8_t              ctrl;
@@ -144,7 +144,7 @@ _fddecode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key
 
 
 void
-GeoIP2_free_all(struct GeoIP2 * gi)
+GeoIPDB_free_all(GeoIPDB * gi)
 {
   if (gi) {
     if (gi->fd >= 0)
@@ -156,7 +156,7 @@ GeoIP2_free_all(struct GeoIP2 * gi)
 }
 
 static int
-_fdlookup_by_ipnum(struct GeoIP2 * gi, uint32_t ipnum, struct GeoIP2_Lookup * result)
+_fdlookup_by_ipnum(GeoIPDB * gi, uint32_t ipnum, struct GeoIPDB_Lookup * result)
 {
   int             segments = gi->segments;
   off_t             offset = 0;
@@ -219,7 +219,7 @@ _fdlookup_by_ipnum(struct GeoIP2 * gi, uint32_t ipnum, struct GeoIP2_Lookup * re
 
 
 static int
-_fdlookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum, struct GeoIP2_Lookup * result)
+_fdlookup_by_ipnum_v6(GeoIPDB * gi, geoipv6_t ipnum, struct GeoIPDB_Lookup * result)
 {
   int             segments = gi->segments;
   int             offset = 0;
@@ -287,7 +287,7 @@ _fdlookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum, struct GeoIP2_Lookup 
 }
 
 static int
-_lookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum,  struct GeoIP2_Lookup * result)
+_lookup_by_ipnum_v6(GeoIPDB * gi, geoipv6_t ipnum,  struct GeoIPDB_Lookup * result)
 {
   int             segments = gi->segments;
   int             offset = 0;
@@ -346,7 +346,7 @@ _lookup_by_ipnum_v6(struct GeoIP2 * gi, geoipv6_t ipnum,  struct GeoIP2_Lookup *
 }
 
 static int
-_lookup_by_ipnum(struct GeoIP2 * gi, uint32_t ipnum, struct GeoIP2_Lookup * res)
+_lookup_by_ipnum(GeoIPDB * gi, uint32_t ipnum, struct GeoIPDB_Lookup * res)
 {
   int             segments = gi->segments;
   int             offset = 0;
@@ -407,7 +407,7 @@ _lookup_by_ipnum(struct GeoIP2 * gi, uint32_t ipnum, struct GeoIP2_Lookup * res)
 }
 
 static void
-_decode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key)
+_decode_key(GeoIPDB * gi, int offset, struct GeoIPDB_Decode_Key * ret_key)
 {
   //int           segments = gi->segments;
   const int       segments = 0;
@@ -474,7 +474,7 @@ _decode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key)
 
 
 static int
-_init(GEOIPDB_T * gi, char *fname, uint32_t flags)
+_init(GeoIPDB * gi, char *fname, uint32_t flags)
 {
   struct stat     s;
   int             fd;
@@ -532,12 +532,12 @@ _init(GEOIPDB_T * gi, char *fname, uint32_t flags)
 
 
 
-GEOIPDB_T       *
-GeoIP2_open(char *fname, uint32_t flags)
+GeoIPDB       *
+GeoIPDB_open(char *fname, uint32_t flags)
 {
-  GEOIPDB_T       *gi = calloc(1, sizeof(GEOIPDB_T));
+  GeoIPDB       *gi = calloc(1, sizeof(GeoIPDB));
   if (GEOIPDB_SUCCESS != _init(gi, fname, flags)) {
-    GeoIP2_free_all(gi);
+    GeoIPDB_free_all(gi);
     return NULL;
   }
   return gi;
