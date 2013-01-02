@@ -70,11 +70,11 @@ static int _read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
 static int
 _fddecode_key(IPDB_s * ipdb, int offset, struct IPDB_Decode_Key *ret_key)
 {
-	const int segments = gi->segments * gi->recbits * 2 / 8;;
+	const int segments = ipdb->segments * ipdb->recbits * 2 / 8;;
 	uint8_t ctrl;
 	int type;
 	uint8_t b[4];
-	int fd = gi->fd;
+	int fd = ipdb->fd;
 	if (_read(fd, &ctrl, 1, segments + offset++) != IPDB_SUCCESS)
 		return IPDB_IOERROR;
 	type = (ctrl >> 5) & 7;
@@ -108,7 +108,7 @@ _fddecode_key(IPDB_s * ipdb, int offset, struct IPDB_Decode_Key *ret_key)
 			new_offset = _get_uint32(b);
 			break;
 		}
-		if (_fddecode_key(gi, new_offset, ret_key) != IPDB_SUCCESS)
+		if (_fddecode_key(ipdb, new_offset, ret_key) != IPDB_SUCCESS)
 			return IPDB_IOERROR;
 		ret_key->new_offset = offset + psize + 1;
 		return IPDB_SUCCESS;
@@ -153,23 +153,23 @@ _fddecode_key(IPDB_s * ipdb, int offset, struct IPDB_Decode_Key *ret_key)
 
 void IPDB_free_all(IPDB_s * ipdb)
 {
-	if (gi) {
-		if (gi->fd >= 0)
-			close(gi->fd);
-		if (gi->file_in_mem_ptr)
-			free((void *)gi->file_in_mem_ptr);
-		free((void *)gi);
+	if (ipdb) {
+		if (ipdb->fd >= 0)
+			close(ipdb->fd);
+		if (ipdb->file_in_mem_ptr)
+			free((void *)ipdb->file_in_mem_ptr);
+		free((void *)ipdb);
 	}
 }
 
 static int
 _fdlookup_by_ipnum(IPDB_s * ipdb, uint32_t ipnum, struct IPDB_Lookup *result)
 {
-	int segments = gi->segments;
+	int segments = ipdb->segments;
 	off_t offset = 0;
 	int byte_offset;
-	int rl = gi->recbits * 2 / 8;
-	int fd = gi->fd;
+	int rl = ipdb->recbits * 2 / 8;
+	int fd = ipdb->fd;
 	uint32_t mask = 0x80000000UL;
 	int depth;
 	uint8_t b[4];
@@ -234,16 +234,16 @@ static int
 _fdlookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 		       struct IPDB_Lookup *result)
 {
-	int segments = gi->segments;
+	int segments = ipdb->segments;
 	int offset = 0;
 	int byte_offset;
-	int rl = gi->recbits * 2 / 8;
-	int fd = gi->fd;
+	int rl = ipdb->recbits * 2 / 8;
+	int fd = ipdb->fd;
 	int depth;
 	uint8_t b[4];
 	if (rl == 6) {
 
-		for (depth = gi->depth - 1; depth >= 0; depth--) {
+		for (depth = ipdb->depth - 1; depth >= 0; depth--) {
 			byte_offset = offset * rl;
 			if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
 				byte_offset += 3;
@@ -257,7 +257,7 @@ _fdlookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 			}
 		}
 	} else if (rl == 7) {
-		for (depth = gi->depth - 1; depth >= 0; depth--) {
+		for (depth = ipdb->depth - 1; depth >= 0; depth--) {
 			byte_offset = offset * rl;
 			if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum)) {
 				byte_offset += 3;
@@ -282,7 +282,7 @@ _fdlookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 			}
 		}
 	} else if (rl == 8) {
-		for (depth = gi->depth - 1; depth >= 0; depth--) {
+		for (depth = ipdb->depth - 1; depth >= 0; depth--) {
 			byte_offset = offset * rl;
 			if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
 				byte_offset += 4;
@@ -304,15 +304,15 @@ static int
 _lookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 		     struct IPDB_Lookup *result)
 {
-	int segments = gi->segments;
+	int segments = ipdb->segments;
 	int offset = 0;
-	int rl = gi->recbits * 2 / 8;
-	const uint8_t *mem = gi->file_in_mem_ptr;
+	int rl = ipdb->recbits * 2 / 8;
+	const uint8_t *mem = ipdb->file_in_mem_ptr;
 	const uint8_t *p;
 	int depth;
 	if (rl == 6) {
 
-		for (depth = gi->depth - 1; depth >= 0; depth--) {
+		for (depth = ipdb->depth - 1; depth >= 0; depth--) {
 			p = &mem[offset * rl];
 			if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
 				p += 3;
@@ -324,7 +324,7 @@ _lookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 			}
 		}
 	} else if (rl == 7) {
-		for (depth = gi->depth - 1; depth >= 0; depth--) {
+		for (depth = ipdb->depth - 1; depth >= 0; depth--) {
 			p = &mem[offset * rl];
 			if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum)) {
 				p += 3;
@@ -343,7 +343,7 @@ _lookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 			}
 		}
 	} else if (rl == 8) {
-		for (depth = gi->depth - 1; depth >= 0; depth--) {
+		for (depth = ipdb->depth - 1; depth >= 0; depth--) {
 			p = &mem[offset * rl];
 			if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
 				p += 4;
@@ -362,10 +362,10 @@ _lookup_by_ipnum_128(IPDB_s * ipdb, struct in6_addr ipnum,
 static int
 _lookup_by_ipnum(IPDB_s * ipdb, uint32_t ipnum, struct IPDB_Lookup *res)
 {
-	int segments = gi->segments;
+	int segments = ipdb->segments;
 	int offset = 0;
-	int rl = gi->recbits * 2 / 8;
-	const uint8_t *mem = gi->file_in_mem_ptr;
+	int rl = ipdb->recbits * 2 / 8;
+	const uint8_t *mem = ipdb->file_in_mem_ptr;
 	const uint8_t *p;
 	uint32_t mask = 0x80000000UL;
 	int depth;
@@ -422,9 +422,9 @@ _lookup_by_ipnum(IPDB_s * ipdb, uint32_t ipnum, struct IPDB_Lookup *res)
 static void
 _decode_key(IPDB_s * ipdb, int offset, struct IPDB_Decode_Key *ret_key)
 {
-	//int           segments = gi->segments;
+	//int           segments = ipdb->segments;
 	const int segments = 0;
-	const uint8_t *mem = gi->dataptr;
+	const uint8_t *mem = ipdb->dataptr;
 	uint8_t ctrl, type;
 	ctrl = mem[segments + offset++];
 	type = (ctrl >> 5) & 7;
@@ -454,7 +454,7 @@ _decode_key(IPDB_s * ipdb, int offset, struct IPDB_Decode_Key *ret_key)
 			new_offset = _get_uint32(&mem[segments + offset]);
 			break;
 		}
-		_decode_key(gi, new_offset, ret_key);
+		_decode_key(ipdb, new_offset, ret_key);
 		ret_key->new_offset = offset + psize + 1;
 		return;
 	}
@@ -496,17 +496,17 @@ static int _init(IPDB_s * ipdb, char *fname, uint32_t flags)
 	ssize_t iread;
 	ssize_t size;
 	off_t offset;
-	gi->fd = fd = open(fname, O_RDONLY);
+	ipdb->fd = fd = open(fname, O_RDONLY);
 	if (fd < 0)
 		return IPDB_OPENFILEERROR;
 	fstat(fd, &s);
-	gi->flags = flags;
+	ipdb->flags = flags;
 	if ((flags & IPDB_MODE_MASK) == IPDB_MODE_MEMORY_CACHE) {
-		gi->fd = -1;
+		ipdb->fd = -1;
 		size = s.st_size;
 		offset = 0;
 	} else {
-		gi->fd = fd;
+		ipdb->fd = fd;
 		size = s.st_size < 2000 ? s.st_size : 2000;
 		offset = s.st_size - size;
 	}
@@ -522,33 +522,33 @@ static int _init(IPDB_s * ipdb, char *fname, uint32_t flags)
 		return IPDB_INVALIDDATABASE;
 	}
 	p += 14;
-	gi->file_format = p[0] * 256 + p[1];
-	gi->recbits = p[2];
-	gi->depth = p[3];
-	gi->database_type = p[4] * 256 + p[5];
-	gi->minor_database_type = p[6] * 256 + p[7];
-	gi->segments = p[8] * 16777216 + p[9] * 65536 + p[10] * 256 + p[11];
+	ipdb->file_format = p[0] * 256 + p[1];
+	ipdb->recbits = p[2];
+	ipdb->depth = p[3];
+	ipdb->database_type = p[4] * 256 + p[5];
+	ipdb->minor_database_type = p[6] * 256 + p[7];
+	ipdb->segments = p[8] * 16777216 + p[9] * 65536 + p[10] * 256 + p[11];
 
 	if ((flags & IPDB_MODE_MASK) == IPDB_MODE_MEMORY_CACHE) {
-		gi->file_in_mem_ptr = ptr;
-		gi->dataptr =
-		    gi->file_in_mem_ptr + gi->segments * gi->recbits * 2 / 8;
+		ipdb->file_in_mem_ptr = ptr;
+		ipdb->dataptr =
+		    ipdb->file_in_mem_ptr + ipdb->segments * ipdb->recbits * 2 / 8;
 
 		close(fd);
 	} else {
-		gi->dataptr =
-		    (const uint8_t *)0 + (gi->segments * gi->recbits * 2 / 8);
+		ipdb->dataptr =
+		    (const uint8_t *)0 + (ipdb->segments * ipdb->recbits * 2 / 8);
 		free(ptr);
 	}
 	return IPDB_SUCCESS;
 }
 
-IPDB *IPDB_open(char *fname, uint32_t flags)
+IPDB_s *IPDB_open(char *fname, uint32_t flags)
 {
-	IPDB *gi = calloc(1, sizeof(IPDB));
-	if (IPDB_SUCCESS != _init(gi, fname, flags)) {
-		IPDB_free_all(gi);
+	IPDB *ipdb = calloc(1, sizeof(IPDB));
+	if (IPDB_SUCCESS != _init(ipdb, fname, flags)) {
+		IPDB_free_all(ipdb);
 		return NULL;
 	}
-	return gi;
+	return ipdb;
 }
