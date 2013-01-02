@@ -1,5 +1,5 @@
 SUBDIRS = \
-  libGeoIPDB\
+  libIPDB	\
   apps		\
   t		\
   examples
