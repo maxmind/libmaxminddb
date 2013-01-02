@@ -219,7 +219,7 @@ _fdlookup_by_ipnum(GeoIPDB * gi, uint32_t ipnum, struct GeoIPDB_Lookup * result)
 
 
 static int
-_fdlookup_by_ipnum_v6(GeoIPDB * gi, geoipv6_t ipnum, struct GeoIPDB_Lookup * result)
+_fdlookup_by_ipnum_128(GeoIPDB * gi, geoipv6_t ipnum, struct GeoIPDB_Lookup * result)
 {
   int             segments = gi->segments;
   int             offset = 0;
@@ -287,7 +287,7 @@ _fdlookup_by_ipnum_v6(GeoIPDB * gi, geoipv6_t ipnum, struct GeoIPDB_Lookup * res
 }
 
 static int
-_lookup_by_ipnum_v6(GeoIPDB * gi, geoipv6_t ipnum,  struct GeoIPDB_Lookup * result)
+_lookup_by_ipnum_128(GeoIPDB * gi, geoipv6_t ipnum,  struct GeoIPDB_Lookup * result)
 {
   int             segments = gi->segments;
   int             offset = 0;
