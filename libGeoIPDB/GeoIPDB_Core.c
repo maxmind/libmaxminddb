@@ -406,29 +406,6 @@ _lookup_by_ipnum(struct GeoIP2 * gi, uint32_t ipnum, struct GeoIP2_Lookup * res)
     return GEOIP2_CORRUPTDATABASE;
 }
 
-static int
-_lookup_by_addr(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
-{
-  return _lookup_by_ipnum(gi, _addr_to_num(addr), result);
-}
-
-static int
-_fdlookup_by_addr(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
-{
-  return _fdlookup_by_ipnum(gi, _addr_to_num(addr), result);
-}
-static int
-_lookup_by_addr_v6(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
-{
-  return _lookup_by_ipnum_v6(gi, _addr_to_num_v6(addr), result);
-}
-
-static int
-_fdlookup_by_addr_v6(struct GeoIP2 * gi, const uint8_t * addr, struct GeoIP2_Lookup * result)
-{
-  return _fdlookup_by_ipnum_v6(gi, _addr_to_num_v6(addr), result);
-}
-
 static void
 _decode_key(struct GeoIP2 * gi, int offset, struct GeoIP2_Decode_Key * ret_key)
 {
