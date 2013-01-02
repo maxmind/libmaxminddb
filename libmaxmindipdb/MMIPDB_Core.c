@@ -152,7 +152,7 @@ _fddecode_key(MMIPDB_s * ipdb, int offset, struct MMIPDB_Decode_Key *ret_key)
     return MMIPDB_SUCCESS;
 }
 
-#define GEOIP_CHKBIT_V6(bit,ptr) ((ptr)[((127UL - (bit)) >> 3)] & (1UL << (~(127UL - (bit)) & 7)))
+#define MMIPDB_CHKBIT_128(bit,ptr) ((ptr)[((127UL - (bit)) >> 3)] & (1UL << (~(127UL - (bit)) & 7)))
 
 void MMIPDB_free_all(MMIPDB_s * ipdb)
 {
@@ -243,7 +243,7 @@ _fdlookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
 
         for (depth = ipdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
-            if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
+            if (MMIPDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 byte_offset += 3;
             if (_read(fd, &b[0], 3, byte_offset) != MMIPDB_SUCCESS)
                 return MMIPDB_IOERROR;
@@ -257,7 +257,7 @@ _fdlookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
     } else if (rl == 7) {
         for (depth = ipdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
-            if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum)) {
+            if (MMIPDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 byte_offset += 3;
                 if (_read(fd, &b[0], 4, byte_offset) != MMIPDB_SUCCESS)
                     return MMIPDB_IOERROR;
@@ -279,7 +279,7 @@ _fdlookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
     } else if (rl == 8) {
         for (depth = ipdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
-            if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
+            if (MMIPDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 byte_offset += 4;
             if (_read(fd, &b[0], 4, byte_offset) != MMIPDB_SUCCESS)
                 return MMIPDB_IOERROR;
@@ -309,7 +309,7 @@ _lookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
 
         for (depth = ipdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
-            if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
+            if (MMIPDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 p += 3;
             offset = _get_uint24(p);
             if (offset >= segments) {
@@ -321,7 +321,7 @@ _lookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
     } else if (rl == 7) {
         for (depth = ipdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
-            if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum)) {
+            if (MMIPDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 p += 3;
                 offset = _get_uint32(p);
                 offset &= 0xfffffff;
@@ -339,7 +339,7 @@ _lookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
     } else if (rl == 8) {
         for (depth = ipdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
-            if (GEOIP_CHKBIT_V6(depth, (uint8_t *) & ipnum))
+            if (MMIPDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 p += 4;
             offset = _get_uint32(p);
             if (offset >= segments) {
