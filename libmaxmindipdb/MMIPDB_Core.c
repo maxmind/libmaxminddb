@@ -5,6 +5,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <netdb.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 static struct in6_addr IPNUM128_NULL = { };
 
