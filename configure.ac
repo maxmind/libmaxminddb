@@ -14,7 +14,7 @@ AC_PROG_CC_C99
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h string.h unistd.h ])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h string.h unistd.h stdlib.h ])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
