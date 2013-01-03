@@ -471,7 +471,7 @@ _decode_key(MMIPDB_s * ipdb, int offset, MMIPDB_decode_key_s *ret_key)
     }
 
     if (size == 0) {
-        ret_key->ptr = "";
+        ret_key->ptr = (const uint8_t *) "";
         ret_key->size = 0;
         ret_key->new_offset = offset;
         return;
