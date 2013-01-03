@@ -58,7 +58,8 @@ extern "C" {
 
     typedef struct MMIPDB_entry_s {
         MMIPDB_s *ipdb;
-        void *sptr;             /* usually pointer to the struct */
+        unsigned int offset;             /* usually pointer to the struct */
+        //uint8_t const *ptr;             /* usually pointer to the struct */
     } MMIPDB_entry_s;
 
     typedef struct {

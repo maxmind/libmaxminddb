@@ -188,7 +188,7 @@ _fdlookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, MMIPDB_root_entry_s *result)
             offset = _get_uint24(b);
             if (offset >= segments) {
                 result->netmask = 32 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -208,7 +208,7 @@ _fdlookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, MMIPDB_root_entry_s *result)
             }
             if (offset >= segments) {
                 result->netmask = 32 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -221,7 +221,7 @@ _fdlookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, MMIPDB_root_entry_s *result)
             offset = _get_uint32(b);
             if (offset >= segments) {
                 result->netmask = 32 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -252,7 +252,7 @@ _fdlookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
             offset = _get_uint24(b);
             if (offset >= segments) {
                 result->netmask = 128 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -274,7 +274,7 @@ _fdlookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
             }
             if (offset >= segments) {
                 result->netmask = 128 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -288,7 +288,7 @@ _fdlookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
             offset = _get_uint32(b);
             if (offset >= segments) {
                 result->netmask = 128 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -316,7 +316,7 @@ _lookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
             offset = _get_uint24(p);
             if (offset >= segments) {
                 result->netmask = 128 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -334,7 +334,7 @@ _lookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
             }
             if (offset >= segments) {
                 result->netmask = 128 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -346,7 +346,7 @@ _lookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
             offset = _get_uint32(p);
             if (offset >= segments) {
                 result->netmask = 128 - depth;
-                result->ptr = offset - segments;
+                result->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
         }
@@ -373,7 +373,7 @@ _lookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, MMIPDB_root_entry_s *res)
             offset = _get_uint24(p);
             if (offset >= segments) {
                 res->netmask = 32 - depth;
-                res->ptr = offset - segments;
+                res->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
             mask >>= 1;
@@ -391,7 +391,7 @@ _lookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, MMIPDB_root_entry_s *res)
             }
             if (offset >= segments) {
                 res->netmask = 32 - depth;
-                res->ptr = offset - segments;
+                res->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
             mask >>= 1;
@@ -404,7 +404,7 @@ _lookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, MMIPDB_root_entry_s *res)
             offset = _get_uint32(p);
             if (offset >= segments) {
                 res->netmask = 32 - depth;
-                res->ptr = offset - segments;
+                res->entry.offset = offset - segments;
                 return MMIPDB_SUCCESS;
             }
             mask >>= 1;
