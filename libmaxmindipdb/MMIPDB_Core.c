@@ -168,7 +168,7 @@ void MMIPDB_free_all(MMIPDB_s * ipdb)
 }
 
 static int
-_fdlookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, struct MMIPDB_Lookup *result)
+_fdlookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, MMIPDB_root_entry_s *result)
 {
     int segments = ipdb->segments;
     off_t offset = 0;
@@ -232,7 +232,7 @@ _fdlookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, struct MMIPDB_Lookup *result
 
 static int
 _fdlookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
-                       struct MMIPDB_Lookup *result)
+                       MMIPDB_root_entry_s *result)
 {
     int segments = ipdb->segments;
     int offset = 0;
@@ -299,7 +299,7 @@ _fdlookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
 
 static int
 _lookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
-                     struct MMIPDB_Lookup *result)
+                     MMIPDB_root_entry_s *result)
 {
     int segments = ipdb->segments;
     int offset = 0;
@@ -356,7 +356,7 @@ _lookup_by_ipnum_128(MMIPDB_s * ipdb, struct in6_addr ipnum,
 }
 
 static int
-_lookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, struct MMIPDB_Lookup *res)
+_lookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, MMIPDB_root_entry_s *res)
 {
     int segments = ipdb->segments;
     int offset = 0;
