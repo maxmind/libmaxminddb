@@ -3,7 +3,7 @@ AM_CPPFLAGS =      \
 
 bin_PROGRAMS = mmipdblookup
 
-ipdblookup_SOURCES = mmipdblookup.c MMIPDB_Helper.c
+mmipdblookup_SOURCES = mmipdblookup.c MMIPDB_Helper.c
 
 mmipdblookup.lo mmipdblookup.o: mmipdblookup.c
 
