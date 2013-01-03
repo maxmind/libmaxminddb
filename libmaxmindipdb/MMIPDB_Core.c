@@ -57,7 +57,7 @@ static double _get_double(const uint8_t * ptr, int length)
     char fmt[256];
     double d;
     sprintf(fmt, "%%%dlf", length);
-    sscanf(ptr, fmt, &d);
+    sscanf((const char *)ptr, fmt, &d);
     return (d);
 }
 
