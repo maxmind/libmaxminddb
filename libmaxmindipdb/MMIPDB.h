@@ -84,9 +84,6 @@ extern "C" {
     };
 #endif
 
-    uint32_t _lookup(GEOIPDB_s * ipdb, uint32_t ipnum);
-    void _decode(GEOIPDB_s * ipdb, int offset);
-
 #ifdef __cplusplus
 }
 #endif
