@@ -70,7 +70,7 @@ extern "C" {
     typedef struct MMIPDB_decode_key_s {
         unsigned int new_offset;
         unsigned int size;
-        uint8_t *ptr;
+        const uint8_t *ptr;
     } MMIPDB_decode_key_s;
 
 #if 0
