@@ -77,7 +77,7 @@ static int _read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
 }
 
 static int
-_fddecode_key(MMIPDB_s * ipdb, int offset, struct MMIPDB_Decode_Key *ret_key)
+_fddecode_key(MMIPDB_s * ipdb, int offset, MMIPDB_decode_key_s *ret_key)
 {
     const int segments = ipdb->segments * ipdb->recbits * 2 / 8;;
     uint8_t ctrl;
@@ -415,7 +415,7 @@ _lookup_by_ipnum(MMIPDB_s * ipdb, uint32_t ipnum, struct MMIPDB_Lookup *res)
 }
 
 static void
-_decode_key(MMIPDB_s * ipdb, int offset, struct MMIPDB_Decode_Key *ret_key)
+_decode_key(MMIPDB_s * ipdb, int offset, MMIPDB_decode_key_s *ret_key)
 {
     //int           segments = ipdb->segments;
     const int segments = 0;

@@ -66,6 +66,12 @@ extern "C" {
         int netmask;
     } MMIPDB_root_entry_s;
 
+    typedef struct MMIPDB_decode_key_s {
+        unsigned int new_offset;
+        unsigned int size;
+        uint8_t *ptr;
+    } MMIPDB_decode_key_s;
+
 #if 0
     struct MMIPDB_Decode_Value {
         SV *sv;
