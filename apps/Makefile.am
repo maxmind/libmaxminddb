@@ -1,11 +1,11 @@
 AM_CPPFLAGS =      \
-        -I$(top_srcdir)/libmaxmindipdb
+        -I$(top_srcdir)/libmaxminddb
 
-bin_PROGRAMS = mmipdblookup
+bin_PROGRAMS = mmdblookup
 
-mmipdblookup_SOURCES = mmipdblookup.c MMIPDB_Helper.c
+mmdblookup_SOURCES = mmdblookup.c MMDB_Helper.c
 
-mmipdblookup.lo mmipdblookup.o: mmipdblookup.c
+mmdblookup.lo mmdblookup.o: mmdblookup.c
 
-MMIPDB_Helper.lo MMIPDB_Helper.o: MMIPDB_Helper.c
+MMDB_Helper.lo MMDB_Helper.o: MMDB_Helper.c
 

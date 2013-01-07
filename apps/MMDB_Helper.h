@@ -1,5 +1,5 @@
-#ifndef GEOIPDB_HELPER
-#define GEOIPDB_HELPER (1)
+#ifndef GEODB_HELPER
+#define GEODB_HELPER (1)
 
 #include <arpa/inet.h>
 

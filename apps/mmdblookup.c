@@ -1,9 +1,10 @@
-#include "MMIPDB.h"
-#include "MMIPDB_Helper.h"
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "MMDB.h"
+#include "MMDB_Helper.h"
+#include "getopt.h"
 /* dummy content */
 
 void usage(char *prg)
