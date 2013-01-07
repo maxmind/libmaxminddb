@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([libIPDB], [0.1], [support@maxmind.com])
-AC_CONFIG_SRCDIR([libmaxmindipdb/MMIPDB.h])
+AC_CONFIG_SRCDIR([libmaxminddb/MMDB.h])
 AC_CONFIG_HEADERS([config.h])
 
 LT_INIT
@@ -27,6 +27,6 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile
-                 libmaxmindipdb/Makefile
+                 libmaxminddb/Makefile
 		 apps/Makefile])
 AC_OUTPUT

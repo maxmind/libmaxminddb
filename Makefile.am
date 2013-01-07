@@ -1,5 +1,5 @@
 SUBDIRS = \
-  libmaxmindipdb	\
+  libmaxminddb	\
   apps		\
   t		\
   examples
