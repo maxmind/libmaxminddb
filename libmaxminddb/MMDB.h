@@ -27,8 +27,9 @@ extern "C" {
 # define MMDB_DTYPE_INT32 (8)
 # define MMDB_DTYPE_UINT64 (9)
 # define MMDB_DTYPE_UINT128 (10)
-# define MMDB_DTYPE_CONTAINER (11)
-# define MMDB_DTYPE_END_MARKER (12)
+# define MMDB_DTYPE_ARRAY (11)
+# define MMDB_DTYPE_CONTAINER (12)
+# define MMDB_DTYPE_END_MARKER (13)
 
 /* GEOIPDB flags */
 #define MMDB_MODE_STANDARD (1)
