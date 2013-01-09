@@ -59,7 +59,7 @@ extern "C" {
 
     typedef struct MMDB_entry_s {
         MMDB_s *ipdb;
-        unsigned int offset;             /* usually pointer to the struct */
+        unsigned int offset;    /* usually pointer to the struct */
         //uint8_t const *ptr;             /* usually pointer to the struct */
     } MMDB_entry_s;
 
@@ -73,6 +73,19 @@ extern "C" {
         unsigned int size;
         const uint8_t *ptr;
     } MMDB_decode_key_s;
+
+    typedef struct MMDB_return_s {
+        /* return values */
+        union {
+            double double_value;
+            uint32_t uinteger;
+            uint8_t const *ptr;
+            int data_size;      /* only valid for strings, utf8_strings or binary data */
+        };
+        int type;               /* type like string utf8_string, int32, ... */
+        int used_bytes;         /* real size of the value */
+        int error;
+    } MMDB_return_s;
 
 #if 0
     struct MMDB_Decode_Value {
