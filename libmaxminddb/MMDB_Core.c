@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 static struct in6_addr IPNUM128_NULL = { };
 
@@ -499,18 +500,36 @@ static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
 
     iread = pread(fd, ptr, size, offset);
 
-    const uint8_t *p = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
-    if (p == NULL) {
+    const uint8_t *metadata = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
+    if (metadata == NULL) {
         free(ptr);
         return MMDB_INVALIDDATABASE;
     }
-    p += 14;
-    mmdb->file_format = p[0] * 256 + p[1];
-    mmdb->recbits = p[2];
-    mmdb->depth = p[3];
-    mmdb->database_type = p[4] * 256 + p[5];
-    mmdb->minor_database_type = p[6] * 256 + p[7];
-    mmdb->segments = p[8] * 16777216 + p[9] * 65536 + p[10] * 256 + p[11];
+
+    MMDB_s fakedb = {.file_in_mem_ptr = metadata + 14 };
+    MMDB_entry_s meta = {.mmdb = &fakedb };
+    MMDB_return_s result;
+
+    // we can't fail with ioerror's here. It is a memory operation
+    mmdb->file_format =
+        _get_uint_value(&meta, KEYS('binary_format_major_version'));
+
+    ioerror =
+        MMDB_get_value(&meta, &result, KEYS('binary_format_minor_version'));
+
+    mmdb->database_type = _get_uint_value(&meta, KEYS('database_type'));;
+    mmdb->recbits = _get_uint_value(&meta, KEYS('record_size'));;
+    mmdb->segments = _get_uint_value(&meta, KEYS('node_count'));
+
+    // unfortunately we must guess the depth of the database
+    mmdb->depth = _get_uint_value(&meta, KEYS('ip_version')) == 4 ? 32 : 128;
+
+    //  mmdb->file_format = p[0] * 256 + p[1];
+    //  mmdb->recbits = p[2];
+    //  mmdb->depth = p[3];
+    //  mmdb->database_type = p[4] * 256 + p[5];
+    //  mmdb->minor_database_type = p[6] * 256 + p[7];
+    //  mmdb->segments = p[8] * 16777216 + p[9] * 65536 + p[10] * 256 + p[11];
 
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
         mmdb->file_in_mem_ptr = ptr;
@@ -534,4 +553,34 @@ MMDB_s *MMDB_open(char *fname, uint32_t flags)
         return NULL;
     }
     return mmdb;
+}
+
+/* return the result of any uint type with 32 bit's or less as uint32 */
+uint32_t MMDB_get_uint(MMDB_return_s const *const result)
+{
+    return result->uinteger;
+}
+
+int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result, ...)
+{
+    va_list keys;
+    va_start(keys, result);
+    int ioerror = MMDB_vget_value(start, result, keys);
+    va_end(keys);
+    return ioerror;
+}
+
+int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
+                    va_list params)
+{
+}
+
+uint32_t _get_uint_value(MMDB_entry_s * start, ...)
+{
+    MMDB_return_s result;
+    va_list params;
+    va_start(params, start);
+    MMDB_vget_value(start, &result, params);
+    va_end(params);
+    return MMDB_get_uint(&result);
 }
