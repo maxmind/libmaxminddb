@@ -76,8 +76,28 @@ static int _read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
     return MMDB_SUCCESS;
 }
 
-static int
-_fddecode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s *ret_key)
+static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t * ptr, int ptr_size)
+{
+    uint32_t new_offset;
+    switch (psize) {
+    case 0:
+        new_offset = (ctrl & 7) * 256 + ptr[0];
+        break;
+    case 1:
+        new_offset = 2048 + (ctrl & 7) * 65536 + ptr[0] * 256 + ptr[1];
+        break;
+    case 2:
+        new_offset = 2048 + 524288 + (ctrl & 7) * 16777216 + _get_uint24(ptr);
+        break;
+    case 3:
+    default:
+        new_offset = _get_uint32(ptr);
+        break;
+    }
+    return new_offset;
+}
+
+static int _fddecode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s * ret_key)
 {
     const int segments = ipdb->segments * ipdb->recbits * 2 / 8;;
     uint8_t ctrl;
@@ -95,24 +115,11 @@ _fddecode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s *ret_key)
 
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
-        int new_offset;
         if (_read(fd, &b[0], psize + 1, segments + offset) != MMDB_SUCCESS)
             return MMDB_IOERROR;
-        switch (psize) {
-        case 0:
-            new_offset = (ctrl & 7) * 256 + b[0];
-            break;
-        case 1:
-            new_offset = 2048 + (ctrl & 7) * 65536 + b[0] * 256 + b[1];
-            break;
-        case 2:
-            new_offset = 2048 + 524288 + (ctrl & 7) * 16777216 + _get_uint24(b);
-            break;
-        case 3:
-        default:
-            new_offset = _get_uint32(b);
-            break;
-        }
+
+        uint32_t new_offset = _get_ptr_from(ctrl, b, psize);
+
         if (_fddecode_key(ipdb, new_offset, ret_key) != MMDB_SUCCESS)
             return MMDB_IOERROR;
         ret_key->new_offset = offset + psize + 1;
@@ -168,7 +175,7 @@ void MMDB_free_all(MMDB_s * ipdb)
 }
 
 static int
-_fdlookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s *result)
+_fdlookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s * result)
 {
     int segments = ipdb->segments;
     off_t offset = 0;
@@ -232,7 +239,7 @@ _fdlookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s *result)
 
 static int
 _fdlookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
-                       MMDB_root_entry_s *result)
+                       MMDB_root_entry_s * result)
 {
     int segments = ipdb->segments;
     int offset = 0;
@@ -299,7 +306,7 @@ _fdlookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
 
 static int
 _lookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
-                     MMDB_root_entry_s *result)
+                     MMDB_root_entry_s * result)
 {
     int segments = ipdb->segments;
     int offset = 0;
@@ -356,7 +363,7 @@ _lookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
 }
 
 static int
-_lookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s *res)
+_lookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s * res)
 {
     int segments = ipdb->segments;
     int offset = 0;
@@ -414,8 +421,7 @@ _lookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s *res)
     return MMDB_CORRUPTDATABASE;
 }
 
-static void
-_decode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s *ret_key)
+static void _decode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s * ret_key)
 {
     //int           segments = ipdb->segments;
     const int segments = 0;
@@ -429,26 +435,8 @@ _decode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s *ret_key)
 
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
-        int new_offset;
-        switch (psize) {
-        case 0:
-            new_offset = (ctrl & 7) * 256 + mem[segments + offset];
-            break;
-        case 1:
-            new_offset =
-                2048 + (ctrl & 7) * 65536 +
-                _get_uint16(&mem[segments + offset]);
-            break;
-        case 2:
-            new_offset =
-                2048 + 524288 + (ctrl & 7) * 16777216 +
-                _get_uint24(&mem[segments + offset]);
-            break;
-        case 3:
-        default:
-            new_offset = _get_uint32(&mem[segments + offset]);
-            break;
-        }
+        int new_offset = _get_ptr_from(ctrl, &mem[segments + offset], psize);
+
         _decode_key(ipdb, new_offset, ret_key);
         ret_key->new_offset = offset + psize + 1;
         return;
@@ -471,7 +459,7 @@ _decode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s *ret_key)
     }
 
     if (size == 0) {
-        ret_key->ptr = (const uint8_t *) "";
+        ret_key->ptr = (const uint8_t *)"";
         ret_key->size = 0;
         ret_key->new_offset = offset;
         return;
