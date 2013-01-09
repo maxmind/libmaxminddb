@@ -97,13 +97,13 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t * ptr, int ptr_size)
     return new_offset;
 }
 
-static int _fddecode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s * ret_key)
+static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
 {
-    const int segments = ipdb->segments * ipdb->recbits * 2 / 8;;
+    const int segments = mmdb->segments * mmdb->recbits * 2 / 8;;
     uint8_t ctrl;
     int type;
     uint8_t b[4];
-    int fd = ipdb->fd;
+    int fd = mmdb->fd;
     if (_read(fd, &ctrl, 1, segments + offset++) != MMDB_SUCCESS)
         return MMDB_IOERROR;
     type = (ctrl >> 5) & 7;
@@ -120,7 +120,7 @@ static int _fddecode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s * ret_key)
 
         uint32_t new_offset = _get_ptr_from(ctrl, b, psize);
 
-        if (_fddecode_key(ipdb, new_offset, ret_key) != MMDB_SUCCESS)
+        if (_fddecode_key(mmdb, new_offset, ret_key) != MMDB_SUCCESS)
             return MMDB_IOERROR;
         ret_key->new_offset = offset + psize + 1;
         return MMDB_SUCCESS;
@@ -163,25 +163,25 @@ static int _fddecode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s * ret_key)
 
 #define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127UL - (bit)) >> 3)] & (1UL << (~(127UL - (bit)) & 7)))
 
-void MMDB_free_all(MMDB_s * ipdb)
+void MMDB_free_all(MMDB_s * mmdb)
 {
-    if (ipdb) {
-        if (ipdb->fd >= 0)
-            close(ipdb->fd);
-        if (ipdb->file_in_mem_ptr)
-            free((void *)ipdb->file_in_mem_ptr);
-        free((void *)ipdb);
+    if (mmdb) {
+        if (mmdb->fd >= 0)
+            close(mmdb->fd);
+        if (mmdb->file_in_mem_ptr)
+            free((void *)mmdb->file_in_mem_ptr);
+        free((void *)mmdb);
     }
 }
 
 static int
-_fdlookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s * result)
+_fdlookup_by_ipnum(MMDB_s * mmdb, uint32_t ipnum, MMDB_root_entry_s * result)
 {
-    int segments = ipdb->segments;
+    int segments = mmdb->segments;
     off_t offset = 0;
     int byte_offset;
-    int rl = ipdb->recbits * 2 / 8;
-    int fd = ipdb->fd;
+    int rl = mmdb->recbits * 2 / 8;
+    int fd = mmdb->fd;
     uint32_t mask = 0x80000000UL;
     int depth;
     uint8_t b[4];
@@ -238,19 +238,19 @@ _fdlookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s * result)
 }
 
 static int
-_fdlookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
+_fdlookup_by_ipnum_128(MMDB_s * mmdb, struct in6_addr ipnum,
                        MMDB_root_entry_s * result)
 {
-    int segments = ipdb->segments;
+    int segments = mmdb->segments;
     int offset = 0;
     int byte_offset;
-    int rl = ipdb->recbits * 2 / 8;
-    int fd = ipdb->fd;
+    int rl = mmdb->recbits * 2 / 8;
+    int fd = mmdb->fd;
     int depth;
     uint8_t b[4];
     if (rl == 6) {
 
-        for (depth = ipdb->depth - 1; depth >= 0; depth--) {
+        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 byte_offset += 3;
@@ -264,7 +264,7 @@ _fdlookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
             }
         }
     } else if (rl == 7) {
-        for (depth = ipdb->depth - 1; depth >= 0; depth--) {
+        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 byte_offset += 3;
@@ -286,7 +286,7 @@ _fdlookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
             }
         }
     } else if (rl == 8) {
-        for (depth = ipdb->depth - 1; depth >= 0; depth--) {
+        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 byte_offset += 4;
@@ -305,18 +305,18 @@ _fdlookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
 }
 
 static int
-_lookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
+_lookup_by_ipnum_128(MMDB_s * mmdb, struct in6_addr ipnum,
                      MMDB_root_entry_s * result)
 {
-    int segments = ipdb->segments;
+    int segments = mmdb->segments;
     int offset = 0;
-    int rl = ipdb->recbits * 2 / 8;
-    const uint8_t *mem = ipdb->file_in_mem_ptr;
+    int rl = mmdb->recbits * 2 / 8;
+    const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
     int depth;
     if (rl == 6) {
 
-        for (depth = ipdb->depth - 1; depth >= 0; depth--) {
+        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 p += 3;
@@ -328,7 +328,7 @@ _lookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
             }
         }
     } else if (rl == 7) {
-        for (depth = ipdb->depth - 1; depth >= 0; depth--) {
+        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 p += 3;
@@ -346,7 +346,7 @@ _lookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
             }
         }
     } else if (rl == 8) {
-        for (depth = ipdb->depth - 1; depth >= 0; depth--) {
+        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 p += 4;
@@ -363,12 +363,12 @@ _lookup_by_ipnum_128(MMDB_s * ipdb, struct in6_addr ipnum,
 }
 
 static int
-_lookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s * res)
+_lookup_by_ipnum(MMDB_s * mmdb, uint32_t ipnum, MMDB_root_entry_s * res)
 {
-    int segments = ipdb->segments;
+    int segments = mmdb->segments;
     int offset = 0;
-    int rl = ipdb->recbits * 2 / 8;
-    const uint8_t *mem = ipdb->file_in_mem_ptr;
+    int rl = mmdb->recbits * 2 / 8;
+    const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
     uint32_t mask = 0x80000000UL;
     int depth;
@@ -421,11 +421,11 @@ _lookup_by_ipnum(MMDB_s * ipdb, uint32_t ipnum, MMDB_root_entry_s * res)
     return MMDB_CORRUPTDATABASE;
 }
 
-static void _decode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s * ret_key)
+static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
 {
-    //int           segments = ipdb->segments;
+    //int           segments = mmdb->segments;
     const int segments = 0;
-    const uint8_t *mem = ipdb->dataptr;
+    const uint8_t *mem = mmdb->dataptr;
     uint8_t ctrl, type;
     ctrl = mem[segments + offset++];
     type = (ctrl >> 5) & 7;
@@ -437,7 +437,7 @@ static void _decode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s * ret_key)
         int psize = (ctrl >> 3) & 3;
         int new_offset = _get_ptr_from(ctrl, &mem[segments + offset], psize);
 
-        _decode_key(ipdb, new_offset, ret_key);
+        _decode_key(mmdb, new_offset, ret_key);
         ret_key->new_offset = offset + psize + 1;
         return;
     }
@@ -471,7 +471,7 @@ static void _decode_key(MMDB_s * ipdb, int offset, MMDB_decode_key_s * ret_key)
     return;
 }
 
-static int _init(MMDB_s * ipdb, char *fname, uint32_t flags)
+static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
 {
     struct stat s;
     int fd;
@@ -479,17 +479,17 @@ static int _init(MMDB_s * ipdb, char *fname, uint32_t flags)
     ssize_t iread;
     ssize_t size;
     off_t offset;
-    ipdb->fd = fd = open(fname, O_RDONLY);
+    mmdb->fd = fd = open(fname, O_RDONLY);
     if (fd < 0)
         return MMDB_OPENFILEERROR;
     fstat(fd, &s);
-    ipdb->flags = flags;
+    mmdb->flags = flags;
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-        ipdb->fd = -1;
+        mmdb->fd = -1;
         size = s.st_size;
         offset = 0;
     } else {
-        ipdb->fd = fd;
+        mmdb->fd = fd;
         size = s.st_size < 2000 ? s.st_size : 2000;
         offset = s.st_size - size;
     }
@@ -505,22 +505,22 @@ static int _init(MMDB_s * ipdb, char *fname, uint32_t flags)
         return MMDB_INVALIDDATABASE;
     }
     p += 14;
-    ipdb->file_format = p[0] * 256 + p[1];
-    ipdb->recbits = p[2];
-    ipdb->depth = p[3];
-    ipdb->database_type = p[4] * 256 + p[5];
-    ipdb->minor_database_type = p[6] * 256 + p[7];
-    ipdb->segments = p[8] * 16777216 + p[9] * 65536 + p[10] * 256 + p[11];
+    mmdb->file_format = p[0] * 256 + p[1];
+    mmdb->recbits = p[2];
+    mmdb->depth = p[3];
+    mmdb->database_type = p[4] * 256 + p[5];
+    mmdb->minor_database_type = p[6] * 256 + p[7];
+    mmdb->segments = p[8] * 16777216 + p[9] * 65536 + p[10] * 256 + p[11];
 
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-        ipdb->file_in_mem_ptr = ptr;
-        ipdb->dataptr =
-            ipdb->file_in_mem_ptr + ipdb->segments * ipdb->recbits * 2 / 8;
+        mmdb->file_in_mem_ptr = ptr;
+        mmdb->dataptr =
+            mmdb->file_in_mem_ptr + mmdb->segments * mmdb->recbits * 2 / 8;
 
         close(fd);
     } else {
-        ipdb->dataptr =
-            (const uint8_t *)0 + (ipdb->segments * ipdb->recbits * 2 / 8);
+        mmdb->dataptr =
+            (const uint8_t *)0 + (mmdb->segments * mmdb->recbits * 2 / 8);
         free(ptr);
     }
     return MMDB_SUCCESS;
@@ -528,10 +528,10 @@ static int _init(MMDB_s * ipdb, char *fname, uint32_t flags)
 
 MMDB_s *MMDB_open(char *fname, uint32_t flags)
 {
-    MMDB_s *ipdb = calloc(1, sizeof(MMDB_s));
-    if (MMDB_SUCCESS != _init(ipdb, fname, flags)) {
-        MMDB_free_all(ipdb);
+    MMDB_s *mmdb = calloc(1, sizeof(MMDB_s));
+    if (MMDB_SUCCESS != _init(mmdb, fname, flags)) {
+        MMDB_free_all(mmdb);
         return NULL;
     }
-    return ipdb;
+    return mmdb;
 }
