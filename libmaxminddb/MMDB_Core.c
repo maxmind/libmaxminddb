@@ -424,19 +424,17 @@ _lookup_by_ipnum(MMDB_s * mmdb, uint32_t ipnum, MMDB_root_entry_s * res)
 
 static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
 {
-    //int           segments = mmdb->segments;
-    const int segments = 0;
     const uint8_t *mem = mmdb->dataptr;
     uint8_t ctrl, type;
-    ctrl = mem[segments + offset++];
+    ctrl = mem[offset++];
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
-        type = 8 + mem[segments + offset++];
+        type = 8 + mem[offset++];
     }
 
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
-        int new_offset = _get_ptr_from(ctrl, &mem[segments + offset], psize);
+        int new_offset = _get_ptr_from(ctrl, &mem[offset], psize);
 
         _decode_key(mmdb, new_offset, ret_key);
         ret_key->new_offset = offset + psize + 1;
@@ -446,14 +444,14 @@ static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
     int size = ctrl & 31;
     switch (size) {
     case 29:
-        size = 29 + mem[segments + offset++];
+        size = 29 + mem[offset++];
         break;
     case 30:
-        size = 285 + _get_uint16(&mem[segments + offset]);
+        size = 285 + _get_uint16(&mem[offset]);
         offset += 2;
         break;
     case 31:
-        size = 65821 + _get_uint24(&mem[segments + offset]);
+        size = 65821 + _get_uint24(&mem[offset]);
         offset += 3;
     default:
         break;
@@ -466,7 +464,7 @@ static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
         return;
     }
 
-    ret_key->ptr = &mem[segments + offset];
+    ret_key->ptr = &mem[offset];
     ret_key->size = size;
     ret_key->new_offset = offset + size;
     return;
