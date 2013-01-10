@@ -11,6 +11,14 @@
 
 #define KEYS(...) __VA_ARGS__, NULL
 
+// prototypes
+//
+
+int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
+                    va_list params);
+
+
+
 static struct in6_addr IPNUM128_NULL = { };
 
 static int __IN6_ADDR_IS_NULL(struct in6_addr ipnum)
@@ -656,4 +664,53 @@ void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     decode->offset_to_next = offset + size;
 
     return;
+}
+
+
+int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
+                    va_list params)
+{
+    MMDB_decode_s decode;
+    char *src_key;
+    MMDB_s *mmdb = start->mmdb;
+    uint32_t offset = start->offset;
+    while ((src_key = va_arg(params, char *))) {
+        int src_keylen = strlen(src_key);
+        _decode_one(mmdb, offset, &decode);
+        switch (decode.data.type) {
+        case MMDB_DTYPE_PTR:
+            // we follow the pointer
+            _decode_one(mmdb, decode.data.uinteger, &decode);
+            break;
+        case MMDB_DTYPE_HASH:
+            {
+                int size = decode.data.data_size;
+                MMDB_decode_s key, value;
+                while (--size) {
+                    _decode_one(mmdb, offset, &key);
+                    uint32_t offset_to_value = key.offset_to_next;
+
+                    while (key.data.type == MMDB_DTYPE_PTR) {
+                        _decode_one(mmdb, key.data.uinteger, &key);
+                    }
+
+                    if (key.data.data_size == src_keylen &&
+                        !memcmp(src_key, key.data.ptr, src_keylen)) {
+                    } else {
+                        // we search for another key skip  this
+                        _decode_one(mmdb, offset_to_value, &value);
+                        offset = value.offset_to_next;
+
+                    }
+                }
+            }
+            //_decode_one(mmdb, decode.data.uinteger, &result);
+            break;
+
+        default:
+            break;
+        }
+    }
+    va_end(params);
+    return MMDB_SUCCESS;
 }
