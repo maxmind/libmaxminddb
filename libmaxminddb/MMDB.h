@@ -68,12 +68,6 @@ extern "C" {
         int netmask;
     } MMDB_root_entry_s;
 
-    typedef struct MMDB_decode_key_s {
-        unsigned int new_offset;
-        unsigned int size;
-        const uint8_t *ptr;
-    } MMDB_decode_key_s;
-
     typedef struct MMDB_return_s {
         /* return values */
         union {
@@ -87,7 +81,18 @@ extern "C" {
         int error;
     } MMDB_return_s;
 
+    typedef struct MMDB_decode_s {
+        MMDB_return_s data;
+        uint32_t offset_to_next;
+    } MMDB_decode_s;
+
 #if 0
+    typedef struct MMDB_decode_key_s {
+        unsigned int new_offset;
+        unsigned int size;
+        const uint8_t *ptr;
+    } MMDB_decode_key_s;
+
     struct MMDB_Decode_Value {
         SV *sv;
         int new_offset;

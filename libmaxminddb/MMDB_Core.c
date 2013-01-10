@@ -98,7 +98,7 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t * ptr, int ptr_size)
     return new_offset;
 }
 
-static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
+static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_s * ret_key)
 {
     const int segments = mmdb->segments * mmdb->recbits * 2 / 8;;
     uint8_t ctrl;
@@ -123,7 +123,7 @@ static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
 
         if (_fddecode_key(mmdb, new_offset, ret_key) != MMDB_SUCCESS)
             return MMDB_IOERROR;
-        ret_key->new_offset = offset + psize + 1;
+        ret_key->offset_to_next = offset + psize + 1;
         return MMDB_SUCCESS;
     }
 
@@ -150,15 +150,15 @@ static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
     }
 
     if (size == 0) {
-        ret_key->ptr = NULL;
-        ret_key->size = 0;
-        ret_key->new_offset = offset;
+        ret_key->data.ptr = NULL;
+        ret_key->data.data_size = 0;
+        ret_key->offset_to_next = offset;
         return MMDB_SUCCESS;
     }
 
-    ret_key->ptr = (void *)0 + segments + offset;
-    ret_key->size = size;
-    ret_key->new_offset = offset + size;
+    ret_key->data.ptr = (void *)0 + segments + offset;
+    ret_key->data.data_size = size;
+    ret_key->offset_to_next = offset + size;
     return MMDB_SUCCESS;
 }
 
@@ -422,7 +422,7 @@ _lookup_by_ipnum(MMDB_s * mmdb, uint32_t ipnum, MMDB_root_entry_s * res)
     return MMDB_CORRUPTDATABASE;
 }
 
-static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
+static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_s * ret_key)
 {
     const uint8_t *mem = mmdb->dataptr;
     uint8_t ctrl, type;
@@ -437,7 +437,7 @@ static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
         int new_offset = _get_ptr_from(ctrl, &mem[offset], psize);
 
         _decode_key(mmdb, new_offset, ret_key);
-        ret_key->new_offset = offset + psize + 1;
+        ret_key->offset_to_next = offset + psize + 1;
         return;
     }
 
@@ -458,15 +458,15 @@ static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_key_s * ret_key)
     }
 
     if (size == 0) {
-        ret_key->ptr = (const uint8_t *)"";
-        ret_key->size = 0;
-        ret_key->new_offset = offset;
+        ret_key->data.ptr = (const uint8_t *)"";
+        ret_key->data.data_size = 0;
+        ret_key->offset_to_next = offset;
         return;
     }
 
-    ret_key->ptr = &mem[offset];
-    ret_key->size = size;
-    ret_key->new_offset = offset + size;
+    ret_key->data.ptr = &mem[offset];
+    ret_key->data.data_size = size;
+    ret_key->offset_to_next = offset + size;
     return;
 }
 
