@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#define KEYS(...) __VA_ARGS__, NULL
+
 static struct in6_addr IPNUM128_NULL = { };
 
 static int __IN6_ADDR_IS_NULL(struct in6_addr ipnum)
