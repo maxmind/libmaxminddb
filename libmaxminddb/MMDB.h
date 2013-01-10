@@ -58,7 +58,7 @@ extern "C" {
     } MMDB_s;
 
     typedef struct MMDB_entry_s {
-        MMDB_s *ipdb;
+        MMDB_s *mmdb;
         unsigned int offset;    /* usually pointer to the struct */
         //uint8_t const *ptr;             /* usually pointer to the struct */
     } MMDB_entry_s;
