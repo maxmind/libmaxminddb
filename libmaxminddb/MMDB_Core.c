@@ -582,3 +582,72 @@ uint32_t _get_uint_value(MMDB_entry_s * start, ...)
     va_end(params);
     return MMDB_get_uint(&result);
 }
+
+void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
+{
+    const uint8_t *mem = mmdb->dataptr;
+    const uint8_t *p;
+    uint8_t ctrl;
+    int type;
+    ctrl = mem[offset++];
+    type = (ctrl >> 5) & 7;
+    if (type == MMDB_DTYPE_EXT) {
+        type = 8 + mem[offset++];
+    }
+
+    decode->data.type = type;
+
+    if (type == MMDB_DTYPE_PTR) {
+        int psize = (ctrl >> 3) & 3;
+        decode->data.uinteger = _get_ptr_from(ctrl, &mem[offset], psize);
+        decode->data.used_bytes = psize + 1;
+        decode->offset_to_next = offset + psize + 1;
+        return;
+    }
+
+    int size = ctrl & 31;
+    switch (size) {
+    case 29:
+        size = 29 + mem[offset++];
+        break;
+    case 30:
+        size = 285 + _get_uint16(&mem[offset]);
+        offset += 2;
+        break;
+    case 31:
+        size = 65821 + _get_uint24(&mem[offset]);
+        offset += 3;
+    default:
+        break;
+    }
+
+    if (type == MMDB_DTYPE_HASH) {
+        decode->data.data_size = size;
+        decode->offset_to_next = offset;
+        return;
+    }
+
+    if (size == 0 && type != MMDB_DTYPE_UINT16 && type != MMDB_DTYPE_UINT32
+        && type != MMDB_DTYPE_INT32) {
+        decode->data.ptr = NULL;
+        decode->data.data_size = 0;
+        decode->offset_to_next = offset;
+        return;
+    }
+
+    if ((type == MMDB_DTYPE_UINT32) || (type == MMDB_DTYPE_UINT16)) {
+        decode->data.uinteger = _get_uintX(&mem[offset], size);
+    } else if (type == MMDB_DTYPE_INT32) {
+        decode->data.sinteger = _get_sint32(&mem[offset]);
+    } else if (type == MMDB_DTYPE_DOUBLE) {
+        decode->data.double_value = _get_double(&mem[offset], size);
+    } else {
+        decode->data.ptr = &mem[offset];
+        decode->data.data_size = size;
+    }
+    decode->offset_to_next = offset + size;
+
+    return;
+}
+
+
