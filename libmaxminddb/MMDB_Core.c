@@ -33,6 +33,11 @@ static uint32_t _get_uint32(const uint8_t * p)
     return (p[0] * 16777216UL + p[1] * 65536 + p[2] * 256 + p[3]);
 }
 
+static int _get_sint32(const uint8_t * p)
+{
+    return (int)(p[0] * 16777216UL + p[1] * 65536 + p[2] * 256 + p[3]);
+}
+
 static uint32_t _get_uint24(const uint8_t * p)
 {
     return (p[0] * 65536UL + p[1] * 256 + p[2]);
