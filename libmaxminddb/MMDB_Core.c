@@ -14,10 +14,10 @@
 // prototypes
 //
 
+uint32_t _get_uint_value(MMDB_entry_s * start, ...);
+
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
-
-
 
 static struct in6_addr IPNUM128_NULL = { };
 
@@ -525,25 +525,18 @@ static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
     MMDB_return_s result;
 
     // we can't fail with ioerror's here. It is a memory operation
-    mmdb->file_format =
-        _get_uint_value(&meta, KEYS('binary_format_major_version'));
+    mmdb->major_file_format =
+        _get_uint_value(&meta, KEYS("binary_format_major_version"));
 
-    ioerror =
-        MMDB_get_value(&meta, &result, KEYS('binary_format_minor_version'));
+    mmdb->minor_file_format =
+        _get_uint_value(&meta, KEYS("binary_format_minor_version"));
 
-    mmdb->database_type = _get_uint_value(&meta, KEYS('database_type'));;
-    mmdb->recbits = _get_uint_value(&meta, KEYS('record_size'));;
-    mmdb->segments = _get_uint_value(&meta, KEYS('node_count'));
+    mmdb->database_type = _get_uint_value(&meta, KEYS("database_type"));
+    mmdb->recbits = _get_uint_value(&meta, KEYS("record_size"));
+    mmdb->segments = _get_uint_value(&meta, KEYS("node_count"));
 
     // unfortunately we must guess the depth of the database
-    mmdb->depth = _get_uint_value(&meta, KEYS('ip_version')) == 4 ? 32 : 128;
-
-    //  mmdb->file_format = p[0] * 256 + p[1];
-    //  mmdb->recbits = p[2];
-    //  mmdb->depth = p[3];
-    //  mmdb->database_type = p[4] * 256 + p[5];
-    //  mmdb->minor_database_type = p[6] * 256 + p[7];
-    //  mmdb->segments = p[8] * 16777216 + p[9] * 65536 + p[10] * 256 + p[11];
+    mmdb->depth = _get_uint_value(&meta, KEYS("ip_version")) == 4 ? 32 : 128;
 
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
         mmdb->file_in_mem_ptr = ptr;
@@ -665,7 +658,6 @@ void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 
     return;
 }
-
 
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params)

@@ -48,9 +48,9 @@ extern "C" {
         int fd;
         const uint8_t *file_in_mem_ptr;
         const char *info;
-        int file_format;
+        int major_file_format;
+        int minor_file_format;
         int database_type;
-        int minor_database_type;
         int recbits;
         int depth;
         int segments;
@@ -87,6 +87,7 @@ extern "C" {
     } MMDB_decode_s;
 
 #if 0
+
     typedef struct MMDB_decode_key_s {
         unsigned int new_offset;
         unsigned int size;
