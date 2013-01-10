@@ -77,10 +77,11 @@ static int _read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
     return MMDB_SUCCESS;
 }
 
-static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t * ptr, int ptr_size)
+static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
+                              int ptr_size)
 {
     uint32_t new_offset;
-    switch (psize) {
+    switch (ptr_size) {
     case 0:
         new_offset = (ctrl & 7) * 256 + ptr[0];
         break;
@@ -649,5 +650,3 @@ void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 
     return;
 }
-
-
