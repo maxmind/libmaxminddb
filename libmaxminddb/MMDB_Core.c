@@ -13,6 +13,7 @@
 
 // prototypes
 //
+void _DPRINT_KEY(MMDB_return_s * data);
 
 uint32_t _get_uint_value(MMDB_entry_s * start, ...);
 
@@ -724,3 +725,13 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     va_end(params);
     return MMDB_SUCCESS;
 }
+
+void _DPRINT_KEY(MMDB_return_s * data)
+{
+    char str[256];
+    int len = data->data_size > 255 ? 255 : data->data_size;
+    memcpy(str, data->ptr, len);
+    str[len] = '\0';
+    fprintf(stderr, "%s\n", str);
+}
+
