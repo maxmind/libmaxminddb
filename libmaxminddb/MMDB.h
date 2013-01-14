@@ -109,6 +109,11 @@ extern "C" {
     };
 #endif
 
+    extern MMDB_s *MMDB_open(char *fname, uint32_t flags);
+    extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res);
+    extern int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result,
+                              ...);
+
 #ifdef __cplusplus
 }
 #endif
