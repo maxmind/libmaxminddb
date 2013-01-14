@@ -536,7 +536,7 @@ static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
         return MMDB_INVALIDDATABASE;
     }
 
-    MMDB_s fakedb = {.file_in_mem_ptr = metadata + 14 };
+    MMDB_s fakedb = {.dataptr = metadata + 14 };
     MMDB_entry_s meta = {.mmdb = &fakedb };
     MMDB_return_s result;
 
