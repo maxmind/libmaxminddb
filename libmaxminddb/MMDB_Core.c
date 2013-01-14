@@ -594,11 +594,6 @@ int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result, ...)
     return ioerror;
 }
 
-int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
-                    va_list params)
-{
-}
-
 uint32_t _get_uint_value(MMDB_entry_s * start, ...)
 {
     MMDB_return_s result;
