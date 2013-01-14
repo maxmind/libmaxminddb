@@ -683,11 +683,11 @@ void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params)
 {
-    MMDB_decode_s decode;
-    char *src_key;
+    MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
-    while ((src_key = va_arg(params, char *))) {
+    char *src_key = va_arg(params, char *);
+    while (1) {
         int src_keylen = strlen(src_key);
         _decode_one(mmdb, offset, &decode);
         switch (decode.data.type) {
@@ -695,35 +695,59 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
             // we follow the pointer
             _decode_one(mmdb, decode.data.uinteger, &decode);
             break;
+
+            // learn to skip this
+        case MMDB_DTYPE_ARRAY:
+            _skip_hash_array(mmdb, &decode);
+            break;
         case MMDB_DTYPE_HASH:
             {
                 int size = decode.data.data_size;
-                MMDB_decode_s key, value;
-                while (--size) {
+                offset = decode.offset_to_next;
+                while (size--) {
                     _decode_one(mmdb, offset, &key);
+
                     uint32_t offset_to_value = key.offset_to_next;
 
-                    while (key.data.type == MMDB_DTYPE_PTR) {
-                        _decode_one(mmdb, key.data.uinteger, &key);
+                    if (key.data.type == MMDB_DTYPE_PTR) {
+                        while (key.data.type == MMDB_DTYPE_PTR) {
+                            _decode_one(mmdb, key.data.uinteger, &key);
+                        }
                     }
+
+                    assert(key.data.type == MMDB_DTYPE_BYTES ||
+                           key.data.type == MMDB_DTYPE_UTF8_STRING);
+
+                    // _DPRINT_KEY(&key.data);
 
                     if (key.data.data_size == src_keylen &&
                         !memcmp(src_key, key.data.ptr, src_keylen)) {
+                        _decode_one(mmdb, offset_to_value, &value);
+                        if ((src_key = va_arg(params, char *))) {
+
+                            _skip_hash_array(mmdb, &value);
+                            offset = value.offset_to_next;
+                            continue;
+                        }
+                        // found it!
+                        memcpy(result, &value.data, sizeof(MMDB_return_s));
+                        goto end;
                     } else {
                         // we search for another key skip  this
                         _decode_one(mmdb, offset_to_value, &value);
+                        _skip_hash_array(mmdb, &value);
                         offset = value.offset_to_next;
-
                     }
                 }
+                // not found!! do something
+                //_DPRINT_KEY(&key.data);
+                goto end;
             }
-            //_decode_one(mmdb, decode.data.uinteger, &result);
-            break;
-
         default:
             break;
         }
     }
+ end:
     va_end(params);
     return MMDB_SUCCESS;
 }
@@ -755,4 +779,3 @@ void _DPRINT_KEY(MMDB_return_s * data)
     str[len] = '\0';
     fprintf(stderr, "%s\n", str);
 }
-
