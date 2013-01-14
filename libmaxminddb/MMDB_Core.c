@@ -127,7 +127,11 @@ static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_s * ret_key)
     if (type == MMDB_DTYPE_EXT) {
         if (_read(fd, &b[0], 1, segments + offset++) != MMDB_SUCCESS)
             return MMDB_IOERROR;
-        type = 8 + b[0];
+#if defined BROKEN_TYPE
+        type = b[0];
+#else
+         type = 8 + b[0];
+#endif
     }
 
     if (type == MMDB_DTYPE_PTR) {
@@ -445,7 +449,12 @@ static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_s * ret_key)
     ctrl = mem[offset++];
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
+#if defined BROKEN_TYPE
+        type = mem[offset++];
+#else
         type = 8 + mem[offset++];
+#endif
+
     }
 
     if (type == MMDB_DTYPE_PTR) {
@@ -601,7 +610,12 @@ void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     ctrl = mem[offset++];
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
+#if defined BROKEN_TYPE
+        type = mem[offset++];
+#else
         type = 8 + mem[offset++];
+#endif
+
     }
 
     decode->data.type = type;

@@ -16,6 +16,10 @@ extern "C" {
 //#include <sys/types.h> /* for fstat */
 //#include <sys/stat.h>   /* for fstat */
 
+// *** the EXT_TYPE is wrong it should be type - 8 not type
+#define BROKEN_TYPE (1)
+
+
 # define MMDB_DTYPE_EXT (0)
 # define MMDB_DTYPE_PTR (1)
 # define MMDB_DTYPE_UTF8_STRING (2)
