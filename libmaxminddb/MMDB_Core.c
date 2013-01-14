@@ -547,7 +547,8 @@ static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
     mmdb->minor_file_format =
         _get_uint_value(&meta, KEYS("binary_format_minor_version"));
 
-    mmdb->database_type = _get_uint_value(&meta, KEYS("database_type"));
+    // looks like the dataabase_type is the info string.
+    // mmdb->database_type = _get_uint_value(&meta, KEYS("database_type"));
     mmdb->recbits = _get_uint_value(&meta, KEYS("record_size"));
     mmdb->segments = _get_uint_value(&meta, KEYS("node_count"));
 
