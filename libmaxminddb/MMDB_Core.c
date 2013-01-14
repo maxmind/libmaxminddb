@@ -108,10 +108,10 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
 #endif
         break;
     case 2:
-    #if defined BROKEN_PTR
+#if defined BROKEN_PTR
         new_offset = (ctrl & 7) * 16777216 + _get_uint24(ptr);
 #else
-         new_offset = 2048 + 524288 + (ctrl & 7) * 16777216 + _get_uint24(ptr);
+        new_offset = 2048 + 524288 + (ctrl & 7) * 16777216 + _get_uint24(ptr);
 #endif
         break;
     case 3:
@@ -138,7 +138,7 @@ static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_s * ret_key)
 #if defined BROKEN_TYPE
         type = b[0];
 #else
-         type = 8 + b[0];
+        type = 8 + b[0];
 #endif
     }
 
@@ -203,9 +203,9 @@ void MMDB_free_all(MMDB_s * mmdb)
     }
 }
 
-static int
-_fdlookup_by_ipnum(MMDB_s * mmdb, uint32_t ipnum, MMDB_root_entry_s * result)
+static int _fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
 {
+    MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->segments;
     off_t offset = 0;
     int byte_offset;
@@ -267,9 +267,9 @@ _fdlookup_by_ipnum(MMDB_s * mmdb, uint32_t ipnum, MMDB_root_entry_s * result)
 }
 
 static int
-_fdlookup_by_ipnum_128(MMDB_s * mmdb, struct in6_addr ipnum,
-                       MMDB_root_entry_s * result)
+_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
+    MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->segments;
     int offset = 0;
     int byte_offset;
@@ -333,10 +333,9 @@ _fdlookup_by_ipnum_128(MMDB_s * mmdb, struct in6_addr ipnum,
     return MMDB_CORRUPTDATABASE;
 }
 
-static int
-_lookup_by_ipnum_128(MMDB_s * mmdb, struct in6_addr ipnum,
-                     MMDB_root_entry_s * result)
+int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
+    MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->segments;
     int offset = 0;
     int rl = mmdb->recbits * 2 / 8;
@@ -391,9 +390,9 @@ _lookup_by_ipnum_128(MMDB_s * mmdb, struct in6_addr ipnum,
     return MMDB_CORRUPTDATABASE;
 }
 
-static int
-_lookup_by_ipnum(MMDB_s * mmdb, uint32_t ipnum, MMDB_root_entry_s * res)
+int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
 {
+    MMDB_s *mmdb = res->entry.mmdb;
     int segments = mmdb->segments;
     int offset = 0;
     int rl = mmdb->recbits * 2 / 8;

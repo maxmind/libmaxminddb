@@ -22,8 +22,6 @@ extern "C" {
 // only th 32bit ptr contains all of them.
 #define BROKEN_PTR (1)
 
-
-
 # define MMDB_DTYPE_EXT (0)
 # define MMDB_DTYPE_PTR (1)
 # define MMDB_DTYPE_UTF8_STRING (2)
@@ -85,8 +83,8 @@ extern "C" {
             uint8_t c16[16];
             uint8_t const *ptr;
         };
-	uint32_t offset; /* start of our field */
-        int data_size;      /* only valid for strings, utf8_strings or binary data */
+        uint32_t offset;        /* start of our field */
+        int data_size;          /* only valid for strings, utf8_strings or binary data */
         int type;               /* type like string utf8_string, int32, ... */
         int used_bytes;         /* real size of the value */
         int error;
@@ -118,6 +116,8 @@ extern "C" {
 
     extern MMDB_s *MMDB_open(char *fname, uint32_t flags);
     extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res);
+    extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
+                                        MMDB_root_entry_s * result);
     extern int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result,
                               ...);
 
