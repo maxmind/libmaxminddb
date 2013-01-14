@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <assert.h>
 
 #define KEYS(...) __VA_ARGS__, NULL
 
@@ -650,7 +651,7 @@ void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         break;
     }
 
-    if (type == MMDB_DTYPE_HASH) {
+    if (type == MMDB_DTYPE_HASH || type == MMDB_DTYPE_ARRAY) {
         decode->data.data_size = size;
         decode->offset_to_next = offset;
         return;
