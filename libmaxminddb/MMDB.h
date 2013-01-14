@@ -76,9 +76,12 @@ extern "C" {
         /* return values */
         union {
             double double_value;
+            int sinteger;
             uint32_t uinteger;
+            uint8_t c16[16];
             uint8_t const *ptr;
         };
+	uint32_t offset; /* start of our field */
         int data_size;      /* only valid for strings, utf8_strings or binary data */
         int type;               /* type like string utf8_string, int32, ... */
         int used_bytes;         /* real size of the value */
