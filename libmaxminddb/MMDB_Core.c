@@ -16,6 +16,7 @@
 void _DPRINT_KEY(MMDB_return_s * data);
 
 uint32_t _get_uint_value(MMDB_entry_s * start, ...);
+void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
@@ -724,6 +725,25 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     }
     va_end(params);
     return MMDB_SUCCESS;
+}
+
+void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
+{
+    if (decode->data.type == MMDB_DTYPE_HASH) {
+        int size = decode->data.data_size;
+        while (size--) {
+            _decode_one(mmdb, decode->offset_to_next, decode);  // key
+            _decode_one(mmdb, decode->offset_to_next, decode);  // value
+            _skip_hash_array(mmdb, decode);
+        }
+
+    } else if (decode->data.type == MMDB_DTYPE_ARRAY) {
+        int size = decode->data.data_size;
+        while (size--) {
+            _decode_one(mmdb, decode->offset_to_next, decode);  // value
+            _skip_hash_array(mmdb, decode);
+        }
+    }
 }
 
 void _DPRINT_KEY(MMDB_return_s * data)
