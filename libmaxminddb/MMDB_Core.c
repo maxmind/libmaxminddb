@@ -101,10 +101,18 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
         new_offset = (ctrl & 7) * 256 + ptr[0];
         break;
     case 1:
+#if defined BROKEN_PTR
+        new_offset = (ctrl & 7) * 65536 + ptr[0] * 256 + ptr[1];
+#else
         new_offset = 2048 + (ctrl & 7) * 65536 + ptr[0] * 256 + ptr[1];
+#endif
         break;
     case 2:
-        new_offset = 2048 + 524288 + (ctrl & 7) * 16777216 + _get_uint24(ptr);
+    #if defined BROKEN_PTR
+        new_offset = (ctrl & 7) * 16777216 + _get_uint24(ptr);
+#else
+         new_offset = 2048 + 524288 + (ctrl & 7) * 16777216 + _get_uint24(ptr);
+#endif
         break;
     case 3:
     default:
