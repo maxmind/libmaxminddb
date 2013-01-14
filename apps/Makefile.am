@@ -3,6 +3,8 @@ AM_CPPFLAGS =      \
 
 bin_PROGRAMS = mmdblookup
 
+mmdblookup_DEPENDENCIES = $(top_builddir)/libmaxminddb/libmaxminddb.la
+mmdblookup_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la -lc
 mmdblookup_SOURCES = mmdblookup.c MMDB_Helper.c
 
 mmdblookup.lo mmdblookup.o: mmdblookup.c
