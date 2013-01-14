@@ -74,8 +74,8 @@ extern "C" {
             double double_value;
             uint32_t uinteger;
             uint8_t const *ptr;
-            int data_size;      /* only valid for strings, utf8_strings or binary data */
         };
+        int data_size;      /* only valid for strings, utf8_strings or binary data */
         int type;               /* type like string utf8_string, int32, ... */
         int used_bytes;         /* real size of the value */
         int error;
