@@ -615,6 +615,7 @@ void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     const uint8_t *p;
     uint8_t ctrl;
     int type;
+    decode->data.offset = offset;
     ctrl = mem[offset++];
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
