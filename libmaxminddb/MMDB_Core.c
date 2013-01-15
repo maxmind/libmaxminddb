@@ -603,7 +603,7 @@ int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result, ...)
     return ioerror;
 }
 
-uint32_t _get_uint_value(MMDB_entry_s * start, ...)
+static uint32_t _get_uint_value(MMDB_entry_s * start, ...)
 {
     MMDB_return_s result;
     va_list params;
@@ -613,7 +613,7 @@ uint32_t _get_uint_value(MMDB_entry_s * start, ...)
     return MMDB_get_uint(&result);
 }
 
-void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
+static void _decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 {
     const uint8_t *mem = mmdb->dataptr;
     const uint8_t *p;
@@ -758,7 +758,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     return MMDB_SUCCESS;
 }
 
-void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
+static void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 {
     if (decode->data.type == MMDB_DTYPE_HASH) {
         int size = decode->data.data_size;
@@ -777,7 +777,7 @@ void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
     }
 }
 
-void _DPRINT_KEY(MMDB_return_s * data)
+static void _DPRINT_KEY(MMDB_return_s * data)
 {
     char str[256];
     int len = data->data_size > 255 ? 255 : data->data_size;
