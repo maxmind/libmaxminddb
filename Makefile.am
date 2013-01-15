@@ -1,6 +1,4 @@
 SUBDIRS = \
   libmaxminddb	\
   apps		\
-  t		\
-  examples
-
+  t
