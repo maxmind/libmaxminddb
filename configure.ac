@@ -28,5 +28,6 @@ AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile
                  libmaxminddb/Makefile
-		 apps/Makefile])
+		 apps/Makefile
+		 t/Makefile])
 AC_OUTPUT
