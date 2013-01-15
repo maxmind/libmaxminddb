@@ -125,7 +125,7 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
     return new_offset;
 }
 
-static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_s * ret_key)
+static int _fddecode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 {
     const int segments = mmdb->segments * mmdb->recbits * 2 / 8;;
     uint8_t ctrl;
@@ -274,7 +274,7 @@ _fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->segments;
-    int offset = 0;
+    uint32_t offset = 0;
     int byte_offset;
     int rl = mmdb->recbits * 2 / 8;
     int fd = mmdb->fd;
@@ -340,7 +340,7 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->segments;
-    int offset = 0;
+    uint32_t offset = 0;
     int rl = mmdb->recbits * 2 / 8;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
@@ -415,7 +415,7 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
 {
     MMDB_s *mmdb = res->entry.mmdb;
     int segments = mmdb->segments;
-    int offset = 0;
+    uint32_t offset = 0;
     int rl = mmdb->recbits * 2 / 8;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
@@ -458,7 +458,7 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     return MMDB_CORRUPTDATABASE;
 }
 
-static void _decode_key(MMDB_s * mmdb, int offset, MMDB_decode_s * ret_key)
+static void _decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 {
     const uint8_t *mem = mmdb->dataptr;
     uint8_t ctrl, type;
