@@ -10,12 +10,6 @@ extern "C" {
 #include <netinet/in.h>
 //#include <arpa/inet.h>
 
-//#include<stdio.h>
-//#include<stdlib.h>
-//#include<string.h>
-//#include <sys/types.h> /* for fstat */
-//#include <sys/stat.h>   /* for fstat */
-
 // *** the EXT_TYPE is wrong it should be type - 8 not type
 #define BROKEN_TYPE (1)
 // every pointer start at the MAX + 1 of the previous type. To extend the range
