@@ -207,7 +207,30 @@ void MMDB_free_all(MMDB_s * mmdb)
     }
 }
 
-static int _fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
+#if defined BROKEN_SEARCHTREE
+
+#define RETURN_ON_END_OF_SEARCHX(offset,segments,depth,maxdepth, res)  \
+            if ((offset) == 0 || (offset) >= (segments)) {    \
+                (res)->netmask = (maxdepth) - (depth);                \
+                (res)->entry.offset = (offset);               \
+                return MMDB_SUCCESS;                          \
+            }
+#else
+#define RETURN_ON_END_OF_SEARCHX(offset,segments,depth,maxdepth, res) \
+            if ((offset) >= (segments)) {                     \
+                (res)->netmask = (maxdepth) - (depth);                \
+                (res)->entry.offset = (offset) - (segments);  \
+                return MMDB_SUCCESS;                          \
+            }
+#endif
+
+#define RETURN_ON_END_OF_SEARCH32(offset,segments,depth, res) \
+	    RETURN_ON_END_OF_SEARCHX(offset,segments,depth, 32, res)
+
+#define RETURN_ON_END_OF_SEARCH128(offset,segments,depth, res) \
+	    RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
+
+int MMDB_fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->segments;
@@ -226,11 +249,7 @@ static int _fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
                  offset * rl + ((ipnum & mask) ? 3 : 0)) != MMDB_SUCCESS)
                 return MMDB_IOERROR;
             offset = _get_uint24(b);
-            if (offset >= segments) {
-                result->netmask = 32 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH32(offset, segments, depth, result);
         }
     } else if (rl == 7) {
         for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
@@ -246,11 +265,7 @@ static int _fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
                 offset =
                     b[0] * 65536 + b[1] * 256 + b[2] + ((b[3] & 0xf0) << 20);
             }
-            if (offset >= segments) {
-                result->netmask = 32 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH32(offset, segments, depth, result);
         }
     } else if (rl == 8) {
         for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
@@ -259,19 +274,15 @@ static int _fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
                  offset * rl + ((ipnum & mask) ? 4 : 0)) != MMDB_SUCCESS)
                 return MMDB_IOERROR;
             offset = _get_uint32(b);
-            if (offset >= segments) {
-                result->netmask = 32 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH32(offset, segments, depth, result);
         }
     }
     //uhhh should never happen !
     return MMDB_CORRUPTDATABASE;
 }
 
-static int
-_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
+int
+MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->segments;
@@ -290,11 +301,7 @@ _fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
             if (_read(fd, &b[0], 3, byte_offset) != MMDB_SUCCESS)
                 return MMDB_IOERROR;
             offset = _get_uint24(b);
-            if (offset >= segments) {
-                result->netmask = 128 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
     } else if (rl == 7) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
@@ -312,11 +319,7 @@ _fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
                 offset =
                     b[0] * 65536 + b[1] * 256 + b[2] + ((b[3] & 0xf0) << 20);
             }
-            if (offset >= segments) {
-                result->netmask = 128 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
     } else if (rl == 8) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
@@ -326,11 +329,7 @@ _fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
             if (_read(fd, &b[0], 4, byte_offset) != MMDB_SUCCESS)
                 return MMDB_IOERROR;
             offset = _get_uint32(b);
-            if (offset >= segments) {
-                result->netmask = 128 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
     }
     //uhhh should never happen !
@@ -353,11 +352,7 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 p += 3;
             offset = _get_uint24(p);
-            if (offset >= segments) {
-                result->netmask = 128 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
     } else if (rl == 7) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
@@ -371,11 +366,7 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
                 offset =
                     p[0] * 65536 + p[1] * 256 + p[2] + ((p[3] & 0xf0) << 20);
             }
-            if (offset >= segments) {
-                result->netmask = 128 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
     } else if (rl == 8) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
@@ -383,34 +374,12 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 p += 4;
             offset = _get_uint32(p);
-            if (offset >= segments) {
-                result->netmask = 128 - depth;
-                result->entry.offset = offset - segments;
-                return MMDB_SUCCESS;
-            }
+            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
     }
     //uhhh should never happen !
     return MMDB_CORRUPTDATABASE;
 }
-
-#if defined BROKEN_SEARCHTREE
-
-#define RETURN_ON_END_OF_SEARCH32(offset,segments,depth,res)  \
-            if ((offset) == 0 || (offset) >= (segments)) {    \
-                (res)->netmask = 32 - (depth);                \
-                (res)->entry.offset = (offset);               \
-                return MMDB_SUCCESS;                          \
-            }
-
-#else
-#define RETURN_ON_END_OF_SEARCH32(offset,segments,depth, res) \
-            if ((offset) >= (segments)) {                     \
-                (res)->netmask = 32 - (depth);                \
-                (res)->entry.offset = (offset) - (segments);  \
-                return MMDB_SUCCESS;                          \
-            }
-#endif
 
 int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
 {
