@@ -43,22 +43,22 @@ static int __IN6_ADDR_IS_NULL(struct in6_addr ipnum)
 
 static uint32_t _get_uint32(const uint8_t * p)
 {
-    return (p[0] * 16777216UL + p[1] * 65536 + p[2] * 256 + p[3]);
+    return (p[0] * 16777216U + p[1] * 65536 + p[2] * 256 + p[3]);
 }
 
 static int _get_sint32(const uint8_t * p)
 {
-    return (int)(p[0] * 16777216UL + p[1] * 65536 + p[2] * 256 + p[3]);
+    return (int)(p[0] * 16777216U + p[1] * 65536 + p[2] * 256 + p[3]);
 }
 
 static uint32_t _get_uint24(const uint8_t * p)
 {
-    return (p[0] * 65536UL + p[1] * 256 + p[2]);
+    return (p[0] * 65536U + p[1] * 256 + p[2]);
 }
 
 static uint32_t _get_uint16(const uint8_t * p)
 {
-    return (p[0] * 256UL + p[1]);
+    return (p[0] * 256U + p[1]);
 }
 
 static uint32_t _get_uintX(const uint8_t * p, int length)
@@ -193,7 +193,7 @@ static int _fddecode_key(MMDB_s * mmdb, int offset, MMDB_decode_s * ret_key)
     return MMDB_SUCCESS;
 }
 
-#define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127UL - (bit)) >> 3)] & (1UL << (~(127UL - (bit)) & 7)))
+#define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
 
 void MMDB_free_all(MMDB_s * mmdb)
 {
@@ -214,7 +214,7 @@ static int _fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
     int byte_offset;
     int rl = mmdb->recbits * 2 / 8;
     int fd = mmdb->fd;
-    uint32_t mask = 0x80000000UL;
+    uint32_t mask = 0x80000000U;
     int depth;
     uint8_t b[4];
 
@@ -419,7 +419,7 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     int rl = mmdb->recbits * 2 / 8;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
-    uint32_t mask = 0x80000000UL;
+    uint32_t mask = 0x80000000U;
     int depth;
     if (rl == 6) {
         for (depth = 32 - 1; depth >= 0; depth--) {
