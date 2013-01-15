@@ -16,6 +16,10 @@ extern "C" {
 // only th 32bit ptr contains all of them.
 #define BROKEN_PTR (1)
 
+// the searchtree ends the search unfortuately with offset zero instead of
+// offset = segments.
+#define BROKEN_SEARCHTREE (1)
+
 # define MMDB_DTYPE_EXT (0)
 # define MMDB_DTYPE_PTR (1)
 # define MMDB_DTYPE_UTF8_STRING (2)
@@ -77,7 +81,7 @@ extern "C" {
             uint8_t c16[16];
             uint8_t const *ptr;
         };
-        uint32_t offset;        /* start of our field */
+        uint32_t offset;        /* start of our field or zero for not found */
         int data_size;          /* only valid for strings, utf8_strings or binary data */
         int type;               /* type like string utf8_string, int32, ... */
         int used_bytes;         /* real size of the value */
