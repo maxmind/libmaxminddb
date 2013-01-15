@@ -125,7 +125,8 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
     return new_offset;
 }
 
-static int _fddecode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
+static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
+                         MMDB_decode_s * ret_key)
 {
     const int segments = mmdb->segments * mmdb->recbits * 2 / 8;;
     uint8_t ctrl;
@@ -692,10 +693,12 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
-    char *src_key = va_arg(params, char *);
-    while (1) {
-        int src_keylen = strlen(src_key);
+    char *src_key;              // = va_arg(params, char *);
+    int src_keylen;
+    while (src_key = va_arg(params, char *)) {
         _decode_one(mmdb, offset, &decode);
+ donotdecode:
+        src_keylen = strlen(src_key);
         switch (decode.data.type) {
         case MMDB_DTYPE_PTR:
             // we follow the pointer
@@ -709,6 +712,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
         case MMDB_DTYPE_HASH:
             {
                 int size = decode.data.data_size;
+                // printf("decode hash with %d keys\n", size);
                 offset = decode.offset_to_next;
                 while (size--) {
                     _decode_one(mmdb, offset, &key);
@@ -716,26 +720,34 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     uint32_t offset_to_value = key.offset_to_next;
 
                     if (key.data.type == MMDB_DTYPE_PTR) {
-                        while (key.data.type == MMDB_DTYPE_PTR) {
-                            _decode_one(mmdb, key.data.uinteger, &key);
-                        }
+                        // while (key.data.type == MMDB_DTYPE_PTR) {
+                        _decode_one(mmdb, key.data.uinteger, &key);
+                        // }
                     }
 
                     assert(key.data.type == MMDB_DTYPE_BYTES ||
                            key.data.type == MMDB_DTYPE_UTF8_STRING);
 
-                    // _DPRINT_KEY(&key.data);
-
                     if (key.data.data_size == src_keylen &&
                         !memcmp(src_key, key.data.ptr, src_keylen)) {
-                        _decode_one(mmdb, offset_to_value, &value);
                         if ((src_key = va_arg(params, char *))) {
+                            // _DPRINT_KEY(&key.data);
+                            _decode_one(mmdb, offset_to_value, &decode);
+                            if (decode.data.type == MMDB_DTYPE_PTR)
+                                _decode_one(mmdb, decode.data.uinteger,
+                                            &decode);
+                            //memcpy(&decode, &valudde, sizeof(MMDB_decode_s));
 
-                            _skip_hash_array(mmdb, &value);
-                            offset = value.offset_to_next;
-                            continue;
+                            //_skip_hash_array(mmdb, &value);
+                            offset = decode.offset_to_next;
+
+                            goto donotdecode;
                         }
                         // found it!
+                        _decode_one(mmdb, offset_to_value, &value);
+                        if (value.data.type == MMDB_DTYPE_PTR)
+                            _decode_one(mmdb, value.data.uinteger, &value);
+
                         memcpy(result, &value.data, sizeof(MMDB_return_s));
                         goto end;
                     } else {
@@ -747,6 +759,8 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                 }
                 // not found!! do something
                 //_DPRINT_KEY(&key.data);
+                //
+                result->offset = 0;     // not found.
                 goto end;
             }
         default:
