@@ -14,10 +14,10 @@
 
 // prototypes
 //
-void _DPRINT_KEY(MMDB_return_s * data);
+static void _DPRINT_KEY(MMDB_return_s * data);
 
-uint32_t _get_uint_value(MMDB_entry_s * start, ...);
-void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
+static uint32_t _get_uint_value(MMDB_entry_s * start, ...);
+static void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
