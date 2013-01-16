@@ -1,13 +1,19 @@
 AM_CPPFLAGS =      \
         -I$(top_srcdir)/libmaxminddb
 
-bin_PROGRAMS = mmdblookup
+bin_PROGRAMS = mmdblookup country_lookup
 
 mmdblookup_DEPENDENCIES = $(top_builddir)/libmaxminddb/libmaxminddb.la
 mmdblookup_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la -lc
 mmdblookup_SOURCES = mmdblookup.c MMDB_Helper.c
 
 mmdblookup.lo mmdblookup.o: mmdblookup.c
+
+country_lookup_DEPENDENCIES = $(top_builddir)/libmaxminddb/libmaxminddb.la
+country_lookup_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la -lc
+country_lookup_SOURCES = country_lookup.c MMDB_Helper.c
+
+coutry_lookup.lo country_lookup.o: country_lookup.c
 
 MMDB_Helper.lo MMDB_Helper.o: MMDB_Helper.c
 
