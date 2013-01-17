@@ -652,6 +652,8 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
+    if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_STANDARD)
+        return _fdvget_value(start, result, params);
     char *src_key;              // = va_arg(params, char *);
     int src_keylen;
     while (src_key = va_arg(params, char *)) {
@@ -730,6 +732,104 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     va_end(params);
     return MMDB_SUCCESS;
 }
+
+static int _fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
+                         va_list params)
+{
+    MMDB_decode_s decode, key, value;
+    MMDB_s *mmdb = start->mmdb;
+    uint32_t offset = start->offset;
+    char *src_key;
+    int src_keylen;
+    int err;
+    while (src_key = va_arg(params, char *)) {
+
+        FD_RET_ON_ERR(_fddecode_one(mmdb, offset, &decode));
+ donotdecode:
+        src_keylen = strlen(src_key);
+        switch (decode.data.type) {
+        case MMDB_DTYPE_PTR:
+            // we follow the pointer
+            FD_RET_ON_ERR(_fddecode_one(mmdb, decode.data.uinteger, &decode));
+            break;
+
+            // learn to skip this
+        case MMDB_DTYPE_ARRAY:
+            FD_RET_ON_ERR(_fdskip_hash_array(mmdb, &decode));
+            break;
+        case MMDB_DTYPE_HASH:
+            {
+                int size = decode.data.data_size;
+                //printf("decode hash with %d keys\n", size);
+                offset = decode.offset_to_next;
+                while (size--) {
+                    FD_RET_ON_ERR(_fddecode_one(mmdb, offset, &key));
+
+                    uint32_t offset_to_value = key.offset_to_next;
+
+                    if (key.data.type == MMDB_DTYPE_PTR) {
+                        // while (key.data.type == MMDB_DTYPE_PTR) {
+                        FD_RET_ON_ERR(_fddecode_one
+                                      (mmdb, key.data.uinteger, &key));
+                        // }
+                    }
+
+                    assert(key.data.type == MMDB_DTYPE_BYTES ||
+                           key.data.type == MMDB_DTYPE_UTF8_STRING);
+
+                    if (key.data.data_size == src_keylen &&
+                        !_fdcmp(mmdb, &key, src_key)) {
+                        if ((src_key = va_arg(params, char *))) {
+                            //_DPRINT_KEY(&key.data);
+                            FD_RET_ON_ERR(_fddecode_one
+                                          (mmdb, offset_to_value, &decode));
+
+                            if (decode.data.type == MMDB_DTYPE_PTR) {
+                                FD_RET_ON_ERR(_fddecode_one
+                                              (mmdb, decode.data.uinteger,
+                                               &decode));
+                            }
+                            //memcpy(&decode, &valudde, sizeof(MMDB_decode_s));
+
+                            //_skip_hash_array(mmdb, &value);
+                            offset = decode.offset_to_next;
+
+                            goto donotdecode;
+                        }
+                        // found it!
+                        FD_RET_ON_ERR(_fddecode_one
+                                      (mmdb, offset_to_value, &value));
+
+                        if (value.data.type == MMDB_DTYPE_PTR) {
+                            FD_RET_ON_ERR(_fddecode_one
+                                          (mmdb, value.data.uinteger, &value));
+                        }
+                        memcpy(result, &value.data, sizeof(MMDB_return_s));
+                        goto end;
+                    } else {
+                        // we search for another key skip  this
+                        FD_RET_ON_ERR(_fddecode_one
+                                      (mmdb, offset_to_value, &value));
+
+                        FD_RET_ON_ERR(_fdskip_hash_array(mmdb, &value));
+                        offset = value.offset_to_next;
+                    }
+                }
+                // not found!! do something
+                //_DPRINT_KEY(&key.data);
+                //
+                result->offset = 0;     // not found.
+                goto end;
+            }
+        default:
+            break;
+        }
+    }
+ end:
+    va_end(params);
+    return MMDB_SUCCESS;
+}
+
 
 static int _fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 {
