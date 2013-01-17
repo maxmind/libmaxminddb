@@ -497,16 +497,15 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     uint32_t mask = 0x80000000U;
     int depth;
     if (rl == 6) {
-        for (depth = 32 - 1; depth >= 0; depth--) {
+        for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
             p = &mem[offset * rl];
             if (ipnum & mask)
                 p += 3;
             offset = get_uint24(p);
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res);
-            mask >>= 1;
         }
     } else if (rl == 7) {
-        for (depth = 32 - 1; depth >= 0; depth--) {
+        for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
             p = &mem[offset * rl];
             if (ipnum & mask) {
                 p += 3;
@@ -517,16 +516,14 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
                     p[0] * 65536 + p[1] * 256 + p[2] + ((p[3] & 0xf0) << 20);
             }
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res);
-            mask >>= 1;
         }
     } else if (rl == 8) {
-        for (depth = 32 - 1; depth >= 0; depth--) {
+        for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
             p = &mem[offset * rl];
             if (ipnum & mask)
                 p += 4;
             offset = get_uint32(p);
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res);
-            mask >>= 1;
         }
     }
     //uhhh should never happen !
