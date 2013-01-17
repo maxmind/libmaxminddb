@@ -731,6 +731,27 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     return MMDB_SUCCESS;
 }
 
+static int _fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
+{
+    int err;
+    if (decode->data.type == MMDB_DTYPE_HASH) {
+        int size = decode->data.data_size;
+        while (size--) {
+            FD_RET_ON_ERR(_fddecode_one(mmdb, decode->offset_to_next, decode)); // key
+            FD_RET_ON_ERR(_fddecode_one(mmdb, decode->offset_to_next, decode)); // value
+            FD_RET_ON_ERR(_fdskip_hash_array(mmdb, decode));
+        }
+
+    } else if (decode->data.type == MMDB_DTYPE_ARRAY) {
+        int size = decode->data.data_size;
+        while (size--) {
+            FD_RET_ON_ERR(_fddecode_one(mmdb, decode->offset_to_next, decode)); // value
+            FD_RET_ON_ERR(_fdskip_hash_array(mmdb, decode));
+        }
+    }
+    return MMDB_SUCCESS;
+}
+
 static void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 {
     if (decode->data.type == MMDB_DTYPE_HASH) {
