@@ -125,6 +125,12 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
     return new_offset;
 }
 
+#define FD_RET_ON_ERR(fn) do{ \
+  int err = (fn);             \
+  if ( err != MMDB_SUCCESS )  \
+    return err;               \
+  }while(0)
+
 static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
                          MMDB_decode_s * ret_key)
 {
@@ -133,12 +139,10 @@ static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
     int type;
     uint8_t b[4];
     int fd = mmdb->fd;
-    if (_read(fd, &ctrl, 1, segments + offset++) != MMDB_SUCCESS)
-        return MMDB_IOERROR;
+    FD_RET_ON_ERR(_read(fd, &ctrl, 1, segments + offset++));
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
-        if (_read(fd, &b[0], 1, segments + offset++) != MMDB_SUCCESS)
-            return MMDB_IOERROR;
+        FD_RET_ON_ERR(_read(fd, &b[0], 1, segments + offset++));
 #if defined BROKEN_TYPE
         type = b[0];
 #else
@@ -148,13 +152,11 @@ static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
 
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
-        if (_read(fd, &b[0], psize + 1, segments + offset) != MMDB_SUCCESS)
-            return MMDB_IOERROR;
+        FD_RET_ON_ERR(_read(fd, &b[0], psize + 1, segments + offset));
 
         uint32_t new_offset = _get_ptr_from(ctrl, b, psize);
 
-        if (_fddecode_key(mmdb, new_offset, ret_key) != MMDB_SUCCESS)
-            return MMDB_IOERROR;
+        FD_RET_ON_ERR(_fddecode_key(mmdb, new_offset, ret_key));
         ret_key->offset_to_next = offset + psize + 1;
         return MMDB_SUCCESS;
     }
@@ -162,19 +164,16 @@ static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
     int size = ctrl & 31;
     switch (size) {
     case 29:
-        if (_read(fd, &b[0], 1, segments + offset++) != MMDB_SUCCESS)
-            return MMDB_IOERROR;
+        FD_RET_ON_ERR(_read(fd, &b[0], 1, segments + offset++));
         size = 29 + b[0];
         break;
     case 30:
-        if (_read(fd, &b[0], 2, segments + offset) != MMDB_SUCCESS)
-            return MMDB_IOERROR;
+        FD_RET_ON_ERR(_read(fd, &b[0], 2, segments + offset));
         size = 285 + b[0] * 256 + b[1];
         offset += 2;
         break;
     case 31:
-        if (_read(fd, &b[0], 3, segments + offset) != MMDB_SUCCESS)
-            return MMDB_IOERROR;
+        FD_RET_ON_ERR(_read(fd, &b[0], 3, segments + offset));
         size = 65821 + _get_uint24(b);
         offset += 3;
     default:
@@ -244,10 +243,9 @@ int MMDB_fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
 
     if (rl == 6) {
         for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
-            if (_read
-                (fd, &b[0], 3,
-                 offset * rl + ((ipnum & mask) ? 3 : 0)) != MMDB_SUCCESS)
-                return MMDB_IOERROR;
+            FD_RET_ON_ERR(_read
+                          (fd, &b[0], 3,
+                           offset * rl + ((ipnum & mask) ? 3 : 0)));
             offset = _get_uint24(b);
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, result);
         }
@@ -255,13 +253,11 @@ int MMDB_fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
         for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
             byte_offset = offset * rl;
             if (ipnum & mask) {
-                if (_read(fd, &b[0], 4, byte_offset + 3) != MMDB_SUCCESS)
-                    return MMDB_IOERROR;
+                FD_RET_ON_ERR(_read(fd, &b[0], 4, byte_offset + 3));
                 offset = _get_uint32(b);
                 offset &= 0xfffffff;
             } else {
-                if (_read(fd, &b[0], 4, byte_offset) != MMDB_SUCCESS)
-                    return MMDB_IOERROR;
+                FD_RET_ON_ERR(_read(fd, &b[0], 4, byte_offset));
                 offset =
                     b[0] * 65536 + b[1] * 256 + b[2] + ((b[3] & 0xf0) << 20);
             }
@@ -269,10 +265,9 @@ int MMDB_fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
         }
     } else if (rl == 8) {
         for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
-            if (_read
-                (fd, &b[0], 4,
-                 offset * rl + ((ipnum & mask) ? 4 : 0)) != MMDB_SUCCESS)
-                return MMDB_IOERROR;
+            FD_RET_ON_ERR(_read
+                          (fd, &b[0], 4,
+                           offset * rl + ((ipnum & mask) ? 4 : 0)));
             offset = _get_uint32(b);
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, result);
         }
@@ -298,8 +293,7 @@ MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
             byte_offset = offset * rl;
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 byte_offset += 3;
-            if (_read(fd, &b[0], 3, byte_offset) != MMDB_SUCCESS)
-                return MMDB_IOERROR;
+            FD_RET_ON_ERR(_read(fd, &b[0], 3, byte_offset));
             offset = _get_uint24(b);
             RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
@@ -308,14 +302,12 @@ MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
             byte_offset = offset * rl;
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 byte_offset += 3;
-                if (_read(fd, &b[0], 4, byte_offset) != MMDB_SUCCESS)
-                    return MMDB_IOERROR;
+                FD_RET_ON_ERR(_read(fd, &b[0], 4, byte_offset));
                 offset = _get_uint32(b);
                 offset &= 0xfffffff;
             } else {
 
-                if (_read(fd, &b[0], 4, byte_offset) != MMDB_SUCCESS)
-                    return MMDB_IOERROR;
+                FD_RET_ON_ERR(_read(fd, &b[0], 4, byte_offset));
                 offset =
                     b[0] * 65536 + b[1] * 256 + b[2] + ((b[3] & 0xf0) << 20);
             }
@@ -326,8 +318,7 @@ MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
             byte_offset = offset * rl;
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
                 byte_offset += 4;
-            if (_read(fd, &b[0], 4, byte_offset) != MMDB_SUCCESS)
-                return MMDB_IOERROR;
+            FD_RET_ON_ERR(_read(fd, &b[0], 4, byte_offset));
             offset = _get_uint32(b);
             RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
@@ -440,7 +431,6 @@ static void _decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 #else
         type = 8 + mem[offset++];
 #endif
-
     }
 
     if (type == MMDB_DTYPE_PTR) {
