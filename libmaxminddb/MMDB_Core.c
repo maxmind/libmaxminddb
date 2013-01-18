@@ -20,9 +20,9 @@ static uint32_t get_uint_value(MMDB_entry_s * start, ...);
 static int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 static void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
-                         va_list params);
-static int fdcmp(MMDB_s * mmdb, MMDB_return_s const * const result, char *src_key);
-
+                        va_list params);
+static int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
+                 char *src_key);
 
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
@@ -85,7 +85,8 @@ static double get_double(const uint8_t * ptr, int length)
     return (d);
 }
 
-static int atomic_read(int fd, uint8_t * buffer, ssize_t toatomic_read, off_t offset)
+static int atomic_read(int fd, uint8_t * buffer, ssize_t toatomic_read,
+                       off_t offset)
 {
     while (toatomic_read > 0) {
         ssize_t haveatomic_read = pread(fd, buffer, toatomic_read, offset);
@@ -162,7 +163,8 @@ int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
 
 }
 
-static int fdcmp(MMDB_s * mmdb, MMDB_return_s const * const result, char *src_key)
+static int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
+                 char *src_key)
 {
     int src_keylen = result->data_size;
     if (result->data_size != src_keylen)
@@ -173,7 +175,9 @@ static int fdcmp(MMDB_s * mmdb, MMDB_return_s const * const result, char *src_ke
     int len = src_keylen;
     while (len > 0) {
         int want_atomic_read = len > sizeof(buff) ? sizeof(buff) : len;
-        int err = atomic_read(mmdb->fd, &buff[0], want_atomic_read, segments + offset);
+        int err =
+            atomic_read(mmdb->fd, &buff[0], want_atomic_read,
+                        segments + offset);
         if (err == MMDB_SUCCESS) {
             if (memcmp(buff, src_key, want_atomic_read))
                 return 1;       // does not match
@@ -181,9 +185,9 @@ static int fdcmp(MMDB_s * mmdb, MMDB_return_s const * const result, char *src_ke
             offset += want_atomic_read;
             len -= want_atomic_read;
         } else {
-	  /* in case of read error */
-	  return 1;
-	}
+            /* in case of read error */
+            return 1;
+        }
     }
     return 0;
 }
@@ -215,7 +219,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 1, segments + offset++));
-	type = get_ext_type(b[0]);
+        type = get_ext_type(b[0]);
     }
 
     decode->data.type = type;
@@ -225,7 +229,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         FD_RET_ON_ERR(atomic_read(fd, &b[0], psize + 1, segments + offset));
 
         decode->data.uinteger = _get_ptr_from(ctrl, b, psize);
-        decode->data.used_bytes = psize + 1;
+        decode->data.data_bytes = psize + 1;
         decode->offset_to_next = offset + psize + 1;
         return MMDB_SUCCESS;
     }
@@ -292,7 +296,7 @@ static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 1, segments + offset++));
-	type = get_ext_type(b[0]);
+        type = get_ext_type(b[0]);
     }
 
     if (type == MMDB_DTYPE_PTR) {
@@ -732,7 +736,7 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
         decode->data.uinteger = _get_ptr_from(ctrl, &mem[offset], psize);
-        decode->data.used_bytes = psize + 1;
+        decode->data.data_size = psize + 1;
         decode->offset_to_next = offset + psize + 1;
         return;
     }
@@ -831,8 +835,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                             // DPRINT_KEY(&key.data);
                             decode_one(mmdb, offset_to_value, &decode);
                             if (decode.data.type == MMDB_DTYPE_PTR)
-                                decode_one(mmdb, decode.data.uinteger,
-                                            &decode);
+                                decode_one(mmdb, decode.data.uinteger, &decode);
                             //memcpy(&decode, &valudde, sizeof(MMDB_decode_s));
 
                             //skip_hash_array(mmdb, &value);
@@ -870,7 +873,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
 }
 
 static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
-                         va_list params)
+                        va_list params)
 {
     MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;
@@ -972,15 +975,15 @@ static int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
     if (decode->data.type == MMDB_DTYPE_HASH) {
         int size = decode->data.data_size;
         while (size--) {
-            FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode)); // key
-            FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode)); // value
+            FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode));  // key
+            FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode));  // value
             FD_RET_ON_ERR(fdskip_hash_array(mmdb, decode));
         }
 
     } else if (decode->data.type == MMDB_DTYPE_ARRAY) {
         int size = decode->data.data_size;
         while (size--) {
-            FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode)); // value
+            FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode));  // value
             FD_RET_ON_ERR(fdskip_hash_array(mmdb, decode));
         }
     }
@@ -992,15 +995,15 @@ static void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
     if (decode->data.type == MMDB_DTYPE_HASH) {
         int size = decode->data.data_size;
         while (size--) {
-            decode_one(mmdb, decode->offset_to_next, decode);  // key
-            decode_one(mmdb, decode->offset_to_next, decode);  // value
+            decode_one(mmdb, decode->offset_to_next, decode);   // key
+            decode_one(mmdb, decode->offset_to_next, decode);   // value
             skip_hash_array(mmdb, decode);
         }
 
     } else if (decode->data.type == MMDB_DTYPE_ARRAY) {
         int size = decode->data.data_size;
         while (size--) {
-            decode_one(mmdb, decode->offset_to_next, decode);  // value
+            decode_one(mmdb, decode->offset_to_next, decode);   // value
             skip_hash_array(mmdb, decode);
         }
     }

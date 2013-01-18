@@ -118,7 +118,8 @@ extern "C" {
                                         MMDB_root_entry_s * result);
     extern int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result,
                               ...);
-    extern int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result, char *str);
+    extern int MMDB_strcmp_result(MMDB_s * mmdb,
+                                  MMDB_return_s const *const result, char *str);
 
 #ifdef __cplusplus
 }
