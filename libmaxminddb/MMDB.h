@@ -47,6 +47,8 @@ extern "C" {
 #define MMDB_INVALIDDATABASE (-3)
 #define MMDB_IOERROR (-4)
 #define MMDB_OUTOFMEMORY (-5)
+
+// information about the database file.
     typedef struct MMDB_s {
         uint32_t flags;
         int fd;
@@ -61,17 +63,23 @@ extern "C" {
         const uint8_t *dataptr;
     } MMDB_s;
 
+// This is the starting point for every search.
+// It is like the hash to start the search. It may or may not the root hash
     typedef struct MMDB_entry_s {
         MMDB_s *mmdb;
         unsigned int offset;    /* usually pointer to the struct */
         //uint8_t const *ptr;             /* usually pointer to the struct */
     } MMDB_entry_s;
 
+// the root entry is the entry structure from a lookup
+// think of it as the root of all informations about the IP.
+
     typedef struct {
         MMDB_entry_s entry;
         int netmask;
     } MMDB_root_entry_s;
 
+// this is the result for every field
     typedef struct MMDB_return_s {
         /* return values */
         union {
@@ -86,6 +94,9 @@ extern "C" {
         int type;               /* type like string utf8_string, int32, ... */
     } MMDB_return_s;
 
+    // The decode structure is like the result ( return_s ) but with the start
+    // of the next entry. For example if we search for a key but this is the
+    // wrong key.
     typedef struct MMDB_decode_s {
         MMDB_return_s data;
         uint32_t offset_to_next;
