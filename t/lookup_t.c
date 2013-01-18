@@ -12,30 +12,6 @@ uint32_t ip_to_num(char *ipstr)
     return htonl(ip.s_addr);
 }
 
-static char *bytesdup(MMDB_return_s const *const ret)
-{
-    char *mem = NULL;
-    if (ret->offset) {
-        mem = malloc(ret->data_size + 1);
-        memcpy(mem, ret->ptr, ret->data_size);
-        mem[ret->data_size] = '\0';
-    }
-    return mem;
-}
-
-// 0 match like strcmp
-int strcmp_result(MMDB_return_s const *const result, char *str)
-{
-    if (result->offset > 0) {
-        char *str1 = bytesdup(result);
-        int ret = strcmp(str1, str);
-        if (str1)
-            free(str1);
-        return ret;
-    }
-    return 1;
-}
-
 int main(void)
 {
     char *fname = "./data/test-database.dat";
@@ -71,22 +47,22 @@ int main(void)
             MMDB_get_value(&country_hash, &result, "code", NULL);
             ok(result.offset > 0, "Found country code for %s", ipstr);
             if (result.offset > 0) {
-                ok(strcmp_result(&result, "US") == 0,
+                ok(MMDB_strcmp_result(mmdb, &result, "US") == 0,
                    "Country code is US for %s", ipstr);
             }
             MMDB_get_value(&country_hash, &result, "name", "ascii", NULL);
             if (result.offset > 0) {
-                ok(strcmp_result(&result, "United States") == 0,
+                ok(MMDB_strcmp_result(mmdb, &result, "United States") == 0,
                    "Country name ascii match United States for %s", ipstr);
             }
             MMDB_get_value(&country_hash, &result, "name", "de", NULL);
             if (result.offset > 0) {
-                ok(strcmp_result(&result, "USA") == 0,
+                ok(MMDB_strcmp_result(mmdb, &result, "USA") == 0,
                    "Country name de is USA for %s", ipstr);
             }
             MMDB_get_value(&country_hash, &result, "name", "es", NULL);
             if (result.offset > 0) {
-                ok(strcmp_result(&result, "Estados Unidos") == 0,
+                ok(MMDB_strcmp_result(mmdb, &result, "Estados Unidos") == 0,
                    "Country name es is Estados Unidos for %s", ipstr);
             }
             MMDB_get_value(&country_hash, &result, "name", "whatever", NULL);

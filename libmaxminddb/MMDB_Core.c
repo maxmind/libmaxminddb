@@ -21,7 +21,7 @@ static int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 static void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
                          va_list params);
-static int fdcmp(MMDB_s * mmdb, MMDB_return_s * result, char *src_key);
+static int fdcmp(MMDB_s * mmdb, MMDB_return_s const * const result, char *src_key);
 
 
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
@@ -130,7 +130,39 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
     return new_offset;
 }
 
-static int _fdcmp(MMDB_s * mmdb, MMDB_return_s * result, char *src_key)
+static char *bytesdup(MMDB_return_s const *const ret)
+{
+    char *mem = NULL;
+    if (ret->offset) {
+        mem = malloc(ret->data_size + 1);
+        memcpy(mem, ret->ptr, ret->data_size);
+        mem[ret->data_size] = '\0';
+    }
+    return mem;
+}
+
+// 0 match like strcmp
+int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
+                       char *str)
+{
+    if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
+
+        if (result->offset > 0) {
+            char *str1 = bytesdup(result);
+            int ret = strcmp(str1, str);
+            if (str1)
+                free(str1);
+            return ret;
+        }
+        return 1;
+    }
+
+    /* MMDB_MODE_STANDARD */
+    return fdcmp(mmdb, result, str);
+
+}
+
+static int fdcmp(MMDB_s * mmdb, MMDB_return_s const * const result, char *src_key)
 {
     int src_keylen = result->data_size;
     if (result->data_size != src_keylen)
@@ -330,7 +362,7 @@ void MMDB_free_all(MMDB_s * mmdb)
 #else
 #define RETURN_ON_END_OF_SEARCHX(offset,segments,depth,maxdepth, res) \
             if ((offset) >= (segments)) {                     \
-                (res)->netmask = (maxdepth) - (depth);                \
+                (res)->netmask = (maxdepth) - (depth);        \
                 (res)->entry.offset = (offset) - (segments);  \
                 return MMDB_SUCCESS;                          \
             }
@@ -882,7 +914,7 @@ static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
                            key.data.type == MMDB_DTYPE_UTF8_STRING);
 
                     if (key.data.data_size == src_keylen &&
-                        !_fdcmp(mmdb, &key.data, src_key)) {
+                        !fdcmp(mmdb, &key.data, src_key)) {
                         if ((src_key = va_arg(params, char *))) {
                             //DPRINT_KEY(&key.data);
                             FD_RET_ON_ERR(fddecode_one
