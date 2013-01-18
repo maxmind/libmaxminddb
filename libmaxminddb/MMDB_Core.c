@@ -191,7 +191,6 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
         FD_RET_ON_ERR(atomic_read(fd, &b[0], psize + 1, segments + offset));
-            return MMDB_IOERROR;
 
         decode->data.uinteger = _get_ptr_from(ctrl, b, psize);
         decode->data.used_bytes = psize + 1;
