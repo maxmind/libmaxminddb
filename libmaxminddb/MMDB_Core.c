@@ -156,6 +156,15 @@ static int _fdcmp(MMDB_s * mmdb, MMDB_return_s * result, char *src_key)
     return 0;
 }
 
+static int get_ext_type(int raw_ext_type)
+{
+#if defined BROKEN_TYPE
+    return raw_ext_type;
+#else
+    return 8 + raw_ext_type;
+#endif
+}
+
 #define FD_RET_ON_ERR(fn) do{ \
   int err = (fn);             \
   if ( err != MMDB_SUCCESS )  \
@@ -238,15 +247,6 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     }
     decode->offset_to_next = offset + size;
     return MMDB_SUCCESS;
-}
-
-static int get_ext_type(int raw_ext_type)
-{
-#if defined BROKEN_TYPE
-    return raw_ext_type;
-#else
-    return 8 + raw_ext_type;
-#endif
 }
 
 static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
