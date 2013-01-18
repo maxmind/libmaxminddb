@@ -84,8 +84,6 @@ extern "C" {
         uint32_t offset;        /* start of our field or zero for not found */
         int data_size;          /* only valid for strings, utf8_strings or binary data */
         int type;               /* type like string utf8_string, int32, ... */
-        int used_bytes;         /* real size of the value */
-        int error;
     } MMDB_return_s;
 
     typedef struct MMDB_decode_s {

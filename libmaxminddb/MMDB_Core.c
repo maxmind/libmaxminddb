@@ -229,7 +229,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         FD_RET_ON_ERR(atomic_read(fd, &b[0], psize + 1, segments + offset));
 
         decode->data.uinteger = _get_ptr_from(ctrl, b, psize);
-        decode->data.data_bytes = psize + 1;
+        decode->data.data_size = psize + 1;
         decode->offset_to_next = offset + psize + 1;
         return MMDB_SUCCESS;
     }
