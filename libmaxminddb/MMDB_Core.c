@@ -137,7 +137,7 @@ static int _fdcmp(MMDB_s * mmdb, MMDB_return_s * result, char *src_key)
         return 1;
     uint32_t segments = mmdb->recbits * 2 / 8U * mmdb->segments;
     ssize_t offset = (ssize_t) result->ptr;
-    char buff[1024];
+    uint8_t buff[1024];
     int len = src_keylen;
     while (len > 0) {
         int wantatomic_read = len > sizeof(buff) ? sizeof(buff) : len;
@@ -764,7 +764,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
         return fdvget_value(start, result, params);
     char *src_key;              // = va_arg(params, char *);
     int src_keylen;
-    while (src_key = va_arg(params, char *)) {
+    while ((src_key = va_arg(params, char *))) {
         decode_one(mmdb, offset, &decode);
  donotdecode:
         src_keylen = strlen(src_key);
@@ -850,7 +850,7 @@ static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
     char *src_key;
     int src_keylen;
     int err;
-    while (src_key = va_arg(params, char *)) {
+    while ((src_key = va_arg(params, char *))) {
 
         FD_RET_ON_ERR(fddecode_one(mmdb, offset, &decode));
  donotdecode:
