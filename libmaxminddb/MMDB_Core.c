@@ -21,6 +21,8 @@ static int _fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 static void _skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 static int _fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
                          va_list params);
+static int _fdcmp(MMDB_s * mmdb, MMDB_return_s * result, char *src_key);
+
 
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
@@ -128,11 +130,119 @@ static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
     return new_offset;
 }
 
+static int _fdcmp(MMDB_s * mmdb, MMDB_return_s * result, char *src_key)
+{
+    int src_keylen = result->data_size;
+    if (result->data_size != src_keylen)
+        return 1;
+    uint32_t segments = mmdb->recbits * 2 / 8U * mmdb->segments;
+    ssize_t offset = (ssize_t) result->ptr;
+    char buff[1024];
+    int len = src_keylen;
+    while (len > 0) {
+        int want_read = len > sizeof(buff) ? sizeof(buff) : len;
+        int err = _read(mmdb->fd, &buff[0], want_read, segments + offset);
+        if (err == MMDB_SUCCESS) {
+            if (memcmp(buff, src_key, want_read))
+                return 1;       // does not match
+            src_key += want_read;
+            offset += want_read;
+            len -= want_read;
+        } else {
+	  /* in case of read error */
+	  return 1;
+	}
+    }
+    return 0;
+}
+
 #define FD_RET_ON_ERR(fn) do{ \
   int err = (fn);             \
   if ( err != MMDB_SUCCESS )  \
     return err;               \
   }while(0)
+
+static int _fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
+{
+    const ssize_t segments = mmdb->recbits * 2 / 8U * mmdb->segments;
+    uint8_t ctrl;
+    int type;
+    uint8_t b[4];
+    int fd = mmdb->fd;
+    decode->data.offset = offset;
+    FD_RET_ON_ERR(_read(fd, &ctrl, 1, segments + offset++));
+    type = (ctrl >> 5) & 7;
+    if (type == MMDB_DTYPE_EXT) {
+        FD_RET_ON_ERR(_read(fd, &b[0], 1, segments + offset++));
+#if defined BROKEN_TYPE
+        type = b[0];
+#else
+        type = 8 + b[0];
+#endif
+    }
+
+    decode->data.type = type;
+
+    if (type == MMDB_DTYPE_PTR) {
+        int psize = (ctrl >> 3) & 3;
+        FD_RET_ON_ERR(_read(fd, &b[0], psize + 1, segments + offset));
+            return MMDB_IOERROR;
+
+        decode->data.uinteger = _get_ptr_from(ctrl, b, psize);
+        decode->data.used_bytes = psize + 1;
+        decode->offset_to_next = offset + psize + 1;
+        return MMDB_SUCCESS;
+    }
+
+    int size = ctrl & 31;
+    switch (size) {
+    case 29:
+        FD_RET_ON_ERR(_read(fd, &b[0], 1, segments + offset++));
+        size = 29 + b[0];
+        break;
+    case 30:
+        FD_RET_ON_ERR(_read(fd, &b[0], 2, segments + offset));
+        size = 285 + b[0] * 256 + b[1];
+        offset += 2;
+        break;
+    case 31:
+        FD_RET_ON_ERR(_read(fd, &b[0], 3, segments + offset));
+        size = 65821 + _get_uint24(b);
+        offset += 3;
+    default:
+        break;
+    }
+
+    if (type == MMDB_DTYPE_HASH || type == MMDB_DTYPE_ARRAY) {
+        decode->data.data_size = size;
+        decode->offset_to_next = offset;
+        return MMDB_SUCCESS;
+    }
+
+    if (size == 0 && type != MMDB_DTYPE_UINT16 && type != MMDB_DTYPE_UINT32
+        && type != MMDB_DTYPE_INT32) {
+        decode->data.ptr = NULL;
+        decode->data.data_size = 0;
+        decode->offset_to_next = offset;
+        return MMDB_SUCCESS;
+    }
+
+    if ((type == MMDB_DTYPE_UINT32) || (type == MMDB_DTYPE_UINT16)) {
+        FD_RET_ON_ERR(_read(fd, &b[0], size, segments + offset));
+        decode->data.uinteger = _get_uintX(b, size);
+    } else if (type == MMDB_DTYPE_INT32) {
+        FD_RET_ON_ERR(_read(fd, &b[0], 4, segments + offset));
+        decode->data.sinteger = _get_sint32(b);
+    } else if (type == MMDB_DTYPE_DOUBLE) {
+        FD_RET_ON_ERR(_read(fd, &b[0], size, segments + offset));
+        decode->data.double_value = _get_double(b, size);
+    } else {
+        decode->data.ptr = NULL + offset;
+        decode->data.data_size = size;
+    }
+    decode->offset_to_next = offset + size;
+    return MMDB_SUCCESS;
+}
 
 static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
                          MMDB_decode_s * ret_key)
@@ -781,7 +891,7 @@ static int _fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
                            key.data.type == MMDB_DTYPE_UTF8_STRING);
 
                     if (key.data.data_size == src_keylen &&
-                        !_fdcmp(mmdb, &key, src_key)) {
+                        !_fdcmp(mmdb, &key.data, src_key)) {
                         if ((src_key = va_arg(params, char *))) {
                             //_DPRINT_KEY(&key.data);
                             FD_RET_ON_ERR(_fddecode_one
