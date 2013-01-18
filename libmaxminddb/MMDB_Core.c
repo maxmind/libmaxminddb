@@ -174,11 +174,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 1, segments + offset++));
-#if defined BROKEN_TYPE
-        type = b[0];
-#else
-        type = 8 + b[0];
-#endif
+	type = get_ext_type(b[0]);
     }
 
     decode->data.type = type;
@@ -244,6 +240,15 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     return MMDB_SUCCESS;
 }
 
+static int get_ext_type(int raw_ext_type)
+{
+#if defined BROKEN_TYPE
+    return raw_ext_type;
+#else
+    return 8 + raw_ext_type;
+#endif
+}
+
 static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
                          MMDB_decode_s * ret_key)
 {
@@ -256,11 +261,7 @@ static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
     type = (ctrl >> 5) & 7;
     if (type == MMDB_DTYPE_EXT) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 1, segments + offset++));
-#if defined BROKEN_TYPE
-        type = b[0];
-#else
-        type = 8 + b[0];
-#endif
+	type = get_ext_type(b[0]);
     }
 
     if (type == MMDB_DTYPE_PTR) {
@@ -695,14 +696,8 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     decode->data.offset = offset;
     ctrl = mem[offset++];
     type = (ctrl >> 5) & 7;
-    if (type == MMDB_DTYPE_EXT) {
-#if defined BROKEN_TYPE
-        type = mem[offset++];
-#else
-        type = 8 + mem[offset++];
-#endif
-
-    }
+    if (type == MMDB_DTYPE_EXT)
+        type = get_ext_type(mem[offset++]);
 
     decode->data.type = type;
 
