@@ -140,14 +140,14 @@ static int _fdcmp(MMDB_s * mmdb, MMDB_return_s * result, char *src_key)
     uint8_t buff[1024];
     int len = src_keylen;
     while (len > 0) {
-        int wantatomic_read = len > sizeof(buff) ? sizeof(buff) : len;
-        int err = atomic_read(mmdb->fd, &buff[0], wantatomic_read, segments + offset);
+        int want_atomic_read = len > sizeof(buff) ? sizeof(buff) : len;
+        int err = atomic_read(mmdb->fd, &buff[0], want_atomic_read, segments + offset);
         if (err == MMDB_SUCCESS) {
-            if (memcmp(buff, src_key, wantatomic_read))
+            if (memcmp(buff, src_key, want_atomic_read))
                 return 1;       // does not match
-            src_key += wantatomic_read;
-            offset += wantatomic_read;
-            len -= wantatomic_read;
+            src_key += want_atomic_read;
+            offset += want_atomic_read;
+            len -= want_atomic_read;
         } else {
 	  /* in case of read error */
 	  return 1;
