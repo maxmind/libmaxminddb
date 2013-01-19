@@ -695,7 +695,7 @@ MMDB_s *MMDB_open(char *fname, uint32_t flags)
 }
 
 /* return the result of any uint type with 32 bit's or less as uint32 */
-uint32_t MMDBget_uint(MMDB_return_s const *const result)
+uint32_t MMDB_get_uint(MMDB_return_s const *const result)
 {
     return result->uinteger;
 }
@@ -716,7 +716,7 @@ static uint32_t get_uint_value(MMDB_entry_s * start, ...)
     va_start(params, start);
     MMDB_vget_value(start, &result, params);
     va_end(params);
-    return MMDBget_uint(&result);
+    return MMDB_get_uint(&result);
 }
 
 static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
