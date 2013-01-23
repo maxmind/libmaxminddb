@@ -9,12 +9,27 @@ int main(void)
     int err = stat(fname, &sstat);
     ok(err == 0, "%s exists", fname);
 
-    MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
-    ok(mmdb != NULL, "MMDB_open successful");
-    if (mmdb) {
+    MMDB_s *mmdb_m = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
+    ok(mmdb_m != NULL, "MMDB_open successful ( MMDB_MODE_MEMORY_CACHE )");
 
-        ok((mmdb->recbits == 24 || mmdb->recbits == 28
-            || mmdb->recbits == 32), "recbits = %d", mmdb->recbits);
+    MMDB_s *mmdb_s = MMDB_open(fname, MMDB_MODE_STANDARD);
+    ok(mmdb_s != NULL, "MMDB_open successful ( MMDB_MODE_STANDARD )");
+
+    if (mmdb_m && mmdb_s) {
+        int rbm = mmdb_m->recbits;
+        int rbs = mmdb_s->recbits;
+
+        ok((rbs == 24 || rbs == 28
+            || rbs == 32), "recbits = %d MMDB_MODE_STANDARD", rbs);
+        ok((rbm == 24 || rbm == 28
+            || rbm == 32), "recbits = %d MMDB_MODE_MEMORY_CACHE", rbm);
+
+        ok(rbm == rbs, "recbits are the same");
+
+        ok(mmdb_s->segments == mmdb_m->segments,
+           "segments are the same ( %d == %d )", mmdb_m->segments,
+           mmdb_s->segments);
+
     }
     done_testing();
 }
