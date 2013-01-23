@@ -101,7 +101,7 @@ static int atomic_read(int fd, uint8_t * buffer, ssize_t toatomic_read,
     return MMDB_SUCCESS;
 }
 
-static uint32_t _get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
+static uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                               int ptr_size)
 {
     uint32_t new_offset;
@@ -228,7 +228,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         int psize = (ctrl >> 3) & 3;
         FD_RET_ON_ERR(atomic_read(fd, &b[0], psize + 1, segments + offset));
 
-        decode->data.uinteger = _get_ptr_from(ctrl, b, psize);
+        decode->data.uinteger = get_ptr_from(ctrl, b, psize);
         decode->data.data_size = psize + 1;
         decode->offset_to_next = offset + psize + 1;
         return MMDB_SUCCESS;
@@ -284,7 +284,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     return MMDB_SUCCESS;
 }
 
-static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
+static int fddecode_key(MMDB_s * mmdb, uint32_t offset,
                          MMDB_decode_s * ret_key)
 {
     const int segments = mmdb->segments * mmdb->recbits * 2 / 8;;
@@ -303,9 +303,9 @@ static int _fddecode_key(MMDB_s * mmdb, uint32_t offset,
         int psize = (ctrl >> 3) & 3;
         FD_RET_ON_ERR(atomic_read(fd, &b[0], psize + 1, segments + offset));
 
-        uint32_t new_offset = _get_ptr_from(ctrl, b, psize);
+        uint32_t new_offset = get_ptr_from(ctrl, b, psize);
 
-        FD_RET_ON_ERR(_fddecode_key(mmdb, new_offset, ret_key));
+        FD_RET_ON_ERR(fddecode_key(mmdb, new_offset, ret_key));
         ret_key->offset_to_next = offset + psize + 1;
         return MMDB_SUCCESS;
     }
@@ -581,7 +581,7 @@ static void _decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
-        int new_offset = _get_ptr_from(ctrl, &mem[offset], psize);
+        int new_offset = get_ptr_from(ctrl, &mem[offset], psize);
 
         _decode_key(mmdb, new_offset, ret_key);
         ret_key->offset_to_next = offset + psize + 1;
@@ -735,7 +735,7 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
-        decode->data.uinteger = _get_ptr_from(ctrl, &mem[offset], psize);
+        decode->data.uinteger = get_ptr_from(ctrl, &mem[offset], psize);
         decode->data.data_size = psize + 1;
         decode->offset_to_next = offset + psize + 1;
         return;
