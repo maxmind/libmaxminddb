@@ -571,13 +571,8 @@ static void _decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
     uint8_t ctrl, type;
     ctrl = mem[offset++];
     type = (ctrl >> 5) & 7;
-    if (type == MMDB_DTYPE_EXT) {
-#if defined BROKEN_TYPE
-        type = mem[offset++];
-#else
-        type = 8 + mem[offset++];
-#endif
-    }
+    if (type == MMDB_DTYPE_EXT)
+        type = get_ext_type(mem[offset++]);
 
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
