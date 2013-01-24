@@ -102,7 +102,7 @@ static int atomic_read(int fd, uint8_t * buffer, ssize_t toatomic_read,
 }
 
 static uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
-                              int ptr_size)
+                             int ptr_size)
 {
     uint32_t new_offset;
     switch (ptr_size) {
@@ -175,9 +175,8 @@ static int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
     int len = src_keylen;
     while (len > 0) {
         int want_atomic_read = len > sizeof(buff) ? sizeof(buff) : len;
-        int err =
-            atomic_read(mmdb->fd, &buff[0], want_atomic_read,
-                        segments + offset);
+        int err = atomic_read(mmdb->fd, &buff[0], want_atomic_read,
+                              segments + offset);
         if (err == MMDB_SUCCESS) {
             if (memcmp(buff, src_key, want_atomic_read))
                 return 1;       // does not match
@@ -284,8 +283,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     return MMDB_SUCCESS;
 }
 
-static int fddecode_key(MMDB_s * mmdb, uint32_t offset,
-                         MMDB_decode_s * ret_key)
+static int fddecode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 {
     const int segments = mmdb->segments * mmdb->recbits * 2 / 8;;
     uint8_t ctrl;
@@ -524,6 +522,10 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
 {
     MMDB_s *mmdb = res->entry.mmdb;
+
+    if (mmdb->fd >= 0)
+        return MMDB_fdlookup_by_ipnum(ipnum, res);
+
     int segments = mmdb->segments;
     uint32_t offset = 0;
     int rl = mmdb->recbits * 2 / 8;
