@@ -130,6 +130,8 @@ extern "C" {
     extern int MMDB_strcmp_result(MMDB_s * mmdb,
                                   MMDB_return_s const *const result, char *str);
 
+    extern const char* MMDB_lib_version(void);
+
 #ifdef __cplusplus
 }
 #endif

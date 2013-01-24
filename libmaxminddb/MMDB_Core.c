@@ -10,6 +10,10 @@
 #include <stdarg.h>
 #include <assert.h>
 
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #define KEYS(...) __VA_ARGS__, NULL
 
 // prototypes
@@ -1013,4 +1017,9 @@ static void DPRINT_KEY(MMDB_return_s * data)
     memcpy(str, data->ptr, len);
     str[len] = '\0';
     fprintf(stderr, "%s\n", str);
+}
+
+const char * MMDB_lib_version(void)
+{
+       return PACKAGE_VERSION;
 }
