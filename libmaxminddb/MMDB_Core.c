@@ -35,15 +35,15 @@ static struct in6_addr IPNUM128_NULL = { };
 
 static int IN6_ADDR_IS_NULL(struct in6_addr ipnum)
 {
-    int i;
-    for (i = 0; i < 4; i++) {
+#if 0
+    for (int i = 0; i < 4; i++) {
         if (ipnum.__u6_addr.__u6_addr32[i])
             return 0;
     }
-#if 0
+#else
     // more portable but slow.
-    for (i = 0; i < 16; i++) {
-        if (v6.s6_addr[i])
+    for (int i = 0; i < 16; i++) {
+        if (ipnum.s6_addr[i])
             return 0;
     }
 #endif
