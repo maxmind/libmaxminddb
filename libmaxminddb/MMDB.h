@@ -102,6 +102,12 @@ extern "C" {
         uint32_t offset_to_next;
     } MMDB_decode_s;
 
+    typedef struct MMDB_decode_all_s {
+        MMDB_decode_s decode;
+        struct MMDB_decode_all_s *next;
+        int indent;
+    } MMDB_decode_all_s;
+
 #if 0
 
     typedef struct MMDB_decode_key_s {
@@ -130,8 +136,11 @@ extern "C" {
     extern int MMDB_strcmp_result(MMDB_s * mmdb,
                                   MMDB_return_s const *const result, char *str);
 
-    extern const char* MMDB_lib_version(void);
+    extern const char *MMDB_lib_version(void);
 
+    extern int MMDB_dump(MMDB_decode_all_s * decode_all, int indent);
+    extern int MMDB_get_tree(MMDB_entry_s * start,
+                             MMDB_decode_all_s ** decode_all);
 #ifdef __cplusplus
 }
 #endif

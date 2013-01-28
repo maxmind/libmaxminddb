@@ -28,8 +28,11 @@ static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
 static int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
                  char *src_key);
 
+static int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode);
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
+
+static MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent);
 
 static struct in6_addr IPNUM128_NULL = { };
 
@@ -1033,4 +1036,164 @@ static void DPRINT_KEY(MMDB_return_s * data)
 const char *MMDB_lib_version(void)
 {
     return PACKAGE_VERSION;
+}
+
+int MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
+{
+    MMDB_decode_all_s *decode = *decode_all =
+        calloc(1, sizeof(MMDB_decode_all_s));
+    uint32_t offset = start->offset;
+    int err;
+    do {
+        err = get_tree(start->mmdb, offset, decode);
+        if (err != MMDB_SUCCESS)
+            return err;
+    } while (0);
+//    } while ((offset = decode->decode.offset_to_next));
+    return MMDB_SUCCESS;
+}
+
+void MMDB_free_decode_all(MMDB_decode_all_s * decode_all)
+{
+    if (decode_all->next)
+        MMDB_free_decode_all(decode_all->next);
+    free(decode_all);
+}
+
+static int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
+{
+    decode_one(mmdb, offset, &decode->decode);
+
+    if (decode->decode.data.type == MMDB_DTYPE_PTR) {
+        // skip pointer silently
+        uint32_t tmp = decode->decode.offset_to_next;
+        while (decode->decode.data.type == MMDB_DTYPE_PTR) {
+            decode_one(mmdb, decode->decode.data.uinteger, &decode->decode);
+        }
+
+        decode->decode.offset_to_next = tmp;
+    }
+
+    switch (decode->decode.data.type) {
+
+    case MMDB_DTYPE_ARRAY:
+        {
+            int array_size = decode->decode.data.data_size;
+            uint32_t array_offset = decode->decode.offset_to_next;
+            decode->indent = 1;
+            while (array_size--) {
+                MMDB_decode_all_s *decode_to = decode->next =
+                    calloc(1, sizeof(MMDB_decode_all_s));
+                get_tree(mmdb, array_offset, decode_to);
+                array_offset = decode_to->decode.offset_to_next;
+            }
+            decode->decode.offset_to_next = array_offset;
+
+        }
+        break;
+    case MMDB_DTYPE_HASH:
+        {
+            int size = decode->decode.data.data_size;
+
+#if defined MMDB_DEBUG
+            int xx = rand();
+            printf("%u decode hash with %d keys\n", xx, size);
+#endif
+            offset = decode->decode.offset_to_next;
+            MMDB_decode_all_s *previous = decode;
+            while (size--) {
+                MMDB_decode_all_s *decode_to = previous->next =
+                    calloc(1, sizeof(MMDB_decode_all_s));
+                get_tree(mmdb, offset, decode_to);
+                while (previous->next)
+                    previous = previous->next;
+
+#if defined MMDB_DEBUG
+                fprintf(stderr, "key num: %d (%u)", size, xx);
+                DPRINT_KEY(&decode_to->decode.data);
+#endif
+
+                offset = decode_to->decode.offset_to_next;
+                decode_to = previous->next =
+                    calloc(1, sizeof(MMDB_decode_all_s));
+                get_tree(mmdb, offset, decode_to);
+                while (previous->next)
+                    previous = previous->next;
+                offset = decode_to->decode.offset_to_next;
+            }
+            decode->decode.offset_to_next = offset;
+        }
+        break;
+    default:
+        break;
+    }
+    return MMDB_SUCCESS;
+}
+
+int MMDB_dump(MMDB_decode_all_s * decode_all, int indent)
+{
+    while (decode_all) {
+        decode_all = dump(decode_all, indent);
+    }
+    // not sure about the return type right now
+}
+
+static void silly_pindent(int i)
+{
+    char buffer[1024];
+    int size = i >= 1024 ? 1023 : i;
+    memset(buffer, 32, size);
+    buffer[size] = '\0';
+    fputs(buffer, stderr);
+}
+
+static MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
+{
+    switch (decode_all->decode.data.type) {
+    case MMDB_DTYPE_HASH:
+        {
+            int size = decode_all->decode.data.data_size;
+            for (decode_all = decode_all->next; size && decode_all; size--) {
+                decode_all = dump(decode_all, indent + 2);
+                decode_all = dump(decode_all, indent + 2);
+            }
+        }
+        break;
+    case MMDB_DTYPE_ARRAY:
+        {
+            int size = decode_all->decode.data.data_size;
+            for (decode_all = decode_all->next; size && decode_all; size--) {
+                decode_all = dump(decode_all, indent + 2);
+            }
+        }
+        break;
+    case MMDB_DTYPE_UTF8_STRING:
+    case MMDB_DTYPE_BYTES:
+        silly_pindent(indent);
+        DPRINT_KEY(&decode_all->decode.data);
+        decode_all = decode_all->next;
+        break;
+    case MMDB_DTYPE_DOUBLE:
+        silly_pindent(indent);
+        fprintf(stderr, "%f\n", decode_all->decode.data.double_value);
+        decode_all = decode_all->next;
+
+        break;
+    case MMDB_DTYPE_UINT16:
+    case MMDB_DTYPE_UINT32:
+        silly_pindent(indent);
+        fprintf(stderr, "%u\n", decode_all->decode.data.uinteger);
+        decode_all = decode_all->next;
+
+        break;
+    case MMDB_DTYPE_INT32:
+        silly_pindent(indent);
+        fprintf(stderr, "%d\n", decode_all->decode.data.sinteger);
+        decode_all = decode_all->next;
+        break;
+    default:
+        assert(0);
+    }
+    return decode_all;
+>>>>>>> Add functions to map and dump the whole hash
 }
