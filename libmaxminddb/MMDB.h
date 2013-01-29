@@ -85,6 +85,7 @@ extern "C" {
             double double_value;
             int sinteger;
             uint32_t uinteger;
+            uint8_t c8[8];
             uint8_t c16[16];
             uint8_t const *ptr;
         };

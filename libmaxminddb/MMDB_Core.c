@@ -276,6 +276,12 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     } else if (type == MMDB_DTYPE_INT32) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 4, segments + offset));
         decode->data.sinteger = get_sint32(b);
+    } else if (type == MMDB_DTYPE_UINT64) {
+        FD_RET_ON_ERR(atomic_read(fd, &b[0], 8, segments + offset));
+        memcpy(decode->data.c8,b, 8);
+    } else if (type == MMDB_DTYPE_UINT128) {
+        FD_RET_ON_ERR(atomic_read(fd, &b[0], 16, segments + offset));
+        memcpy(decode->data.c16,b, 16);
     } else if (type == MMDB_DTYPE_DOUBLE) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
         decode->data.double_value = get_double(b, size);
@@ -775,6 +781,10 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         decode->data.uinteger = get_uintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_INT32) {
         decode->data.sinteger = get_sint32(&mem[offset]);
+    } else if (type == MMDB_DTYPE_UINT64) {
+        memcpy(decode->data.c8,&mem[offset],8);
+    } else if (type == MMDB_DTYPE_UINT128) {
+        memcpy(decode->data.c16,&mem[offset],16);
     } else if (type == MMDB_DTYPE_DOUBLE) {
         decode->data.double_value = get_double(&mem[offset], size);
     } else {
