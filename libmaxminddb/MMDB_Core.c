@@ -89,18 +89,17 @@ static double get_double(const uint8_t * ptr, int length)
     return (d);
 }
 
-static int atomic_read(int fd, uint8_t * buffer, ssize_t toatomic_read,
-                       off_t offset)
+static int atomic_read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
 {
-    while (toatomic_read > 0) {
-        ssize_t haveatomic_read = pread(fd, buffer, toatomic_read, offset);
-        if (haveatomic_read <= 0)
+    while (to_read > 0) {
+        ssize_t have_read = pread(fd, buffer, to_read, offset);
+        if (have_read <= 0)
             return MMDB_IOERROR;
-        toatomic_read -= haveatomic_read;
-        if (toatomic_read == 0)
+        to_read -= have_read;
+        if (to_read == 0)
             break;
-        offset += haveatomic_read;
-        buffer += haveatomic_read;
+        offset += have_read;
+        buffer += have_read;
     }
     return MMDB_SUCCESS;
 }
@@ -278,10 +277,10 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         decode->data.sinteger = get_sint32(b);
     } else if (type == MMDB_DTYPE_UINT64) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 8, segments + offset));
-        memcpy(decode->data.c8,b, 8);
+        memcpy(decode->data.c8, b, 8);
     } else if (type == MMDB_DTYPE_UINT128) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 16, segments + offset));
-        memcpy(decode->data.c16,b, 16);
+        memcpy(decode->data.c16, b, 16);
     } else if (type == MMDB_DTYPE_DOUBLE) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
         decode->data.double_value = get_double(b, size);
@@ -671,7 +670,8 @@ static int init(MMDB_s * mmdb, char *fname, uint32_t flags)
 
     // looks like the dataabase_type is the info string.
     // mmdb->database_type = get_uint_value(&meta, KEYS("database_type"));
-    mmdb->full_record_size_bytes = get_uint_value(&meta, KEYS("record_size")) * 2 / 8U ;
+    mmdb->full_record_size_bytes =
+        get_uint_value(&meta, KEYS("record_size")) * 2 / 8U;
     mmdb->node_count = get_uint_value(&meta, KEYS("node_count"));
 
     // unfortunately we must guess the depth of the database
@@ -680,11 +680,13 @@ static int init(MMDB_s * mmdb, char *fname, uint32_t flags)
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
         mmdb->file_in_mem_ptr = ptr;
         mmdb->dataptr =
-            mmdb->file_in_mem_ptr + mmdb->node_count * mmdb->full_record_size_bytes;
+            mmdb->file_in_mem_ptr +
+            mmdb->node_count * mmdb->full_record_size_bytes;
         close(fd);
     } else {
         mmdb->dataptr =
-            (const uint8_t *)0 + (mmdb->node_count * mmdb->full_record_size_bytes);
+            (const uint8_t *)0 +
+            (mmdb->node_count * mmdb->full_record_size_bytes);
         free(ptr);
     }
     return MMDB_SUCCESS;
@@ -782,9 +784,9 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     } else if (type == MMDB_DTYPE_INT32) {
         decode->data.sinteger = get_sint32(&mem[offset]);
     } else if (type == MMDB_DTYPE_UINT64) {
-        memcpy(decode->data.c8,&mem[offset],8);
+        memcpy(decode->data.c8, &mem[offset], 8);
     } else if (type == MMDB_DTYPE_UINT128) {
-        memcpy(decode->data.c16,&mem[offset],16);
+        memcpy(decode->data.c16, &mem[offset], 16);
     } else if (type == MMDB_DTYPE_DOUBLE) {
         decode->data.double_value = get_double(&mem[offset], size);
     } else {
@@ -1028,7 +1030,7 @@ static void DPRINT_KEY(MMDB_return_s * data)
     fprintf(stderr, "%s\n", str);
 }
 
-const char * MMDB_lib_version(void)
+const char *MMDB_lib_version(void)
 {
-       return PACKAGE_VERSION;
+    return PACKAGE_VERSION;
 }
