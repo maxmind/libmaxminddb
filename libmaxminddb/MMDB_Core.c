@@ -173,7 +173,7 @@ static int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
     int src_keylen = result->data_size;
     if (result->data_size != src_keylen)
         return 1;
-    uint32_t segments = mmdb->recbits * 2 / 8U * mmdb->segments;
+    uint32_t segments = mmdb->full_record_size_bytes * mmdb->segments;
     ssize_t offset = (ssize_t) result->ptr;
     uint8_t buff[1024];
     int len = src_keylen;
@@ -212,7 +212,7 @@ static int get_ext_type(int raw_ext_type)
 
 static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 {
-    const ssize_t segments = mmdb->recbits * 2 / 8U * mmdb->segments;
+    const ssize_t segments = mmdb->full_record_size_bytes * mmdb->segments;
     uint8_t ctrl;
     int type;
     uint8_t b[4];
@@ -289,7 +289,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 
 static int fddecode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 {
-    const int segments = mmdb->segments * mmdb->recbits * 2 / 8;;
+    const int segments = mmdb->segments * mmdb->full_record_size_bytes;
     uint8_t ctrl;
     int type;
     uint8_t b[4];
@@ -386,7 +386,7 @@ int MMDB_fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
     int segments = mmdb->segments;
     off_t offset = 0;
     int byte_offset;
-    int rl = mmdb->recbits * 2 / 8;
+    int rl = mmdb->full_record_size_bytes;
     int fd = mmdb->fd;
     uint32_t mask = 0x80000000U;
     int depth;
@@ -434,7 +434,7 @@ MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     int segments = mmdb->segments;
     uint32_t offset = 0;
     int byte_offset;
-    int rl = mmdb->recbits * 2 / 8;
+    int rl = mmdb->full_record_size_bytes;
     int fd = mmdb->fd;
     int depth;
     uint8_t b[4];
@@ -483,7 +483,7 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->segments;
     uint32_t offset = 0;
-    int rl = mmdb->recbits * 2 / 8;
+    int rl = mmdb->full_record_size_bytes;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
     int depth;
@@ -532,7 +532,7 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
 
     int segments = mmdb->segments;
     uint32_t offset = 0;
-    int rl = mmdb->recbits * 2 / 8;
+    int rl = mmdb->full_record_size_bytes;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
     uint32_t mask = 0x80000000U;
@@ -665,7 +665,7 @@ static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
 
     // looks like the dataabase_type is the info string.
     // mmdb->database_type = get_uint_value(&meta, KEYS("database_type"));
-    mmdb->recbits = get_uint_value(&meta, KEYS("record_size"));
+    mmdb->full_record_size_bytes = get_uint_value(&meta, KEYS("record_size")) * 2 / 8U ;
     mmdb->segments = get_uint_value(&meta, KEYS("node_count"));
 
     // unfortunately we must guess the depth of the database
@@ -674,12 +674,11 @@ static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
         mmdb->file_in_mem_ptr = ptr;
         mmdb->dataptr =
-            mmdb->file_in_mem_ptr + mmdb->segments * mmdb->recbits * 2 / 8;
-
+            mmdb->file_in_mem_ptr + mmdb->segments * mmdb->full_record_size_bytes;
         close(fd);
     } else {
         mmdb->dataptr =
-            (const uint8_t *)0 + (mmdb->segments * mmdb->recbits * 2 / 8);
+            (const uint8_t *)0 + (mmdb->segments * mmdb->full_record_size_bytes);
         free(ptr);
     }
     return MMDB_SUCCESS;

@@ -56,7 +56,7 @@ extern "C" {
         int major_file_format;
         int minor_file_format;
         int database_type;
-        int recbits;
+        uint32_t full_record_size_bytes; /* recbits * 2 / 8 */
         int depth;
         int segments;
         const uint8_t *dataptr;
