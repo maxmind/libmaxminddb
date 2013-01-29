@@ -571,7 +571,7 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     return MMDB_CORRUPTDATABASE;
 }
 
-static void _decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
+static void decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 {
     const uint8_t *mem = mmdb->dataptr;
     uint8_t ctrl, type;
@@ -584,7 +584,7 @@ static void _decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
         int psize = (ctrl >> 3) & 3;
         int new_offset = get_ptr_from(ctrl, &mem[offset], psize);
 
-        _decode_key(mmdb, new_offset, ret_key);
+        decode_key(mmdb, new_offset, ret_key);
         ret_key->offset_to_next = offset + psize + 1;
         return;
     }
@@ -618,7 +618,7 @@ static void _decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
     return;
 }
 
-static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
+static int init(MMDB_s * mmdb, char *fname, uint32_t flags)
 {
     struct stat s;
     int fd;
@@ -687,7 +687,7 @@ static int _init(MMDB_s * mmdb, char *fname, uint32_t flags)
 MMDB_s *MMDB_open(char *fname, uint32_t flags)
 {
     MMDB_s *mmdb = calloc(1, sizeof(MMDB_s));
-    if (MMDB_SUCCESS != _init(mmdb, fname, flags)) {
+    if (MMDB_SUCCESS != init(mmdb, fname, flags)) {
         MMDB_free_all(mmdb);
         return NULL;
     }
