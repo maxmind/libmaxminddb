@@ -53,7 +53,6 @@ extern "C" {
         uint32_t flags;
         int fd;
         const uint8_t *file_in_mem_ptr;
-        const char *info;
         int major_file_format;
         int minor_file_format;
         int database_type;
