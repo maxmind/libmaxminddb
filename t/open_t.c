@@ -16,15 +16,17 @@ int main(void)
     ok(mmdb_s != NULL, "MMDB_open successful ( MMDB_MODE_STANDARD )");
 
     if (mmdb_m && mmdb_s) {
-        int rbm = mmdb_m->recbits;
-        int rbs = mmdb_s->recbits;
+        int rec_size_m = mmdb_m->full_record_size_bytes;
+        int rec_size_s = mmdb_s->full_record_size_bytes;
 
-        ok((rbs == 24 || rbs == 28
-            || rbs == 32), "recbits = %d MMDB_MODE_STANDARD", rbs);
-        ok((rbm == 24 || rbm == 28
-            || rbm == 32), "recbits = %d MMDB_MODE_MEMORY_CACHE", rbm);
+        ok((rec_size_s == 6 || rec_size_s == 7
+            || rec_size_s == 8),
+           "full_record_size_bytes = %d MMDB_MODE_STANDARD", rec_size_s);
+        ok((rec_size_m == 6 || rec_size_m == 7
+            || rec_size_m == 8),
+           "full_record_size_bytes = %d MMDB_MODE_MEMORY_CACHE", rec_size_m);
 
-        ok(rbm == rbs, "recbits are the same");
+        ok(rec_size_m == rec_size_s, "full_record_size_bytes are the same");
 
         ok(mmdb_s->node_count == mmdb_m->node_count,
            "node_count are the same ( %d == %d )", mmdb_m->node_count,

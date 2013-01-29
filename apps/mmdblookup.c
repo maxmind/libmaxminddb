@@ -56,7 +56,7 @@ int main(int argc, char *const argv[])
         if (root.entry.offset > 0) {
 #if defined BROKEN_SEARCHTREE
             // correct offset
-            root.entry.offset -= mmdb->segments;
+            root.entry.offset -= mmdb->node_count;
 #endif
             MMDB_return_s res_location;
             MMDB_get_value(&root.entry, &res_location, "location", NULL);
