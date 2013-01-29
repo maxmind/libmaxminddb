@@ -84,7 +84,7 @@ static double get_double(const uint8_t * ptr, int length)
 {
     char fmt[256];
     double d;
-    sprintf(fmt, "%%%dlf", length);
+    snprintf(fmt, sizeof(fmt), "%%%dlf", length);
     sscanf((const char *)ptr, fmt, &d);
     return (d);
 }
