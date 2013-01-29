@@ -27,7 +27,7 @@ void test_mmdb(MMDB_s * mmdb)
     ok(err == MMDB_SUCCESS, "Search for %s SUCCESSFUL", ipstr);
     ok(root.entry.offset > 0, "Found something %s good", ipstr);
 #if defined BROKEN_SEARCHTREE
-    root.entry.offset -= mmdb->segments;
+    root.entry.offset -= mmdb->node_count;
 #endif
     MMDB_return_s country;
     MMDB_get_value(&root.entry, &country, "country", NULL);

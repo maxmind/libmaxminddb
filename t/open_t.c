@@ -26,9 +26,9 @@ int main(void)
 
         ok(rbm == rbs, "recbits are the same");
 
-        ok(mmdb_s->segments == mmdb_m->segments,
-           "segments are the same ( %d == %d )", mmdb_m->segments,
-           mmdb_s->segments);
+        ok(mmdb_s->node_count == mmdb_m->node_count,
+           "node_count are the same ( %d == %d )", mmdb_m->node_count,
+           mmdb_s->node_count);
 
     }
     done_testing();

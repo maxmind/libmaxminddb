@@ -58,7 +58,7 @@ extern "C" {
         int database_type;
         uint32_t full_record_size_bytes; /* recbits * 2 / 8 */
         int depth;
-        int segments;
+        int node_count;
         const uint8_t *dataptr;
     } MMDB_s;
 
