@@ -256,7 +256,7 @@ static int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         break;
     }
 
-    if (type == MMDB_DTYPE_HASH || type == MMDB_DTYPE_ARRAY) {
+    if (type == MMDB_DTYPE_MAP || type == MMDB_DTYPE_ARRAY) {
         decode->data.data_size = size;
         decode->offset_to_next = offset;
         return MMDB_SUCCESS;
@@ -758,7 +758,7 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         break;
     }
 
-    if (type == MMDB_DTYPE_HASH || type == MMDB_DTYPE_ARRAY) {
+    if (type == MMDB_DTYPE_MAP || type == MMDB_DTYPE_ARRAY) {
         decode->data.data_size = size;
         decode->offset_to_next = offset;
         return;
@@ -811,7 +811,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
         case MMDB_DTYPE_ARRAY:
             skip_hash_array(mmdb, &decode);
             break;
-        case MMDB_DTYPE_HASH:
+        case MMDB_DTYPE_MAP:
             {
                 int size = decode.data.data_size;
                 // printf("decode hash with %d keys\n", size);
@@ -897,7 +897,7 @@ static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
         case MMDB_DTYPE_ARRAY:
             FD_RET_ON_ERR(fdskip_hash_array(mmdb, &decode));
             break;
-        case MMDB_DTYPE_HASH:
+        case MMDB_DTYPE_MAP:
             {
                 int size = decode.data.data_size;
                 //printf("decode hash with %d keys\n", size);
@@ -973,7 +973,7 @@ static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
 static int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 {
     int err;
-    if (decode->data.type == MMDB_DTYPE_HASH) {
+    if (decode->data.type == MMDB_DTYPE_MAP) {
         int size = decode->data.data_size;
         while (size--) {
             FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode));  // key
@@ -993,7 +993,7 @@ static int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 
 static void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 {
-    if (decode->data.type == MMDB_DTYPE_HASH) {
+    if (decode->data.type == MMDB_DTYPE_MAP) {
         int size = decode->data.data_size;
         while (size--) {
             decode_one(mmdb, decode->offset_to_next, decode);   // key
