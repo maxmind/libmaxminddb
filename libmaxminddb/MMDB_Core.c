@@ -1091,7 +1091,7 @@ static int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 
         }
         break;
-    case MMDB_DTYPE_HASH:
+    case MMDB_DTYPE_MAP:
         {
             int size = decode->decode.data.data_size;
 
@@ -1150,7 +1150,7 @@ static void silly_pindent(int i)
 static MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
 {
     switch (decode_all->decode.data.type) {
-    case MMDB_DTYPE_HASH:
+    case MMDB_DTYPE_MAP:
         {
             int size = decode_all->decode.data.data_size;
             for (decode_all = decode_all->next; size && decode_all; size--) {
