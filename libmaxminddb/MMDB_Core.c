@@ -714,6 +714,13 @@ MMDB_s *MMDB_open(char *fname, uint32_t flags)
     return mmdb;
 }
 
+void MMDB_close(MMDB_s * mmdb)
+{
+    if (mmdb) {
+        MMDB_free_all(mmdb);
+    }
+}
+
 /* return the result of any uint type with 32 bit's or less as uint32 */
 uint32_t MMDB_get_uint(MMDB_return_s const *const result)
 {
