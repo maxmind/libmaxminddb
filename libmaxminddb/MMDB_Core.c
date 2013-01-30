@@ -1195,5 +1195,4 @@ static MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
         assert(0);
     }
     return decode_all;
->>>>>>> Add functions to map and dump the whole hash
 }
