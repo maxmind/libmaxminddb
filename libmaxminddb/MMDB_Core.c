@@ -1184,7 +1184,13 @@ static MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
         silly_pindent(indent);
         fprintf(stderr, "%u\n", decode_all->decode.data.uinteger);
         decode_all = decode_all->next;
-
+        break;
+    case MMDB_DTYPE_UINT64:
+    case MMDB_DTYPE_UINT128:
+        silly_pindent(indent);
+        fprintf(stderr, "some UINT64 or UINT128 data\n");
+        //fprintf(stderr, "%u\n", decode_all->decode.data.uinteger);
+        decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_INT32:
         silly_pindent(indent);
