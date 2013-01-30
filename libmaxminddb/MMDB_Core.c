@@ -361,6 +361,12 @@ void MMDB_free_all(MMDB_s * mmdb)
             close(mmdb->fd);
         if (mmdb->file_in_mem_ptr)
             free((void *)mmdb->file_in_mem_ptr);
+        if (mmdb->meta_data_content) {
+            free(mmdb->meta_data_content);
+        }
+        if (mmdb->fake_metadata_db) {
+            free(mmdb->fake_metadata_db);
+        }
         free((void *)mmdb);
     }
 }
@@ -648,37 +654,41 @@ static int init(MMDB_s * mmdb, char *fname, uint32_t flags)
         size = s.st_size < 2000 ? s.st_size : 2000;
         offset = s.st_size - size;
     }
-    ptr = malloc(size);
+    mmdb->meta_data_content = malloc(size);
     if (ptr == NULL)
         return MMDB_INVALIDDATABASE;
 
-    iread = pread(fd, ptr, size, offset);
+    iread = pread(fd, mmdb->meta_data_content, size, offset);
 
     const uint8_t *metadata = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
     if (metadata == NULL) {
-        free(ptr);
+        free(mmdb->meta_data_content);
+        mmdb->meta_data_content = NULL;
         return MMDB_INVALIDDATABASE;
     }
 
-    MMDB_s fakedb = {.dataptr = metadata + 14 };
-    MMDB_entry_s meta = {.mmdb = &fakedb };
+    mmdb->fake_metadata_db = calloc(sizeof(struct MMDB_s), 1);
+    mmdb->fake_metadata_db->dataptr = metadata + 14;
+    mmdb->meta.mmdb = mmdb->fake_metadata_db;
+
     MMDB_return_s result;
 
     // we can't fail with ioerror's here. It is a memory operation
     mmdb->major_file_format =
-        get_uint_value(&meta, KEYS("binary_format_major_version"));
+        get_uint_value(&mmdb->meta, KEYS("binary_format_major_version"));
 
     mmdb->minor_file_format =
-        get_uint_value(&meta, KEYS("binary_format_minor_version"));
+        get_uint_value(&mmdb->meta, KEYS("binary_format_minor_version"));
 
     // looks like the dataabase_type is the info string.
     // mmdb->database_type = get_uint_value(&meta, KEYS("database_type"));
     mmdb->full_record_size_bytes =
-        get_uint_value(&meta, KEYS("record_size")) * 2 / 8U;
-    mmdb->node_count = get_uint_value(&meta, KEYS("node_count"));
+        get_uint_value(&mmdb->meta, KEYS("record_size")) * 2 / 8U;
+    mmdb->node_count = get_uint_value(&mmdb->meta, KEYS("node_count"));
 
     // unfortunately we must guess the depth of the database
-    mmdb->depth = get_uint_value(&meta, KEYS("ip_version")) == 4 ? 32 : 128;
+    mmdb->depth =
+        get_uint_value(&mmdb->meta, KEYS("ip_version")) == 4 ? 32 : 128;
 
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
         mmdb->file_in_mem_ptr = ptr;
@@ -690,7 +700,6 @@ static int init(MMDB_s * mmdb, char *fname, uint32_t flags)
         mmdb->dataptr =
             (const uint8_t *)0 +
             (mmdb->node_count * mmdb->full_record_size_bytes);
-        free(ptr);
     }
     return MMDB_SUCCESS;
 }

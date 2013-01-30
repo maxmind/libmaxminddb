@@ -27,7 +27,7 @@ extern "C" {
 # define MMDB_DTYPE_BYTES (4)
 # define MMDB_DTYPE_UINT16 (5)
 # define MMDB_DTYPE_UINT32 (6)
-# define MMDB_DTYPE_MAP (7) /* HASH */
+# define MMDB_DTYPE_MAP (7)     /* HASH */
 # define MMDB_DTYPE_INT32 (8)
 # define MMDB_DTYPE_UINT64 (9)
 # define MMDB_DTYPE_UINT128 (10)
@@ -48,24 +48,10 @@ extern "C" {
 #define MMDB_IOERROR (-4)
 #define MMDB_OUTOFMEMORY (-5)
 
-// information about the database file.
-    typedef struct MMDB_s {
-        uint32_t flags;
-        int fd;
-        const uint8_t *file_in_mem_ptr;
-        int major_file_format;
-        int minor_file_format;
-        int database_type;
-        uint32_t full_record_size_bytes; /* recbits * 2 / 8 */
-        int depth;
-        int node_count;
-        const uint8_t *dataptr;
-    } MMDB_s;
-
 // This is the starting point for every search.
 // It is like the hash to start the search. It may or may not the root hash
     typedef struct MMDB_entry_s {
-        MMDB_s *mmdb;
+        struct MMDB_s *mmdb;
         unsigned int offset;    /* usually pointer to the struct */
         //uint8_t const *ptr;             /* usually pointer to the struct */
     } MMDB_entry_s;
@@ -77,6 +63,23 @@ extern "C" {
         MMDB_entry_s entry;
         int netmask;
     } MMDB_root_entry_s;
+
+// information about the database file.
+    typedef struct MMDB_s {
+        uint32_t flags;
+        int fd;
+        const uint8_t *file_in_mem_ptr;
+        int major_file_format;
+        int minor_file_format;
+        int database_type;
+        uint32_t full_record_size_bytes;        /* recbits * 2 / 8 */
+        int depth;
+        int node_count;
+        const uint8_t *dataptr;
+        uint8_t *meta_data_content;
+        struct MMDB_s *fake_metadata_db;
+        MMDB_entry_s meta;      // should change to entry_s
+    } MMDB_s;
 
 // this is the result for every field
     typedef struct MMDB_return_s {
