@@ -200,7 +200,7 @@ static int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
 static int get_ext_type(int raw_ext_type)
 {
 #if defined BROKEN_TYPE
-    return raw_ext_type;
+    return 7 + raw_ext_type;
 #else
     return 8 + raw_ext_type;
 #endif
