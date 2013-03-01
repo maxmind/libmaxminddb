@@ -379,6 +379,7 @@ void MMDB_free_all(MMDB_s * mmdb)
             }
 
 #define RETURN_ON_END_OF_SEARCH32(offset,segments,depth, res) \
+            MMDB_DBG_CARP( "RETURN_ON_END_OF_SEARCH32 depth:%d offset:%u segments:%d\n", depth, (unsigned int)offset, segments); \
 	    RETURN_ON_END_OF_SEARCHX(offset,segments,depth, 32, res)
 
 #define RETURN_ON_END_OF_SEARCH128(offset,segments,depth, res) \
@@ -530,6 +531,10 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
 {
     MMDB_s *mmdb = res->entry.mmdb;
+
+    MMDB_DBG_CARP("MMDB_lookup_by_ipnum{mmdb} fd:%d depth:%d node_count:%d\n",
+                  mmdb->fd, mmdb->depth, mmdb->node_count);
+    MMDB_DBG_CARP("MMDB_lookup_by_ipnum ip:%u fd:%d\n", ipnum, mmdb->fd);
 
     if (mmdb->fd >= 0)
         return MMDB_fdlookup_by_ipnum(ipnum, res);
@@ -696,6 +701,7 @@ static int init(MMDB_s * mmdb, char *fname, uint32_t flags)
 
 MMDB_s *MMDB_open(char *fname, uint32_t flags)
 {
+    MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
     MMDB_s *mmdb = calloc(1, sizeof(MMDB_s));
     if (MMDB_SUCCESS != init(mmdb, fname, flags)) {
         MMDB_free_all(mmdb);
@@ -748,6 +754,8 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     if (type == MMDB_DTYPE_EXT)
         type = get_ext_type(mem[offset++]);
 
+    // MMDB_DBG_CARP("decode_one type:%d\n", type);
+
     decode->data.type = type;
 
     if (type == MMDB_DTYPE_PTR) {
@@ -755,6 +763,9 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         decode->data.uinteger = get_ptr_from(ctrl, &mem[offset], psize);
         decode->data.data_size = psize + 1;
         decode->offset_to_next = offset + psize + 1;
+        MMDB_DBG_CARP
+            ("decode_one{ptr} ctrl:%d, offset:%d psize:%d point_to:%d\n", ctrl,
+             offset, psize, decode->data.uinteger);
         return;
     }
 
@@ -777,6 +788,7 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     if (type == MMDB_DTYPE_MAP || type == MMDB_DTYPE_ARRAY) {
         decode->data.data_size = size;
         decode->offset_to_next = offset;
+        MMDB_DBG_CARP("decode_one type:%d size:%d\n", type, size);
         return;
     }
 
@@ -803,6 +815,7 @@ static void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         decode->data.data_size = size;
     }
     decode->offset_to_next = offset + size;
+    MMDB_DBG_CARP("decode_one type:%d size:%d\n", type, size);
 
     return;
 }
@@ -1101,9 +1114,9 @@ static int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
         {
             int size = decode->decode.data.data_size;
 
-#if defined MMDB_DEBUG
-            int xx = rand();
-            printf("%u decode hash with %d keys\n", xx, size);
+#if MMDB_DEBUG
+            int rnd = rand();
+            MMDB_DBG_CARP("%u decode hash with %d keys\n", rnd, size);
 #endif
             offset = decode->decode.offset_to_next;
             MMDB_decode_all_s *previous = decode;
@@ -1114,8 +1127,8 @@ static int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
                 while (previous->next)
                     previous = previous->next;
 
-#if defined MMDB_DEBUG
-                fprintf(stderr, "key num: %d (%u)", size, xx);
+#if MMDB_DEBUG
+                MMDB_DBG_CARP("key num: %d (%u)", size, rnd);
                 DPRINT_KEY(&decode_to->decode.data);
 #endif
 
@@ -1204,6 +1217,8 @@ static MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
         decode_all = decode_all->next;
         break;
     default:
+        MMDB_DBG_CARP("decode_one UNIPLEMENTED type:%d\n",
+                      decode_all->decode.data.type);
         assert(0);
     }
     return decode_all;
