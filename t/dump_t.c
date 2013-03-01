@@ -29,9 +29,6 @@ int main(void)
         err = MMDB_lookup_by_ipnum(ipnum, &root);
         ok(err == MMDB_SUCCESS, "Search for %s SUCCESSFUL", ipstr);
         ok(root.entry.offset > 0, "Found something %s good", ipstr);
-#if defined BROKEN_SEARCHTREE
-        root.entry.offset -= mmdb->node_count;
-#endif
         MMDB_decode_all_s *decode_all = calloc(1, sizeof(MMDB_decode_all_s));
         int err = MMDB_get_tree(&root.entry, &decode_all);
 

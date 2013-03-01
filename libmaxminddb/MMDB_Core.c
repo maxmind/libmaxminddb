@@ -371,22 +371,12 @@ void MMDB_free_all(MMDB_s * mmdb)
     }
 }
 
-#if defined BROKEN_SEARCHTREE
-
-#define RETURN_ON_END_OF_SEARCHX(offset,segments,depth,maxdepth, res)  \
-            if ((offset) == 0 || (offset) >= (segments)) {    \
-                (res)->netmask = (maxdepth) - (depth);                \
-                (res)->entry.offset = (offset);               \
-                return MMDB_SUCCESS;                          \
-            }
-#else
 #define RETURN_ON_END_OF_SEARCHX(offset,segments,depth,maxdepth, res) \
             if ((offset) >= (segments)) {                     \
                 (res)->netmask = (maxdepth) - (depth);        \
                 (res)->entry.offset = (offset) - (segments);  \
                 return MMDB_SUCCESS;                          \
             }
-#endif
 
 #define RETURN_ON_END_OF_SEARCH32(offset,segments,depth, res) \
 	    RETURN_ON_END_OF_SEARCHX(offset,segments,depth, 32, res)

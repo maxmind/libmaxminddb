@@ -16,10 +16,6 @@ extern "C" {
 // only th 32bit ptr contains all of them.
 #define BROKEN_PTR (1)
 
-// the searchtree ends the search unfortuately with offset zero instead of
-// offset = segments.
-#define BROKEN_SEARCHTREE (1)
-
 # define MMDB_DTYPE_EXT (0)
 # define MMDB_DTYPE_PTR (1)
 # define MMDB_DTYPE_UTF8_STRING (2)

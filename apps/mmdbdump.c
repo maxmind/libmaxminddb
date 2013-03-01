@@ -74,12 +74,7 @@ int main(int argc, char *const argv[])
         double dlat, dlon;
         char *city, *country, *region_name, code2[3];
         if (root.entry.offset > 0) {
-#if defined BROKEN_SEARCHTREE
-            // correct offset
-            root.entry.offset -= mmdb->node_count;
-#endif
             MMDB_return_s res_location;
-
             MMDB_decode_all_s *decode_all =
                 calloc(1, sizeof(MMDB_decode_all_s));
             int err = MMDB_get_tree(&root.entry, &decode_all);

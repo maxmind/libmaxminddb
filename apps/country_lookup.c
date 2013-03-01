@@ -52,11 +52,6 @@ int main(int argc, char *const argv[])
             double dlat, dlon;
             char *name, *code;
             if (root.entry.offset > 0) {
-#if defined BROKEN_SEARCHTREE
-                // correct offset
-                root.entry.offset -= mmdb->node_count;
-#endif
-
                 MMDB_return_s country;
                 MMDB_get_value(&root.entry, &country, "country", NULL);
                 MMDB_entry_s start = {.mmdb = mmdb,.offset = country.offset };
