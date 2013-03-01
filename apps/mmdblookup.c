@@ -39,10 +39,12 @@ int main(int argc, char *const argv[])
     argc -= optind;
     argv += optind;
 
-    MMDB_s *mmdb =
-        MMDB_open(fname ? fname :
-                  "/usr/local/share/GeoIP2/reference-database.dat",
-                  MMDB_MODE_MEMORY_CACHE);
+
+    if (!fname) {
+        fname = strdup("/usr/local/share/GeoIP2/reference-database.dat");
+    }
+
+    MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
 
     char *ipstr = argv[0];
     struct in_addr ip;
