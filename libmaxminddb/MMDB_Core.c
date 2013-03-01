@@ -649,7 +649,7 @@ static int init(MMDB_s * mmdb, char *fname, uint32_t flags)
         size = s.st_size < 2000 ? s.st_size : 2000;
         offset = s.st_size - size;
     }
-    mmdb->meta_data_content = malloc(size);
+    ptr = mmdb->meta_data_content = malloc(size);
     if (ptr == NULL)
         return MMDB_INVALIDDATABASE;
 
