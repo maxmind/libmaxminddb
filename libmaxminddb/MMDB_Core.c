@@ -134,7 +134,7 @@ static uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
         new_offset = get_uint32(ptr);
         break;
     }
-    return new_offset;
+    return MMDB_DATASECTION_NOOP_SIZE + new_offset;
 }
 
 static char *bytesdup(MMDB_return_s const *const ret)
