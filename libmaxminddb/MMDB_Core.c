@@ -849,7 +849,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                 int size = decode.data.data_size;
                 // printf("decode hash with %d keys\n", size);
                 offset = decode.offset_to_next;
-                while (size--) {
+                while (size-- > 0) {
                     decode_one(mmdb, offset, &key);
 
                     uint32_t offset_to_value = key.offset_to_next;
@@ -935,7 +935,7 @@ static int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
                 int size = decode.data.data_size;
                 //printf("decode hash with %d keys\n", size);
                 offset = decode.offset_to_next;
-                while (size--) {
+                while (size-- > 0) {
                     FD_RET_ON_ERR(fddecode_one(mmdb, offset, &key));
 
                     uint32_t offset_to_value = key.offset_to_next;
@@ -1008,7 +1008,7 @@ static int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
     int err;
     if (decode->data.type == MMDB_DTYPE_MAP) {
         int size = decode->data.data_size;
-        while (size--) {
+        while (size-- > 0) {
             FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode));  // key
             FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode));  // value
             FD_RET_ON_ERR(fdskip_hash_array(mmdb, decode));
@@ -1016,7 +1016,7 @@ static int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 
     } else if (decode->data.type == MMDB_DTYPE_ARRAY) {
         int size = decode->data.data_size;
-        while (size--) {
+        while (size-- > 0) {
             FD_RET_ON_ERR(fddecode_one(mmdb, decode->offset_to_next, decode));  // value
             FD_RET_ON_ERR(fdskip_hash_array(mmdb, decode));
         }
@@ -1028,7 +1028,7 @@ static void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 {
     if (decode->data.type == MMDB_DTYPE_MAP) {
         int size = decode->data.data_size;
-        while (size--) {
+        while (size-- > 0) {
             decode_one(mmdb, decode->offset_to_next, decode);   // key
             decode_one(mmdb, decode->offset_to_next, decode);   // value
             skip_hash_array(mmdb, decode);
@@ -1036,7 +1036,7 @@ static void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 
     } else if (decode->data.type == MMDB_DTYPE_ARRAY) {
         int size = decode->data.data_size;
-        while (size--) {
+        while (size-- > 0) {
             decode_one(mmdb, decode->offset_to_next, decode);   // value
             skip_hash_array(mmdb, decode);
         }
@@ -1100,7 +1100,7 @@ static int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
             int array_size = decode->decode.data.data_size;
             uint32_t array_offset = decode->decode.offset_to_next;
             decode->indent = 1;
-            while (array_size--) {
+            while (array_size-- > 0) {
                 MMDB_decode_all_s *decode_to = decode->next =
                     calloc(1, sizeof(MMDB_decode_all_s));
                 get_tree(mmdb, array_offset, decode_to);
@@ -1120,7 +1120,7 @@ static int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 #endif
             offset = decode->decode.offset_to_next;
             MMDB_decode_all_s *previous = decode;
-            while (size--) {
+            while (size-- > 0) {
                 MMDB_decode_all_s *decode_to = previous->next =
                     calloc(1, sizeof(MMDB_decode_all_s));
                 get_tree(mmdb, offset, decode_to);
