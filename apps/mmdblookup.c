@@ -52,6 +52,8 @@ int main(int argc, char *const argv[])
     if (!mmdb)
         die("Can't open %s\n", fname);
 
+    free(fname);
+
     char *ipstr = argv[0];
     struct in_addr ip;
     if (ipstr == NULL || 1 != addr_to_num(ipstr, &ip))
@@ -112,9 +114,6 @@ int main(int argc, char *const argv[])
             puts("Sorry, nothing found");       // not found
         }
     }
-
-    if (fname)
-        free(fname);
 
     return (0);
 }
