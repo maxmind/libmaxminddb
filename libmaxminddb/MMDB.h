@@ -47,6 +47,17 @@ extern "C" {
 #define MMDB_IOERROR (-4)
 #define MMDB_OUTOFMEMORY (-5)
 
+/* */
+# define MMDB_DEBUG (1)
+
+#if MMDB_DEBUG
+#define MMDB_DBG_CARP(...) fprintf(stderr, __VA_ARGS__ );
+#define MMDB_DBG_ASSERT(ex) assert(#ex)
+#else
+#define MMDB_DBG_CARP(...)
+#define MMDB_DBG_ASSERT(ex)
+#endif
+
 // This is the starting point for every search.
 // It is like the hash to start the search. It may or may not the root hash
     typedef struct MMDB_entry_s {
