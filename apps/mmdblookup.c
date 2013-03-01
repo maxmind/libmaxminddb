@@ -5,6 +5,8 @@
 #include "MMDB.h"
 #include "MMDB_Helper.h"
 #include "getopt.h"
+#include <assert.h>
+
 /* dummy content */
 
 #define die(...) do { \
@@ -39,12 +41,16 @@ int main(int argc, char *const argv[])
     argc -= optind;
     argv += optind;
 
-
     if (!fname) {
         fname = strdup("/usr/local/share/GeoIP2/reference-database.dat");
     }
 
+    assert(fname != NULL);
+
     MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
+
+    if (!mmdb)
+        die("Can't open %s\n", fname);
 
     char *ipstr = argv[0];
     struct in_addr ip;
