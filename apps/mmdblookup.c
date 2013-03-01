@@ -7,10 +7,14 @@
 #include "getopt.h"
 /* dummy content */
 
+#define die(...) do { \
+    fprintf(stderr, __VA_ARGS__); \
+    exit(1); \
+} while(0)
+
 void usage(char *prg)
 {
-    fprintf(stderr, "Usage: %s -f database addr\n", prg);
-    exit(1);
+    die("Usage: %s -f database addr\n", prg);
 }
 
 int main(int argc, char *const argv[])
@@ -42,10 +46,8 @@ int main(int argc, char *const argv[])
 
     char *ipstr = argv[0];
     struct in_addr ip;
-    if (ipstr == NULL || 1 != addr_to_num(ipstr, &ip)) {
-        fprintf(stderr, "Invalid IP\n");
-        exit(1);
-    }
+    if (ipstr == NULL || 1 != addr_to_num(ipstr, &ip))
+        die("Invalid IP\n");
 
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
     uint32_t ipnum = htonl(ip.s_addr);
