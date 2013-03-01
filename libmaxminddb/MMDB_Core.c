@@ -1099,12 +1099,16 @@ static int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
         {
             int array_size = decode->decode.data.data_size;
             uint32_t array_offset = decode->decode.offset_to_next;
+            MMDB_decode_all_s *previous = decode;
             decode->indent = 1;
             while (array_size-- > 0) {
-                MMDB_decode_all_s *decode_to = decode->next =
+                MMDB_decode_all_s *decode_to = previous->next =
                     calloc(1, sizeof(MMDB_decode_all_s));
                 get_tree(mmdb, array_offset, decode_to);
                 array_offset = decode_to->decode.offset_to_next;
+                while (previous->next)
+                    previous = previous->next;
+
             }
             decode->decode.offset_to_next = array_offset;
 
