@@ -31,6 +31,9 @@ extern "C" {
 # define MMDB_DTYPE_CONTAINER (12)
 # define MMDB_DTYPE_END_MARKER (13)
 
+# define MMDB_DTYPE_MAX (MMDB_DTYPE_END_MARKER)
+
+
 /* GEOIPDB flags */
 #define MMDB_MODE_STANDARD (1)
 #define MMDB_MODE_MEMORY_CACHE (2)
