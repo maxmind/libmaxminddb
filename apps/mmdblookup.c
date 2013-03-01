@@ -49,6 +49,16 @@ int main(int argc, char *const argv[])
     if (ipstr == NULL || 1 != addr_to_num(ipstr, &ip))
         die("Invalid IP\n");
 
+    if (verbose) {
+        MMDB_decode_all_s *decode_all = calloc(1, sizeof(MMDB_decode_all_s));
+        int err = MMDB_get_tree(&mmdb->meta, &decode_all);
+        assert(err == MMDB_SUCCESS);
+
+        if (decode_all != NULL)
+            MMDB_dump(decode_all, 0);
+        free(decode_all);
+    }
+
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
     uint32_t ipnum = htonl(ip.s_addr);
     int err = MMDB_lookup_by_ipnum(ipnum, &root);
