@@ -65,11 +65,6 @@ LOCAL uint32_t get_uint32(const uint8_t * p)
     return (p[0] * 16777216U + p[1] * 65536 + p[2] * 256 + p[3]);
 }
 
-LOCAL int get_sint32(const uint8_t * p)
-{
-    return (int)(p[0] * 16777216U + p[1] * 65536 + p[2] * 256 + p[3]);
-}
-
 LOCAL uint32_t get_uint24(const uint8_t * p)
 {
     return (p[0] * 65536U + p[1] * 256 + p[2]);
@@ -88,6 +83,11 @@ LOCAL uint32_t get_uintX(const uint8_t * p, int length)
         r += *p++;
     }
     return r;
+}
+
+LOCAL int get_sintX(const uint8_t * p, int length)
+{
+    return (int)get_uintX(p, length);
 }
 
 LOCAL double get_double(const uint8_t * ptr, int length)
@@ -282,8 +282,8 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
         decode->data.uinteger = get_uintX(b, size);
     } else if (type == MMDB_DTYPE_INT32) {
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 4, segments + offset));
-        decode->data.sinteger = get_sint32(b);
+        FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
+        decode->data.sinteger = get_sintX(b, size);
     } else if (type == MMDB_DTYPE_UINT64) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 8, segments + offset));
         memcpy(decode->data.c8, b, 8);
@@ -809,7 +809,7 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     if ((type == MMDB_DTYPE_UINT32) || (type == MMDB_DTYPE_UINT16)) {
         decode->data.uinteger = get_uintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_INT32) {
-        decode->data.sinteger = get_sint32(&mem[offset]);
+        decode->data.sinteger = get_sintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_UINT64) {
         memcpy(decode->data.c8, &mem[offset], 8);
     } else if (type == MMDB_DTYPE_UINT128) {
