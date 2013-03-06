@@ -1220,26 +1220,26 @@ LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
         break;
     case MMDB_DTYPE_DOUBLE:
         silly_pindent(indent);
-        fprintf(stderr, "%f\n", decode_all->decode.data.double_value);
+        fprintf(stdout, "%f\n", decode_all->decode.data.double_value);
         decode_all = decode_all->next;
 
         break;
     case MMDB_DTYPE_UINT16:
     case MMDB_DTYPE_UINT32:
         silly_pindent(indent);
-        fprintf(stderr, "%u\n", decode_all->decode.data.uinteger);
+        fprintf(stdout, "%u\n", decode_all->decode.data.uinteger);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_UINT64:
     case MMDB_DTYPE_UINT128:
         silly_pindent(indent);
-        fprintf(stderr, "some UINT64 or UINT128 data\n");
+        fprintf(stdout, "Some UINT64 or UINT128 data\n");
         //fprintf(stderr, "%u\n", decode_all->decode.data.uinteger);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_INT32:
         silly_pindent(indent);
-        fprintf(stderr, "%d\n", decode_all->decode.data.sinteger);
+        fprintf(stdout, "%d\n", decode_all->decode.data.sinteger);
         decode_all = decode_all->next;
         break;
     default:
