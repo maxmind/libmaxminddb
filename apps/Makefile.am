@@ -12,7 +12,7 @@ mmdblookup.lo mmdblookup.o: mmdblookup.c
 
 mmdbdump_DEPENDENCIES = $(top_builddir)/libmaxminddb/libmaxminddb.la
 mmdbdump_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la -lc
-mmdbdump_SOURCES = mmdblookup.c MMDB_Helper.c
+mmdbdump_SOURCES = mmdbdump.c MMDB_Helper.c
 
 mmdbdump.lo mmdblookup.o: mmdblookup.c
 

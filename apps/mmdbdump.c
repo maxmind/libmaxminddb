@@ -42,6 +42,7 @@ int main(int argc, char *const argv[])
     assert(fname != NULL);
 
     MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
+    //MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_STANDARD);
 
     if (!mmdb) {
         fprintf(stderr, "Can't open %s\n", fname);
