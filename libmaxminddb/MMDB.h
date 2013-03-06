@@ -49,7 +49,7 @@ extern "C" {
 #define MMDB_OUTOFMEMORY (-5)
 
 /* */
-# define MMDB_DEBUG (1)
+# define MMDB_DEBUG (0)
 
 #if MMDB_DEBUG
 #define MMDB_DBG_CARP(...) fprintf(stderr, __VA_ARGS__ );
