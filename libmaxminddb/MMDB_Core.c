@@ -1119,9 +1119,10 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
     case MMDB_DTYPE_ARRAY:
         {
             int array_size = decode->decode.data.data_size;
+            MMDB_DBG_CARP("Decode array with %d entries\n", array_size);
             uint32_t array_offset = decode->decode.offset_to_next;
             MMDB_decode_all_s *previous = decode;
-            decode->indent = 1;
+            // decode->indent = 1;
             while (array_size-- > 0) {
                 MMDB_decode_all_s *decode_to = previous->next =
                     calloc(1, sizeof(MMDB_decode_all_s));
