@@ -70,8 +70,8 @@ int main(int argc, char *const argv[])
 
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
     uint32_t ipnum = htonl(ip.s_addr);
-    int err = MMDB_lookup_by_ipnum(ipnum, &root);
-    if (err == MMDB_SUCCESS) {
+    int status = MMDB_lookup_by_ipnum(ipnum, &root);
+    if (status == MMDB_SUCCESS) {
         double dlat, dlon;
         char *city, *country, *region_name, code2[3];
         if (root.entry.offset > 0) {
