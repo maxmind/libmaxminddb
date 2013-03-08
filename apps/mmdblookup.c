@@ -83,8 +83,8 @@ int main(int argc, char *const argv[])
             MMDB_entry_s location = {.mmdb = mmdb,.offset = res_location.offset
             };
             if (res_location.offset) {
-                MMDB_get_value(&location, &lat, "lat", NULL);
-                MMDB_get_value(&location, &lon, "lon", NULL);
+                MMDB_get_value(&location, &lat, "latitude", NULL);
+                MMDB_get_value(&location, &lon, "longitude", NULL);
                 dlat = lat.double_value;
                 dlon = lon.double_value;
             } else {
@@ -94,9 +94,9 @@ int main(int argc, char *const argv[])
             //     printf( "%u %f %f\n", ipnum , dlat, dlon);
 
             MMDB_return_s res;
-            MMDB_get_value(&root.entry, &res, "city", "name", "ascii", NULL);
+            MMDB_get_value(&root.entry, &res, "city", "name", "en", NULL);
             city = bytesdup(&res);
-            MMDB_get_value(&root.entry, &res, "country", "name", "ascii", NULL);
+            MMDB_get_value(&root.entry, &res, "country", "name", "en", NULL);
             country = bytesdup(&res);
 
             printf("%u %f %f %s %s\n", ipnum, dlat, dlon, city, country);
