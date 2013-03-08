@@ -1181,6 +1181,7 @@ int MMDB_dump(MMDB_decode_all_s * decode_all, int indent)
         decode_all = dump(decode_all, indent);
     }
     // not sure about the return type right now
+    return MMDB_SUCCESS;
 }
 
 LOCAL void silly_pindent(int i)
