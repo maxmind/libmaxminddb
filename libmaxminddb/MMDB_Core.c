@@ -1104,10 +1104,7 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 
         if (decode->decode.data.type == MMDB_DTYPE_ARRAY
             || decode->decode.data.type == MMDB_DTYPE_MAP) {
-
             get_tree(mmdb, last_offset, decode);
-            while (decode->next)
-                decode = decode->next;
         }
         decode->decode.offset_to_next = tmp;
         return MMDB_SUCCESS;
