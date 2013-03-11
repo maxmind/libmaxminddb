@@ -72,8 +72,6 @@ int main(int argc, char *const argv[])
     uint32_t ipnum = htonl(ip.s_addr);
     int status = MMDB_lookup_by_ipnum(ipnum, &root);
     if (status == MMDB_SUCCESS) {
-        double dlat, dlon;
-        char *city, *country, *region_name, code2[3];
         if (root.entry.offset > 0) {
             MMDB_return_s res_location;
             MMDB_decode_all_s *decode_all =
