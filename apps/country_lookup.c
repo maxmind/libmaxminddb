@@ -39,7 +39,7 @@ int main(int argc, char *const argv[])
 
     MMDB_s *mmdb =
         MMDB_open(fname ? fname :
-                  "/usr/local/share/GeoIP2/reference-database.dat",
+                  "/usr/local/share/GeoIP2/city-region.db",
                   MMDB_MODE_MEMORY_CACHE);
 
     for (int i = 1; i <= 10000000; i++) {
@@ -59,7 +59,7 @@ int main(int argc, char *const argv[])
                     MMDB_return_s res;
                     MMDB_get_value(&start, &res, "code", NULL);
                     code = bytesdup(&res);
-                    MMDB_get_value(&start, &res, "name", "ascii", NULL);
+                    MMDB_get_value(&start, &res, "name", "en", NULL);
                     name = bytesdup(&res);
 
 //                    printf( "%u %s %s\n", ipnum , code, name);
