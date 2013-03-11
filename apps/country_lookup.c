@@ -9,12 +9,6 @@
 // country lookup is not useful, it is just to see how fast it is compared to
 // 106
 
-void usage(char *prg)
-{
-    fprintf(stderr, "Usage: %s -f database addr\n", prg);
-    exit(1);
-}
-
 int main(int argc, char *const argv[])
 {
     int verbose = 0;
