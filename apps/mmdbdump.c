@@ -7,11 +7,6 @@
 #include "getopt.h"
 #include <assert.h>
 
-void usage(char *prg)
-{
-    fprintf(stderr, "Usage: %s -f database addr\n", prg);
-    exit(1);
-}
 
 int main(int argc, char *const argv[])
 {
@@ -36,7 +31,7 @@ int main(int argc, char *const argv[])
     argv += optind;
 
     if (!fname) {
-        fname = strdup("/usr/local/share/GeoIP2/reference-database.dat");
+        fname = strdup("/usr/local/share/GeoIP2/city-region.db");
     }
 
     assert(fname != NULL);
@@ -59,13 +54,7 @@ int main(int argc, char *const argv[])
     }
 
     if (verbose) {
-        MMDB_decode_all_s *decode_all = calloc(1, sizeof(MMDB_decode_all_s));
-        int err = MMDB_get_tree(&mmdb->meta, &decode_all);
-        assert(err == MMDB_SUCCESS);
-
-        if (decode_all != NULL)
-            MMDB_dump(decode_all, 0);
-        free(decode_all);
+      dump_meta(mmdb);
     }
 
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
