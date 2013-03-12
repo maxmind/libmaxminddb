@@ -156,6 +156,8 @@ extern "C" {
     extern int MMDB_dump(MMDB_decode_all_s * decode_all, int indent);
     extern int MMDB_get_tree(MMDB_entry_s * start,
                              MMDB_decode_all_s ** decode_all);
+    extern MMDB_decode_all_s * MMDB_alloc_decode_all(void);
+    extern void MMDB_free_decode_all( MMDB_decode_all_s * freeme);
 #ifdef __cplusplus
 }
 #endif

@@ -1070,8 +1070,7 @@ const char *MMDB_lib_version(void)
 
 int MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
 {
-    MMDB_decode_all_s *decode = *decode_all =
-        calloc(1, sizeof(MMDB_decode_all_s));
+    MMDB_decode_all_s *decode = *decode_all = MMDB_alloc_decode_all();
     uint32_t offset = start->offset;
     int err;
     do {
@@ -1124,7 +1123,7 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
             // decode->indent = 1;
             while (array_size-- > 0) {
                 MMDB_decode_all_s *decode_to = previous->next =
-                    calloc(1, sizeof(MMDB_decode_all_s));
+                    MMDB_alloc_decode_all();
                 get_tree(mmdb, array_offset, decode_to);
                 array_offset = decode_to->decode.offset_to_next;
                 while (previous->next)
@@ -1147,7 +1146,7 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
             MMDB_decode_all_s *previous = decode;
             while (size-- > 0) {
                 MMDB_decode_all_s *decode_to = previous->next =
-                    calloc(1, sizeof(MMDB_decode_all_s));
+                    MMDB_alloc_decode_all();
                 get_tree(mmdb, offset, decode_to);
                 while (previous->next)
                     previous = previous->next;
@@ -1158,8 +1157,7 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 #endif
 
                 offset = decode_to->decode.offset_to_next;
-                decode_to = previous->next =
-                    calloc(1, sizeof(MMDB_decode_all_s));
+                decode_to = previous->next = MMDB_alloc_decode_all();
                 get_tree(mmdb, offset, decode_to);
                 while (previous->next)
                     previous = previous->next;
@@ -1248,4 +1246,16 @@ LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
         assert(0);
     }
     return decode_all;
+}
+
+MMDB_decode_all_s *MMDB_alloc_decode_all(void)
+{
+    return calloc(1, sizeof(MMDB_decode_all_s));
+}
+
+void MMDB_free_decode_all(MMDB_decode_all_s * freeme)
+{
+    if (freeme->next)
+        MMDB_free_decode_all(freeme->next);
+    free(freeme);
 }
