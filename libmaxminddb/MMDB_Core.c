@@ -669,7 +669,7 @@ LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
         return MMDB_INVALIDDATABASE;
     }
 
-    mmdb->fake_metadata_db = calloc(sizeof(struct MMDB_s), 1);
+    mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));
     mmdb->fake_metadata_db->dataptr = metadata + 14;
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
 
