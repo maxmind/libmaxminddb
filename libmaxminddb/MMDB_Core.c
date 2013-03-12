@@ -366,12 +366,14 @@ void MMDB_free_all(MMDB_s * mmdb)
             close(mmdb->fd);
         if (mmdb->file_in_mem_ptr)
             free((void *)mmdb->file_in_mem_ptr);
-        if (mmdb->meta_data_content) {
+        else if (mmdb->meta_data_content) {
             free(mmdb->meta_data_content);
         }
+#if 0
         if (mmdb->fake_metadata_db) {
             free(mmdb->fake_metadata_db);
         }
+#endif
         free((void *)mmdb);
     }
 }
