@@ -1096,7 +1096,7 @@ const char *MMDB_lib_version(void)
 
 int MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
 {
-    MMDB_decode_all_s *decode = *decode_all;
+    MMDB_decode_all_s *decode = *decode_all = MMDB_alloc_decode_all();
     uint32_t offset = start->offset;
     int err;
     do {
