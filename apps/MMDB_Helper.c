@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int is_ipv4(MMDB_s * mmdb)
+{
+    return mmdb->depth == 32;
+}
+
 char *bytesdup(MMDB_return_s const *const ret)
 {
     char *mem = NULL;

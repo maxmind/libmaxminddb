@@ -19,4 +19,5 @@ char *bytesdup(MMDB_return_s const *const ret);
 void dump_ipinfo(const char * ipstr, MMDB_root_entry_s * ipinfo);
 void dump_meta(MMDB_s * mmdb);
 void usage(char *prg);
+int is_ipv4(MMDB_s * mmdb);
 #endif
