@@ -77,41 +77,9 @@ int MMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
                    16);
 
         } else {
-	    /* should never happen */
+            /* should never happen */
             assert(0);
         }
-        freeaddrinfo(aifirst);
-    }
-    return gaierr;
-}
-
-int MMDB_lookupaddress(const char *host, int ai_flags, struct in_addr *ip)
-{
-    struct addrinfo hints = {.ai_family = AF_INET,
-        .ai_flags = ai_flags,
-        .ai_socktype = SOCK_STREAM
-    }, *aifirst;
-    int gaierr = getaddrinfo(host, NULL, &hints, &aifirst);
-
-    if (gaierr == 0) {
-        memcpy(&ip->s_addr, &((struct sockaddr_in *)aifirst->ai_addr)->sin_addr,
-               4);
-        freeaddrinfo(aifirst);
-    }
-    return gaierr;
-}
-
-int MMDB_lookupaddress_v6(const char *host, int ai_flags, struct in6_addr *ipv6)
-{
-    struct addrinfo hints = {.ai_family = AF_INET6,
-        .ai_flags = ai_flags,.ai_socktype = SOCK_STREAM
-    }, *aifirst;
-    int gaierr = getaddrinfo(host, NULL, &hints, &aifirst);
-
-    if (gaierr == 0) {
-        memcpy(ipv6->s6_addr,
-               ((struct sockaddr_in6 *)aifirst->ai_addr)->sin6_addr.s6_addr,
-               16);
         freeaddrinfo(aifirst);
     }
     return gaierr;
