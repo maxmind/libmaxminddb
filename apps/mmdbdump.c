@@ -77,17 +77,15 @@ int main(int argc, char *const argv[])
         status = MMDB_lookup_by_ipnum(ipnum, &root);
     } else {
         status = MMDB_lookup_by_ipnum_128(ip.v6, &root);
-
     }
     if (status == MMDB_SUCCESS) {
         if (root.entry.offset > 0) {
             MMDB_return_s res_location;
-            MMDB_decode_all_s *decode_all =
-                calloc(1, sizeof(MMDB_decode_all_s));
+            MMDB_decode_all_s *decode_all;
             int err = MMDB_get_tree(&root.entry, &decode_all);
             if (decode_all != NULL)
                 MMDB_dump(decode_all, 0);
-            free(decode_all);
+            MMDB_free_decode_all(decode_all);
 
         } else {
             puts("Sorry, nothing found");       // not found
