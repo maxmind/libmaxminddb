@@ -156,8 +156,16 @@ extern "C" {
     extern int MMDB_dump(MMDB_decode_all_s * decode_all, int indent);
     extern int MMDB_get_tree(MMDB_entry_s * start,
                              MMDB_decode_all_s ** decode_all);
-    extern MMDB_decode_all_s * MMDB_alloc_decode_all(void);
-    extern void MMDB_free_decode_all( MMDB_decode_all_s * freeme);
+    extern MMDB_decode_all_s *MMDB_alloc_decode_all(void);
+    extern void MMDB_free_decode_all(MMDB_decode_all_s * freeme);
+
+    extern int MMDB_lookupaddress_v6(const char *host, int ai_flags,
+                                     struct in6_addr *ipv6);
+    extern int MMDB_lookupaddress(const char *host, int ai_flags,
+                                  struct in_addr *ipv4);
+    extern int MMDB_lookupaddressX(const char *host, int ai_family,
+                                   int ai_flags, void *ip);
+
 #ifdef __cplusplus
 }
 #endif
