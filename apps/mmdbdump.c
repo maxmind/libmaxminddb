@@ -8,11 +8,6 @@
 #include <assert.h>
 #include <netdb.h>
 
-static int is_ipv4(MMDB_s * mmdb)
-{
-    return mmdb->depth == 32;
-}
-
 int main(int argc, char *const argv[])
 {
     int verbose = 0;
