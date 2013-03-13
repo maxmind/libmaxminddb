@@ -6,7 +6,12 @@
 #include "MMDB_Helper.h"
 #include "getopt.h"
 #include <assert.h>
+#include <netdb.h>
 
+static int is_ipv4(MMDB_s * mmdb)
+{
+    return mmdb->depth == 32;
+}
 
 int main(int argc, char *const argv[])
 {
@@ -31,7 +36,7 @@ int main(int argc, char *const argv[])
     argv += optind;
 
     if (!fname) {
-        fname = strdup("/usr/local/share/GeoIP2/city-region.db");
+        fname = strdup("/usr/local/share/GeoIP2/city-v6.db");
     }
 
     assert(fname != NULL);
@@ -47,19 +52,33 @@ int main(int argc, char *const argv[])
     free(fname);
 
     char *ipstr = argv[0];
-    struct in_addr ip;
-    if (ipstr == NULL || 1 != addr_to_num(ipstr, &ip)) {
+    union {
+        struct in_addr v4;
+        struct in6_addr v6;
+    } ip;
+
+    int ai_family = is_ipv4(mmdb) ? AF_INET : AF_INET6;
+    int ai_flags = AI_V4MAPPED; // accept everything
+
+    if (ipstr == NULL || 0 != MMDB_lookupaddressX(ipstr, ai_family, ai_flags,
+                                                  &ip)) {
         fprintf(stderr, "Invalid IP\n");
         exit(1);
     }
 
     if (verbose) {
-      dump_meta(mmdb);
+        dump_meta(mmdb);
     }
 
+    int status;
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
-    uint32_t ipnum = htonl(ip.s_addr);
-    int status = MMDB_lookup_by_ipnum(ipnum, &root);
+    if (is_ipv4(mmdb)) {
+        uint32_t ipnum = htonl(ip.v4.s_addr);
+        status = MMDB_lookup_by_ipnum(ipnum, &root);
+    } else {
+        status = MMDB_lookup_by_ipnum_128(ip.v6, &root);
+
+    }
     if (status == MMDB_SUCCESS) {
         if (root.entry.offset > 0) {
             MMDB_return_s res_location;
@@ -74,6 +93,5 @@ int main(int argc, char *const argv[])
             puts("Sorry, nothing found");       // not found
         }
     }
-
     return (0);
 }
