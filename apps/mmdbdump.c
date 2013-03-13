@@ -53,7 +53,7 @@ int main(int argc, char *const argv[])
     } ip;
 
     int ai_family = is_ipv4(mmdb) ? AF_INET : AF_INET6;
-    int ai_flags = AI_V4MAPPED; // accept everything
+    int ai_flags = AI_V4MAPPED;
 
     if (ipstr == NULL || 0 != MMDB_lookupaddressX(ipstr, ai_family, ai_flags,
                                                   &ip)) {
