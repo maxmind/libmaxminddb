@@ -1070,7 +1070,7 @@ const char *MMDB_lib_version(void)
 
 int MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
 {
-    MMDB_decode_all_s *decode = *decode_all = MMDB_alloc_decode_all();
+    MMDB_decode_all_s *decode = *decode_all;
     uint32_t offset = start->offset;
     int err;
     do {
@@ -1080,13 +1080,6 @@ int MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
     } while (0);
 //    } while ((offset = decode->decode.offset_to_next));
     return MMDB_SUCCESS;
-}
-
-void MMDB_free_decode_all(MMDB_decode_all_s * decode_all)
-{
-    if (decode_all->next)
-        MMDB_free_decode_all(decode_all->next);
-    free(decode_all);
 }
 
 LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
@@ -1255,6 +1248,8 @@ MMDB_decode_all_s *MMDB_alloc_decode_all(void)
 
 void MMDB_free_decode_all(MMDB_decode_all_s * freeme)
 {
+    if (freeme == NULL)
+        return;
     if (freeme->next)
         MMDB_free_decode_all(freeme->next);
     free(freeme);
