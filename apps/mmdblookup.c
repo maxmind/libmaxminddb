@@ -62,14 +62,10 @@ int main(int argc, char *const argv[])
         dump_meta(mmdb);
     }
 
-    int status;
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
-    if (is_ipv4(mmdb)) {
-        uint32_t ipnum = htonl(ip.v4.s_addr);
-        status = MMDB_lookup_by_ipnum(ipnum, &root);
-    } else {
-        status = MMDB_lookup_by_ipnum_128(ip.v6, &root);
-    }
+    int status = is_ipv4(mmdb)
+        ? MMDB_lookup_by_ipnum(htonl(ip.v4.s_addr), &root)
+        : MMDB_lookup_by_ipnum_128(ip.v6, &root);
 
     if (status == MMDB_SUCCESS) {
         dump_ipinfo(ipstr, &root);
