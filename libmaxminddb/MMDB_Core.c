@@ -437,6 +437,8 @@ LOCAL int fddecode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 void MMDB_free_all(MMDB_s * mmdb)
 {
     if (mmdb) {
+        if (mmdb->fname)
+            free(mmdb->fname);
         if (mmdb->fd >= 0)
             close(mmdb->fd);
         if (mmdb->file_in_mem_ptr)
@@ -727,6 +729,9 @@ LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
     ssize_t iread;
     ssize_t size;
     off_t offset;
+    mmdb->fname = strdup(fname);
+    if (mmdb->fname == NULL)
+        return MMDB_OUTOFMEMORY;
     mmdb->fd = fd = open(fname, O_RDONLY);
     if (fd < 0)
         return MMDB_OPENFILEERROR;

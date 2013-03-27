@@ -88,6 +88,7 @@ extern "C" {
     typedef struct MMDB_s {
         uint32_t flags;
         int fd;
+        char *fname;
         const uint8_t *file_in_mem_ptr;
         int major_file_format;
         int minor_file_format;
