@@ -48,6 +48,10 @@ extern "C" {
 #define MMDB_IOERROR (-4)
 #define MMDB_OUTOFMEMORY (-5)
 
+/* Looks better */
+#define MMDB_TRUE (1)
+#define MMDB_FALSE (0)
+
 /* */
 # define MMDB_DEBUG (0)
 
