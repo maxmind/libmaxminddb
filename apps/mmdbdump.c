@@ -31,7 +31,7 @@ int main(int argc, char *const argv[])
     argv += optind;
 
     if (!fname) {
-        fname = strdup("/usr/local/share/GeoIP2/city-v6.db");
+        fname = strdup(MMDB_DEFAULT_DATABASE);
     }
 
     assert(fname != NULL);

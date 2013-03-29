@@ -5,7 +5,6 @@
 #include <string.h>
 #include <arpa/inet.h>
 
-
 /* dummy content */
 
 #define die(...) do { \

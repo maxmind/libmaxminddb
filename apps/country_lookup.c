@@ -33,7 +33,7 @@ int main(int argc, char *const argv[])
 
     MMDB_s *mmdb =
         MMDB_open(fname ? fname :
-                  "/usr/local/share/GeoIP2/city-region.db",
+                  MMDB_DEFAULT_DATABASE,
                   MMDB_MODE_MEMORY_CACHE);
 
     for (int i = 1; i <= 10000000; i++) {
