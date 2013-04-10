@@ -4,22 +4,18 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-uint32_t ip_to_num(char *ipstr)
-{
-    struct in_addr ip;
-    if (ipstr == NULL || 1 != inet_pton(AF_INET, ipstr, &ip))
-        return 0;
-    return htonl(ip.s_addr);
-}
-
 int main(void)
 {
-    char *fname = "./data/test-database.dat";
+    char *fname = getenv("MMDB_TEST_DATABASE");
+    if (!fname)
+        fname = MMDB_DEFAULT_DATABASE;
+
     struct stat sstat;
     int err = stat(fname, &sstat);
     ok(err == 0, "%s exists", fname);
 
     MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
+    // MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_STANDARD);
     ok(mmdb != NULL, "MMDB_open successful");
     if (mmdb) {
 
