@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include "test_helper.h"
 
 uint32_t ip_to_num(char *ipstr)
 {
@@ -62,7 +63,7 @@ void test_mmdb(MMDB_s * mmdb)
 
 int main(void)
 {
-    char *fname = "./data/test-database.dat";
+    char *fname = get_test_db_fname();
     struct stat sstat;
     int err = stat(fname, &sstat);
     ok(err == 0, "%s exists", fname);

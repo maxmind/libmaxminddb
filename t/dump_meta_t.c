@@ -3,12 +3,11 @@
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include "test_helper.h"
 
 int main(void)
 {
-    char *fname = getenv("MMDB_TEST_DATABASE");
-    if (!fname)
-        fname = MMDB_DEFAULT_DATABASE;
+    char *fname = get_test_db_fname();
 
     struct stat sstat;
     int err = stat(fname, &sstat);

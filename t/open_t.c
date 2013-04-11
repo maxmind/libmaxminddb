@@ -1,10 +1,11 @@
 #include "MMDB.h"
 #include "tap.h"
 #include <sys/stat.h>
+#include "test_helper.h"
 
 int main(void)
 {
-    char *fname = "./data/test-database.dat";
+    char *fname = get_test_db_fname();
     struct stat sstat;
     int err = stat(fname, &sstat);
     ok(err == 0, "%s exists", fname);
