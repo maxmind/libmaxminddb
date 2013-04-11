@@ -4,14 +4,6 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-uint32_t ip_to_num(char *ipstr)
-{
-    struct in_addr ip;
-    if (ipstr == NULL || 1 != inet_pton(AF_INET, ipstr, &ip))
-        return 0;
-    return htonl(ip.s_addr);
-}
-
 int main(void)
 {
     char *fname = "./data/test-database.dat";
