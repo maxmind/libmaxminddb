@@ -7,8 +7,9 @@
 
 int main(void)
 {
-    char *fname = get_test_db_fname();
+    in_addrX ipnum;
     struct stat sstat;
+    char *fname = get_test_db_fname();
     int err = stat(fname, &sstat);
     ok(err == 0, "%s exists", fname);
 
@@ -18,8 +19,8 @@ int main(void)
 
         MMDB_root_entry_s root = {.entry.mmdb = mmdb };
         char *ipstr = "24.24.24.24";
-        uint32_t ipnum = ip_to_num(ipstr);
-        err = MMDB_lookup_by_ipnum(ipnum, &root);
+        ip_to_num(mmdb, ipstr, &ipnum);
+        err = MMDB_lookup_by_ipnum_128(ipnum.v6, &root);
         ok(err == MMDB_SUCCESS, "Search for %s SUCCESSFUL", ipstr);
         ok(root.entry.offset > 0, "Found something %s good", ipstr);
         MMDB_decode_all_s *decode_all = calloc(1, sizeof(MMDB_decode_all_s));

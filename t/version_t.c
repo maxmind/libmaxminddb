@@ -10,7 +10,8 @@ int main(void)
 {
     const char *version = MMDB_lib_version();
     ok(version != NULL, "MMDB_lib_version exists");
-    if ( version )
-        ok(strcmp(version, PACKAGE_VERSION) == 0, "version is " PACKAGE_VERSION);
+    if (version)
+        ok(strcmp(version, PACKAGE_VERSION) == 0,
+           "version is " PACKAGE_VERSION);
     done_testing();
 }

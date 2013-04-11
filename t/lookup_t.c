@@ -5,26 +5,19 @@
 #include <string.h>
 #include "test_helper.h"
 
-uint32_t ip_to_num(char *ipstr)
-{
-    struct in_addr ip;
-    if (ipstr == NULL || 1 != inet_pton(AF_INET, ipstr, &ip))
-        return 0;
-    return htonl(ip.s_addr);
-}
-
 void test_mmdb(MMDB_s * mmdb)
 {
-
+    in_addrX ipnum;
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
+
     char *ipstr = "127.0.0.1";
-    uint32_t ipnum = ip_to_num(ipstr);
-    int err = MMDB_lookup_by_ipnum(ipnum, &root);
+    ip_to_num(mmdb, ipstr, &ipnum);
+    int err = MMDB_lookup_by_ipnum(ipnum.v4.s_addr, &root);
     ok(err == MMDB_SUCCESS, "Search for %s SUCCESSFUL", ipstr);
     ok(root.entry.offset == 0, "No entries found for %s good", ipstr);
     ipstr = "24.24.24.24";
-    ipnum = ip_to_num(ipstr);
-    err = MMDB_lookup_by_ipnum(ipnum, &root);
+    ip_to_num(mmdb, ipstr, &ipnum);
+    err = MMDB_lookup_by_ipnum(ipnum.v4.s_addr, &root);
     ok(err == MMDB_SUCCESS, "Search for %s SUCCESSFUL", ipstr);
     ok(root.entry.offset > 0, "Found something %s good", ipstr);
     MMDB_return_s country;
