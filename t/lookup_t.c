@@ -10,6 +10,11 @@ void test_mmdb(MMDB_s * mmdb)
     in_addrX ipnum;
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
 
+    if (mmdb->depth != 32) {
+        note("This test should test IPv4 lookups on top of a IPv4 database\nThis database is not suitable\nWe skip all tests.");
+        return;
+    }
+
     char *ipstr = "127.0.0.1";
     ip_to_num(mmdb, ipstr, &ipnum);
     int err = MMDB_lookup_by_ipnum(ipnum.v4.s_addr, &root);
