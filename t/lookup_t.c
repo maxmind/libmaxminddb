@@ -32,7 +32,7 @@ void test_mmdb(MMDB_s * mmdb)
         MMDB_entry_s country_hash = {.mmdb = mmdb,.offset = country.offset
         };
         MMDB_return_s result;
-        MMDB_get_value(&country_hash, &result, "code", NULL);
+        MMDB_get_value(&country_hash, &result, "iso_3166_1_alpha_2", NULL);
         ok(result.offset > 0, "Found country code for %s", ipstr);
         if (result.offset > 0) {
             ok(MMDB_strcmp_result(mmdb, &result, "US") == 0,
