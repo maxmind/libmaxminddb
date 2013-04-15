@@ -703,6 +703,7 @@ LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
     }
 
     mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));
+    mmdb->fake_metadata_db->fd = -1;
     mmdb->fake_metadata_db->dataptr = metadata + 14;
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
 
