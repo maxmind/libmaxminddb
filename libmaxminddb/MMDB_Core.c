@@ -526,6 +526,10 @@ MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
+
+    if (mmdb->fd >= 0)
+        return MMDB_fdlookup_by_ipnum_128(ipnum, result);
+
     int segments = mmdb->node_count;
     uint32_t offset = 0;
     int rl = mmdb->full_record_size_bytes;
@@ -622,6 +626,12 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
 
 LOCAL void decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
 {
+
+    if (mmdb->fd >= 0) {
+        fddecode_key(mmdb, offset, ret_key);
+        return;
+    }
+
     const uint8_t *mem = mmdb->dataptr;
     uint8_t ctrl, type;
     ctrl = mem[offset++];
@@ -785,6 +795,12 @@ LOCAL uint32_t get_uint_value(MMDB_entry_s * start, ...)
 
 LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 {
+
+    if (mmdb->fd >= 0) {
+        fddecode_one(mmdb, offset, decode);
+        return;
+    }
+
     const uint8_t *mem = mmdb->dataptr;
     const uint8_t *p;
     uint8_t ctrl;
