@@ -69,9 +69,9 @@ void dump_ipinfo(const char * ipstr, MMDB_root_entry_s * ipinfo)
         //     printf( "%u %f %f\n", ipnum , dlat, dlon);
 
         MMDB_return_s res;
-        MMDB_get_value(&ipinfo->entry, &res, "city", "name", "en", NULL);
+        MMDB_get_value(&ipinfo->entry, &res, "city", "names", "en", NULL);
         city = bytesdup(&res);
-        MMDB_get_value(&ipinfo->entry, &res, "country", "name", "en", NULL);
+        MMDB_get_value(&ipinfo->entry, &res, "country", "names", "en", NULL);
         country = bytesdup(&res);
 
         printf("%s %f %f %s %s\n",ipstr, dlat, dlon, city == NULL ? "N/A" : city, country);
