@@ -295,6 +295,13 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         return MMDB_SUCCESS;
     }
 
+    if (type == MMDB_DTYPE_BOOLEAN) {
+        decode->data.uinteger = !!size;
+        decode->data.data_size = 0;
+        decode->offset_to_next = offset;
+        return MMDB_SUCCESS;
+    }
+
     if (size == 0 && type != MMDB_DTYPE_UINT16 && type != MMDB_DTYPE_UINT32
         && type != MMDB_DTYPE_INT32) {
         decode->data.ptr = NULL;
@@ -822,6 +829,14 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         decode->data.data_size = size;
         decode->offset_to_next = offset;
         MMDB_DBG_CARP("decode_one type:%d size:%d\n", type, size);
+        return;
+    }
+
+    if (type == MMDB_DTYPE_BOOLEAN) {
+        decode->data.uinteger = !!size;
+        decode->data.data_size = 0;
+        decode->offset_to_next = offset;
+        MMDB_DBG_CARP("decode_one type:%d size:%d\n", type, 0);
         return;
     }
 

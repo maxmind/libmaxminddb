@@ -30,6 +30,7 @@ extern "C" {
 # define MMDB_DTYPE_ARRAY (11)
 # define MMDB_DTYPE_CONTAINER (12)
 # define MMDB_DTYPE_END_MARKER (13)
+# define MMDB_DTYPE_BOOLEAN (14)
 
 # define MMDB_DTYPE_MAX (MMDB_DTYPE_END_MARKER)
 
