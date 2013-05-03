@@ -1258,6 +1258,7 @@ LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
         break;
     case MMDB_DTYPE_UINT16:
     case MMDB_DTYPE_UINT32:
+    case MMDB_DTYPE_BOOLEAN:
         silly_pindent(indent);
         fprintf(stdout, "%u\n", decode_all->decode.data.uinteger);
         decode_all = decode_all->next;
