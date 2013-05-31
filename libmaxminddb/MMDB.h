@@ -33,8 +33,10 @@ extern "C" {
 #define MMDB_DTYPE_CONTAINER (12)
 #define MMDB_DTYPE_END_MARKER (13)
 #define MMDB_DTYPE_BOOLEAN (14)
+#define MMDB_DTYPE_IEEE754_FLOAT (15)
+#define MMDB_DTYPE_IEEE754_DOUBLE (16)
 
-#define MMDB_DTYPE_MAX (MMDB_DTYPE_END_MARKER)
+#define MMDB_DTYPE_MAX (MMDB_DTYPE_IEEE754_DOUBLE)
 
 #define MMDB_DATASECTION_NOOP_SIZE (16)
 
@@ -103,6 +105,7 @@ extern "C" {
     typedef struct MMDB_return_s {
         /* return values */
         union {
+            float float_value;
             double double_value;
             int sinteger;
             uint32_t uinteger;

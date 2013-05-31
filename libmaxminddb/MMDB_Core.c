@@ -85,6 +85,42 @@ int MMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
     return gaierr;
 }
 
+LOCAL float get_ieee754_float(const uint8_t * restrict p)
+{
+    volatile float f;
+    uint8_t *q = &f;
+#if defined(__LITTLE_ENDIAN__)
+    q[3] = p[0];
+    q[2] = p[1];
+    q[1] = p[2];
+    q[0] = p[3];
+#else
+    memcpy(q, p, 4);
+#endif
+    return f;
+}
+
+LOCAL double get_ieee754_double(const uint8_t * restrict p)
+{
+    volatile double d;
+    uint8_t *q = (void *)&d;
+
+#if defined(__LITTLE_ENDIAN__)
+    q[7] = p[0];
+    q[6] = p[1];
+    q[5] = p[2];
+    q[4] = p[3];
+    q[3] = p[4];
+    q[2] = p[5];
+    q[1] = p[6];
+    q[0] = p[7];
+#else
+    memcpy(q, p, 8);
+#endif
+
+    return d;
+}
+
 LOCAL uint32_t get_uint32(const uint8_t * p)
 {
     return (p[0] * 16777216U + p[1] * 65536 + p[2] * 256 + p[3]);
@@ -325,6 +361,12 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     } else if (type == MMDB_DTYPE_DOUBLE) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
         decode->data.double_value = get_double(b, size);
+    } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
+        FD_RET_ON_ERR(atomic_read(fd, &b[0], 4, segments + offset));
+        decode->data.float_value = get_ieee754_float(b);
+    } else if (type == MMDB_DTYPE_IEEE754_DOUBLE) {
+        FD_RET_ON_ERR(atomic_read(fd, &b[0], 8, segments + offset));
+        decode->data.double_value = get_ieee754_double(b);
     } else {
         decode->data.ptr = NULL + offset;
         decode->data.data_size = size;
@@ -879,6 +921,10 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
             memcpy(decode->data.c16 + 16 - size, &mem[offset], size);
     } else if (type == MMDB_DTYPE_DOUBLE) {
         decode->data.double_value = get_double(&mem[offset], size);
+    } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
+        decode->data.float_value = get_ieee754_float(&mem[offset]);
+    } else if (type == MMDB_DTYPE_IEEE754_DOUBLE) {
+        decode->data.double_value = get_ieee754_double(&mem[offset]);
     } else {
         decode->data.ptr = &mem[offset];
         decode->data.data_size = size;
