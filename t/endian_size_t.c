@@ -12,11 +12,11 @@ int main(void)
     double d = 2.57;            // 40048F5C28F5C28F
 
 #if defined ( __LITTLE_ENDIAN__ )
-    uint8_t *binfloat = "\xe1\x7a\x24\x40";
-    uint8_t *bindouble = "\x8f\xc2\xf5\x28\x5c\x8f\x04\x40";
+    uint8_t *binfloat = (void *)"\xe1\x7a\x24\x40";
+    uint8_t *bindouble = (void *)"\x8f\xc2\xf5\x28\x5c\x8f\x04\x40";
 #else
-    uint8_t *binfloat = "\x40\x24\x7a\xe1";
-    uint8_t *bindouble = "\x40\x04\x8F\x5C\x28\xF5\xC2\x8F";
+    uint8_t *binfloat = (void *)"\x40\x24\x7a\xe1";
+    uint8_t *bindouble = (void *)"\x40\x04\x8F\x5C\x28\xF5\xC2\x8F";
 #endif
 
     ok(sizeof(float) == 4, "(sizeof ( float ) == 4");
