@@ -40,6 +40,25 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
 
 LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent);
 
+#if !defined HAVE_MEMMEM
+LOCAL void *memmem(const void *big, size_t big_len, const void *little,
+                   size_t little_len)
+{
+    if (little_len) {
+        int first_char = ((uint8_t *) little)[0];
+        const void *ptr = big;
+        size_t len = big_len;
+        while (len >= little_len
+               && (ptr = memchr(ptr, first_char, len - little_len + 1))) {
+            if (!memcmp(ptr, little, little_len))
+                return (void *)ptr;
+            len = big_len - (++ptr - big);
+        }
+    }
+    return NULL;
+}
+#endif
+
 int MMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
 {
     struct addrinfo hints = {.ai_family = ai_family,
