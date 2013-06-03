@@ -88,7 +88,7 @@ int MMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
 LOCAL float get_ieee754_float(const uint8_t * restrict p)
 {
     volatile float f;
-    uint8_t *q = &f;
+    uint8_t *q = (void *)&f;
 #if defined(__LITTLE_ENDIAN__)
     q[3] = p[0];
     q[2] = p[1];
