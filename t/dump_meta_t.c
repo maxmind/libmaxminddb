@@ -18,11 +18,13 @@ int main(void)
     ok(mmdb != NULL, "MMDB_open successful");
     if (mmdb) {
 
-        MMDB_decode_all_s *decode_all = calloc(1, sizeof(MMDB_decode_all_s));
+        MMDB_decode_all_s *decode_all;
         int err = MMDB_get_tree(&mmdb->meta, &decode_all);
-
-        if (decode_all != NULL)
-            MMDB_dump(decode_all, 0);
+        if (err == MMDB_SUCCESS) {
+            if (decode_all != NULL)
+                MMDB_dump(decode_all, 0);
+            MMDB_free_decode_all(decode_all);
+        }
     }
     done_testing();
 }
