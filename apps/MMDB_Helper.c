@@ -49,12 +49,12 @@ void dump_ipinfo(const char * ipstr, MMDB_root_entry_s * ipinfo)
 {
 
     double dlat, dlon;
-    char *city, *country, *region_name, code2[3];
+    char *city, *country;
     if (ipinfo->entry.offset > 0) {
         MMDB_return_s res_location;
         MMDB_get_value(&ipinfo->entry, &res_location, "location", NULL);
         // TODO handle failed search somehow.
-        MMDB_return_s lat, lon, field;
+        MMDB_return_s lat, lon;
         MMDB_entry_s location = {.mmdb = ipinfo->entry.mmdb,.offset = res_location.offset
         };
         if (res_location.offset) {

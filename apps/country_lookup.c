@@ -43,7 +43,6 @@ int main(int argc, char *const argv[])
         uint32_t ipnum = htonl(rand());
         int err = MMDB_lookup_by_ipnum(ipnum, &root);
         if (err == MMDB_SUCCESS) {
-            double dlat, dlon;
             char *name, *code;
             if (root.entry.offset > 0) {
                 MMDB_return_s country;
