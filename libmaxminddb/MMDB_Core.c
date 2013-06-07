@@ -40,25 +40,6 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
 
 LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent);
 
-LOCAL struct in6_addr IPNUM128_NULL = { };
-
-LOCAL int IN6_ADDR_IS_NULL(struct in6_addr ipnum)
-{
-#if 0
-    for (int i = 0; i < 4; i++) {
-        if (ipnum.__u6_addr.__u6_addr32[i])
-            return 0;
-    }
-#else
-    // more portable but slow.
-    for (int i = 0; i < 16; i++) {
-        if (ipnum.s6_addr[i])
-            return 0;
-    }
-#endif
-    return 1;
-}
-
 int MMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
 {
     struct addrinfo hints = {.ai_family = ai_family,
