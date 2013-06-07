@@ -759,8 +759,6 @@ LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
     mmdb->fake_metadata_db->dataptr = metadata + 14;
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
 
-    MMDB_return_s result;
-
     // we can't fail with ioerror's here. It is a memory operation
     mmdb->major_file_format =
         get_uint_value(&mmdb->meta, KEYS("binary_format_major_version"));
@@ -844,7 +842,6 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     }
 
     const uint8_t *mem = mmdb->dataptr;
-    const uint8_t *p;
     uint8_t ctrl;
     int type;
     decode->data.offset = offset;
@@ -1029,7 +1026,6 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
     uint32_t offset = start->offset;
     char *src_key;
     int src_keylen;
-    int err;
     while ((src_key = va_arg(params, char *))) {
 
         FD_RET_ON_ERR(fddecode_one(mmdb, offset, &decode));
@@ -1120,7 +1116,6 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
 
 LOCAL int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 {
-    int err;
     if (decode->data.type == MMDB_DTYPE_MAP) {
         int size = decode->data.data_size;
         while (size-- > 0) {
