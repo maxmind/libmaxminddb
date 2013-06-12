@@ -25,7 +25,7 @@ AC_TYPE_UINT32_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([memset memem])
+AC_CHECK_FUNCS([memset memmem])
 
 AC_CONFIG_FILES([Makefile
                  libmaxminddb/Makefile
