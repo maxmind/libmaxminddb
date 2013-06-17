@@ -153,11 +153,7 @@ LOCAL int get_sintX(const uint8_t * p, int length)
 
 LOCAL double get_double(const uint8_t * ptr, int length)
 {
-    char fmt[256];
-    double d;
-    snprintf(fmt, sizeof(fmt), "%%%dlf", length);
-    sscanf((const char *)ptr, fmt, &d);
-    return (d);
+    return (length ? strtod(ptr, ptr + length + 1) : 0);
 }
 
 LOCAL int atomic_read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
