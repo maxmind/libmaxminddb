@@ -151,11 +151,6 @@ LOCAL int get_sintX(const uint8_t * p, int length)
     return (int)get_uintX(p, length);
 }
 
-LOCAL double get_double(const uint8_t * ptr, int length)
-{
-    return (length ? strtod(ptr, ptr + length + 1) : 0);
-}
-
 LOCAL int atomic_read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
 {
     while (to_read > 0) {
@@ -354,9 +349,6 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     } else if (type == MMDB_DTYPE_UINT128) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 16, segments + offset));
         memcpy(decode->data.c16, b, 16);
-    } else if (type == MMDB_DTYPE_DOUBLE) {
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
-        decode->data.double_value = get_double(b, size);
     } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 4, segments + offset));
         decode->data.float_value = get_ieee754_float(b);
@@ -917,8 +909,6 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         memset(decode->data.c16, 0, 16);
         if (size > 0)
             memcpy(decode->data.c16 + 16 - size, &mem[offset], size);
-    } else if (type == MMDB_DTYPE_DOUBLE) {
-        decode->data.double_value = get_double(&mem[offset], size);
     } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
         decode->data.float_value = get_ieee754_float(&mem[offset]);
     } else if (type == MMDB_DTYPE_IEEE754_DOUBLE) {
@@ -1309,11 +1299,15 @@ LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
         DPRINT_KEY(&decode_all->decode.data);
         decode_all = decode_all->next;
         break;
-    case MMDB_DTYPE_DOUBLE:
+    case MMDB_DTYPE_IEEE754_DOUBLE:
         silly_pindent(indent);
         fprintf(stdout, "%f\n", decode_all->decode.data.double_value);
         decode_all = decode_all->next;
-
+	break;
+    case MMDB_DTYPE_IEEE754_FLOAT:
+        silly_pindent(indent);
+        fprintf(stdout, "%f\n", decode_all->decode.data.float_value);
+        decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_UINT16:
     case MMDB_DTYPE_UINT32:
