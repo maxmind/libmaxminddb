@@ -13,5 +13,5 @@ typedef union {
 
 char *get_test_db_fname(void);
 void ip_to_num(MMDB_s * mmdb, char *ipstr, in_addrX * dest_ipnum);
-
+int dbl_cmp(double a, double b);
 #endif

@@ -4,6 +4,12 @@
 #include <stdio.h>
 #include "test_helper.h"
 
+// 0 == equal
+int dbl_cmp(double a, double b)
+{
+    return (fabs(a - b) >= 0.00025);
+}
+
 char *get_test_db_fname(void)
 {
     char *fname = getenv("MMDB_TEST_DATABASE");
