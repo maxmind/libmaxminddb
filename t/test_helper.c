@@ -7,6 +7,8 @@
 // 0 == equal
 int dbl_cmp(double a, double b)
 {
+    if (b)
+        return (fabs((a - b) / b) >= 0.00025);
     return (fabs(a - b) >= 0.00025);
 }
 

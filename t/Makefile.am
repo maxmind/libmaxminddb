@@ -10,7 +10,7 @@ open_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
 open_t_SOURCES = open_t.c tap.c test_helper.c
 
 lookup_v4_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
-lookup_v4_t_SOURCES = lookup_v4_t.c tap.c
+lookup_v4_t_SOURCES = lookup_v4_t.c tap.c test_helper.c
 
 lookup_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
 lookup_t_SOURCES = lookup_t.c tap.c test_helper.c
