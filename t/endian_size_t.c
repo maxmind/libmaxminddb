@@ -11,7 +11,7 @@ int main(void)
     float f = 2.57;             // 40247AE1
     double d = 2.57;            // 40048F5C28F5C28F
 
-#if defined ( __LITTLE_ENDIAN__ )
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     uint8_t *binfloat = (void *)"\xe1\x7a\x24\x40";
     uint8_t *bindouble = (void *)"\x8f\xc2\xf5\x28\x5c\x8f\x04\x40";
 #else
