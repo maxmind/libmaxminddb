@@ -3,6 +3,7 @@
 #include <netdb.h>
 #include <stdio.h>
 #include "test_helper.h"
+#include <math.h>
 
 // 0 == equal
 int dbl_cmp(double a, double b)
