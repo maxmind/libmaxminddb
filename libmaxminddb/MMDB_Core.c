@@ -359,10 +359,12 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
                           (fd, &b[16 - size], size, segments + offset));
         memcpy(decode->data.c16, b, 16);
     } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 4, segments + offset));
+        size = 4;
+        FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
         decode->data.float_value = get_ieee754_float(b);
     } else if (type == MMDB_DTYPE_IEEE754_DOUBLE) {
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 8, segments + offset));
+        size = 8;
+        FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
         decode->data.double_value = get_ieee754_double(b);
     } else {
         decode->data.ptr = NULL + offset;
