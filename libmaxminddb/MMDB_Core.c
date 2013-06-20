@@ -24,7 +24,7 @@
 
 // prototypes
 //
-LOCAL void DPRINT_KEY(MMDB_return_s * data);
+LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data);
 
 LOCAL uint32_t get_uint_value(MMDB_entry_s * start, ...);
 LOCAL int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
@@ -38,7 +38,8 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode);
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
 
-LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent);
+LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
+                              int indent);
 
 #if !defined HAVE_MEMMEM
 LOCAL void *memmem(const void *big, size_t big_len, const void *little,
@@ -299,7 +300,9 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         decode->data.uinteger = get_ptr_from(ctrl, b, psize);
         decode->data.data_size = psize + 1;
         decode->offset_to_next = offset + psize + 1;
-	MMDB_DBG_CARP ("fddecode_one{ptr} ctrl:%d, offset:%d psize:%d point_to::%d\n", ctrl, offset, psize, decode->data.uinteger);
+        MMDB_DBG_CARP
+            ("fddecode_one{ptr} ctrl:%d, offset:%d psize:%d point_to::%d\n",
+             ctrl, offset, psize, decode->data.uinteger);
         return MMDB_SUCCESS;
     }
 
@@ -1164,11 +1167,18 @@ LOCAL void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
     }
 }
 
-LOCAL void DPRINT_KEY(MMDB_return_s * data)
+LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data)
 {
     char str[256];
     int len = data->data_size > 255 ? 255 : data->data_size;
-    memcpy(str, data->ptr, len);
+
+    if (mmdb && mmdb->fd >= 0) {
+        uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
+        atomic_read(mmdb->fd, str, len, segments + data->ptr);
+    } else {
+        memcpy(str, data->ptr, len);
+    }
+
     str[len] = '\0';
     fprintf(stderr, "%s\n", str);
 }
@@ -1275,10 +1285,10 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
     return MMDB_SUCCESS;
 }
 
-int MMDB_dump(MMDB_decode_all_s * decode_all, int indent)
+int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all, int indent)
 {
     while (decode_all) {
-        decode_all = dump(decode_all, indent);
+        decode_all = dump(mmdb, decode_all, indent);
     }
     // not sure about the return type right now
     return MMDB_SUCCESS;
@@ -1293,15 +1303,16 @@ LOCAL void silly_pindent(int i)
     fputs(buffer, stderr);
 }
 
-LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
+LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
+                              int indent)
 {
     switch (decode_all->decode.data.type) {
     case MMDB_DTYPE_MAP:
         {
             int size = decode_all->decode.data.data_size;
             for (decode_all = decode_all->next; size && decode_all; size--) {
-                decode_all = dump(decode_all, indent + 2);
-                decode_all = dump(decode_all, indent + 2);
+                decode_all = dump(mmdb, decode_all, indent + 2);
+                decode_all = dump(mmdb, decode_all, indent + 2);
             }
         }
         break;
@@ -1309,21 +1320,21 @@ LOCAL MMDB_decode_all_s *dump(MMDB_decode_all_s * decode_all, int indent)
         {
             int size = decode_all->decode.data.data_size;
             for (decode_all = decode_all->next; size && decode_all; size--) {
-                decode_all = dump(decode_all, indent + 2);
+                decode_all = dump(mmdb, decode_all, indent + 2);
             }
         }
         break;
     case MMDB_DTYPE_UTF8_STRING:
     case MMDB_DTYPE_BYTES:
         silly_pindent(indent);
-        DPRINT_KEY(&decode_all->decode.data);
+        DPRINT_KEY(mmdb, &decode_all->decode.data);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_IEEE754_DOUBLE:
         silly_pindent(indent);
         fprintf(stdout, "%f\n", decode_all->decode.data.double_value);
         decode_all = decode_all->next;
-	break;
+        break;
     case MMDB_DTYPE_IEEE754_FLOAT:
         silly_pindent(indent);
         fprintf(stdout, "%f\n", decode_all->decode.data.float_value);

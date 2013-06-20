@@ -27,7 +27,7 @@ int main(void)
         int err = MMDB_get_tree(&root.entry, &decode_all);
         if (err == MMDB_SUCCESS) {
             if (decode_all != NULL)
-                MMDB_dump(decode_all, 0);
+                MMDB_dump(mmdb, decode_all, 0);
             MMDB_free_decode_all(decode_all);
         }
     }

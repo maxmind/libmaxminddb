@@ -8,12 +8,20 @@ int is_ipv4(MMDB_s * mmdb)
     return mmdb->depth == 32;
 }
 
-char *bytesdup(MMDB_return_s const *const ret)
+char *bytesdup(MMDB_s * mmdb, MMDB_return_s const *const ret)
 {
     char *mem = NULL;
+
     if (ret->offset) {
         mem = malloc(ret->data_size + 1);
-        memcpy(mem, ret->ptr, ret->data_size);
+
+        if (mmdb && mmdb->fd >= 0) {
+            uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
+            MMDB_pread(mmdb->fd, mem, ret->data_size,
+                             segments + ret->ptr);
+        } else {
+            memcpy(mem, ret->ptr, ret->data_size);
+        }
         mem[ret->data_size] = '\0';
     }
     return mem;
@@ -41,11 +49,11 @@ void dump_meta(MMDB_s * mmdb)
     assert(err == MMDB_SUCCESS);
 
     if (decode_all != NULL)
-        MMDB_dump(decode_all, 0);
+        MMDB_dump(NULL, decode_all, 0);
     free(decode_all);
 }
 
-void dump_ipinfo(const char * ipstr, MMDB_root_entry_s * ipinfo)
+void dump_ipinfo(const char *ipstr, MMDB_root_entry_s * ipinfo)
 {
 
     double dlat, dlon;
@@ -55,7 +63,8 @@ void dump_ipinfo(const char * ipstr, MMDB_root_entry_s * ipinfo)
         MMDB_get_value(&ipinfo->entry, &res_location, "location", NULL);
         // TODO handle failed search somehow.
         MMDB_return_s lat, lon;
-        MMDB_entry_s location = {.mmdb = ipinfo->entry.mmdb,.offset = res_location.offset
+        MMDB_entry_s location = {.mmdb = ipinfo->entry.mmdb,.offset =
+                res_location.offset
         };
         if (res_location.offset) {
             MMDB_get_value(&location, &lat, "latitude", NULL);
@@ -70,11 +79,12 @@ void dump_ipinfo(const char * ipstr, MMDB_root_entry_s * ipinfo)
 
         MMDB_return_s res;
         MMDB_get_value(&ipinfo->entry, &res, "city", "names", "en", NULL);
-        city = bytesdup(&res);
+        city = bytesdup(ipinfo->entry.mmdb, &res);
         MMDB_get_value(&ipinfo->entry, &res, "country", "names", "en", NULL);
-        country = bytesdup(&res);
+        country = bytesdup(ipinfo->entry.mmdb, &res);
 
-        printf("%s %f %f %s %s\n",ipstr, dlat, dlon, city == NULL ? "N/A" : city, country);
+        printf("%s %f %f %s %s\n", ipstr, dlat, dlon,
+               city == NULL ? "N/A" : city, country);
 
         if (city)
             free(city);

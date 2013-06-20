@@ -36,8 +36,8 @@ int main(int argc, char *const argv[])
 
     assert(fname != NULL);
 
-    MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
-    //MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_STANDARD);
+    //MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
+    MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_STANDARD);
 
     if (!mmdb) {
         fprintf(stderr, "Can't open %s\n", fname);
@@ -77,7 +77,7 @@ int main(int argc, char *const argv[])
             int err = MMDB_get_tree(&root.entry, &decode_all);
             if (err == MMDB_SUCCESS) {
                 if (decode_all != NULL)
-                    MMDB_dump(decode_all, 0);
+                    MMDB_dump(mmdb, decode_all, 0);
                 MMDB_free_decode_all(decode_all);
             }
 

@@ -31,10 +31,8 @@ int main(int argc, char *const argv[])
     argc -= optind;
     argv += optind;
 
-    MMDB_s *mmdb =
-        MMDB_open(fname ? fname :
-                  MMDB_DEFAULT_DATABASE,
-                  MMDB_MODE_MEMORY_CACHE);
+    MMDB_s *mmdb = MMDB_open(fname ? fname : MMDB_DEFAULT_DATABASE,
+                             MMDB_MODE_MEMORY_CACHE);
 
     for (int i = 1; i <= 10000000; i++) {
 
@@ -51,9 +49,9 @@ int main(int argc, char *const argv[])
                 if (country.offset) {
                     MMDB_return_s res;
                     MMDB_get_value(&start, &res, "code", NULL);
-                    code = bytesdup(&res);
+                    code = bytesdup(mmdb, &res);
                     MMDB_get_value(&start, &res, "name", "en", NULL);
-                    name = bytesdup(&res);
+                    name = bytesdup(mmdb, &res);
 
 //                    printf( "%u %s %s\n", ipnum , code, name);
 
