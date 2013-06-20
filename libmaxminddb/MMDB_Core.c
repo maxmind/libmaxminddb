@@ -913,10 +913,12 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     } else if (type == MMDB_DTYPE_INT32) {
         decode->data.sinteger = get_sintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_UINT64) {
+        assert(size >= 0 && size <= 8);
         memset(decode->data.c8, 0, 8);
         if (size > 0)
             memcpy(decode->data.c8 + 8 - size, &mem[offset], size);
     } else if (type == MMDB_DTYPE_UINT128) {
+        assert(size >= 0 && size <= 16);
         memset(decode->data.c16, 0, 16);
         if (size > 0)
             memcpy(decode->data.c16 + 16 - size, &mem[offset], size);
