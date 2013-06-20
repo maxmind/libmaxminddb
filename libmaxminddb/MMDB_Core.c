@@ -166,6 +166,11 @@ LOCAL int atomic_read(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
     return MMDB_SUCCESS;
 }
 
+int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
+{
+    return atomic_read(fd, buffer, to_read, offset);
+}
+
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size)
 {

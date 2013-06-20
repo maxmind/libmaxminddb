@@ -25,7 +25,7 @@ extern "C" {
 #define MMDB_DTYPE_BYTES (4)
 #define MMDB_DTYPE_UINT16 (5)
 #define MMDB_DTYPE_UINT32 (6)
-#define MMDB_DTYPE_MAP (7)     /* HASH */
+#define MMDB_DTYPE_MAP (7)      /* HASH */
 #define MMDB_DTYPE_INT32 (8)
 #define MMDB_DTYPE_UINT64 (9)
 #define MMDB_DTYPE_UINT128 (10)
@@ -172,6 +172,8 @@ extern "C" {
     extern int MMDB_lookupaddressX(const char *host, int ai_family,
                                    int ai_flags, void *ip);
 
+    extern int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read,
+                                off_t offset);
 #ifdef __cplusplus
 }
 #endif
