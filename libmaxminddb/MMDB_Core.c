@@ -1169,12 +1169,12 @@ LOCAL void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
 
 LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data)
 {
-    char str[256];
+    uint8_t str[256];
     int len = data->data_size > 255 ? 255 : data->data_size;
 
     if (mmdb && mmdb->fd >= 0) {
         uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
-        atomic_read(mmdb->fd, str, len, segments + data->ptr);
+        atomic_read(mmdb->fd, str, len, segments + (uintptr_t)data->ptr);
     } else {
         memcpy(str, data->ptr, len);
     }

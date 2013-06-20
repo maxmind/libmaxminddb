@@ -111,7 +111,7 @@ extern "C" {
             uint32_t uinteger;
             uint8_t c8[8];
             uint8_t c16[16];
-            uint8_t const *ptr;
+	    const void* ptr;
         };
         uint32_t offset;        /* start of our field or zero for not found */
         int data_size;          /* only valid for strings, utf8_strings or binary data */

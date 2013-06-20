@@ -17,8 +17,8 @@ char *bytesdup(MMDB_s * mmdb, MMDB_return_s const *const ret)
 
         if (mmdb && mmdb->fd >= 0) {
             uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
-            MMDB_pread(mmdb->fd, mem, ret->data_size,
-                             segments + ret->ptr);
+            MMDB_pread(mmdb->fd, (void*) mem, ret->data_size,
+                             segments + (uintptr_t)ret->ptr);
         } else {
             memcpy(mem, ret->ptr, ret->data_size);
         }
