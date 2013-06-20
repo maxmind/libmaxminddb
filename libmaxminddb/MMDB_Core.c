@@ -923,8 +923,10 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         if (size > 0)
             memcpy(decode->data.c16 + 16 - size, &mem[offset], size);
     } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
+        size = 4;
         decode->data.float_value = get_ieee754_float(&mem[offset]);
     } else if (type == MMDB_DTYPE_IEEE754_DOUBLE) {
+        size = 8;
         decode->data.double_value = get_ieee754_double(&mem[offset]);
     } else {
         decode->data.ptr = &mem[offset];
