@@ -294,6 +294,7 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         decode->data.uinteger = get_ptr_from(ctrl, b, psize);
         decode->data.data_size = psize + 1;
         decode->offset_to_next = offset + psize + 1;
+	MMDB_DBG_CARP ("fddecode_one{ptr} ctrl:%d, offset:%d psize:%d point_to::%d\n", ctrl, offset, psize, decode->data.uinteger);
         return MMDB_SUCCESS;
     }
 
