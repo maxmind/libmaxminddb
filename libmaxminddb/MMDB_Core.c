@@ -345,10 +345,18 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         FD_RET_ON_ERR(atomic_read(fd, &b[0], size, segments + offset));
         decode->data.sinteger = get_sintX(b, size);
     } else if (type == MMDB_DTYPE_UINT64) {
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 8, segments + offset));
+        assert(size >= 0 && size <= 8);
+        memset(b, 0, 8);
+        if (size > 0)
+            FD_RET_ON_ERR(atomic_read
+                          (fd, &b[8 - size], size, segments + offset));
         memcpy(decode->data.c8, b, 8);
     } else if (type == MMDB_DTYPE_UINT128) {
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 16, segments + offset));
+        assert(size >= 0 && size <= 16);
+        memset(b, 0, 16);
+        if (size > 0)
+            FD_RET_ON_ERR(atomic_read
+                          (fd, &b[16 - size], size, segments + offset));
         memcpy(decode->data.c16, b, 16);
     } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
         FD_RET_ON_ERR(atomic_read(fd, &b[0], 4, segments + offset));
