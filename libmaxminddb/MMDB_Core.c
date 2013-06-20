@@ -275,7 +275,7 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     const ssize_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
     uint8_t ctrl;
     int type;
-    uint8_t b[4];
+    uint8_t b[16];
     int fd = mmdb->fd;
     decode->data.offset = offset;
     FD_RET_ON_ERR(atomic_read(fd, &ctrl, 1, segments + offset++));
