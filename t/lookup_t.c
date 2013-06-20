@@ -135,17 +135,12 @@ int main(void)
             MMDB_close(mmdb_m);
         }
 
-#if 0
-
-// the lookup function is broken in this mode
         MMDB_s *mmdb_s = MMDB_open(fname, MMDB_MODE_STANDARD);
         ok(mmdb_s != NULL, "MMDB_open successful ( MMDB_MODE_STANDARD )");
         if (mmdb_s) {
             test_mmdb(mmdb_s);
             MMDB_close(mmdb_s);
         }
-#endif
-
     }
     done_testing();
 }
