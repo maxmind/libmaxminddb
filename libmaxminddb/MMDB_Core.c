@@ -382,63 +382,6 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     return MMDB_SUCCESS;
 }
 
-LOCAL int fddecode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
-{
-    const int segments = mmdb->node_count * mmdb->full_record_size_bytes;
-    uint8_t ctrl;
-    int type;
-    uint8_t b[4];
-    int fd = mmdb->fd;
-    FD_RET_ON_ERR(atomic_read(fd, &ctrl, 1, segments + offset++));
-    type = (ctrl >> 5) & 7;
-    if (type == MMDB_DTYPE_EXT) {
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 1, segments + offset++));
-        type = get_ext_type(b[0]);
-    }
-
-    if (type == MMDB_DTYPE_PTR) {
-        int psize = (ctrl >> 3) & 3;
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], psize + 1, segments + offset));
-
-        uint32_t new_offset = get_ptr_from(ctrl, b, psize);
-
-        FD_RET_ON_ERR(fddecode_key(mmdb, new_offset, ret_key));
-        ret_key->offset_to_next = offset + psize + 1;
-        return MMDB_SUCCESS;
-    }
-
-    int size = ctrl & 31;
-    switch (size) {
-    case 29:
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 1, segments + offset++));
-        size = 29 + b[0];
-        break;
-    case 30:
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 2, segments + offset));
-        size = 285 + b[0] * 256 + b[1];
-        offset += 2;
-        break;
-    case 31:
-        FD_RET_ON_ERR(atomic_read(fd, &b[0], 3, segments + offset));
-        size = 65821 + get_uint24(b);
-        offset += 3;
-    default:
-        break;
-    }
-
-    if (size == 0) {
-        ret_key->data.ptr = NULL;
-        ret_key->data.data_size = 0;
-        ret_key->offset_to_next = offset;
-        return MMDB_SUCCESS;
-    }
-
-    ret_key->data.ptr = (void *)0 + segments + offset;
-    ret_key->data.data_size = size;
-    ret_key->offset_to_next = offset + size;
-    return MMDB_SUCCESS;
-}
-
 #define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
 
 void MMDB_free_all(MMDB_s * mmdb)
@@ -673,59 +616,6 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     }
     //uhhh should never happen !
     return MMDB_CORRUPTDATABASE;
-}
-
-LOCAL void decode_key(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * ret_key)
-{
-
-    if (mmdb->fd >= 0) {
-        fddecode_key(mmdb, offset, ret_key);
-        return;
-    }
-
-    const uint8_t *mem = mmdb->dataptr;
-    uint8_t ctrl, type;
-    ctrl = mem[offset++];
-    type = (ctrl >> 5) & 7;
-    if (type == MMDB_DTYPE_EXT)
-        type = get_ext_type(mem[offset++]);
-
-    if (type == MMDB_DTYPE_PTR) {
-        int psize = (ctrl >> 3) & 3;
-        int new_offset = get_ptr_from(ctrl, &mem[offset], psize);
-
-        decode_key(mmdb, new_offset, ret_key);
-        ret_key->offset_to_next = offset + psize + 1;
-        return;
-    }
-
-    int size = ctrl & 31;
-    switch (size) {
-    case 29:
-        size = 29 + mem[offset++];
-        break;
-    case 30:
-        size = 285 + get_uint16(&mem[offset]);
-        offset += 2;
-        break;
-    case 31:
-        size = 65821 + get_uint24(&mem[offset]);
-        offset += 3;
-    default:
-        break;
-    }
-
-    if (size == 0) {
-        ret_key->data.ptr = (const uint8_t *)"";
-        ret_key->data.data_size = 0;
-        ret_key->offset_to_next = offset;
-        return;
-    }
-
-    ret_key->data.ptr = &mem[offset];
-    ret_key->data.data_size = size;
-    ret_key->offset_to_next = offset + size;
-    return;
 }
 
 LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
