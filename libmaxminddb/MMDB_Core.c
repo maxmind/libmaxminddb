@@ -623,7 +623,6 @@ LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
     struct stat s;
     int fd;
     uint8_t *ptr;
-    ssize_t iread;
     ssize_t size;
     off_t offset;
     mmdb->fname = strdup(fname);
@@ -647,7 +646,8 @@ LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
     if (ptr == NULL)
         return MMDB_INVALIDDATABASE;
 
-    iread = pread(fd, mmdb->meta_data_content, size, offset);
+    if( MMDB_SUCCESS != int_pread(fd, mmdb->meta_data_content, size, offset) )
+        return MMDB_IOERROR;
 
     const uint8_t *metadata = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
     if (metadata == NULL) {
