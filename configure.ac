@@ -7,7 +7,7 @@ AC_CONFIG_SRCDIR([libmaxminddb/MMDB.h])
 AC_CONFIG_HEADERS([config.h])
 
 LT_INIT
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([serial-tests])
 AC_PROG_LIBTOOL
 # Checks for programs.
 AC_PROG_CC_C99

@@ -3,6 +3,10 @@ AM_CPPFLAGS =      \
 
 noinst_PROGRAMS = version_t open_t lookup_t dump_t dump_meta_t endian_size_t
 
+TESTS_ENVIRONMENT = export MMDB_TEST_DATABASE=$(srcdir)/data/v6-28.mmdb;
+TESTS = version_t open_t lookup_t dump_t dump_meta_t endian_size_t
+// AM_TESTS_FD_REDIRECT = 9>&2
+
 version_t_LDADD = $(top_builddir)/libmaxminddb/libmaxminddb.la
 version_t_SOURCES = version_t.c tap.c test_helper.c
 
