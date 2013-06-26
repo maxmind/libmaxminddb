@@ -7,7 +7,10 @@ AC_CONFIG_SRCDIR([libmaxminddb/MMDB.h])
 AC_CONFIG_HEADERS([config.h])
 
 LT_INIT
-AM_INIT_AUTOMAKE([serial-tests])
+AM_INIT_AUTOMAKE(m4_esyscmd([case `automake --version | head -n 1` in
+                             *1.11*);;
+                             *) echo serial-tests;;
+                             esac]))
 AC_PROG_LIBTOOL
 # Checks for programs.
 AC_PROG_CC_C99
