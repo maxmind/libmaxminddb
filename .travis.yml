@@ -3,7 +3,7 @@ language: c
 compiler:
   - gcc
 
-before script:
+before_script:
   - ./bootstrap
   - ./configure
   - make
