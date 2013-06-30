@@ -1,0 +1,19 @@
+language: c
+
+compiler:
+  - gcc
+
+before script:
+  - ./bootstrap
+  - ./configure
+  - make
+
+script:
+  - make check
+
+notifications:
+  email:
+    recipients:
+      - dev@maxmind.com
+    on_success: change
+    on_failure: always
