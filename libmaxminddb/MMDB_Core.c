@@ -384,7 +384,7 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 
 #define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
 
-void MMDB_free_all(MMDB_s * mmdb)
+LOCAL void free_all(MMDB_s * mmdb)
 {
     if (mmdb) {
         if (mmdb->fname)
@@ -697,7 +697,7 @@ MMDB_s *MMDB_open(char *fname, uint32_t flags)
     MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
     MMDB_s *mmdb = calloc(1, sizeof(MMDB_s));
     if (MMDB_SUCCESS != init(mmdb, fname, flags)) {
-        MMDB_free_all(mmdb);
+        free_all(mmdb);
         return NULL;
     }
     return mmdb;
@@ -706,7 +706,7 @@ MMDB_s *MMDB_open(char *fname, uint32_t flags)
 void MMDB_close(MMDB_s * mmdb)
 {
     if (mmdb) {
-        MMDB_free_all(mmdb);
+        free_all(mmdb);
     }
 }
 
