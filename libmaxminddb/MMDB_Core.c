@@ -618,7 +618,7 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     return MMDB_CORRUPTDATABASE;
 }
 
-LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
+LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
 {
     struct stat s;
     int fd;
@@ -692,7 +692,7 @@ LOCAL int init(MMDB_s * mmdb, char *fname, uint32_t flags)
     return MMDB_SUCCESS;
 }
 
-MMDB_s *MMDB_open(char *fname, uint32_t flags)
+MMDB_s *MMDB_open(const char *fname, uint32_t flags)
 {
     MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
     MMDB_s *mmdb = calloc(1, sizeof(MMDB_s));

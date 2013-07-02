@@ -151,7 +151,7 @@ extern "C" {
     };
 #endif
 
-    extern MMDB_s *MMDB_open(char *fname, uint32_t flags);
+    extern MMDB_s *MMDB_open(const char *fname, uint32_t flags);
     extern void MMDB_close(MMDB_s * mmdb);
     extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res);
     extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
