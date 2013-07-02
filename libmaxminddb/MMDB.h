@@ -10,7 +10,7 @@ extern "C" {
 #include <netinet/in.h>
 //#include <arpa/inet.h>
 
-#define MMDB_DEFAULT_DATABASE "/usr/local/share/GeoIP/GeoIP2-City.mmdb"
+#define MMDB_DEFAULT_DATABASE "/usr/local/share/GeoIP2/GeoIP2-Precision-City.mmdb"
 
 // *** the EXT_TYPE is wrong it should be type - 8 not type
 #define BROKEN_TYPE (1)
