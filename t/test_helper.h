@@ -4,8 +4,6 @@
 
 #include "MMDB.h"
 
-#define MMDB_DEFAULT_DATABASE "/usr/local/share/GeoIP/GeoIP2-City.mmdb"
-
 typedef union {
     struct in_addr v4;
     struct in6_addr v6;
