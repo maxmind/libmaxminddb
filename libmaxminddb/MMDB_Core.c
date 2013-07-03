@@ -1156,7 +1156,7 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 
 #if MMDB_DEBUG
                 MMDB_DBG_CARP("key num: %d (%u)", size, rnd);
-                DPRINT_KEY(&decode_to->decode.data);
+                DPRINT_KEY(mmdb, &decode_to->decode.data);
 #endif
 
                 offset = decode_to->decode.offset_to_next;
