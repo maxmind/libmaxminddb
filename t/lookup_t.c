@@ -18,6 +18,15 @@ char *ip6_string[][2] = {
     {NULL, NULL}
 };
 
+static void check_illegal_index(MMDB_entry_s * entry, int idx)
+{
+    MMDB_return_s result;
+    char string[256];
+    snprintf(string, sizeof(string), "%d", idx);
+    MMDB_get_value(entry, &result, string, NULL);
+    ok(result.offset == 0, "Great nothing found");
+}
+
 void test_mmdb(MMDB_s * mmdb)
 {
     char *ipstr;
@@ -111,6 +120,37 @@ void test_mmdb(MMDB_s * mmdb)
 
             ok(!dbl_cmp(dbl.double_value, 999999999.9999),
                "test_data/max/double_t _is_ nearly 999999999.9999");
+
+            {
+                double expect[] =
+                    { 0.000000, 0.000000, 1.000000, 0.100000, 0.123000,
+          10.000000, 7.990000, 1000000000.000000, -1.000000, -0.100000,
+          -0.123000, -10.000000, -7.990000, -1000000000.000000 };
+                int cnt = sizeof(expect) / sizeof(double);
+
+                MMDB_return_s got;
+                MMDB_get_value(&root.entry, &dbl, "test_data", "tst",
+                               "array_ieee754_double_t", NULL);
+                ok(dbl.offset > 0, "Found it");
+
+                if (dbl.offset > 0) {
+                    MMDB_entry_s dbl_array = {.mmdb = mmdb,.offset = dbl.offset
+                    };
+                    for (int i = 0; i < cnt; i++) {
+                        char idx[256];
+                        snprintf(idx, sizeof(idx), "%d", i);
+                        MMDB_get_value(&dbl_array, &got, idx, NULL);
+                        ok(got.offset != 0, "Found something");
+                        ok(got.type == MMDB_DTYPE_IEEE754_DOUBLE,
+                           "type ok (is %d)", got.type);
+                        ok(!dbl_cmp(got.double_value, expect[i]),
+                           "test_data/max/double_t _is_ nearly %f", expect[i]);
+                    }
+
+                    check_illegal_index(&dbl_array, -1);
+                    check_illegal_index(&dbl_array, cnt);
+                }
+            }
         }
     }
 }
