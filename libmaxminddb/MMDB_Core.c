@@ -246,7 +246,7 @@ LOCAL int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result, char *src_key)
     while (len > 0) {
         int want_bytes = len > sizeof(buff) ? sizeof(buff) : len;
         int err = int_pread(mmdb->fd, &buff[0], want_bytes,
-                              segments + offset);
+                            segments + offset);
         if (err == MMDB_SUCCESS) {
             if (memcmp(buff, src_key, want_bytes))
                 return 1;       // does not match
@@ -356,8 +356,7 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
         assert(size >= 0 && size <= 8);
         memset(b, 0, 8);
         if (size > 0)
-            FD_RET_ON_ERR(int_pread
-                          (fd, &b[8 - size], size, segments + offset));
+            FD_RET_ON_ERR(int_pread(fd, &b[8 - size], size, segments + offset));
         memcpy(decode->data.c8, b, 8);
     } else if (type == MMDB_DTYPE_UINT128) {
         assert(size >= 0 && size <= 16);
@@ -646,7 +645,7 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     if (ptr == NULL)
         return MMDB_INVALIDDATABASE;
 
-    if( MMDB_SUCCESS != int_pread(fd, mmdb->meta_data_content, size, offset) )
+    if (MMDB_SUCCESS != int_pread(fd, mmdb->meta_data_content, size, offset))
         return MMDB_IOERROR;
 
     const uint8_t *metadata = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
@@ -836,6 +835,23 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     return;
 }
 
+LOCAL int fddecode_one_follow(MMDB_s * mmdb, uint32_t offset,
+                              MMDB_decode_s * decode)
+{
+    FD_RET_ON_ERR(fddecode_one(mmdb, offset, decode));
+    if (decode->data.type == MMDB_DTYPE_PTR)
+        FD_RET_ON_ERR(fddecode_one(mmdb, decode->data.uinteger, decode));
+    return MMDB_SUCCESS;
+}
+
+LOCAL void decode_one_follow(MMDB_s * mmdb, uint32_t offset,
+                             MMDB_decode_s * decode)
+{
+    decode_one(mmdb, offset, decode);
+    if (decode->data.type == MMDB_DTYPE_PTR)
+        decode_one(mmdb, decode->data.uinteger, decode);
+}
+
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params)
 {
@@ -847,6 +863,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     char *src_key;              // = va_arg(params, char *);
     int src_keylen;
     while ((src_key = va_arg(params, char *))) {
+        MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
         decode_one(mmdb, offset, &decode);
  donotdecode:
         src_keylen = strlen(src_key);
@@ -858,7 +875,26 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
 
             // learn to skip this
         case MMDB_DTYPE_ARRAY:
-            skip_hash_array(mmdb, &decode);
+            {
+                int size = decode.data.data_size;
+                int offset = strtol(src_key, NULL, 10);
+                if (offset >= size || offset < 0) {
+                    result->offset = 0; // not found.
+                    goto end;
+                }
+                for (int i = 0; i < offset; i++) {
+                    decode_one(mmdb, decode.offset_to_next, &decode);
+                    skip_hash_array(mmdb, &decode);
+                }
+                if ((src_key = va_arg(params, char *))) {
+                    decode_one_follow(mmdb, decode.offset_to_next, &decode);
+                    offset = decode.offset_to_next;
+                    goto donotdecode;
+                }
+                decode_one_follow(mmdb, decode.offset_to_next, &value);
+                memcpy(result, &value.data, sizeof(MMDB_return_s));
+                goto end;
+            }
             break;
         case MMDB_DTYPE_MAP:
             {
@@ -883,21 +919,13 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                         !memcmp(src_key, key.data.ptr, src_keylen)) {
                         if ((src_key = va_arg(params, char *))) {
                             // DPRINT_KEY(&key.data);
-                            decode_one(mmdb, offset_to_value, &decode);
-                            if (decode.data.type == MMDB_DTYPE_PTR)
-                                decode_one(mmdb, decode.data.uinteger, &decode);
-                            //memcpy(&decode, &valudde, sizeof(MMDB_decode_s));
-
-                            //skip_hash_array(mmdb, &value);
+                            decode_one_follow(mmdb, offset_to_value, &decode);
                             offset = decode.offset_to_next;
 
                             goto donotdecode;
                         }
                         // found it!
-                        decode_one(mmdb, offset_to_value, &value);
-                        if (value.data.type == MMDB_DTYPE_PTR)
-                            decode_one(mmdb, value.data.uinteger, &value);
-
+                        decode_one_follow(mmdb, offset_to_value, &value);
                         memcpy(result, &value.data, sizeof(MMDB_return_s));
                         goto end;
                     } else {
@@ -941,9 +969,30 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
             FD_RET_ON_ERR(fddecode_one(mmdb, decode.data.uinteger, &decode));
             break;
 
-            // learn to skip this
         case MMDB_DTYPE_ARRAY:
-            FD_RET_ON_ERR(fdskip_hash_array(mmdb, &decode));
+            {
+                int size = decode.data.data_size;
+                int offset = strtol(src_key, NULL, 10);
+                if (offset >= size || offset < 0) {
+                    result->offset = 0; // not found.
+                    goto end;
+                }
+                for (int i = 0; i < offset; i++) {
+                    FD_RET_ON_ERR(fddecode_one
+                                  (mmdb, decode.offset_to_next, &decode));
+                    FD_RET_ON_ERR(fdskip_hash_array(mmdb, &decode));
+                }
+                if ((src_key = va_arg(params, char *))) {
+                    FD_RET_ON_ERR(fddecode_one_follow
+                                  (mmdb, decode.offset_to_next, &decode));
+                    offset = decode.offset_to_next;
+                    goto donotdecode;
+                }
+                FD_RET_ON_ERR(fddecode_one_follow
+                              (mmdb, decode.offset_to_next, &value));
+                memcpy(result, &value.data, sizeof(MMDB_return_s));
+                goto end;
+            }
             break;
         case MMDB_DTYPE_MAP:
             {
@@ -969,14 +1018,8 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
                         !fdcmp(mmdb, &key.data, src_key)) {
                         if ((src_key = va_arg(params, char *))) {
                             //DPRINT_KEY(&key.data);
-                            FD_RET_ON_ERR(fddecode_one
+                            FD_RET_ON_ERR(fddecode_one_follow
                                           (mmdb, offset_to_value, &decode));
-
-                            if (decode.data.type == MMDB_DTYPE_PTR) {
-                                FD_RET_ON_ERR(fddecode_one
-                                              (mmdb, decode.data.uinteger,
-                                               &decode));
-                            }
                             //memcpy(&decode, &valudde, sizeof(MMDB_decode_s));
 
                             //skip_hash_array(mmdb, &value);
@@ -985,13 +1028,8 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
                             goto donotdecode;
                         }
                         // found it!
-                        FD_RET_ON_ERR(fddecode_one
+                        FD_RET_ON_ERR(fddecode_one_follow
                                       (mmdb, offset_to_value, &value));
-
-                        if (value.data.type == MMDB_DTYPE_PTR) {
-                            FD_RET_ON_ERR(fddecode_one
-                                          (mmdb, value.data.uinteger, &value));
-                        }
                         memcpy(result, &value.data, sizeof(MMDB_return_s));
                         goto end;
                     } else {
@@ -1064,7 +1102,7 @@ LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data)
 
     if (mmdb && mmdb->fd >= 0) {
         uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
-        int_pread(mmdb->fd, str, len, segments + (uintptr_t)data->ptr);
+        int_pread(mmdb->fd, str, len, segments + (uintptr_t) data->ptr);
     } else {
         memcpy(str, data->ptr, len);
     }
