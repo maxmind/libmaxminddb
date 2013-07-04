@@ -12,6 +12,16 @@
     exit(1); \
 } while(0)
 
+#define free_list(...) do{ \
+    { \
+        void *ptr[] = { __VA_ARGS__ }; \
+        for (int i = 0; i < sizeof(ptr)/sizeof(void *); i++){ \
+            if (ptr[i]) \
+                free(ptr[i]); \
+        } \
+    } \
+}while(0)
+
 int addr_to_num(char *addr, struct in_addr *result);
 int addr6_to_num(char *addr, struct in6_addr *result);
 char *bytesdup(MMDB_s * mmdb, MMDB_return_s const *const ret);

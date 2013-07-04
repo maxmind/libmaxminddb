@@ -17,8 +17,8 @@ char *bytesdup(MMDB_s * mmdb, MMDB_return_s const *const ret)
 
         if (mmdb && mmdb->fd >= 0) {
             uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
-            MMDB_pread(mmdb->fd, (void*) mem, ret->data_size,
-                             segments + (uintptr_t)ret->ptr);
+            MMDB_pread(mmdb->fd, (void *)mem, ret->data_size,
+                       segments + (uintptr_t) ret->ptr);
         } else {
             memcpy(mem, ret->ptr, ret->data_size);
         }
@@ -53,11 +53,17 @@ void dump_meta(MMDB_s * mmdb)
     free(decode_all);
 }
 
+static const char *na(char const *string)
+{
+    return string ? string : "N/A";
+}
+
 void dump_ipinfo(const char *ipstr, MMDB_root_entry_s * ipinfo)
 {
 
-    double dlat, dlon;
     char *city, *country, *region;
+    double dlat, dlon;
+    dlat = dlon = 0;
     if (ipinfo->entry.offset > 0) {
         MMDB_return_s res_location;
         MMDB_get_value(&ipinfo->entry, &res_location, "location", NULL);
@@ -69,13 +75,11 @@ void dump_ipinfo(const char *ipstr, MMDB_root_entry_s * ipinfo)
         if (res_location.offset) {
             MMDB_get_value(&location, &lat, "latitude", NULL);
             MMDB_get_value(&location, &lon, "longitude", NULL);
-            dlat = lat.double_value;
-            dlon = lon.double_value;
-        } else {
-            dlon = dlat = 0;
+            if (lat.offset)
+                dlat = lat.double_value;
+            if (lon.offset)
+                dlon = lon.double_value;
         }
-
-        //     printf( "%u %f %f\n", ipnum , dlat, dlon);
 
         MMDB_return_s res;
         MMDB_get_value(&ipinfo->entry, &res, "city", "names", "en", NULL);
@@ -87,14 +91,8 @@ void dump_ipinfo(const char *ipstr, MMDB_root_entry_s * ipinfo)
         region = bytesdup(ipinfo->entry.mmdb, &res);
 
         printf("%s %f %f %s %s %s\n", ipstr, dlat, dlon,
-	       region == NULL ? "N/A" : region,
-               city == NULL ? "N/A" : city, country);
-
-        if (city)
-            free(city);
-        if (country)
-            free(country);
-
+	       na(region),na(city), na(country));
+        free_list(city, country, region);
     } else {
         puts("Sorry, nothing found");   // not found
     }
