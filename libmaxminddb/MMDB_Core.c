@@ -395,11 +395,9 @@ LOCAL void free_all(MMDB_s * mmdb)
         else if (mmdb->meta_data_content) {
             free(mmdb->meta_data_content);
         }
-#if 0
         if (mmdb->fake_metadata_db) {
             free(mmdb->fake_metadata_db);
         }
-#endif
         free((void *)mmdb);
     }
 }
