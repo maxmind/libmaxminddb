@@ -686,6 +686,12 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
             (const uint8_t *)0 +
             (mmdb->node_count * mmdb->full_record_size_bytes);
     }
+
+    // Success - but can we handle the data?
+    if (mmdb->major_file_format != 2) {
+        return MMDB_UNKNOWNDATABASEFMT;
+    }
+
     return MMDB_SUCCESS;
 }
 

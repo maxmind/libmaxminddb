@@ -51,6 +51,7 @@ extern "C" {
 #define MMDB_INVALIDDATABASE (-3)
 #define MMDB_IOERROR (-4)
 #define MMDB_OUTOFMEMORY (-5)
+#define MMDB_UNKNOWNDATABASEFMT (-6)
 
 /* Looks better */
 #define MMDB_TRUE (1)
