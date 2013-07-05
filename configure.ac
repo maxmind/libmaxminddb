@@ -15,6 +15,8 @@ AC_PROG_LIBTOOL
 # Checks for programs.
 AC_PROG_CC_C99
 
+AC_C_RESTRICT
+
 # Checks for libraries.
 
 # Checks for header files.
@@ -22,6 +24,7 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h string.h sys/time.h u
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UINT8_T
 AC_TYPE_UINT32_T
@@ -30,7 +33,7 @@ AC_TYPE_UINTPTR_T
 # Checks for library functions.
 
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([memset gettimeofday strdup memmem])
+AC_CHECK_FUNCS([memchr strtol memset gettimeofday strdup memmem])
 
 AC_CONFIG_FILES([Makefile
                  libmaxminddb/Makefile
