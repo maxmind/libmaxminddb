@@ -132,25 +132,6 @@ extern "C" {
         struct MMDB_decode_all_s *next;
     } MMDB_decode_all_s;
 
-#if 0
-
-    typedef struct MMDB_decode_key_s {
-        unsigned int new_offset;
-        unsigned int size;
-        const uint8_t *ptr;
-    } MMDB_decode_key_s;
-
-    struct MMDB_Decode_Value {
-        SV *sv;
-        int new_offset;
-    };
-    struct MMDB_Decode_Key {
-        const char *ptr;
-        int size;
-        int new_offset;
-    };
-#endif
-
     extern MMDB_s *MMDB_open(const char *fname, uint32_t flags);
     extern void MMDB_close(MMDB_s * mmdb);
     extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res);
