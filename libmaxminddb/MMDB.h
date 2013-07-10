@@ -130,7 +130,6 @@ extern "C" {
     typedef struct MMDB_decode_all_s {
         MMDB_decode_s decode;
         struct MMDB_decode_all_s *next;
-        int indent;
     } MMDB_decode_all_s;
 
 #if 0
