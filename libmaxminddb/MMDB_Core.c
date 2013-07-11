@@ -866,7 +866,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
         return fdvget_value(start, result, params);
     char *src_key;              // = va_arg(params, char *);
     int src_keylen;
-    while ((src_key = va_arg(params, char *))) {
+    while (src_key = va_arg(params, char *)) {
         MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
         decode_one(mmdb, offset, &decode);
  donotdecode:
@@ -890,7 +890,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     decode_one(mmdb, decode.offset_to_next, &decode);
                     skip_hash_array(mmdb, &decode);
                 }
-                if ((src_key = va_arg(params, char *))) {
+                if (src_key = va_arg(params, char *)) {
                     decode_one_follow(mmdb, decode.offset_to_next, &decode);
                     offset = decode.offset_to_next;
                     goto donotdecode;
@@ -921,7 +921,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
 
                     if (key.data.data_size == src_keylen &&
                         !memcmp(src_key, key.data.ptr, src_keylen)) {
-                        if ((src_key = va_arg(params, char *))) {
+                        if (src_key = va_arg(params, char *)) {
                             // DPRINT_KEY(&key.data);
                             decode_one_follow(mmdb, offset_to_value, &decode);
                             offset = decode.offset_to_next;
@@ -962,7 +962,7 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
     uint32_t offset = start->offset;
     char *src_key;
     int src_keylen;
-    while ((src_key = va_arg(params, char *))) {
+    while (src_key = va_arg(params, char *)) {
 
         FD_RET_ON_ERR(fddecode_one(mmdb, offset, &decode));
  donotdecode:
@@ -986,7 +986,7 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
                                   (mmdb, decode.offset_to_next, &decode));
                     FD_RET_ON_ERR(fdskip_hash_array(mmdb, &decode));
                 }
-                if ((src_key = va_arg(params, char *))) {
+                if (src_key = va_arg(params, char *)) {
                     FD_RET_ON_ERR(fddecode_one_follow
                                   (mmdb, decode.offset_to_next, &decode));
                     offset = decode.offset_to_next;
@@ -1020,7 +1020,7 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
 
                     if (key.data.data_size == src_keylen &&
                         !fdcmp(mmdb, &key.data, src_key)) {
-                        if ((src_key = va_arg(params, char *))) {
+                        if (src_key = va_arg(params, char *)) {
                             //DPRINT_KEY(&key.data);
                             FD_RET_ON_ERR(fddecode_one_follow
                                           (mmdb, offset_to_value, &decode));
