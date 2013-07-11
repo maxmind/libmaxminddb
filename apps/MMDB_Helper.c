@@ -87,7 +87,7 @@ void dump_ipinfo(const char *ipstr, MMDB_root_entry_s * ipinfo)
         MMDB_get_value(&ipinfo->entry, &res, "country", "names", "en", NULL);
         country = bytesdup(ipinfo->entry.mmdb, &res);
 
-        MMDB_get_value(&ipinfo->entry, &res, "subdivisions", "0", "names", "en", NULL);        
+        MMDB_get_value(&ipinfo->entry, &res, "subdivisions", "0", "names", "en", NULL);
         region = bytesdup(ipinfo->entry.mmdb, &res);
 
         printf("%s %f %f %s %s %s\n", ipstr, dlat, dlon,
