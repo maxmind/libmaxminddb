@@ -51,8 +51,9 @@ LOCAL void *memmem(const void *big, size_t big_len, const void *little,
         size_t len = big_len;
         while (len >= little_len
                && (ptr = memchr(ptr, first_char, len - little_len + 1))) {
-            if (!memcmp(ptr, little, little_len))
+            if (!memcmp(ptr, little, little_len)) {
                 return (void *)ptr;
+            }
             len = big_len - (++ptr - big);
         }
     }
@@ -156,11 +157,13 @@ LOCAL int int_pread(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
 {
     while (to_read > 0) {
         ssize_t have_read = pread(fd, buffer, to_read, offset);
-        if (have_read <= 0)
+        if (have_read <= 0) {
             return MMDB_IOERROR;
+        }
         to_read -= have_read;
-        if (to_read == 0)
+        if (to_read == 0) {
             break;
+        }
         offset += have_read;
         buffer += have_read;
     }
@@ -222,8 +225,9 @@ int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
         if (result->offset > 0) {
             char *str1 = bytesdup(result);
             int ret = strcmp(str1, str);
-            if (str1)
+            if (str1) {
                 free(str1);
+            }
             return ret;
         }
         return 1;
@@ -237,8 +241,9 @@ int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
 LOCAL int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result, char *src_key)
 {
     int src_keylen = result->data_size;
-    if (result->data_size != src_keylen)
+    if (result->data_size != src_keylen) {
         return 1;
+    }
     uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
     ssize_t offset = (ssize_t) result->ptr;
     uint8_t buff[1024];
@@ -248,8 +253,9 @@ LOCAL int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result, char *src_key)
         int err = int_pread(mmdb->fd, &buff[0], want_bytes,
                             segments + offset);
         if (err == MMDB_SUCCESS) {
-            if (memcmp(buff, src_key, want_bytes))
+            if (memcmp(buff, src_key, want_bytes)) {
                 return 1;       // does not match
+            }
             src_key += want_bytes;
             offset += want_bytes;
             len -= want_bytes;
@@ -274,7 +280,7 @@ LOCAL int get_ext_type(int raw_ext_type)
   int err = (fn);             \
   if ( err != MMDB_SUCCESS )  \
     return err;               \
-  }while(0)
+  } while(0)
 
 LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 {
@@ -361,9 +367,10 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     } else if (type == MMDB_DTYPE_UINT128) {
         assert(size >= 0 && size <= 16);
         memset(b, 0, 16);
-        if (size > 0)
+        if (size > 0) {
             FD_RET_ON_ERR(int_pread
                           (fd, &b[16 - size], size, segments + offset));
+        }
         memcpy(decode->data.c16, b, 16);
     } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
         size = 4;
@@ -386,12 +393,15 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 LOCAL void free_all(MMDB_s * mmdb)
 {
     if (mmdb) {
-        if (mmdb->fname)
+        if (mmdb->fname) {
             free(mmdb->fname);
-        if (mmdb->fd >= 0)
+        }
+        if (mmdb->fd >= 0) {
             close(mmdb->fd);
-        if (mmdb->file_in_mem_ptr)
+        }
+        if (mmdb->file_in_mem_ptr) {
             free((void *)mmdb->file_in_mem_ptr);
+        }
         else if (mmdb->meta_data_content) {
             free(mmdb->meta_data_content);
         }
@@ -475,7 +485,6 @@ MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     int depth;
     uint8_t b[4];
     if (rl == 6) {
-
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
             if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
@@ -518,8 +527,9 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
 
-    if (mmdb->fd >= 0)
+    if (mmdb->fd >= 0) {
         return MMDB_fdlookup_by_ipnum_128(ipnum, result);
+    }
 
     int segments = mmdb->node_count;
     uint32_t offset = 0;
@@ -528,11 +538,11 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     const uint8_t *p;
     int depth;
     if (rl == 6) {
-
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
-            if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
+            if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 p += 3;
+            }
             offset = get_uint24(p);
             RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
@@ -544,7 +554,6 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
                 offset = get_uint32(p);
                 offset &= 0xfffffff;
             } else {
-
                 offset =
                     p[0] * 65536 + p[1] * 256 + p[2] + ((p[3] & 0xf0) << 20);
             }
@@ -553,8 +562,9 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     } else if (rl == 8) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
-            if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
+            if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 p += 4;
+            }
             offset = get_uint32(p);
             RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
         }
@@ -571,8 +581,9 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
                   mmdb->fd, mmdb->depth, mmdb->node_count);
     MMDB_DBG_CARP("MMDB_lookup_by_ipnum ip:%u fd:%d\n", ipnum, mmdb->fd);
 
-    if (mmdb->fd >= 0)
+    if (mmdb->fd >= 0) {
         return MMDB_fdlookup_by_ipnum(ipnum, res);
+    }
 
     int segments = mmdb->node_count;
     uint32_t offset = 0;
@@ -584,8 +595,9 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     if (rl == 6) {
         for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
             p = &mem[offset * rl];
-            if (ipnum & mask)
+            if (ipnum & mask) {
                 p += 3;
+            }
             offset = get_uint24(p);
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res);
         }
@@ -605,8 +617,9 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     } else if (rl == 8) {
         for (depth = 32 - 1; depth >= 0; depth--, mask >>= 1) {
             p = &mem[offset * rl];
-            if (ipnum & mask)
+            if (ipnum & mask) {
                 p += 4;
+            }
             offset = get_uint32(p);
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res);
         }
@@ -623,11 +636,13 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     ssize_t size;
     off_t offset;
     mmdb->fname = strdup(fname);
-    if (mmdb->fname == NULL)
+    if (mmdb->fname == NULL) {
         return MMDB_OUTOFMEMORY;
+    }
     mmdb->fd = fd = open(fname, O_RDONLY);
-    if (fd < 0)
+    if (fd < 0) {
         return MMDB_OPENFILEERROR;
+    }
     fstat(fd, &s);
     mmdb->flags = flags;
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
@@ -640,11 +655,13 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
         offset = s.st_size - size;
     }
     ptr = mmdb->meta_data_content = malloc(size);
-    if (ptr == NULL)
+    if (ptr == NULL) {
         return MMDB_INVALIDDATABASE;
+    }
 
-    if (MMDB_SUCCESS != int_pread(fd, mmdb->meta_data_content, size, offset))
+    if (MMDB_SUCCESS != int_pread(fd, mmdb->meta_data_content, size, offset)) {
         return MMDB_IOERROR;
+    }
 
     const uint8_t *metadata = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
     if (metadata == NULL) {
@@ -752,8 +769,9 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     decode->data.offset = offset;
     ctrl = mem[offset++];
     type = (ctrl >> 5) & 7;
-    if (type == MMDB_DTYPE_EXT)
+    if (type == MMDB_DTYPE_EXT) {
         type = get_ext_type(mem[offset++]);
+    }
 
     // MMDB_DBG_CARP("decode_one type:%d\n", type);
 
@@ -816,13 +834,15 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     } else if (type == MMDB_DTYPE_UINT64) {
         assert(size >= 0 && size <= 8);
         memset(decode->data.c8, 0, 8);
-        if (size > 0)
+        if (size > 0) {
             memcpy(decode->data.c8 + 8 - size, &mem[offset], size);
+        }
     } else if (type == MMDB_DTYPE_UINT128) {
         assert(size >= 0 && size <= 16);
         memset(decode->data.c16, 0, 16);
-        if (size > 0)
+        if (size > 0) {
             memcpy(decode->data.c16 + 16 - size, &mem[offset], size);
+        }
     } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
         size = 4;
         decode->data.float_value = get_ieee754_float(&mem[offset]);
@@ -843,8 +863,9 @@ LOCAL int fddecode_one_follow(MMDB_s * mmdb, uint32_t offset,
                               MMDB_decode_s * decode)
 {
     FD_RET_ON_ERR(fddecode_one(mmdb, offset, decode));
-    if (decode->data.type == MMDB_DTYPE_PTR)
+    if (decode->data.type == MMDB_DTYPE_PTR) {
         FD_RET_ON_ERR(fddecode_one(mmdb, decode->data.uinteger, decode));
+    }
     return MMDB_SUCCESS;
 }
 
@@ -852,8 +873,9 @@ LOCAL void decode_one_follow(MMDB_s * mmdb, uint32_t offset,
                              MMDB_decode_s * decode)
 {
     decode_one(mmdb, offset, decode);
-    if (decode->data.type == MMDB_DTYPE_PTR)
+    if (decode->data.type == MMDB_DTYPE_PTR) {
         decode_one(mmdb, decode->data.uinteger, decode);
+    }
 }
 
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
@@ -862,10 +884,13 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
-    if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_STANDARD)
-        return fdvget_value(start, result, params);
     char *src_key;              // = va_arg(params, char *);
     int src_keylen;
+
+    if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_STANDARD) {
+        return fdvget_value(start, result, params);
+    }
+
     while (src_key = va_arg(params, char *)) {
         MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
         decode_one(mmdb, offset, &decode);
@@ -1163,9 +1188,9 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
                     MMDB_alloc_decode_all();
                 get_tree(mmdb, array_offset, decode_to);
                 array_offset = decode_to->decode.offset_to_next;
-                while (previous->next)
+                while (previous->next) {
                     previous = previous->next;
-
+                }
             }
             decode->decode.offset_to_next = array_offset;
 
@@ -1185,9 +1210,9 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
                 MMDB_decode_all_s *decode_to = previous->next =
                     MMDB_alloc_decode_all();
                 get_tree(mmdb, offset, decode_to);
-                while (previous->next)
+                while (previous->next) {
                     previous = previous->next;
-
+                }
 #if MMDB_DEBUG
                 MMDB_DBG_CARP("key num: %d (%u)", size, rnd);
                 DPRINT_KEY(mmdb, &decode_to->decode.data);
@@ -1196,8 +1221,9 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
                 offset = decode_to->decode.offset_to_next;
                 decode_to = previous->next = MMDB_alloc_decode_all();
                 get_tree(mmdb, offset, decode_to);
-                while (previous->next)
+                while (previous->next) {
                     previous = previous->next;
+                }
                 offset = decode_to->decode.offset_to_next;
             }
             decode->decode.offset_to_next = offset;
@@ -1298,9 +1324,11 @@ MMDB_decode_all_s *MMDB_alloc_decode_all(void)
 
 void MMDB_free_decode_all(MMDB_decode_all_s * freeme)
 {
-    if (freeme == NULL)
+    if (freeme == NULL) {
         return;
-    if (freeme->next)
+    }
+    if (freeme->next) {
         MMDB_free_decode_all(freeme->next);
+    }
     free(freeme);
 }
