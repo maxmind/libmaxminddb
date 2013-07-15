@@ -210,6 +210,8 @@ LOCAL char *bytesdup(MMDB_return_s const *const ret)
     char *mem = NULL;
     if (ret->offset) {
         mem = malloc(ret->data_size + 1);
+        assert(mem != NULL);
+
         memcpy(mem, ret->ptr, ret->data_size);
         mem[ret->data_size] = '\0';
     }
@@ -671,6 +673,8 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     }
 
     mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));
+    assert(mmdb->fake_metadata_db != NULL);
+
     mmdb->fake_metadata_db->fd = -1;
     mmdb->fake_metadata_db->dataptr = metadata + 14;
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
@@ -716,6 +720,8 @@ MMDB_s *MMDB_open(const char *fname, uint32_t flags)
 {
     MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
     MMDB_s *mmdb = calloc(1, sizeof(MMDB_s));
+    assert(mmdb != NULL);
+
     if (MMDB_SUCCESS != init(mmdb, fname, flags)) {
         free_all(mmdb);
         return NULL;
@@ -1319,7 +1325,10 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
 
 MMDB_decode_all_s *MMDB_alloc_decode_all(void)
 {
-    return calloc(1, sizeof(MMDB_decode_all_s));
+    MMDB_decode_all_s * decode_all = calloc(1, sizeof(MMDB_decode_all_s));
+    assert(decode_all != NULL);
+
+    return decode_all;
 }
 
 void MMDB_free_decode_all(MMDB_decode_all_s * freeme)
