@@ -1124,14 +1124,7 @@ int MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
 {
     MMDB_decode_all_s *decode = *decode_all = MMDB_alloc_decode_all();
     uint32_t offset = start->offset;
-    int err;
-    do {
-        err = get_tree(start->mmdb, offset, decode);
-        if (err != MMDB_SUCCESS)
-            return err;
-    } while (0);
-//    } while ((offset = decode->decode.offset_to_next));
-    return MMDB_SUCCESS;
+    return get_tree(start->mmdb, offset, decode);
 }
 
 LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
