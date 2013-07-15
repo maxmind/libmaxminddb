@@ -1135,25 +1135,27 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 
     if (decode->decode.data.type == MMDB_DTYPE_PTR) {
         // skip pointer silently
-        MMDB_DBG_CARP("Skip ptr\n");
-        uint32_t tmp = decode->decode.offset_to_next;
-        uint32_t last_offset;
-        while (decode->decode.data.type == MMDB_DTYPE_PTR) {
-            decode_one(mmdb, last_offset =
-                       decode->decode.data.uinteger, &decode->decode);
-        }
-
-        if (decode->decode.data.type == MMDB_DTYPE_ARRAY
-            || decode->decode.data.type == MMDB_DTYPE_MAP) {
-            get_tree(mmdb, last_offset, decode);
-        }
-        decode->decode.offset_to_next = tmp;
-        return MMDB_SUCCESS;
 
     }
 
     switch (decode->decode.data.type) {
+    case MMDB_DTYPE_PTR:
+        {
+            MMDB_DBG_CARP("Skip ptr\n");
+            uint32_t tmp = decode->decode.offset_to_next;
+            uint32_t last_offset;
+            while (decode->decode.data.type == MMDB_DTYPE_PTR) {
+                decode_one(mmdb, last_offset =
+                           decode->decode.data.uinteger, &decode->decode);
+            }
 
+            if (decode->decode.data.type == MMDB_DTYPE_ARRAY
+                || decode->decode.data.type == MMDB_DTYPE_MAP) {
+                get_tree(mmdb, last_offset, decode);
+            }
+            decode->decode.offset_to_next = tmp;
+        }
+        break;
     case MMDB_DTYPE_ARRAY:
         {
             int array_size = decode->decode.data.data_size;
