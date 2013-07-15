@@ -60,7 +60,7 @@ LOCAL void *memmem(const void *big, size_t big_len, const void *little,
 }
 #endif
 
-int MMDB_lookupaddressX(const char *host, int ai_family, int ai_flags, void *ip)
+int MMDB_resolve_address(const char *host, int ai_family, int ai_flags, void *ip)
 {
     struct addrinfo hints = {.ai_family = ai_family,
         .ai_flags = ai_flags,

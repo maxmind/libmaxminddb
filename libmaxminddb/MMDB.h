@@ -152,7 +152,7 @@ extern "C" {
     extern MMDB_decode_all_s *MMDB_alloc_decode_all(void);
     extern void MMDB_free_decode_all(MMDB_decode_all_s * freeme);
 
-    extern int MMDB_lookupaddressX(const char *host, int ai_family,
+    extern int MMDB_resolve_address(const char *host, int ai_family,
                                    int ai_flags, void *ip);
 
     extern int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read,

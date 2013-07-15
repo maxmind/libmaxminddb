@@ -3,7 +3,7 @@
 
     MMDB_open
     MMDB_close
-    MMDB_lookupaddressX
+    MMDB_resolve_address
     MMDB_lookup_by_ipnum_128
     MMDB_lookup_by_ipnum
     MMDB_get_tree
@@ -34,17 +34,17 @@ The structure `MMDB_s` contains all information to search the database file. Ple
 
 Free's all memory associated with the database and the filehandle.
 
-### `int MMDB_lookupaddressX(const char *addr, int ai_family, int ai_flags, void *ip)` ###
+### `int MMDB_resolve_address(const char *addr, int ai_family, int ai_flags, void *ip)` ###
 
 Resolves the IP address addr into ip. ip is a pointer to `in_addr` or `in6_addr` depend on your inputs.
 
 For IPv4 it is probpaly 
 
-    status = MMDB_lookupaddressX( addr, AF_INET, 0, ip );
+    status = MMDB_resolve_address( addr, AF_INET, 0, ip );
 
 If your database is IPv6 you should use
 
-    status = MMDB_lookupaddressX( addr, AF_INET6, AI_V4MAPPED, ip6 );
+    status = MMDB_resolve_address( addr, AF_INET6, AI_V4MAPPED, ip6 );
 
 So any numeric input works like 24.24.24.24, ::24.24.24.24, ::ffff:24.24.24.24 or 2001:4860:b002::68
 
@@ -52,7 +52,7 @@ The return value is gaierr ( man getaddrinfo ) or 0 on success.
 
 ### `int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)` ###
 
-The `MMDB_lookup_by_ipnum_128` checks if the ipnumber usually created with a call to `MMDB_lookupaddressX` is part of the database.
+The `MMDB_lookup_by_ipnum_128` checks if the ipnumber usually created with a call to `MMDB_resolve_address` is part of the database.
 
     // initialize the root entry structure with the database
     MMDB_root_entry_s root {.entry.mmdb = mmdb };
