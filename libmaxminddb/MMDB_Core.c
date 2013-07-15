@@ -1133,11 +1133,6 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 {
     decode_one(mmdb, offset, &decode->decode);
 
-    if (decode->decode.data.type == MMDB_DTYPE_PTR) {
-        // skip pointer silently
-
-    }
-
     switch (decode->decode.data.type) {
     case MMDB_DTYPE_PTR:
         {
