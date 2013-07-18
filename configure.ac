@@ -37,6 +37,6 @@ AC_CHECK_FUNCS([memchr strtol memset gettimeofday strdup memmem])
 
 AC_CONFIG_FILES([Makefile
                  libmaxminddb/Makefile
-		 apps/Makefile
-		 t/Makefile])
+                 apps/Makefile
+                 t/Makefile])
 AC_OUTPUT
