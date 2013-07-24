@@ -13,6 +13,8 @@ int main(int argc, char *const argv[])
     int verbose = 0;
     int character;
     char *fname = NULL;
+    MMDB_s *mmdb;
+    uint16_t status;
 
     while ((character = getopt(argc, argv, "vf:")) != -1) {
         switch (character) {
@@ -36,8 +38,7 @@ int main(int argc, char *const argv[])
 
     assert(fname != NULL);
 
-    //MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE);
-    MMDB_s *mmdb = MMDB_open(fname, MMDB_MODE_STANDARD);
+    status = MMDB_open(fname, MMDB_MODE_STANDARD, mmdb);
     if (!mmdb)
         die("Can't open %s\n", fname);
 
@@ -63,7 +64,7 @@ int main(int argc, char *const argv[])
     }
 
     MMDB_root_entry_s root = {.entry.mmdb = mmdb };
-    int status = is_ipv4(mmdb)
+    status = is_ipv4(mmdb)
         ? MMDB_lookup_by_ipnum(htonl(ip.v4.s_addr), &root)
         : MMDB_lookup_by_ipnum_128(ip.v6, &root);
 

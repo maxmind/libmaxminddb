@@ -129,7 +129,7 @@ extern "C" {
         struct MMDB_decode_all_s *next;
     } MMDB_decode_all_s;
 
-    extern MMDB_s *MMDB_open(const char *fname, uint32_t flags);
+    extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb);
     extern void MMDB_close(MMDB_s * mmdb);
     extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res);
     extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,

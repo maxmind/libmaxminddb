@@ -14,6 +14,9 @@ int main(int argc, char *const argv[])
     int verbose = 0;
     int character;
     char *fname = NULL;
+    MMDB_s *mmdb;
+    uint16_t status;
+    uint16_t mode;
 
     while ((character = getopt(argc, argv, "vf:")) != -1) {
         switch (character) {
@@ -31,8 +34,8 @@ int main(int argc, char *const argv[])
     argc -= optind;
     argv += optind;
 
-    MMDB_s *mmdb = MMDB_open(fname ? fname : MMDB_DEFAULT_DATABASE,
-                             MMDB_MODE_MEMORY_CACHE);
+    fname = fname ? fname :MMDB_DEFAULT_DATABASE;
+    status = MMDB_open(fname, MMDB_MODE_MEMORY_CACHE, mmdb);
 
     for (int i = 1; i <= 10000000; i++) {
 

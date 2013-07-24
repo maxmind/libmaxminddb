@@ -707,23 +707,30 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
 
     // Success - but can we handle the data?
     if (mmdb->major_file_format != 2) {
-        return MMDB_UNKNOWNDATABASEFMT;
+        return MMDB_UNKNOWN_DATABASE_FORMAT;
     }
 
     return MMDB_SUCCESS;
 }
 
-MMDB_s *MMDB_open(const char *fname, uint32_t flags)
+uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb)
 {
-    MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
-    MMDB_s *mmdb = calloc(1, sizeof(MMDB_s));
-    assert(mmdb != NULL);
+    uint16_t status;
 
-    if (MMDB_SUCCESS != init(mmdb, fname, flags)) {
-        free_all(mmdb);
-        return NULL;
+    MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
+    mmdb = calloc(1, sizeof(*mmdb));
+
+    if (NULL == mmdb) {
+        return MMDB_OUT_OF_MEMORY;
     }
-    return mmdb;
+
+    status = init(mmdb, fname, flags);
+
+    if (MMDB_SUCCESS != status) {
+        free_all(mmdb);
+    }
+
+    return status;
 }
 
 void MMDB_close(MMDB_s * mmdb)
