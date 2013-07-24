@@ -11,6 +11,8 @@ typedef union {
     struct in6_addr v6;
 } in_addrX;
 
-void ip_string_to_struct(MMDB_s *mmdb, char *ipstr, in_addrX *dest_ipnum);
+MMDB_s *open_ok(char *db_file, int mode, char *mode_desc);
+
+void snprintf_or_bail(char *target, size_t size, char *fmt, ...);
 
 #endif

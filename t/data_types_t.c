@@ -1,24 +1,14 @@
 #include "MMDB_test_helper.h"
 
-void run_tests(int mode, const char *description)
+void run_tests(int mode, const char *mode_desc)
 {
-    MMDB_s *mmdb =
-        MMDB_open("../maxmind-db/test-data/MaxMind-DB-test-decoder.mmdb", mode);
-    char *d = malloc(500);
+    char *db_file = "../maxmind-db/test-data/MaxMind-DB-test-decoder.mmdb";
+    MMDB_s *mmdb = open_ok(db_file, mode, mode_desc);
 
-    {
-        if (!snprintf
-            (d, 500, "opened MaxMind-DB-test-decoder.mmdb - %s", description)) {
-            BAIL_OUT("sprintf failed");
-        }
-        ok(mmdb != NULL, d);
+    if (NULL == mmdb) {
+        diag("Could not open %s - skipping remaining tests", db_file);
+        return;
     }
-
-    {
-        char *ip = "::1.1.1.1";
-    }        
-
-    free(d);
 }
 
 int main(void)
