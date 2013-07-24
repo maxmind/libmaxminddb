@@ -420,7 +420,7 @@ LOCAL void free_all(MMDB_s * mmdb)
 #define RETURN_ON_END_OF_SEARCH128(offset,segments,depth, res) \
 	    RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
 
-int MMDB_fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
+LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->node_count;
@@ -468,8 +468,8 @@ int MMDB_fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
     return MMDB_CORRUPT_DATABASE;
 }
 
-int
-MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
+LOCAL int
+fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->node_count;
@@ -523,7 +523,7 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     MMDB_s *mmdb = result->entry.mmdb;
 
     if (mmdb->fd >= 0) {
-        return MMDB_fdlookup_by_ipnum_128(ipnum, result);
+        return fdlookup_by_ipnum_128(ipnum, result);
     }
 
     int segments = mmdb->node_count;
@@ -577,7 +577,7 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     MMDB_DBG_CARP("MMDB_lookup_by_ipnum ip:%u fd:%d\n", ipnum, mmdb->fd);
 
     if (mmdb->fd >= 0) {
-        return MMDB_fdlookup_by_ipnum(ipnum, res);
+        return fdlookup_by_ipnum(ipnum, res);
     }
 
     int segments = mmdb->node_count;
