@@ -158,7 +158,7 @@ LOCAL int int_pread(int fd, uint8_t * buffer, ssize_t to_read, off_t offset)
     while (to_read > 0) {
         ssize_t have_read = pread(fd, buffer, to_read, offset);
         if (have_read <= 0) {
-            return MMDB_IOERROR;
+            return MMDB_IO_ERROR;
         }
         to_read -= have_read;
         if (to_read == 0) {
@@ -463,8 +463,9 @@ int MMDB_fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, result);
         }
     }
-    //uhhh should never happen !
-    return MMDB_CORRUPTDATABASE;
+
+    // This should never happen, but if it does something went horribly wrong.
+    return MMDB_CORRUPT_DATABASE;
 }
 
 int
@@ -514,7 +515,7 @@ MMDB_fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
         }
     }
     //uhhh should never happen !
-    return MMDB_CORRUPTDATABASE;
+    return MMDB_CORRUPT_DATABASE;
 }
 
 int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
@@ -564,7 +565,7 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
         }
     }
     //uhhh should never happen !
-    return MMDB_CORRUPTDATABASE;
+    return MMDB_CORRUPT_DATABASE;
 }
 
 int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
@@ -619,7 +620,7 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
         }
     }
     //uhhh should never happen !
-    return MMDB_CORRUPTDATABASE;
+    return MMDB_CORRUPT_DATABASE;
 }
 
 LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
@@ -629,14 +630,17 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     uint8_t *ptr;
     ssize_t size;
     off_t offset;
+
     mmdb->fname = strdup(fname);
     if (mmdb->fname == NULL) {
-        return MMDB_OUTOFMEMORY;
+        return MMDB_OUT_OF_MEMORY;
     }
+
     mmdb->fd = fd = open(fname, O_RDONLY);
     if (fd < 0) {
-        return MMDB_OPENFILEERROR;
+        return MMDB_FILE_OPEN_ERROR;
     }
+
     fstat(fd, &s);
     mmdb->flags = flags;
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
@@ -648,20 +652,21 @@ LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
         size = s.st_size < 2000 ? s.st_size : 2000;
         offset = s.st_size - size;
     }
+
     ptr = mmdb->meta_data_content = malloc(size);
     if (ptr == NULL) {
-        return MMDB_INVALIDDATABASE;
+        return MMDB_INVALID_DATABASE;
     }
 
     if (MMDB_SUCCESS != int_pread(fd, mmdb->meta_data_content, size, offset)) {
-        return MMDB_IOERROR;
+        return MMDB_IO_ERROR;
     }
 
     const uint8_t *metadata = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
     if (metadata == NULL) {
         free(mmdb->meta_data_content);
         mmdb->meta_data_content = NULL;
-        return MMDB_INVALIDDATABASE;
+        return MMDB_INVALID_DATABASE;
     }
 
     mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));

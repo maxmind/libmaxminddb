@@ -43,12 +43,12 @@ extern "C" {
 
 /* GEOIPDB err codes */
 #define MMDB_SUCCESS (0)
-#define MMDB_OPENFILEERROR (-1)
-#define MMDB_CORRUPTDATABASE (-2)
-#define MMDB_INVALIDDATABASE (-3)
-#define MMDB_IOERROR (-4)
-#define MMDB_OUTOFMEMORY (-5)
-#define MMDB_UNKNOWNDATABASEFMT (-6)
+#define MMDB_FILE_OPEN_ERROR (1)
+#define MMDB_CORRUPT_DATABASE (2)
+#define MMDB_INVALID_DATABASE (3)
+#define MMDB_IO_ERROR (4)
+#define MMDB_OUT_OF_MEMORY (5)
+#define MMDB_UNKNOWN_DATABASE_FORMAT (6)
 
 /* Looks better */
 #define MMDB_TRUE (1)
