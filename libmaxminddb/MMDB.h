@@ -64,24 +64,6 @@ extern "C" {
 #define MMDB_DBG_CARP(...)
 #define MMDB_DBG_ASSERT(ex)
 #endif
-
-    typedef struct MMDB_s {
-        uint32_t flags;
-        int fd;
-        char *fname;
-        const uint8_t *file_in_mem_ptr;
-        int major_file_format;
-        int minor_file_format;
-        int database_type;
-        uint32_t full_record_size_bytes;        /* recbits * 2 / 8 */
-        int depth;
-        int node_count;
-        const uint8_t *dataptr;
-        uint8_t *meta_data_content;
-        struct MMDB_s *fake_metadata_db;
-        MMDB_entry_s meta;      // should change to entry_s
-    } MMDB_s;
-
     // This is the starting point for every search.
     // It is like the hash to start the search. It may or may not the root hash
     typedef struct MMDB_entry_s {
@@ -112,6 +94,23 @@ extern "C" {
         int data_size;          /* only valid for strings, utf8_strings or binary data */
         int type;               /* type like string utf8_string, int32, ... */
     } MMDB_return_s;
+
+    typedef struct MMDB_s {
+        uint32_t flags;
+        int fd;
+        char *fname;
+        const uint8_t *file_in_mem_ptr;
+        int major_file_format;
+        int minor_file_format;
+        int database_type;
+        uint32_t full_record_size_bytes;        /* recbits * 2 / 8 */
+        int depth;
+        int node_count;
+        const uint8_t *dataptr;
+        uint8_t *meta_data_content;
+        struct MMDB_s *fake_metadata_db;
+        MMDB_entry_s meta;      // should change to entry_s
+    } MMDB_s;
 
     // The decode structure is like the result ( return_s ) but with the start
     // of the next entry. For example if we search for a key but this is the
