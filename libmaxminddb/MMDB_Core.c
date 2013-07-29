@@ -11,7 +11,7 @@
 #include <assert.h>
 
 #if HAVE_CONFIG_H
-# include <config.h>
+#include <config.h>
 #endif
 
 #define KEYS(...) __VA_ARGS__, NULL
@@ -61,7 +61,8 @@ LOCAL void *memmem(const void *big, size_t big_len, const void *little,
 }
 #endif
 
-int MMDB_resolve_address(const char *host, int ai_family, int ai_flags, void *ip)
+int MMDB_resolve_address(const char *host, int ai_family, int ai_flags,
+                         void *ip)
 {
     struct addrinfo hints = {.ai_family = ai_family,
         .ai_flags = ai_flags,
@@ -332,7 +333,7 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     }
 
     if (type == MMDB_DTYPE_BOOLEAN) {
-        decode->data.uinteger = !!size;
+        decode->data.uinteger = size ? 1 : 0;
         decode->data.data_size = 0;
         decode->offset_to_next = offset;
         return MMDB_SUCCESS;
@@ -393,8 +394,7 @@ LOCAL void free_all(MMDB_s * mmdb)
         }
         if (mmdb->file_in_mem_ptr) {
             free((void *)mmdb->file_in_mem_ptr);
-        }
-        else if (mmdb->meta_data_content) {
+        } else if (mmdb->meta_data_content) {
             free(mmdb->meta_data_content);
         }
         if (mmdb->fake_metadata_db) {
@@ -404,18 +404,18 @@ LOCAL void free_all(MMDB_s * mmdb)
     }
 }
 
-#define RETURN_ON_END_OF_SEARCHX(offset,segments,depth,maxdepth, res)   \
+#define RETURN_ON_END_OF_SEARCHX(offset, segments, depth, maxdepth, res)   \
     if ((offset) >= (segments)) {                                       \
         (res)->netmask = (maxdepth) - (depth);                          \
         (res)->entry.offset = (offset) - (segments);                    \
         return MMDB_SUCCESS;                                            \
     }
 
-#define RETURN_ON_END_OF_SEARCH32(offset,segments,depth, res)           \
+#define RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res)           \
     MMDB_DBG_CARP( "RETURN_ON_END_OF_SEARCH32 depth:%d offset:%u segments:%d\n", depth, (unsigned int)offset, segments); \
     RETURN_ON_END_OF_SEARCHX(offset,segments,depth, 32, res)
 
-#define RETURN_ON_END_OF_SEARCH128(offset,segments,depth, res)  \
+#define RETURN_ON_END_OF_SEARCH128(offset, segments, depth, res)  \
     RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
 
 LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
@@ -461,7 +461,6 @@ LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
             RETURN_ON_END_OF_SEARCH32(offset, segments, depth, result);
         }
     }
-
     // This should never happen, but if it does something went horribly wrong.
     return MMDB_CORRUPT_DATABASE;
 }
@@ -629,7 +628,9 @@ typedef union {
     struct in6_addr v6;
 } in_addr_any;
 
-LOCAL int resolve_any_address (const char *ipstr, int is_ipv4, in_addr_any *in_addr) {
+LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
+                              in_addr_any * in_addr)
+{
     int ai_flags = AI_NUMERICHOST;
     struct addrinfo hints = {
         .ai_socktype = SOCK_STREAM
@@ -640,8 +641,7 @@ LOCAL int resolve_any_address (const char *ipstr, int is_ipv4, in_addr_any *in_a
     if (is_ipv4) {
         hints.ai_flags = ai_flags;
         hints.ai_family = AF_INET;
-    }
-    else {
+    } else {
         hints.ai_flags = ai_flags | AI_V4MAPPED;
         hints.ai_family = AF_INET6;
     }
@@ -668,7 +668,8 @@ LOCAL int resolve_any_address (const char *ipstr, int is_ipv4, in_addr_any *in_a
     return 0;
 }
 
-MMDB_root_entry_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr, int *gai_error, int *mmdb_error)
+MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr, int *gai_error,
+                               int *mmdb_error)
 {
     // XXX ip version should be in the metadata structure
     int is_ipv4 = mmdb->depth == 32 ? 1 : 0;
@@ -685,8 +686,7 @@ MMDB_root_entry_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr, int *gai_error, 
 
     if (is_ipv4) {
         *mmdb_error = MMDB_lookup_by_ipnum(in_addr.v4.s_addr, root);
-    }
-    else {
+    } else {
         *mmdb_error = MMDB_lookup_by_ipnum_128(in_addr.v6, root);
     }
 
@@ -696,8 +696,7 @@ MMDB_root_entry_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr, int *gai_error, 
 
     if (root->entry.offset > 0) {
         return root;
-    }
-    else {
+    } else {
         return NULL;
     }
 }
@@ -792,7 +791,7 @@ LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     return MMDB_SUCCESS;
 }
 
-uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb)
+uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s * mmdb)
 {
     uint16_t status;
 
@@ -850,7 +849,6 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     if (type == MMDB_DTYPE_EXT) {
         type = get_ext_type(mem[offset++]);
     }
-
     // MMDB_DBG_CARP("decode_one type:%d\n", type);
 
     decode->data.type = type;
@@ -890,7 +888,7 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     }
 
     if (type == MMDB_DTYPE_BOOLEAN) {
-        decode->data.uinteger = !!size;
+        decode->data.uinteger = size ? 1 : 0;
         decode->data.data_size = 0;
         decode->offset_to_next = offset;
         MMDB_DBG_CARP("decode_one type:%d size:%d\n", type, 0);
@@ -1397,7 +1395,7 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
 
 MMDB_decode_all_s *MMDB_alloc_decode_all(void)
 {
-    MMDB_decode_all_s * decode_all = calloc(1, sizeof(MMDB_decode_all_s));
+    MMDB_decode_all_s *decode_all = calloc(1, sizeof(MMDB_decode_all_s));
     assert(decode_all != NULL);
 
     return decode_all;
