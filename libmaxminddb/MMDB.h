@@ -152,6 +152,8 @@ extern "C" {
     extern int MMDB_resolve_address(const char *host, int ai_family,
                                    int ai_flags, void *ip);
 
+    extern MMDB_root_entry_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr, int *gai_error, int *mmdb_error);
+
     extern int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read,
                                 off_t offset);
 #ifdef __cplusplus

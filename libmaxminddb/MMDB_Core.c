@@ -270,11 +270,11 @@ LOCAL int get_ext_type(int raw_ext_type)
 #endif
 }
 
-#define FD_RET_ON_ERR(fn) do{ \
-  int err = (fn);             \
-  if ( err != MMDB_SUCCESS )  \
-    return err;               \
-  } while(0)
+#define FD_RET_ON_ERR(fn) do{                   \
+        int err = (fn);                         \
+        if ( err != MMDB_SUCCESS )              \
+            return err;                         \
+    } while(0)
 
 LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 {
@@ -382,8 +382,6 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     return MMDB_SUCCESS;
 }
 
-#define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
-
 LOCAL void free_all(MMDB_s * mmdb)
 {
     if (mmdb) {
@@ -406,19 +404,19 @@ LOCAL void free_all(MMDB_s * mmdb)
     }
 }
 
-#define RETURN_ON_END_OF_SEARCHX(offset,segments,depth,maxdepth, res) \
-            if ((offset) >= (segments)) {                     \
-                (res)->netmask = (maxdepth) - (depth);        \
-                (res)->entry.offset = (offset) - (segments);  \
-                return MMDB_SUCCESS;                          \
-            }
+#define RETURN_ON_END_OF_SEARCHX(offset,segments,depth,maxdepth, res)   \
+    if ((offset) >= (segments)) {                                       \
+        (res)->netmask = (maxdepth) - (depth);                          \
+        (res)->entry.offset = (offset) - (segments);                    \
+        return MMDB_SUCCESS;                                            \
+    }
 
-#define RETURN_ON_END_OF_SEARCH32(offset,segments,depth, res) \
-            MMDB_DBG_CARP( "RETURN_ON_END_OF_SEARCH32 depth:%d offset:%u segments:%d\n", depth, (unsigned int)offset, segments); \
-	    RETURN_ON_END_OF_SEARCHX(offset,segments,depth, 32, res)
+#define RETURN_ON_END_OF_SEARCH32(offset,segments,depth, res)           \
+    MMDB_DBG_CARP( "RETURN_ON_END_OF_SEARCH32 depth:%d offset:%u segments:%d\n", depth, (unsigned int)offset, segments); \
+    RETURN_ON_END_OF_SEARCHX(offset,segments,depth, 32, res)
 
-#define RETURN_ON_END_OF_SEARCH128(offset,segments,depth, res) \
-	    RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
+#define RETURN_ON_END_OF_SEARCH128(offset,segments,depth, res)  \
+    RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
 
 LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
 {
@@ -468,6 +466,8 @@ LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
     return MMDB_CORRUPT_DATABASE;
 }
 
+#define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
+
 LOCAL int
 fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
@@ -482,8 +482,9 @@ fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     if (rl == 6) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
-            if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
+            if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 byte_offset += 3;
+            }
             FD_RET_ON_ERR(int_pread(fd, &b[0], 3, byte_offset));
             offset = get_uint24(b);
             RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
@@ -497,7 +498,6 @@ fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
                 offset = get_uint32(b);
                 offset &= 0xfffffff;
             } else {
-
                 FD_RET_ON_ERR(int_pread(fd, &b[0], 4, byte_offset));
                 offset =
                     b[0] * 65536 + b[1] * 256 + b[2] + ((b[3] & 0xf0) << 20);
@@ -507,8 +507,9 @@ fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     } else if (rl == 8) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             byte_offset = offset * rl;
-            if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum))
+            if (MMDB_CHKBIT_128(depth, (uint8_t *) & ipnum)) {
                 byte_offset += 4;
+            }
             FD_RET_ON_ERR(int_pread(fd, &b[0], 4, byte_offset));
             offset = get_uint32(b);
             RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
@@ -623,7 +624,85 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     return MMDB_CORRUPT_DATABASE;
 }
 
-LOCAL int init(MMDB_s * mmdb, const char *fname, uint32_t flags)
+typedef union {
+    struct in_addr v4;
+    struct in6_addr v6;
+} in_addr_any;
+
+LOCAL int resolve_any_address (const char *ipstr, int is_ipv4, in_addr_any *in_addr) {
+    int ai_flags = AI_NUMERICHOST;
+    struct addrinfo hints = {
+        .ai_socktype = SOCK_STREAM
+    };
+    struct addrinfo *addresses;
+    int gai_status;
+
+    if (is_ipv4) {
+        hints.ai_flags = ai_flags;
+        hints.ai_family = AF_INET;
+    }
+    else {
+        hints.ai_flags = ai_flags | AI_V4MAPPED;
+        hints.ai_family = AF_INET6;
+    }
+
+    gai_status = getaddrinfo(ipstr, NULL, &hints, &addresses);
+    if (gai_status) {
+        return gai_status;
+    }
+
+    if (hints.ai_family == AF_INET) {
+        memcpy(&((struct in_addr *)in_addr)->s_addr,
+               &((struct sockaddr_in *)addresses->ai_addr)->sin_addr, 4);
+    } else if (hints.ai_family == AF_INET6) {
+        memcpy(&((struct in6_addr *)in_addr)->s6_addr,
+               ((struct sockaddr_in6 *)addresses->ai_addr)->sin6_addr.s6_addr,
+               16);
+    } else {
+        /* This should never happen */
+        assert(0);
+    }
+
+    freeaddrinfo(addresses);
+
+    return 0;
+}
+
+MMDB_root_entry_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr, int *gai_error, int *mmdb_error)
+{
+    // XXX ip version should be in the metadata structure
+    int is_ipv4 = mmdb->depth == 32 ? 1 : 0;
+    in_addr_any in_addr;
+
+    MMDB_root_entry_s *root = malloc(sizeof(MMDB_root_entry_s *));
+    root->entry.mmdb = mmdb;
+
+    *gai_error = resolve_any_address(ipstr, is_ipv4, &in_addr);
+
+    if (*gai_error) {
+        return NULL;
+    }
+
+    if (is_ipv4) {
+        *mmdb_error = MMDB_lookup_by_ipnum(in_addr.v4.s_addr, root);
+    }
+    else {
+        *mmdb_error = MMDB_lookup_by_ipnum_128(in_addr.v6, root);
+    }
+
+    if (*mmdb_error) {
+        return NULL;
+    }
+
+    if (root->entry.offset > 0) {
+        return root;
+    }
+    else {
+        return NULL;
+    }
+}
+
+LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
 {
     struct stat s;
     int fd;
@@ -718,19 +797,8 @@ uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb)
     uint16_t status;
 
     MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
-    mmdb = calloc(1, sizeof(*mmdb));
 
-    if (NULL == mmdb) {
-        return MMDB_OUT_OF_MEMORY;
-    }
-
-    status = init(mmdb, fname, flags);
-
-    if (MMDB_SUCCESS != status) {
-        free_all(mmdb);
-    }
-
-    return status;
+    return init(mmdb, fname, flags);
 }
 
 void MMDB_close(MMDB_s * mmdb)

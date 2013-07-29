@@ -4,15 +4,12 @@
 #ifndef MMDB_TEST_HELPER_C
 #define MMDB_TEST_HELPER_C (1)
 
+#define MAX_DESCRIPTION_LENGTH 500
+
 void for_all_modes( void (*tests)(int mode, const char* description) );
 
-typedef union {
-    struct in_addr v4;
-    struct in6_addr v6;
-} in_addrX;
+MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc);
 
-MMDB_s *open_ok(char *db_file, int mode, char *mode_desc);
-
-void snprintf_or_bail(char *target, size_t size, char *fmt, ...);
+MMDB_root_entry_s *lookup_ok(MMDB_s *mmdb, const char *ip, const char *file, const char *mode_desc);
 
 #endif

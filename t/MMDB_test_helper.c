@@ -5,57 +5,67 @@
 #include "MMDB.h"
 #include "MMDB_test_helper.h"
 
-void for_all_modes( void (*tests)(int mode, const char *description) )
+void for_all_modes(void (*tests) (int mode, const char *description))
 {
     tests(MMDB_MODE_STANDARD, "standard mode");
     tests(MMDB_MODE_MEMORY_CACHE, "memory cache mode");
 }
 
-#define MAX_DESCRIPTION_LENGTH 500
-
-MMDB_s *open_ok(char *db_file, int mode, char *mode_desc)
+MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
 {
-    MMDB_s *mmdb;
+    MMDB_s *mmdb = (MMDB_s *) calloc(1, sizeof(MMDB_s));
     uint16_t status;
-    char desc[MAX_DESCRIPTION_LENGTH];
-    
-    status =
-        MMDB_open(db_file, mode, &mmdb);
+    int ok;
 
-    {
-        snprintf_or_bail(desc, MAX_DESCRIPTION_LENGTH,
-                         "open %s status is success - %s", db_file,
-                         mode_desc);
-        if (!ok(MMDB_SUCCESS == status, desc)) {
-            snprintf_or_bail(desc, MAX_DESCRIPTION_LENGTH,
-                             "open status code = %d", status);
-            diag(desc);
-        }
+    if (NULL == mmdb) {
+        BAIL_OUT("could not allocate memory for our MMDB_s struct");
     }
 
-    {
-        snprintf_or_bail(desc, MAX_DESCRIPTION_LENGTH,
-                         "returned mmdb struct is not null for %s - %s",db_file,
-                         mode_desc);
-        if (!ok(NULL != mmdb, desc)) {
-            // All of the remaining tests require an open mmdb
-            return NULL;
-        }
+    status = MMDB_open(db_file, mode, mmdb);
+
+    ok = ok(MMDB_SUCCESS == status, "open %s status is success - %s",
+            db_file, mode_desc);
+
+    if (!ok) {
+        diag("open status code = %d", status);
+        return NULL;
+    }
+
+    ok = ok(NULL != mmdb, "returned mmdb struct is not null for %s - %s",
+            db_file, mode_desc);
+
+    if (!ok) {
+        return NULL;
     }
 
     return mmdb;
 }
 
-void snprintf_or_bail(char *target, size_t size, char *fmt, ...)
+MMDB_root_entry_s *lookup_ok(MMDB_s * mmdb, const char *ip, const char *file,
+                             const char *mode_desc)
 {
-    va_list args;
+    int gai_error, mmdb_error;
+    MMDB_root_entry_s *root;
     int ok;
 
-    va_start(args, fmt);
-    ok = vsnprintf(target, size, fmt, args);
-    va_end(args);
+    root = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
+
+    ok = ok(0 == gai_error,
+            "no getaddrinfo error in call to MMDB_lookup for %s - %s - %s",
+            ip, file, mode_desc);
 
     if (!ok) {
-        BAIL_OUT("sprintf failed");
+        diag("error from call to getaddrinfo for %s - %s",
+             ip, gai_strerror(gai_error));
     }
+
+    ok = ok(0 == mmdb_error,
+            "no MMDB error in call to MMDB_lookup for %s - %s - %s",
+            ip, file, mode_desc);
+
+    if (!ok) {
+        diag("MMDB error - %d", mmdb_error);
+    }
+
+    return root;
 }
