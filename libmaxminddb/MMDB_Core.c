@@ -676,6 +676,8 @@ MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr, int *gai_error,
     in_addr_any in_addr;
 
     MMDB_root_entry_s *root = malloc(sizeof(MMDB_root_entry_s *));
+    assert(root != NULL);
+
     root->entry.mmdb = mmdb;
 
     *gai_error = resolve_any_address(ipstr, is_ipv4, &in_addr);
@@ -732,6 +734,8 @@ LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     }
 
     ptr = mmdb->meta_data_content = malloc(size);
+    assert(ptr != NULL);
+
     if (ptr == NULL) {
         return MMDB_INVALID_DATABASE;
     }
