@@ -65,23 +65,6 @@ extern "C" {
 #define MMDB_DBG_ASSERT(ex)
 #endif
 
-// This is the starting point for every search.
-// It is like the hash to start the search. It may or may not the root hash
-    typedef struct MMDB_entry_s {
-        struct MMDB_s *mmdb;
-        unsigned int offset;    /* usually pointer to the struct */
-        //uint8_t const *ptr;             /* usually pointer to the struct */
-    } MMDB_entry_s;
-
-// the root entry is the entry structure from a lookup
-// think of it as the root of all informations about the IP.
-
-    typedef struct {
-        MMDB_entry_s entry;
-        int netmask;
-    } MMDB_root_entry_s;
-
-// information about the database file.
     typedef struct MMDB_s {
         uint32_t flags;
         int fd;
@@ -99,7 +82,21 @@ extern "C" {
         MMDB_entry_s meta;      // should change to entry_s
     } MMDB_s;
 
-// this is the result for every field
+    // This is the starting point for every search.
+    // It is like the hash to start the search. It may or may not the root hash
+    typedef struct MMDB_entry_s {
+        struct MMDB_s *mmdb;
+        unsigned int offset;  /* A pointer to the start of the data for an IP */
+    } MMDB_entry_s;
+
+    // This is a pointer to the first 
+    // think of it as the root of all informations about the IP.
+    typedef struct {
+        MMDB_entry_s entry;
+        int netmask;
+    } MMDB_root_entry_s;
+
+    // this is the result for every field
     typedef struct MMDB_return_s {
         /* return values */
         union {
