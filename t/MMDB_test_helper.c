@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -9,6 +10,18 @@ void for_all_modes(void (*tests) (int mode, const char *description))
 {
     tests(MMDB_MODE_STANDARD, "standard mode");
     tests(MMDB_MODE_MEMORY_CACHE, "memory cache mode");
+}
+
+static const char *test_db_dir = "../maxmind-db/test-data";
+
+const char *test_database_path(const char *filename)
+{
+    char *path = malloc(500);
+    assert(path != NULL);
+
+    snprintf(path, 500, "%s/%s", test_db_dir, filename);
+
+    return (const char *)path;
 }
 
 MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
