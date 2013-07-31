@@ -1239,11 +1239,8 @@ const char *MMDB_lib_version(void)
 
 int MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
 {
-    uint32_t offset;
-
     *decode_all = MMDB_alloc_decode_all();
-    offset = start->offset;
-    return get_tree(start->mmdb, offset, *decode_all);
+    return get_tree(start->mmdb, start->offset, *decode_all);
 }
 
 LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
