@@ -820,12 +820,6 @@ void MMDB_close(MMDB_s * mmdb)
     }
 }
 
-/* return the result of any uint type with 32 bit's or less as uint32 */
-uint32_t MMDB_get_uint(MMDB_return_s const *const result)
-{
-    return result->uinteger;
-}
-
 int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result, ...)
 {
     va_list keys;
@@ -842,7 +836,7 @@ LOCAL uint32_t get_uint_value(MMDB_entry_s * start, ...)
     va_start(params, start);
     MMDB_vget_value(start, &result, params);
     va_end(params);
-    return MMDB_get_uint(&result);
+    return result.uinteger;
 }
 
 LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
