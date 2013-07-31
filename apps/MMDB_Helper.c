@@ -45,8 +45,7 @@ void usage(char *prg)
 void dump_meta(MMDB_s * mmdb)
 {
     MMDB_decode_all_s *decode_all = calloc(1, sizeof(MMDB_decode_all_s));
-    int err = MMDB_get_tree(&mmdb->meta, &decode_all);
-    assert(err == MMDB_SUCCESS);
+    MMDB_get_tree(&mmdb->meta, &decode_all);
 
     if (decode_all != NULL)
         MMDB_dump(NULL, decode_all, 0);

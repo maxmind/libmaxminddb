@@ -31,7 +31,7 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
 LOCAL int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
                 char *src_key);
 
-LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode);
+LOCAL void get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode);
 int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
                     va_list params);
 
@@ -1237,13 +1237,13 @@ const char *MMDB_lib_version(void)
     return PACKAGE_VERSION;
 }
 
-int MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
+void MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
 {
     *decode_all = MMDB_alloc_decode_all();
-    return get_tree(start->mmdb, start->offset, *decode_all);
+    get_tree(start->mmdb, start->offset, *decode_all);
 }
 
-LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
+LOCAL void get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 {
     decode_one(mmdb, offset, &decode->decode);
 
@@ -1321,7 +1321,6 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
     default:
         break;
     }
-    return MMDB_SUCCESS;
 }
 
 int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all, int indent)
