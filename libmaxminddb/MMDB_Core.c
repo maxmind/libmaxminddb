@@ -1251,7 +1251,7 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
     case MMDB_DTYPE_PTR:
         {
             MMDB_DBG_CARP("Skip ptr\n");
-            uint32_t tmp = decode->decode.offset_to_next;
+            uint32_t next_offset = decode->decode.offset_to_next;
             uint32_t last_offset;
             while (decode->decode.data.type == MMDB_DTYPE_PTR) {
                 decode_one(mmdb, last_offset =
@@ -1262,7 +1262,7 @@ LOCAL int get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
                 || decode->decode.data.type == MMDB_DTYPE_MAP) {
                 get_tree(mmdb, last_offset, decode);
             }
-            decode->decode.offset_to_next = tmp;
+            decode->decode.offset_to_next = next_offset;
         }
         break;
     case MMDB_DTYPE_ARRAY:
