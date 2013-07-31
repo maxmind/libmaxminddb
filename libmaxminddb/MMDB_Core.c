@@ -24,7 +24,6 @@
 //
 LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data);
 
-LOCAL uint32_t get_uint_value(MMDB_entry_s * start, ...);
 LOCAL int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 LOCAL void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
 LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
@@ -699,6 +698,16 @@ MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr, int *gai_error,
     }
 }
 
+LOCAL uint32_t get_uint_value(MMDB_entry_s * start, ...)
+{
+    MMDB_return_s result;
+    va_list params;
+    va_start(params, start);
+    MMDB_vget_value(start, &result, params);
+    va_end(params);
+    return result.uinteger;
+}
+
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size) {
     const uint8_t *metadata = memmem(metadata_content, size, "\xab\xcd\xefMaxMind.com", 14);
     if (NULL == metadata) {
@@ -827,16 +836,6 @@ int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result, ...)
     int ioerror = MMDB_vget_value(start, result, keys);
     va_end(keys);
     return ioerror;
-}
-
-LOCAL uint32_t get_uint_value(MMDB_entry_s * start, ...)
-{
-    MMDB_return_s result;
-    va_list params;
-    va_start(params, start);
-    MMDB_vget_value(start, &result, params);
-    va_end(params);
-    return result.uinteger;
 }
 
 LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
