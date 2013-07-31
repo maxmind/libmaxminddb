@@ -698,13 +698,10 @@ MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr, int *gai_error,
     }
 }
 
-LOCAL uint32_t get_uint_value(MMDB_entry_s * start, ...)
+LOCAL uint32_t get_uint_value(MMDB_entry_s * start, char *key)
 {
     MMDB_return_s result;
-    va_list params;
-    va_start(params, start);
-    MMDB_vget_value(start, &result, params);
-    va_end(params);
+    MMDB_get_value(start, &result, key, NULL);
     return result.uinteger;
 }
 
