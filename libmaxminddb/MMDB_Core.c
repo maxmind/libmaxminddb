@@ -395,6 +395,9 @@ LOCAL void free_all(MMDB_s * mmdb)
         if (mmdb->fake_metadata_db) {
             free(mmdb->fake_metadata_db);
         }
+        if (mmdb->metadata.database_type) {
+            free(mmdb->metadata.database_type);
+        }
         free((void *)mmdb);
     }
 }
@@ -698,11 +701,18 @@ MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr, int *gai_error,
     }
 }
 
-LOCAL uint32_t get_uint_value(MMDB_entry_s * start, char *key)
+LOCAL uint32_t value_for_key_as_uint(MMDB_entry_s * start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
     return result.uinteger;
+}
+
+LOCAL char *value_for_key_as_string(MMDB_entry_s * start, char *key)
+{
+    MMDB_return_s result;
+    MMDB_get_value(start, &result, key, NULL);
+    return strndup((const char *)result.ptr, result.data_size);
 }
 
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size) {
@@ -720,22 +730,25 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size) {
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
 
     mmdb->metadata.node_count =
-        get_uint_value(&mmdb->meta, "node_count");
+        value_for_key_as_uint(&mmdb->meta, "node_count");
 
     mmdb->metadata.record_size =
-        get_uint_value(&mmdb->meta, "record_size");
+        value_for_key_as_uint(&mmdb->meta, "record_size");
 
     mmdb->metadata.ip_version =
-        get_uint_value(&mmdb->meta, "ip_version");
+        value_for_key_as_uint(&mmdb->meta, "ip_version");
+
+    mmdb->metadata.database_type =
+        value_for_key_as_string(&mmdb->meta, "database_type");
 
     mmdb->metadata.binary_format_major_version =
-        get_uint_value(&mmdb->meta, "binary_format_major_version");
+        value_for_key_as_uint(&mmdb->meta, "binary_format_major_version");
 
     mmdb->metadata.binary_format_minor_version =
-        get_uint_value(&mmdb->meta, "binary_format_minor_version");
+        value_for_key_as_uint(&mmdb->meta, "binary_format_minor_version");
 
     mmdb->full_record_byte_size =
-        get_uint_value(&mmdb->meta, "record_size") * 2 / 8U;
+        value_for_key_as_uint(&mmdb->meta, "record_size") * 2 / 8U;
 
     mmdb->depth = mmdb->metadata.ip_version == 4 ? 32 : 128;
 

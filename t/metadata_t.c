@@ -16,6 +16,7 @@ void run_tests()
     ok(37 == mmdb->metadata.node_count, "node_count is 37");
     ok(24 == mmdb->metadata.record_size, "record_size is 24");
     ok(4 == mmdb->metadata.ip_version, "ip_version is 4");
+    is(mmdb->metadata.database_type, "Test", "database_type is ");
     ok(2 == mmdb->metadata.binary_format_major_version, "binary_format_major_version is 2");
     ok(0 == mmdb->metadata.binary_format_minor_version, "binary_format_minor_version is 0");
     ok(6 == mmdb->full_record_byte_size, "full_record_byte_size is 6");
