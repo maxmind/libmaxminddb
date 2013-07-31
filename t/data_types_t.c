@@ -55,7 +55,7 @@ void run_tests(int mode, const char *mode_desc)
            ip, filename, mode_desc);
     }
 
-    free(path);
+    free((void *)path);
     MMDB_close(mmdb);
 }
 
