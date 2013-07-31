@@ -14,8 +14,6 @@
 #include <config.h>
 #endif
 
-#define KEYS(...) __VA_ARGS__, NULL
-
 #if MMDB_DEBUG
 #define LOCAL
 #else
@@ -239,7 +237,7 @@ LOCAL int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result, char *src_key)
     if (result->data_size != src_keylen) {
         return 1;
     }
-    uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
+    uint32_t segments = mmdb->full_record_byte_size * mmdb->metadata.node_count;
     ssize_t offset = (ssize_t) result->ptr;
     uint8_t buff[1024];
     int len = src_keylen;
@@ -279,7 +277,7 @@ LOCAL int get_ext_type(int raw_ext_type)
 
 LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 {
-    const ssize_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
+    const ssize_t segments = mmdb->full_record_byte_size * mmdb->metadata.node_count;
     uint8_t ctrl;
     int type;
     uint8_t b[16];
@@ -394,8 +392,6 @@ LOCAL void free_all(MMDB_s * mmdb)
         }
         if (mmdb->file_in_mem_ptr) {
             free((void *)mmdb->file_in_mem_ptr);
-        } else if (mmdb->meta_data_content) {
-            free(mmdb->meta_data_content);
         }
         if (mmdb->fake_metadata_db) {
             free(mmdb->fake_metadata_db);
@@ -421,10 +417,10 @@ LOCAL void free_all(MMDB_s * mmdb)
 LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
-    int segments = mmdb->node_count;
+    int segments = mmdb->metadata.node_count;
     off_t offset = 0;
     int byte_offset;
-    int rl = mmdb->full_record_size_bytes;
+    int rl = mmdb->full_record_byte_size;
     int fd = mmdb->fd;
     uint32_t mask = 0x80000000U;
     int depth;
@@ -471,10 +467,10 @@ LOCAL int
 fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
-    int segments = mmdb->node_count;
+    int segments = mmdb->metadata.node_count;
     uint32_t offset = 0;
     int byte_offset;
-    int rl = mmdb->full_record_size_bytes;
+    int rl = mmdb->full_record_byte_size;
     int fd = mmdb->fd;
     int depth;
     uint8_t b[4];
@@ -526,9 +522,9 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
         return fdlookup_by_ipnum_128(ipnum, result);
     }
 
-    int segments = mmdb->node_count;
+    int segments = mmdb->metadata.node_count;
     uint32_t offset = 0;
-    int rl = mmdb->full_record_size_bytes;
+    int rl = mmdb->full_record_byte_size;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
     int depth;
@@ -573,16 +569,16 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
     MMDB_s *mmdb = res->entry.mmdb;
 
     MMDB_DBG_CARP("MMDB_lookup_by_ipnum{mmdb} fd:%d depth:%d node_count:%d\n",
-                  mmdb->fd, mmdb->depth, mmdb->node_count);
+                  mmdb->fd, mmdb->depth, mmdb->metadata.node_count);
     MMDB_DBG_CARP("MMDB_lookup_by_ipnum ip:%u fd:%d\n", ipnum, mmdb->fd);
 
     if (mmdb->fd >= 0) {
         return fdlookup_by_ipnum(ipnum, res);
     }
 
-    int segments = mmdb->node_count;
+    int segments = mmdb->metadata.node_count;
     uint32_t offset = 0;
-    int rl = mmdb->full_record_size_bytes;
+    int rl = mmdb->full_record_byte_size;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
     uint32_t mask = 0x80000000U;
@@ -703,11 +699,50 @@ MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr, int *gai_error,
     }
 }
 
+LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size) {
+    const uint8_t *metadata = memmem(metadata_content, size, "\xab\xcd\xefMaxMind.com", 14);
+    if (NULL == metadata) {
+        free(metadata_content);
+        return MMDB_INVALID_DATABASE;
+    }
+
+    mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));
+    assert(mmdb->fake_metadata_db != NULL);
+
+    mmdb->fake_metadata_db->fd = -1;
+    mmdb->fake_metadata_db->dataptr = metadata + 14;
+    mmdb->meta.mmdb = mmdb->fake_metadata_db;
+
+    mmdb->metadata.node_count =
+        get_uint_value(&mmdb->meta, "node_count");
+
+    mmdb->metadata.record_size =
+        get_uint_value(&mmdb->meta, "record_size");
+
+    mmdb->metadata.ip_version =
+        get_uint_value(&mmdb->meta, "ip_version");
+
+    mmdb->metadata.binary_format_major_version =
+        get_uint_value(&mmdb->meta, "binary_format_major_version");
+
+    mmdb->metadata.binary_format_minor_version =
+        get_uint_value(&mmdb->meta, "binary_format_minor_version");
+
+    mmdb->full_record_byte_size =
+        get_uint_value(&mmdb->meta, "record_size") * 2 / 8U;
+
+    mmdb->depth = mmdb->metadata.ip_version == 4 ? 32 : 128;
+
+    return MMDB_SUCCESS;
+}
+
+#define METADATA_BLOCK_MAX_SIZE 20000
+
 LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
 {
     struct stat s;
     int fd;
-    uint8_t *ptr;
+    uint8_t *metadata_content;
     ssize_t size;
     off_t offset;
 
@@ -729,66 +764,40 @@ LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
         offset = 0;
     } else {
         mmdb->fd = fd;
-        size = s.st_size < 2000 ? s.st_size : 2000;
+        size = s.st_size < METADATA_BLOCK_MAX_SIZE ? s.st_size : METADATA_BLOCK_MAX_SIZE;
         offset = s.st_size - size;
     }
 
-    ptr = mmdb->meta_data_content = malloc(size);
-    assert(ptr != NULL);
+    metadata_content = malloc(size);
+    assert(metadata_content != NULL);
 
-    if (ptr == NULL) {
+    if (metadata_content == NULL) {
         return MMDB_INVALID_DATABASE;
     }
 
-    if (MMDB_SUCCESS != int_pread(fd, mmdb->meta_data_content, size, offset)) {
+    if (MMDB_SUCCESS != int_pread(fd, metadata_content, size, offset)) {
         return MMDB_IO_ERROR;
     }
 
-    const uint8_t *metadata = memmem(ptr, size, "\xab\xcd\xefMaxMind.com", 14);
-    if (metadata == NULL) {
-        free(mmdb->meta_data_content);
-        mmdb->meta_data_content = NULL;
-        return MMDB_INVALID_DATABASE;
+    int ok = read_metadata(mmdb, metadata_content, size);
+    if (MMDB_SUCCESS != ok) {
+        return ok;
     }
 
-    mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));
-    assert(mmdb->fake_metadata_db != NULL);
-
-    mmdb->fake_metadata_db->fd = -1;
-    mmdb->fake_metadata_db->dataptr = metadata + 14;
-    mmdb->meta.mmdb = mmdb->fake_metadata_db;
-
-    // we can't fail with ioerror's here. It is a memory operation
-    mmdb->major_file_format =
-        get_uint_value(&mmdb->meta, KEYS("binary_format_major_version"));
-
-    mmdb->minor_file_format =
-        get_uint_value(&mmdb->meta, KEYS("binary_format_minor_version"));
-
-    // looks like the dataabase_type is the info string.
-    // mmdb->database_type = get_uint_value(&meta, KEYS("database_type"));
-    mmdb->full_record_size_bytes =
-        get_uint_value(&mmdb->meta, KEYS("record_size")) * 2 / 8U;
-    mmdb->node_count = get_uint_value(&mmdb->meta, KEYS("node_count"));
-
-    // unfortunately we must guess the depth of the database
-    mmdb->depth =
-        get_uint_value(&mmdb->meta, KEYS("ip_version")) == 4 ? 32 : 128;
-
     if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-        mmdb->file_in_mem_ptr = ptr;
+        mmdb->file_in_mem_ptr = metadata_content;
         mmdb->dataptr =
             mmdb->file_in_mem_ptr +
-            mmdb->node_count * mmdb->full_record_size_bytes;
+            mmdb->metadata.node_count * mmdb->full_record_byte_size;
         close(fd);
     } else {
         mmdb->dataptr =
             (const uint8_t *)0 +
-            (mmdb->node_count * mmdb->full_record_size_bytes);
+            (mmdb->metadata.node_count * mmdb->full_record_byte_size);
     }
 
     // Success - but can we handle the data?
-    if (mmdb->major_file_format != 2) {
+    if (mmdb->metadata.binary_format_major_version != 2) {
         return MMDB_UNKNOWN_DATABASE_FORMAT;
     }
 
@@ -1210,7 +1219,7 @@ LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data)
     int len = data->data_size > 255 ? 255 : data->data_size;
 
     if (mmdb && mmdb->fd >= 0) {
-        uint32_t segments = mmdb->full_record_size_bytes * mmdb->node_count;
+        uint32_t segments = mmdb->full_record_byte_size * mmdb->metadata.node_count;
         int_pread(mmdb->fd, str, len, segments + (uintptr_t) data->ptr);
     } else {
         memcpy(str, data->ptr, len);

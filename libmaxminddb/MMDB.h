@@ -95,22 +95,31 @@ extern "C" {
         int type;               /* type like string utf8_string, int32, ... */
     } MMDB_return_s;
 
+    typedef struct MMDB_metadata_s {
+        int node_count;
+        int record_size;
+        int ip_version;
+        char *database_type;
+        char **languages;
+        int binary_format_major_version;
+        int binary_format_minor_version;
+        unsigned long long build_epoch;
+        char *description;
+    } MMDB_metadata_s;
+
     typedef struct MMDB_s {
         uint32_t flags;
         int fd;
         char *fname;
         const uint8_t *file_in_mem_ptr;
-        int major_file_format;
-        int minor_file_format;
-        int database_type;
-        uint32_t full_record_size_bytes;        /* recbits * 2 / 8 */
-        int depth;
-        int node_count;
         const uint8_t *dataptr;
-        uint8_t *meta_data_content;
+        uint32_t full_record_byte_size;
+        int depth;
+        MMDB_metadata_s metadata;
         struct MMDB_s *fake_metadata_db;
         MMDB_entry_s meta;      // should change to entry_s
     } MMDB_s;
+
 
     // The decode structure is like the result ( return_s ) but with the start
     // of the next entry. For example if we search for a key but this is the

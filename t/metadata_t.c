@@ -5,7 +5,7 @@ void run_tests()
 {
     const char *file = "MaxMind-DB-test-ipv4-24.mmdb";
     const char *path = test_database_path(file);
-    MMDB_s *mmdb = open_ok(path, mode, mode_desc);
+    MMDB_s *mmdb = open_ok(path, MMDB_MODE_STANDARD, "standard mode");
 
     // All of the remaining tests require an open mmdb
     if (NULL == mmdb) {
@@ -13,50 +13,12 @@ void run_tests()
         return;
     }
 
-    {
-        const char *ip = "not an ip";
-        int gai_error, mmdb_error;
-        MMDB_root_entry_s *root;
-
-        root = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
-
-        ok(EAI_NONAME == gai_error,
-           "MMDB_lookup populates getaddrinfo error properly - %s", ip);
-
-        ok(NULL == root,
-           "no root entry struct returned for invalid IP address '%s'", ip);
-    }
-
-    {
-        const char *ip = "e900::";
-        int gai_error, mmdb_error;
-        MMDB_root_entry_s *root;
-
-        root = lookup_ok(mmdb, ip, file, mode_desc);
-
-        ok(NULL == root,
-           "no root entry struct returned for IP address not in the database - %s - %s - %s",
-           ip, file, mode_desc);
-    }
-
-    {
-        const char *ip = "::1.1.1.1";
-        int gai_error, mmdb_error;
-        MMDB_root_entry_s *root;
-        MMDB_return_s *result;
-
-        root = lookup_ok(mmdb, ip, file, mode_desc);
-
-        ok(NULL != root,
-           "got a root entry struct for IP address in the database - %s - %s - %s",
-           ip, file, mode_desc);
-
-        ok(root->entry.offset > 0,
-           "root.entry.offset > 0 for address in the database - %s - %s - %s",
-           ip, file, mode_desc);
-
-        result = MMDB_get_value(
-    }
+    ok(37 == mmdb->metadata.node_count, "node_count is 37");
+    ok(24 == mmdb->metadata.record_size, "record_size is 24");
+    ok(4 == mmdb->metadata.ip_version, "ip_version is 4");
+    ok(2 == mmdb->metadata.binary_format_major_version, "binary_format_major_version is 2");
+    ok(0 == mmdb->metadata.binary_format_minor_version, "binary_format_minor_version is 0");
+    ok(6 == mmdb->full_record_byte_size, "full_record_byte_size is 6");
 
     MMDB_close(mmdb);
 }
