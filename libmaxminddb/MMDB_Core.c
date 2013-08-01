@@ -1327,6 +1327,7 @@ LOCAL void get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
 
 int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all, int indent)
 {
+    fprintf(stdout, "Dumping data structure\n");
     while (decode_all) {
         decode_all = dump(mmdb, decode_all, indent);
     }
@@ -1350,6 +1351,7 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
     case MMDB_DTYPE_MAP:
         {
             int size = decode_all->decode.data.data_size;
+            fprintf(stdout, "map with %d pairs\n", size);
             for (decode_all = decode_all->next; size && decode_all; size--) {
                 decode_all = dump(mmdb, decode_all, indent + 2);
                 decode_all = dump(mmdb, decode_all, indent + 2);
@@ -1359,48 +1361,64 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
     case MMDB_DTYPE_ARRAY:
         {
             int size = decode_all->decode.data.data_size;
+            fprintf(stdout, "array with %d elements\n", size);
             for (decode_all = decode_all->next; size && decode_all; size--) {
                 decode_all = dump(mmdb, decode_all, indent + 2);
             }
         }
         break;
     case MMDB_DTYPE_UTF8_STRING:
+        silly_pindent(indent);
+        fprintf(stdout, "utf8_string = %s\n", (char *)decode_all->decode.data.ptr);
+        decode_all = decode_all->next;
+        break;
     case MMDB_DTYPE_BYTES:
         silly_pindent(indent);
-        DPRINT_KEY(mmdb, &decode_all->decode.data);
+        fprintf(stdout, "bytes = %s\n", (char *)decode_all->decode.data.ptr);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_IEEE754_DOUBLE:
         silly_pindent(indent);
-        fprintf(stdout, "%f\n", decode_all->decode.data.double_value);
+        fprintf(stdout, "double = %f\n", decode_all->decode.data.double_value);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_IEEE754_FLOAT:
         silly_pindent(indent);
-        fprintf(stdout, "%f\n", decode_all->decode.data.float_value);
+        fprintf(stdout, "float = %f\n", decode_all->decode.data.float_value);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_UINT16:
+        silly_pindent(indent);
+        fprintf(stdout, "uint16 = %u\n", decode_all->decode.data.uinteger);
+        decode_all = decode_all->next;
+        break;
     case MMDB_DTYPE_UINT32:
+        silly_pindent(indent);
+        fprintf(stdout, "uint32 = %u\n", decode_all->decode.data.uinteger);
+        decode_all = decode_all->next;
+        break;
     case MMDB_DTYPE_BOOLEAN:
         silly_pindent(indent);
-        fprintf(stdout, "%u\n", decode_all->decode.data.uinteger);
+        fprintf(stdout, "boolean = %u\n", decode_all->decode.data.uinteger);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_UINT64:
+        silly_pindent(indent);
+        fprintf(stdout, "uint64 = XXX\n");
+        decode_all = decode_all->next;
+        break;
     case MMDB_DTYPE_UINT128:
         silly_pindent(indent);
-        fprintf(stdout, "Some UINT64 or UINT128 data\n");
-        //fprintf(stderr, "%u\n", decode_all->decode.data.uinteger);
+        fprintf(stdout, "uint128 = XXX\n");
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_INT32:
         silly_pindent(indent);
-        fprintf(stdout, "%d\n", decode_all->decode.data.sinteger);
+        fprintf(stdout, "int32 = %d\n", decode_all->decode.data.sinteger);
         decode_all = decode_all->next;
         break;
     default:
-        MMDB_DBG_CARP("decode_one UNIPLEMENTED type:%d\n",
+        MMDB_DBG_CARP("unknown type! %d\n",
                       decode_all->decode.data.type);
         assert(0);
     }
