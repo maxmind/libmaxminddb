@@ -810,7 +810,6 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
 {
     const uint8_t *metadata = memmem(metadata_content, size, METADATA_MARKER, strlen(METADATA_MARKER));
     if (NULL == metadata) {
-        free(metadata_content);
         return MMDB_INVALID_DATABASE;
     }
 
