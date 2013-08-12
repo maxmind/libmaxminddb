@@ -45,6 +45,7 @@ void run_tests(int mode, const char *mode_desc)
     ok(6 == mmdb->full_record_byte_size, "full_record_byte_size is 6 - %s", mode_desc);
 
     MMDB_close(mmdb);
+    free(path);
 }
 
 int main(void)
