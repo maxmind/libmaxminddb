@@ -891,11 +891,13 @@ LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     }
 
     if (MMDB_SUCCESS != int_pread(fd, metadata_content, size, offset)) {
+        free(metadata_content);
         return MMDB_IO_ERROR;
     }
 
     int ok = read_metadata(mmdb, metadata_content, size);
     if (MMDB_SUCCESS != ok) {
+        free(metadata_content);
         return ok;
     }
 
@@ -906,6 +908,7 @@ LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
             mmdb->metadata.node_count * mmdb->full_record_byte_size;
         close(fd);
     } else {
+        free(metadata_content);
         mmdb->dataptr =
             (const uint8_t *)0 +
             (mmdb->metadata.node_count * mmdb->full_record_byte_size);
@@ -913,6 +916,7 @@ LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
 
     // Success - but can we handle the data?
     if (mmdb->metadata.binary_format_major_version != 2) {
+        free(metadata_content);
         return MMDB_UNKNOWN_DATABASE_FORMAT;
     }
 
