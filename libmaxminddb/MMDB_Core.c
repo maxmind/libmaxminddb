@@ -398,6 +398,13 @@ LOCAL void free_all(MMDB_s * mmdb)
         if (mmdb->metadata.database_type) {
             free(mmdb->metadata.database_type);
         }
+        if (mmdb->metadata.languages.names) {
+            int i;
+            for (i = 0; i < mmdb->metadata.languages.count; i++) {
+                free(mmdb->metadata.languages.names[i]);
+            }
+            free(mmdb->metadata.languages.names);
+        }
         free((void *)mmdb);
     }
 }
@@ -712,7 +719,37 @@ LOCAL char *value_for_key_as_string(MMDB_entry_s * start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
-    return strndup((const char *)result.ptr, result.data_size);
+    return strndup(result.ptr, result.data_size);
+}
+
+LOCAL void populate_languages_metadata(MMDB_s *mmdb)
+{
+    MMDB_return_s result;
+    MMDB_entry_s array_start;
+    size_t array_size;
+    MMDB_decode_all_s *member;
+    int i;
+
+    MMDB_get_value(&mmdb->meta, &result, "languages", NULL);
+
+    assert(result.type == MMDB_DTYPE_ARRAY);
+
+    array_start.mmdb = mmdb->fake_metadata_db;
+    array_start.offset = result.offset;
+
+    MMDB_get_tree(&array_start, &member);
+
+    array_size = member->decode.data.data_size;
+    mmdb->metadata.languages.count = array_size;
+    mmdb->metadata.languages.names = malloc(array_size * sizeof(char *));
+
+    for (i = 0; i < array_size; i++) {
+        member = member->next;
+        assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
+
+        mmdb->metadata.languages.names[i] = strndup((char *)member->decode.data.ptr, member->decode.data.data_size);
+        assert(mmdb->metadata.languages.names[i] != NULL);
+    }
 }
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
@@ -742,6 +779,8 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
 
     mmdb->metadata.database_type =
         value_for_key_as_string(&mmdb->meta, "database_type");
+
+    populate_languages_metadata(mmdb);
 
     mmdb->metadata.binary_format_major_version =
         value_for_key_as_uint(&mmdb->meta, "binary_format_major_version");

@@ -100,7 +100,10 @@ extern "C" {
         int record_size;
         int ip_version;
         char *database_type;
-        char **languages;
+        struct {
+            size_t count;
+            const char **names;
+        } languages;
         int binary_format_major_version;
         int binary_format_minor_version;
         unsigned long long build_epoch;
