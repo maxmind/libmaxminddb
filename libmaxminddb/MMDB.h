@@ -73,7 +73,7 @@ extern "C" {
 
     // This is a pointer to the first 
     // think of it as the root of all informations about the IP.
-    typedef struct {
+    typedef struct MMDB_root_entry_s {
         MMDB_entry_s entry;
         int netmask;
     } MMDB_root_entry_s;
