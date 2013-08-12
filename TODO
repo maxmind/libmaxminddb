@@ -1,4 +1,4 @@
-* Check all memory access
+* Check all memory allocations & frees
 * Replace all (or almost all) asserts with error codes
 * Refactor reading code to unify IPv4 & IPv6 paths as well as file & mem paths
 ** or remove file path entirely in favor of mmap
