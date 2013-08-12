@@ -1386,6 +1386,8 @@ LOCAL void silly_pindent(int i)
 LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
                               int indent)
 {
+    char *string, *bytes;
+
     switch (decode_all->decode.data.type) {
     case MMDB_DTYPE_MAP:
         {
@@ -1407,13 +1409,17 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
         }
         break;
     case MMDB_DTYPE_UTF8_STRING:
+        string = strndup((char *)decode_all->decode.data.ptr, decode_all->decode.data.data_size);
         silly_pindent(indent);
-        fprintf(stdout, "utf8_string = %s\n", (char *)decode_all->decode.data.ptr);
+        fprintf(stdout, "utf8_string = %s\n", string);
+        free(string);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_BYTES:
+        bytes = strndup((char *)decode_all->decode.data.ptr, decode_all->decode.data.data_size);
         silly_pindent(indent);
-        fprintf(stdout, "bytes = %s\n", (char *)decode_all->decode.data.ptr);
+        fprintf(stdout, "bytes = %s\n", bytes);
+        free(bytes);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_IEEE754_DOUBLE:
