@@ -276,7 +276,8 @@ LOCAL int get_ext_type(int raw_ext_type)
 
 LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
 {
-    const ssize_t segments = mmdb->full_record_byte_size * mmdb->metadata.node_count;
+    const ssize_t segments =
+        mmdb->full_record_byte_size * mmdb->metadata.node_count;
     uint8_t ctrl;
     int type;
     uint8_t b[16];
@@ -408,8 +409,10 @@ LOCAL void free_all(MMDB_s * mmdb)
         if (mmdb->metadata.description.descriptions) {
             int i;
             for (i = 0; i < mmdb->metadata.description.count; i++) {
-                free((char *)mmdb->metadata.description.descriptions[i]->language);
-                free((char *)mmdb->metadata.description.descriptions[i]->description);
+                free((char *)mmdb->metadata.description.descriptions[i]->
+                     language);
+                free((char *)mmdb->metadata.description.descriptions[i]->
+                     description);
                 free(mmdb->metadata.description.descriptions[i]);
             }
             free(mmdb->metadata.description.descriptions);
@@ -731,7 +734,7 @@ LOCAL char *value_for_key_as_string(MMDB_entry_s * start, char *key)
     return strndup((char *)result.ptr, result.data_size);
 }
 
-LOCAL void populate_languages_metadata(MMDB_s *mmdb)
+LOCAL void populate_languages_metadata(MMDB_s * mmdb)
 {
     MMDB_return_s result;
     MMDB_entry_s array_start;
@@ -759,14 +762,16 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
         member = member->next;
         assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
 
-        mmdb->metadata.languages.names[i] = strndup((char *)member->decode.data.ptr, member->decode.data.data_size);
+        mmdb->metadata.languages.names[i] =
+            strndup((char *)member->decode.data.ptr,
+                    member->decode.data.data_size);
         assert(mmdb->metadata.languages.names[i] != NULL);
     }
 
     MMDB_free_decode_all(first_member);
 }
 
-LOCAL void populate_description_metadata(MMDB_s *mmdb)
+LOCAL void populate_description_metadata(MMDB_s * mmdb)
 {
     MMDB_return_s result;
     MMDB_entry_s map_start;
@@ -788,27 +793,35 @@ LOCAL void populate_description_metadata(MMDB_s *mmdb)
 
     map_size = member->decode.data.data_size;
     mmdb->metadata.description.count = map_size;
-    mmdb->metadata.description.descriptions = malloc(map_size * sizeof(MMDB_description_s *));
+    mmdb->metadata.description.descriptions =
+        malloc(map_size * sizeof(MMDB_description_s *));
 
     for (i = 0; i < map_size; i++) {
-        mmdb->metadata.description.descriptions[i] = malloc(sizeof(MMDB_description_s));
+        mmdb->metadata.description.descriptions[i] =
+            malloc(sizeof(MMDB_description_s));
 
         member = member->next;
         assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
-        mmdb->metadata.description.descriptions[i]->language = strndup((char *)member->decode.data.ptr, member->decode.data.data_size);
+        mmdb->metadata.description.descriptions[i]->language =
+            strndup((char *)member->decode.data.ptr,
+                    member->decode.data.data_size);
 
         member = member->next;
         assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
-        mmdb->metadata.description.descriptions[i]->description = strndup((char *)member->decode.data.ptr, member->decode.data.data_size);
+        mmdb->metadata.description.descriptions[i]->description =
+            strndup((char *)member->decode.data.ptr,
+                    member->decode.data.data_size);
     }
 
     MMDB_free_decode_all(first_member);
 }
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
-LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
+LOCAL int read_metadata(MMDB_s * mmdb, uint8_t * metadata_content, ssize_t size)
 {
-    const uint8_t *metadata = memmem(metadata_content, size, METADATA_MARKER, strlen(METADATA_MARKER));
+    const uint8_t *metadata =
+        memmem(metadata_content, size, METADATA_MARKER,
+               strlen(METADATA_MARKER));
     if (NULL == metadata) {
         return MMDB_INVALID_DATABASE;
     }
@@ -878,7 +891,9 @@ LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
         offset = 0;
     } else {
         mmdb->fd = fd;
-        size = s.st_size < METADATA_BLOCK_MAX_SIZE ? s.st_size : METADATA_BLOCK_MAX_SIZE;
+        size =
+            s.st_size <
+            METADATA_BLOCK_MAX_SIZE ? s.st_size : METADATA_BLOCK_MAX_SIZE;
         offset = s.st_size - size;
     }
 
@@ -1321,7 +1336,8 @@ LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data)
     int len = data->data_size > 255 ? 255 : data->data_size;
 
     if (mmdb && mmdb->fd >= 0) {
-        uint32_t segments = mmdb->full_record_byte_size * mmdb->metadata.node_count;
+        uint32_t segments =
+            mmdb->full_record_byte_size * mmdb->metadata.node_count;
         int_pread(mmdb->fd, str, len, segments + (uintptr_t) data->ptr);
     } else {
         memcpy(str, data->ptr, len);
@@ -1467,14 +1483,18 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
         }
         break;
     case MMDB_DTYPE_UTF8_STRING:
-        string = strndup((char *)decode_all->decode.data.ptr, decode_all->decode.data.data_size);
+        string =
+            strndup((char *)decode_all->decode.data.ptr,
+                    decode_all->decode.data.data_size);
         silly_pindent(indent);
         fprintf(stdout, "utf8_string = %s\n", string);
         free(string);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_BYTES:
-        bytes = strndup((char *)decode_all->decode.data.ptr, decode_all->decode.data.data_size);
+        bytes =
+            strndup((char *)decode_all->decode.data.ptr,
+                    decode_all->decode.data.data_size);
         silly_pindent(indent);
         fprintf(stdout, "bytes = %s\n", bytes);
         free(bytes);
@@ -1521,8 +1541,7 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
         decode_all = decode_all->next;
         break;
     default:
-        MMDB_DBG_CARP("unknown type! %d\n",
-                      decode_all->decode.data.type);
+        MMDB_DBG_CARP("unknown type! %d\n", decode_all->decode.data.type);
         assert(0);
     }
     return decode_all;

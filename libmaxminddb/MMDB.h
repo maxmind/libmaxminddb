@@ -68,7 +68,7 @@ extern "C" {
     // It is like the hash to start the search. It may or may not the root hash
     typedef struct MMDB_entry_s {
         struct MMDB_s *mmdb;
-        unsigned int offset;  /* A pointer to the start of the data for an IP */
+        unsigned int offset;    /* A pointer to the start of the data for an IP */
     } MMDB_entry_s;
 
     // This is a pointer to the first 
@@ -88,7 +88,7 @@ extern "C" {
             uint32_t uinteger;
             uint8_t c8[8];
             uint8_t c16[16];
-            const void* ptr;
+            const void *ptr;
         };
         uint32_t offset;        /* start of our field or zero for not found */
         int data_size;          /* only valid for strings, utf8_strings or binary data */
@@ -131,7 +131,6 @@ extern "C" {
         MMDB_entry_s meta;      // should change to entry_s
     } MMDB_s;
 
-
     // The decode structure is like the result ( return_s ) but with the start
     // of the next entry. For example if we search for a key but this is the
     // wrong key.
@@ -145,12 +144,11 @@ extern "C" {
         struct MMDB_decode_all_s *next;
     } MMDB_decode_all_s;
 
-    extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb);
+    extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s * mmdb);
     extern void MMDB_close(MMDB_s * mmdb);
     extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res);
     extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
                                         MMDB_root_entry_s * result);
-
 
     extern int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result,
                               ...);
@@ -159,19 +157,21 @@ extern "C" {
 
     extern const char *MMDB_lib_version(void);
 
-    extern int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all, int indent);
+    extern int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
+                         int indent);
     extern void MMDB_get_tree(MMDB_entry_s * start,
                               MMDB_decode_all_s ** decode_all);
     extern MMDB_decode_all_s *MMDB_alloc_decode_all(void);
     extern void MMDB_free_decode_all(MMDB_decode_all_s * freeme);
 
     extern int MMDB_resolve_address(const char *host, int ai_family,
-                                   int ai_flags, void *ip);
+                                    int ai_flags, void *ip);
 
-    extern MMDB_root_entry_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr, int *gai_error, int *mmdb_error);
+    extern MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr,
+                                          int *gai_error, int *mmdb_error);
 
     extern int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read,
-                                off_t offset);
+                          off_t offset);
 #ifdef __cplusplus
 }
 #endif
