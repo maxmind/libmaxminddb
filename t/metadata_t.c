@@ -27,8 +27,8 @@ void run_tests(int mode, const char *mode_desc)
 
     ok(2 == mmdb->metadata.description.count, "found 2 descriptions - %s", mode_desc);
     for (i = 0; i < mmdb->metadata.description.count; i++) {
-        char *language = mmdb->metadata.description.descriptions[i]->language;
-        char *description = mmdb->metadata.description.descriptions[i]->description;
+        const char *language = mmdb->metadata.description.descriptions[i]->language;
+        const char *description = mmdb->metadata.description.descriptions[i]->description;
         if (strncmp(language, "en", 2) == 0) {
             ok(1, "found en description");
             is(description, "Test Database", "en description - %s");
@@ -44,8 +44,8 @@ void run_tests(int mode, const char *mode_desc)
 
     ok(6 == mmdb->full_record_byte_size, "full_record_byte_size is 6 - %s", mode_desc);
 
+    free((void *)path);
     MMDB_close(mmdb);
-    free(path);
 }
 
 int main(void)
