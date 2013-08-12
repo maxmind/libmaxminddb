@@ -765,7 +765,7 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     assert(mmdb->fake_metadata_db != NULL);
 
     mmdb->fake_metadata_db->fd = -1;
-    mmdb->fake_metadata_db->dataptr = metadata + 14;
+    mmdb->fake_metadata_db->dataptr = metadata + strlen(METADATA_MARKER);
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
 
     mmdb->metadata.node_count =
