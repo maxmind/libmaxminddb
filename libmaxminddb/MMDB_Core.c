@@ -719,7 +719,7 @@ LOCAL char *value_for_key_as_string(MMDB_entry_s * start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
-    return strndup(result.ptr, result.data_size);
+    return strndup((char *)result.ptr, result.data_size);
 }
 
 LOCAL void populate_languages_metadata(MMDB_s *mmdb)
