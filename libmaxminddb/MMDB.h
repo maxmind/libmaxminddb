@@ -95,6 +95,11 @@ extern "C" {
         int type;               /* type like string utf8_string, int32, ... */
     } MMDB_return_s;
 
+    typedef struct MMDB_description_s {
+        const char *language;
+        const char *description;
+    } MMDB_description_s;
+
     typedef struct MMDB_metadata_s {
         int node_count;
         int record_size;
@@ -107,7 +112,10 @@ extern "C" {
         int binary_format_major_version;
         int binary_format_minor_version;
         unsigned long long build_epoch;
-        char *description;
+        struct {
+            size_t count;
+            MMDB_description_s **descriptions;
+        } description;
     } MMDB_metadata_s;
 
     typedef struct MMDB_s {

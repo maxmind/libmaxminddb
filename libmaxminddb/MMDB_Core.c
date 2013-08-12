@@ -405,6 +405,15 @@ LOCAL void free_all(MMDB_s * mmdb)
             }
             free(mmdb->metadata.languages.names);
         }
+        if (mmdb->metadata.description.descriptions) {
+            int i;
+            for (i = 0; i < mmdb->metadata.description.count; i++) {
+                free((char *)mmdb->metadata.description.descriptions[i]->language);
+                free((char *)mmdb->metadata.description.descriptions[i]->description);
+                free(mmdb->metadata.description.descriptions[i]);
+            }
+            free(mmdb->metadata.description.descriptions);
+        }
         free((void *)mmdb);
     }
 }
@@ -752,6 +761,40 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
     }
 }
 
+LOCAL void populate_description_metadata(MMDB_s *mmdb)
+{
+    MMDB_return_s result;
+    MMDB_entry_s map_start;
+    size_t map_size;
+    MMDB_decode_all_s *member;
+    int i;
+
+    MMDB_get_value(&mmdb->meta, &result, "description", NULL);
+
+    assert(result.type == MMDB_DTYPE_MAP);
+
+    map_start.mmdb = mmdb->fake_metadata_db;
+    map_start.offset = result.offset;
+
+    MMDB_get_tree(&map_start, &member);
+
+    map_size = member->decode.data.data_size;
+    mmdb->metadata.description.count = map_size;
+    mmdb->metadata.description.descriptions = malloc(map_size * sizeof(MMDB_description_s *));
+
+    for (i = 0; i < map_size; i++) {
+        mmdb->metadata.description.descriptions[i] = malloc(sizeof(MMDB_description_s));
+
+        member = member->next;
+        assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
+        mmdb->metadata.description.descriptions[i]->language = strndup((char *)member->decode.data.ptr, member->decode.data.data_size);
+
+        member = member->next;
+        assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
+        mmdb->metadata.description.descriptions[i]->description = strndup((char *)member->decode.data.ptr, member->decode.data.data_size);
+    }
+}
+
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
 {
@@ -787,6 +830,8 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
 
     mmdb->metadata.binary_format_minor_version =
         value_for_key_as_uint(&mmdb->meta, "binary_format_minor_version");
+
+    populate_description_metadata(mmdb);
 
     mmdb->full_record_byte_size =
         value_for_key_as_uint(&mmdb->meta, "record_size") * 2 / 8U;
