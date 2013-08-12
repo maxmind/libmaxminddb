@@ -401,7 +401,7 @@ LOCAL void free_all(MMDB_s * mmdb)
         if (mmdb->metadata.languages.names) {
             int i;
             for (i = 0; i < mmdb->metadata.languages.count; i++) {
-                free(mmdb->metadata.languages.names[i]);
+                free((char *)mmdb->metadata.languages.names[i]);
             }
             free(mmdb->metadata.languages.names);
         }
