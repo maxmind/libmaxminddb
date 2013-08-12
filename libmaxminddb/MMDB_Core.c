@@ -737,6 +737,7 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
     MMDB_entry_s array_start;
     size_t array_size;
     MMDB_decode_all_s *member;
+    MMDB_decode_all_s *first_member;
     int i;
 
     MMDB_get_value(&mmdb->meta, &result, "languages", NULL);
@@ -747,6 +748,8 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
     array_start.offset = result.offset;
 
     MMDB_get_tree(&array_start, &member);
+
+    first_member = member;
 
     array_size = member->decode.data.data_size;
     mmdb->metadata.languages.count = array_size;
@@ -759,6 +762,8 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
         mmdb->metadata.languages.names[i] = strndup((char *)member->decode.data.ptr, member->decode.data.data_size);
         assert(mmdb->metadata.languages.names[i] != NULL);
     }
+
+    MMDB_free_decode_all(first_member);
 }
 
 LOCAL void populate_description_metadata(MMDB_s *mmdb)
@@ -767,6 +772,7 @@ LOCAL void populate_description_metadata(MMDB_s *mmdb)
     MMDB_entry_s map_start;
     size_t map_size;
     MMDB_decode_all_s *member;
+    MMDB_decode_all_s *first_member;
     int i;
 
     MMDB_get_value(&mmdb->meta, &result, "description", NULL);
@@ -777,6 +783,8 @@ LOCAL void populate_description_metadata(MMDB_s *mmdb)
     map_start.offset = result.offset;
 
     MMDB_get_tree(&map_start, &member);
+
+    first_member = member;
 
     map_size = member->decode.data.data_size;
     mmdb->metadata.description.count = map_size;
@@ -793,6 +801,8 @@ LOCAL void populate_description_metadata(MMDB_s *mmdb)
         assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
         mmdb->metadata.description.descriptions[i]->description = strndup((char *)member->decode.data.ptr, member->decode.data.data_size);
     }
+
+    MMDB_free_decode_all(first_member);
 }
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
