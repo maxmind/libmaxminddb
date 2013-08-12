@@ -1,3 +1,35 @@
--nbad -bap -nbc -bbo -hnl -br -brs -c33 -cd33 -ncdb -ce -ci4
--cli0 -d0 -di1 -nfc1 -i4 -ip0 -l80 -lp -npcs -nprs -npsl -sai
--saf -saw -ncs -nsc -sob -nfca -cp33 -ss -ts8 -il1 -nut
+--blank-lines-after-procedures
+--braces-on-if-line
+--braces-on-struct-decl-line
+--break-before-boolean-operator
+--case-indentation0
+--comment-indentation33
+--continuation-indentation4
+--continue-at-parentheses
+--cuddle-else
+--declaration-comment-column33
+--declaration-indentation1
+--dont-break-procedure-type
+--dont-format-comments
+--dont-format-first-column-comments
+--dont-star-comments
+--else-endif-column33
+--honour-newlines
+--indent-label1
+--indent-level4
+--line-comments-indentation0
+--line-length80
+--no-blank-lines-after-commas
+--no-blank-lines-after-declarations
+--no-comment-delimiters-on-blank-lines
+--no-space-after-casts
+--no-space-after-function-call-names
+--no-space-after-parentheses
+--no-tabs
+--parameter-indentation0
+--space-after-for
+--space-after-if
+--space-after-while
+--space-special-semicolon
+--swallow-optional-blank-lines
+--tab-size8
