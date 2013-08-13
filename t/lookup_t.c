@@ -18,7 +18,7 @@ char *ip6_string[][2] = {
     {NULL, NULL}
 };
 
-static void check_illegal_index(MMDB_entry_s * entry, int idx)
+static void check_illegal_index(MMDB_entry_s *entry, int idx)
 {
     MMDB_return_s result;
     char string[256];
@@ -27,7 +27,7 @@ static void check_illegal_index(MMDB_entry_s * entry, int idx)
     ok(result.offset == 0, "Great nothing found");
 }
 
-void test_mmdb(MMDB_s * mmdb)
+void test_mmdb(MMDB_s *mmdb)
 {
     char *ipstr;
     char *(*ip_string)[2] = mmdb->depth == 32 ? ip4_string : ip6_string;
@@ -124,8 +124,10 @@ void test_mmdb(MMDB_s * mmdb)
             {
                 double expect[] =
                     { 0.000000, 0.000000, 1.000000, 0.100000, 0.123000,
-          10.000000, 7.990000, 1000000000.000000, -1.000000, -0.100000,
-          -0.123000, -10.000000, -7.990000, -1000000000.000000 };
+                    10.000000, 7.990000, 1000000000.000000, -1.000000,
+                    -0.100000,
+                    -0.123000, -10.000000, -7.990000, -1000000000.000000
+                };
                 int cnt = sizeof(expect) / sizeof(double);
 
                 MMDB_return_s got;

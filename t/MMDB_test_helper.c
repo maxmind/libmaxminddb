@@ -26,7 +26,7 @@ const char *test_database_path(const char *filename)
 
 MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
 {
-    MMDB_s *mmdb = (MMDB_s *) calloc(1, sizeof(MMDB_s));
+    MMDB_s *mmdb = (MMDB_s *)calloc(1, sizeof(MMDB_s));
     uint16_t status;
     int ok;
 
@@ -54,8 +54,8 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
     return mmdb;
 }
 
-MMDB_lookup_result_s *lookup_ok(MMDB_s * mmdb, const char *ip,
-                                   const char *file, const char *mode_desc)
+MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
+                                const char *file, const char *mode_desc)
 {
     int gai_error, mmdb_error;
     MMDB_lookup_result_s *root;

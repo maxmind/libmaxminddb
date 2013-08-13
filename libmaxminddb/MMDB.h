@@ -144,30 +144,29 @@ extern "C" {
         struct MMDB_decode_all_s *next;
     } MMDB_decode_all_s;
 
-    extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s * mmdb);
-    extern void MMDB_close(MMDB_s * mmdb);
-    extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s * res);
+    extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb);
+    extern void MMDB_close(MMDB_s *mmdb);
+    extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s *res);
     extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
-                                        MMDB_lookup_result_s * result);
+                                        MMDB_lookup_result_s *result);
 
-    extern int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result,
-                              ...);
-    extern int MMDB_strcmp_result(MMDB_s * mmdb,
+    extern int MMDB_get_value(MMDB_entry_s *start, MMDB_return_s *result, ...);
+    extern int MMDB_strcmp_result(MMDB_s *mmdb,
                                   MMDB_return_s const *const result, char *str);
 
     extern const char *MMDB_lib_version(void);
 
-    extern int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
+    extern int MMDB_dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
                          int indent);
-    extern void MMDB_get_tree(MMDB_entry_s * start,
-                              MMDB_decode_all_s ** decode_all);
+    extern void MMDB_get_tree(MMDB_entry_s *start,
+                              MMDB_decode_all_s **decode_all);
     extern MMDB_decode_all_s *MMDB_alloc_decode_all(void);
-    extern void MMDB_free_decode_all(MMDB_decode_all_s * freeme);
+    extern void MMDB_free_decode_all(MMDB_decode_all_s *freeme);
 
     extern int MMDB_resolve_address(const char *host, int ai_family,
                                     int ai_flags, void *ip);
 
-    extern MMDB_lookup_result_s *MMDB_lookup(MMDB_s * mmdb,
+    extern MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb,
                                              const char *ipstr,
                                              int *gai_error, int *mmdb_error);
 

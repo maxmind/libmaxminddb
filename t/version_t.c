@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #if HAVE_CONFIG_H
-# include <config.h>
+#include <config.h>
 #endif
 
 int main(void)

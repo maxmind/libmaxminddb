@@ -22,20 +22,18 @@
 
 // prototypes
 //
-LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data);
+LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_return_s *data);
 
-LOCAL int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
-LOCAL void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode);
-LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
+LOCAL int fdskip_hash_array(MMDB_s *mmdb, MMDB_decode_s *decode);
+LOCAL void skip_hash_array(MMDB_s *mmdb, MMDB_decode_s *decode);
+LOCAL int fdvget_value(MMDB_entry_s *start, MMDB_return_s *result,
                        va_list params);
-LOCAL int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result,
-                char *src_key);
+LOCAL int fdcmp(MMDB_s *mmdb, MMDB_return_s const *const result, char *src_key);
 
-LOCAL void get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode);
-int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
-                    va_list params);
+LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset, MMDB_decode_all_s *decode);
+int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params);
 
-LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
+LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
                               int indent);
 
 #if !defined HAVE_MEMMEM
@@ -209,7 +207,7 @@ LOCAL char *bytesdup(MMDB_return_s const *const ret)
 }
 
 // 0 match like strcmp
-int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
+int MMDB_strcmp_result(MMDB_s *mmdb, MMDB_return_s const *const result,
                        char *str)
 {
     if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
@@ -230,7 +228,7 @@ int MMDB_strcmp_result(MMDB_s * mmdb, MMDB_return_s const *const result,
 
 }
 
-LOCAL int fdcmp(MMDB_s * mmdb, MMDB_return_s const *const result, char *src_key)
+LOCAL int fdcmp(MMDB_s *mmdb, MMDB_return_s const *const result, char *src_key)
 {
     int src_keylen = result->data_size;
     if (result->data_size != src_keylen) {
@@ -274,7 +272,7 @@ LOCAL int get_ext_type(int raw_ext_type)
             return err;                         \
     } while(0)
 
-LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
+LOCAL int fddecode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode)
 {
     const ssize_t segments =
         mmdb->full_record_byte_size * mmdb->metadata.node_count;
@@ -381,7 +379,7 @@ LOCAL int fddecode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     return MMDB_SUCCESS;
 }
 
-LOCAL void free_all(MMDB_s * mmdb)
+LOCAL void free_all(MMDB_s *mmdb)
 {
     if (mmdb) {
         if (mmdb->fname) {
@@ -435,7 +433,7 @@ LOCAL void free_all(MMDB_s * mmdb)
 #define RETURN_ON_END_OF_SEARCH128(offset, segments, depth, res)  \
     RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
 
-LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s * result)
+LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s *result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->metadata.node_count;
@@ -485,7 +483,7 @@ LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s * result)
 #define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
 
 LOCAL int
-fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_lookup_result_s * result)
+fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_lookup_result_s *result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->metadata.node_count;
@@ -536,7 +534,7 @@ fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_lookup_result_s * result)
 }
 
 int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
-                             MMDB_lookup_result_s * result)
+                             MMDB_lookup_result_s *result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
 
@@ -586,7 +584,7 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
     return MMDB_CORRUPT_DATABASE;
 }
 
-int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s * res)
+int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s *res)
 {
     MMDB_s *mmdb = res->entry.mmdb;
 
@@ -647,7 +645,7 @@ typedef union {
 } in_addr_any;
 
 LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
-                              in_addr_any * in_addr)
+                              in_addr_any *in_addr)
 {
     int ai_flags = AI_NUMERICHOST;
     struct addrinfo hints = {
@@ -686,7 +684,7 @@ LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
     return 0;
 }
 
-MMDB_lookup_result_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr,
+MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
                                   int *gai_error, int *mmdb_error)
 {
     // XXX ip version should be in the metadata structure
@@ -721,21 +719,21 @@ MMDB_lookup_result_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr,
     }
 }
 
-LOCAL uint32_t value_for_key_as_uint(MMDB_entry_s * start, char *key)
+LOCAL uint32_t value_for_key_as_uint(MMDB_entry_s *start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
     return result.uinteger;
 }
 
-LOCAL char *value_for_key_as_string(MMDB_entry_s * start, char *key)
+LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
     return strndup((char *)result.ptr, result.data_size);
 }
 
-LOCAL void populate_languages_metadata(MMDB_s * mmdb)
+LOCAL void populate_languages_metadata(MMDB_s *mmdb)
 {
     MMDB_return_s result;
     MMDB_entry_s array_start;
@@ -772,7 +770,7 @@ LOCAL void populate_languages_metadata(MMDB_s * mmdb)
     MMDB_free_decode_all(first_member);
 }
 
-LOCAL void populate_description_metadata(MMDB_s * mmdb)
+LOCAL void populate_description_metadata(MMDB_s *mmdb)
 {
     MMDB_return_s result;
     MMDB_entry_s map_start;
@@ -818,7 +816,7 @@ LOCAL void populate_description_metadata(MMDB_s * mmdb)
 }
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
-LOCAL int read_metadata(MMDB_s * mmdb, uint8_t * metadata_content, ssize_t size)
+LOCAL int read_metadata(MMDB_s *mmdb, uint8_t * metadata_content, ssize_t size)
 {
     const uint8_t *metadata = memmem(metadata_content, size, METADATA_MARKER,
                                      strlen(METADATA_MARKER));
@@ -865,7 +863,7 @@ LOCAL int read_metadata(MMDB_s * mmdb, uint8_t * metadata_content, ssize_t size)
 
 #define METADATA_BLOCK_MAX_SIZE 20000
 
-LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
+LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags)
 {
     struct stat s;
     int fd;
@@ -937,7 +935,7 @@ LOCAL uint16_t init(MMDB_s * mmdb, const char *fname, uint32_t flags)
     return MMDB_SUCCESS;
 }
 
-uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s * mmdb)
+uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb)
 {
     uint16_t status;
 
@@ -946,14 +944,14 @@ uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s * mmdb)
     return init(mmdb, fname, flags);
 }
 
-void MMDB_close(MMDB_s * mmdb)
+void MMDB_close(MMDB_s *mmdb)
 {
     if (mmdb) {
         free_all(mmdb);
     }
 }
 
-int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result, ...)
+int MMDB_get_value(MMDB_entry_s *start, MMDB_return_s *result, ...)
 {
     va_list keys;
     va_start(keys, result);
@@ -962,7 +960,7 @@ int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result, ...)
     return ioerror;
 }
 
-LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
+LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode)
 {
 
     if (mmdb->fd >= 0) {
@@ -1065,8 +1063,8 @@ LOCAL void decode_one(MMDB_s * mmdb, uint32_t offset, MMDB_decode_s * decode)
     return;
 }
 
-LOCAL int fddecode_one_follow(MMDB_s * mmdb, uint32_t offset,
-                              MMDB_decode_s * decode)
+LOCAL int fddecode_one_follow(MMDB_s *mmdb, uint32_t offset,
+                              MMDB_decode_s *decode)
 {
     FD_RET_ON_ERR(fddecode_one(mmdb, offset, decode));
     if (decode->data.type == MMDB_DTYPE_PTR) {
@@ -1075,8 +1073,8 @@ LOCAL int fddecode_one_follow(MMDB_s * mmdb, uint32_t offset,
     return MMDB_SUCCESS;
 }
 
-LOCAL void decode_one_follow(MMDB_s * mmdb, uint32_t offset,
-                             MMDB_decode_s * decode)
+LOCAL void decode_one_follow(MMDB_s *mmdb, uint32_t offset,
+                             MMDB_decode_s *decode)
 {
     decode_one(mmdb, offset, decode);
     if (decode->data.type == MMDB_DTYPE_PTR) {
@@ -1084,8 +1082,7 @@ LOCAL void decode_one_follow(MMDB_s * mmdb, uint32_t offset,
     }
 }
 
-int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
-                    va_list params)
+int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
 {
     MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;
@@ -1185,7 +1182,7 @@ int MMDB_vget_value(MMDB_entry_s * start, MMDB_return_s * result,
     return MMDB_SUCCESS;
 }
 
-LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
+LOCAL int fdvget_value(MMDB_entry_s *start, MMDB_return_s *result,
                        va_list params)
 {
     MMDB_decode_s decode, key, value;
@@ -1291,7 +1288,7 @@ LOCAL int fdvget_value(MMDB_entry_s * start, MMDB_return_s * result,
     return MMDB_SUCCESS;
 }
 
-LOCAL int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
+LOCAL int fdskip_hash_array(MMDB_s *mmdb, MMDB_decode_s *decode)
 {
     if (decode->data.type == MMDB_DTYPE_MAP) {
         int size = decode->data.data_size;
@@ -1311,7 +1308,7 @@ LOCAL int fdskip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
     return MMDB_SUCCESS;
 }
 
-LOCAL void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
+LOCAL void skip_hash_array(MMDB_s *mmdb, MMDB_decode_s *decode)
 {
     if (decode->data.type == MMDB_DTYPE_MAP) {
         int size = decode->data.data_size;
@@ -1330,7 +1327,7 @@ LOCAL void skip_hash_array(MMDB_s * mmdb, MMDB_decode_s * decode)
     }
 }
 
-LOCAL void DPRINT_KEY(MMDB_s * mmdb, MMDB_return_s * data)
+LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_return_s *data)
 {
     uint8_t str[256];
     int len = data->data_size > 255 ? 255 : data->data_size;
@@ -1352,13 +1349,13 @@ const char *MMDB_lib_version(void)
     return PACKAGE_VERSION;
 }
 
-void MMDB_get_tree(MMDB_entry_s * start, MMDB_decode_all_s ** decode_all)
+void MMDB_get_tree(MMDB_entry_s *start, MMDB_decode_all_s **decode_all)
 {
     *decode_all = MMDB_alloc_decode_all();
     get_tree(start->mmdb, start->offset, *decode_all);
 }
 
-LOCAL void get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
+LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset, MMDB_decode_all_s *decode)
 {
     decode_one(mmdb, offset, &decode->decode);
 
@@ -1438,7 +1435,7 @@ LOCAL void get_tree(MMDB_s * mmdb, uint32_t offset, MMDB_decode_all_s * decode)
     }
 }
 
-int MMDB_dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all, int indent)
+int MMDB_dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all, int indent)
 {
     fprintf(stdout, "Dumping data structure\n");
     while (decode_all) {
@@ -1457,7 +1454,7 @@ LOCAL void silly_pindent(int i)
     fputs(buffer, stderr);
 }
 
-LOCAL MMDB_decode_all_s *dump(MMDB_s * mmdb, MMDB_decode_all_s * decode_all,
+LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
                               int indent)
 {
     char *string, *bytes;
@@ -1555,7 +1552,7 @@ MMDB_decode_all_s *MMDB_alloc_decode_all(void)
     return decode_all;
 }
 
-void MMDB_free_decode_all(MMDB_decode_all_s * freeme)
+void MMDB_free_decode_all(MMDB_decode_all_s *freeme)
 {
     if (freeme == NULL) {
         return;
