@@ -20,8 +20,6 @@
 #define LOCAL static
 #endif
 
-// prototypes
-//
 LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_return_s *data);
 
 LOCAL int fdskip_hash_array(MMDB_s *mmdb, MMDB_decode_s *decode);
@@ -29,10 +27,8 @@ LOCAL void skip_hash_array(MMDB_s *mmdb, MMDB_decode_s *decode);
 LOCAL int fdvget_value(MMDB_entry_s *start, MMDB_return_s *result,
                        va_list params);
 LOCAL int fdcmp(MMDB_s *mmdb, MMDB_return_s const *const result, char *src_key);
-
 LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset, MMDB_decode_all_s *decode);
-int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params);
-
+LOCAL int vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params);
 LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
                               int indent);
 
@@ -955,7 +951,7 @@ int MMDB_get_value(MMDB_entry_s *start, MMDB_return_s *result, ...)
 {
     va_list keys;
     va_start(keys, result);
-    int ioerror = MMDB_vget_value(start, result, keys);
+    int ioerror = vget_value(start, result, keys);
     va_end(keys);
     return ioerror;
 }
@@ -1082,7 +1078,7 @@ LOCAL void decode_one_follow(MMDB_s *mmdb, uint32_t offset,
     }
 }
 
-int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
+LOCAL int vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
 {
     MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;
