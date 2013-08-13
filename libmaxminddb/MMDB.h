@@ -73,10 +73,10 @@ extern "C" {
 
     // This is a pointer to the first 
     // think of it as the root of all informations about the IP.
-    typedef struct MMDB_root_entry_s {
+    typedef struct MMDB_lookup_result_s {
         MMDB_entry_s entry;
         int netmask;
-    } MMDB_root_entry_s;
+    } MMDB_lookup_result_s;
 
     // this is the result for every field
     typedef struct MMDB_return_s {
@@ -146,9 +146,9 @@ extern "C" {
 
     extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s * mmdb);
     extern void MMDB_close(MMDB_s * mmdb);
-    extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res);
+    extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s * res);
     extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
-                                        MMDB_root_entry_s * result);
+                                        MMDB_lookup_result_s * result);
 
     extern int MMDB_get_value(MMDB_entry_s * start, MMDB_return_s * result,
                               ...);
@@ -167,8 +167,9 @@ extern "C" {
     extern int MMDB_resolve_address(const char *host, int ai_family,
                                     int ai_flags, void *ip);
 
-    extern MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr,
-                                          int *gai_error, int *mmdb_error);
+    extern MMDB_lookup_result_s *MMDB_lookup(MMDB_s * mmdb,
+                                             const char *ipstr,
+                                             int *gai_error, int *mmdb_error);
 
     extern int MMDB_pread(int fd, uint8_t * buffer, ssize_t to_read,
                           off_t offset);

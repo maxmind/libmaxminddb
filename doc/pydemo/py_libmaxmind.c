@@ -79,7 +79,7 @@ static PyObject *MMDB_lookup_Py(PyObject * self, PyObject * args)
 
     status = MMDB_resolve_address(name, AF_INET6, AI_V4MAPPED, &ip);
     if (status == 0) {
-        MMDB_root_entry_s root = {.entry.mmdb = obj->mmdb };
+        MMDB_lookup_result_s root = {.entry.mmdb = obj->mmdb };
         status = MMDB_lookup_by_ipnum_128(ip, &root);
         if (status == MMDB_SUCCESS && root.entry.offset > 0) {
             MMDB_decode_all_s *decode_all;

@@ -33,7 +33,7 @@ void test_mmdb(MMDB_s * mmdb)
     char *(*ip_string)[2] = mmdb->depth == 32 ? ip4_string : ip6_string;
     for (int i = 0; (ipstr = ip_string[i][0]); i++) {
         in_addrX ipnum;
-        MMDB_root_entry_s root = {.entry.mmdb = mmdb };
+        MMDB_lookup_result_s root = {.entry.mmdb = mmdb };
         ip_to_num(mmdb, ipstr, &ipnum);
         int err =
             mmdb->depth == 32 ? MMDB_lookup_by_ipnum(ipnum.v4.s_addr, &root)

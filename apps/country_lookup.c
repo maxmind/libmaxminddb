@@ -39,7 +39,7 @@ int main(int argc, char *const argv[])
 
     for (int i = 1; i <= 10000000; i++) {
 
-        MMDB_root_entry_s root = {.entry.mmdb = mmdb };
+        MMDB_lookup_result_s root = {.entry.mmdb = mmdb };
 //    int err = MMDB_lookup_by_ipnum(404232216, &root);
         uint32_t ipnum = htonl(rand());
         int err = MMDB_lookup_by_ipnum(ipnum, &root);

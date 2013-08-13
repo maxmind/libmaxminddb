@@ -66,7 +66,7 @@ int main(int argc, char *const argv[])
         dump_meta(mmdb);
     }
 
-    MMDB_root_entry_s root = {.entry.mmdb = mmdb };
+    MMDB_lookup_result_s root = {.entry.mmdb = mmdb };
 
     status = is_ipv4(mmdb)
         ? MMDB_lookup_by_ipnum(htonl(ip.v4.s_addr), &root)

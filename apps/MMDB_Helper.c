@@ -57,7 +57,7 @@ static const char *na(char const *string)
     return string ? string : "N/A";
 }
 
-void dump_ipinfo(const char *ipstr, MMDB_root_entry_s * ipinfo)
+void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s * ipinfo)
 {
 
     char *city, *country, *region;

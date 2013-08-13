@@ -50,12 +50,12 @@ So any numeric input works like 24.24.24.24, ::24.24.24.24, ::ffff:24.24.24.24 o
 
 The return value is gaierr ( man getaddrinfo ) or 0 on success.
 
-### `int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)` ###
+### `int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_lookup_result_s * result)` ###
 
 The `MMDB_lookup_by_ipnum_128` checks if the ipnumber usually created with a call to `MMDB_resolve_address` is part of the database.
 
     // initialize the root entry structure with the database
-    MMDB_root_entry_s root {.entry.mmdb = mmdb };
+    MMDB_lookup_result_s root {.entry.mmdb = mmdb };
     status = MMDB_lookup_by_ipnum_128(ip.v6, &root);
     if ( status == MMDB_SUCCESS ) {
         if (root.entry.offset ){

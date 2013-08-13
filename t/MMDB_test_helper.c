@@ -54,11 +54,11 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
     return mmdb;
 }
 
-MMDB_root_entry_s *lookup_ok(MMDB_s * mmdb, const char *ip, const char *file,
-                             const char *mode_desc)
+MMDB_lookup_result_s *lookup_ok(MMDB_s * mmdb, const char *ip,
+                                   const char *file, const char *mode_desc)
 {
     int gai_error, mmdb_error;
-    MMDB_root_entry_s *root;
+    MMDB_lookup_result_s *root;
     int ok;
 
     root = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);

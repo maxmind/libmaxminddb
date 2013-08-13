@@ -17,7 +17,7 @@ int main(void)
     ok(mmdb != NULL, "MMDB_open successful");
     if (mmdb) {
 
-        MMDB_root_entry_s root = {.entry.mmdb = mmdb };
+        MMDB_lookup_result_s root = {.entry.mmdb = mmdb };
         char *ipstr = "24.24.24.24";
         ip_to_num(mmdb, ipstr, &ipnum);
         err = MMDB_lookup_by_ipnum_128(ipnum.v6, &root);

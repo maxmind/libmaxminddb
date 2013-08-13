@@ -435,7 +435,7 @@ LOCAL void free_all(MMDB_s * mmdb)
 #define RETURN_ON_END_OF_SEARCH128(offset, segments, depth, res)  \
     RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
 
-LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
+LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->metadata.node_count;
@@ -485,7 +485,7 @@ LOCAL int fdlookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * result)
 #define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
 
 LOCAL int
-fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
+fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_lookup_result_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
     int segments = mmdb->metadata.node_count;
@@ -535,7 +535,8 @@ fdlookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     return MMDB_CORRUPT_DATABASE;
 }
 
-int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
+int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
+                             MMDB_lookup_result_s * result)
 {
     MMDB_s *mmdb = result->entry.mmdb;
 
@@ -585,7 +586,7 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum, MMDB_root_entry_s * result)
     return MMDB_CORRUPT_DATABASE;
 }
 
-int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_root_entry_s * res)
+int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s * res)
 {
     MMDB_s *mmdb = res->entry.mmdb;
 
@@ -685,14 +686,14 @@ LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
     return 0;
 }
 
-MMDB_root_entry_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr, int *gai_error,
-                               int *mmdb_error)
+MMDB_lookup_result_s *MMDB_lookup(MMDB_s * mmdb, const char *ipstr,
+                                  int *gai_error, int *mmdb_error)
 {
     // XXX ip version should be in the metadata structure
     int is_ipv4 = mmdb->depth == 32 ? 1 : 0;
     in_addr_any in_addr;
 
-    MMDB_root_entry_s *root = malloc(sizeof(MMDB_root_entry_s *));
+    MMDB_lookup_result_s *root = malloc(sizeof(MMDB_lookup_result_s *));
     assert(root != NULL);
 
     root->entry.mmdb = mmdb;
@@ -819,9 +820,8 @@ LOCAL void populate_description_metadata(MMDB_s * mmdb)
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 LOCAL int read_metadata(MMDB_s * mmdb, uint8_t * metadata_content, ssize_t size)
 {
-    const uint8_t *metadata =
-        memmem(metadata_content, size, METADATA_MARKER,
-               strlen(METADATA_MARKER));
+    const uint8_t *metadata = memmem(metadata_content, size, METADATA_MARKER,
+                                     strlen(METADATA_MARKER));
     if (NULL == metadata) {
         return MMDB_INVALID_DATABASE;
     }
