@@ -292,11 +292,7 @@ LOCAL int fdcmp(MMDB_s *mmdb, MMDB_return_s const *const result, char *src_key)
 
 LOCAL int get_ext_type(int raw_ext_type)
 {
-#if defined BROKEN_TYPE
     return 7 + raw_ext_type;
-#else
-    return 8 + raw_ext_type;
-#endif
 }
 
 #define FD_RET_ON_ERR(fn) do{                   \

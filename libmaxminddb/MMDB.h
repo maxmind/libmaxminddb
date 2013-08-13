@@ -12,9 +12,6 @@ extern "C" {
 
 #define MMDB_DEFAULT_DATABASE "/usr/local/share/GeoIP2/GeoIP2-City.mmdb"
 
-// *** the EXT_TYPE is wrong it should be type - 8 not type
-#define BROKEN_TYPE (1)
-
 #define MMDB_DTYPE_EXT (0)
 #define MMDB_DTYPE_PTR (1)
 #define MMDB_DTYPE_UTF8_STRING (2)
