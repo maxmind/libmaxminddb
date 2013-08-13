@@ -711,8 +711,7 @@ LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
 MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
                                   int *gai_error, int *mmdb_error)
 {
-    // XXX ip version should be in the metadata structure
-    int is_ipv4 = mmdb->depth == 32 ? 1 : 0;
+    int is_ipv4 = mmdb->metadata.ip_version == 4 ? 1 : 0;
     in_addr_any in_addr;
 
     MMDB_lookup_result_s *root = malloc(sizeof(MMDB_lookup_result_s *));
