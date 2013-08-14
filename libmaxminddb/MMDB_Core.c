@@ -7,7 +7,6 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <assert.h>
 
 #if HAVE_CONFIG_H
@@ -692,12 +691,12 @@ int MMDB_get_value(MMDB_entry_s *start, MMDB_return_s *result, ...)
 {
     va_list keys;
     va_start(keys, result);
-    int ioerror = vget_value(start, result, keys);
+    int ioerror = MMDB_vget_value(start, result, keys);
     va_end(keys);
     return ioerror;
 }
 
-LOCAL int vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
+int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
 {
     MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;

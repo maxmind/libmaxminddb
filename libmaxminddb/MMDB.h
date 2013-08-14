@@ -6,9 +6,8 @@ extern "C" {
 #endif
 #define _GNU_SOURCE
 #include <sys/types.h>
-//#include <sys/socket.h>
 #include <netinet/in.h>
-//#include <arpa/inet.h>
+#include <stdarg.h>
 
 #define MMDB_DEFAULT_DATABASE "/usr/local/share/GeoIP2/GeoIP2-City.mmdb"
 
@@ -148,6 +147,7 @@ extern "C" {
                                         MMDB_lookup_result_s *result);
 
     extern int MMDB_get_value(MMDB_entry_s *start, MMDB_return_s *result, ...);
+    extern int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params);
     extern int MMDB_strcmp_result(MMDB_s *mmdb,
                                   MMDB_return_s const *const result, char *str);
 
