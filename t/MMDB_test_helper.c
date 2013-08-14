@@ -59,24 +59,24 @@ MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
 {
     int gai_error, mmdb_error;
     MMDB_lookup_result_s *root;
-    int ok;
+    int is_ok;
 
     root = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
 
-    ok = ok(0 == gai_error,
+    is_ok = ok(0 == gai_error,
             "no getaddrinfo error in call to MMDB_lookup for %s - %s - %s",
             ip, file, mode_desc);
 
-    if (!ok) {
+    if (!is_ok) {
         diag("error from call to getaddrinfo for %s - %s",
              ip, gai_strerror(gai_error));
     }
 
-    ok = ok(0 == mmdb_error,
+    is_ok = ok(0 == mmdb_error,
             "no MMDB error in call to MMDB_lookup for %s - %s - %s",
             ip, file, mode_desc);
 
-    if (!ok) {
+    if (!is_ok) {
         diag("MMDB error - %d", mmdb_error);
     }
 
