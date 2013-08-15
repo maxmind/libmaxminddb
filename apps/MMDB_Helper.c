@@ -15,13 +15,7 @@ char *bytesdup(MMDB_s * mmdb, MMDB_return_s const *const ret)
     if (ret->offset) {
         mem = malloc(ret->data_size + 1);
 
-        if (mmdb && mmdb->fd >= 0) {
-            uint32_t segments = mmdb->full_record_byte_size * mmdb->metadata.node_count;
-            MMDB_pread(mmdb->fd, (void *)mem, ret->data_size,
-                       segments + (uintptr_t) ret->ptr);
-        } else {
-            memcpy(mem, ret->ptr, ret->data_size);
-        }
+        memcpy(mem, ret->ptr, ret->data_size);
         mem[ret->data_size] = '\0';
     }
     return mem;

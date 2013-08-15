@@ -8,7 +8,7 @@
 
 void for_all_modes(void (*tests) (int mode, const char *description))
 {
-//    tests(MMDB_MODE_STANDARD, "standard mode");
+    tests(MMDB_MODE_STANDARD, "standard mode");
     tests(MMDB_MODE_MEMORY_CACHE, "memory cache mode");
 }
 

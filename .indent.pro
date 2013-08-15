@@ -43,3 +43,7 @@
 -T MMDB_s
 -T in_addrX
 -T in_addr_any
+-T uint8_t
+-T uint16_t
+-T uint32_t
+-T uint64_t
