@@ -49,7 +49,9 @@ LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
                               in_addr_any *in_addr);
 LOCAL void populate_description_metadata(MMDB_s *mmdb);
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size);
-LOCAL uint32_t value_for_key_as_uint(MMDB_entry_s *start, char *key);
+LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
+LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key);
+LOCAL uint64_t c8_to_uint64(uint8_t c8[]);
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key);
 LOCAL void populate_languages_metadata(MMDB_s *mmdb);
 LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags);
@@ -352,13 +354,13 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
 
     mmdb->metadata.node_count =
-        value_for_key_as_uint(&mmdb->meta, "node_count");
+        value_for_key_as_uint32(&mmdb->meta, "node_count");
 
     mmdb->metadata.record_size =
-        value_for_key_as_uint(&mmdb->meta, "record_size");
+        value_for_key_as_uint32(&mmdb->meta, "record_size");
 
     mmdb->metadata.ip_version =
-        value_for_key_as_uint(&mmdb->meta, "ip_version");
+        value_for_key_as_uint32(&mmdb->meta, "ip_version");
 
     mmdb->metadata.database_type =
         value_for_key_as_string(&mmdb->meta, "database_type");
@@ -366,26 +368,47 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     populate_languages_metadata(mmdb);
 
     mmdb->metadata.binary_format_major_version =
-        value_for_key_as_uint(&mmdb->meta, "binary_format_major_version");
+        value_for_key_as_uint32(&mmdb->meta, "binary_format_major_version");
 
     mmdb->metadata.binary_format_minor_version =
-        value_for_key_as_uint(&mmdb->meta, "binary_format_minor_version");
+        value_for_key_as_uint32(&mmdb->meta, "binary_format_minor_version");
+
+    mmdb->metadata.build_epoch =
+        value_for_key_as_uint64(&mmdb->meta, "build_epoch");
 
     populate_description_metadata(mmdb);
 
     mmdb->full_record_byte_size =
-        value_for_key_as_uint(&mmdb->meta, "record_size") * 2 / 8U;
+        value_for_key_as_uint32(&mmdb->meta, "record_size") * 2 / 8U;
 
     mmdb->depth = mmdb->metadata.ip_version == 4 ? 32 : 128;
 
     return MMDB_SUCCESS;
 }
 
-LOCAL uint32_t value_for_key_as_uint(MMDB_entry_s *start, char *key)
+LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
     return result.uinteger;
+}
+
+LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key)
+{
+    MMDB_return_s result;
+    MMDB_get_value(start, &result, key, NULL);
+    return c8_to_uint64(result.c8);
+}
+
+LOCAL uint64_t c8_to_uint64(uint8_t c8[])
+{
+    uint64_t value = 0;
+    for (int i = 0; i < 8; i++) {
+        value <<= 8;
+        value += c8[i];
+    }
+
+    return value;
 }
 
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)

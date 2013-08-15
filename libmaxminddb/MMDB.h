@@ -107,7 +107,7 @@ extern "C" {
         } languages;
         int binary_format_major_version;
         int binary_format_minor_version;
-        unsigned long long build_epoch;
+        uint64_t build_epoch;
         struct {
             size_t count;
             MMDB_description_s **descriptions;

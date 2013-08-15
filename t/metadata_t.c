@@ -19,6 +19,15 @@ void run_tests(int mode, const char *mode_desc)
     ok(4 == mmdb->metadata.ip_version, "ip_version is 4 - %s", mode_desc);
     is(mmdb->metadata.database_type, "Test", "database_type is Test - %s",
        mode_desc);
+    // 2013-07-01T00:00:00Z
+    uint64_t expect_epoch = 1372636800;
+    int is_ok =
+        ok(mmdb->metadata.build_epoch >= expect_epoch, "build_epoch > %lli",
+           expect_epoch);
+    if (!is_ok) {
+        diag("  epoch is %lli", mmdb->metadata.build_epoch);
+    }
+
     ok(2 == mmdb->metadata.binary_format_major_version,
        "binary_format_major_version is 2 - %s", mode_desc);
     ok(0 == mmdb->metadata.binary_format_minor_version,
