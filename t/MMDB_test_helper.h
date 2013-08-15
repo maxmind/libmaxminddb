@@ -1,5 +1,5 @@
 #include "MMDB.h"
-#include "tap.h"
+#include "libtap/tap.h"
 
 #ifndef MMDB_TEST_HELPER_C
 #define MMDB_TEST_HELPER_C (1)
