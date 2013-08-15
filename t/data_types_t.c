@@ -1,6 +1,3 @@
-#include <netdb.h>
-#include <string.h>
-#include <math.h>
 #include "MMDB_test_helper.h"
 
 uint64_t c8_to_uint64(uint8_t c8[])
