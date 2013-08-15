@@ -8,7 +8,7 @@
 
 void for_all_modes(void (*tests) (int mode, const char *description))
 {
-    tests(MMDB_MODE_STANDARD, "standard mode");
+//    tests(MMDB_MODE_STANDARD, "standard mode");
     tests(MMDB_MODE_MEMORY_CACHE, "memory cache mode");
 }
 
@@ -64,8 +64,8 @@ MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
     root = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
 
     is_ok = ok(0 == gai_error,
-            "no getaddrinfo error in call to MMDB_lookup for %s - %s - %s",
-            ip, file, mode_desc);
+               "no getaddrinfo error in call to MMDB_lookup for %s - %s - %s",
+               ip, file, mode_desc);
 
     if (!is_ok) {
         diag("error from call to getaddrinfo for %s - %s",
@@ -73,12 +73,32 @@ MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
     }
 
     is_ok = ok(0 == mmdb_error,
-            "no MMDB error in call to MMDB_lookup for %s - %s - %s",
-            ip, file, mode_desc);
+               "no MMDB error in call to MMDB_lookup for %s - %s - %s",
+               ip, file, mode_desc);
 
     if (!is_ok) {
         diag("MMDB error - %d", mmdb_error);
     }
 
     return root;
+}
+
+MMDB_return_s data_ok(MMDB_lookup_result_s *result, int expect_type,
+                      const char *description, ...)
+{
+    va_list keys;
+    MMDB_return_s data;
+    va_start(keys, expect_type);
+    int error = MMDB_vget_value(&result->entry, &data, keys);
+    va_end(keys);
+
+    ok(!error, "no error from call to MMDB_vget_value - %s", description);
+    int is_ok =
+        ok(data.type == expect_type, "got the expected data type - %s",
+           description);
+    if (!is_ok) {
+        diag("  data type value is %i but expected %i", data.type, expect_type);
+    }
+
+    return data;
 }
