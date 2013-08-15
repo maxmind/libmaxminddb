@@ -13,9 +13,12 @@ void run_tests(int mode, const char *mode_desc)
         return;
     }
 
-    ok(37 == mmdb->metadata.node_count, "node_count is 37 - %s", mode_desc);
-    ok(24 == mmdb->metadata.record_size, "record_size is 24 - %s", mode_desc);
-    ok(4 == mmdb->metadata.ip_version, "ip_version is 4 - %s", mode_desc);
+    cmp_ok(mmdb->metadata.node_count, "==", 37, "node_count is 37 - %s",
+           mode_desc);
+    cmp_ok(mmdb->metadata.record_size, "==", 24, "record_size is 24 - %s",
+           mode_desc);
+    cmp_ok(mmdb->metadata.ip_version, "==", 4, "ip_version is 4 - %s",
+           mode_desc);
     is(mmdb->metadata.database_type, "Test", "database_type is Test - %s",
        mode_desc);
     // 2013-07-01T00:00:00Z
@@ -27,20 +30,20 @@ void run_tests(int mode, const char *mode_desc)
         diag("  epoch is %lli", mmdb->metadata.build_epoch);
     }
 
-    ok(2 == mmdb->metadata.binary_format_major_version,
-       "binary_format_major_version is 2 - %s", mode_desc);
-    ok(0 == mmdb->metadata.binary_format_minor_version,
-       "binary_format_minor_version is 0 - %s", mode_desc);
+    cmp_ok(mmdb->metadata.binary_format_major_version, "==", 2,
+           "binary_format_major_version is 2 - %s", mode_desc);
+    cmp_ok(mmdb->metadata.binary_format_minor_version, "==", 0,
+           "binary_format_minor_version is 0 - %s", mode_desc);
 
-    ok(2 == mmdb->metadata.languages.count, "found 2 languages - %s",
-       mode_desc);
+    cmp_ok(mmdb->metadata.languages.count, "==", 2, "found 2 languages - %s",
+           mode_desc);
     is(mmdb->metadata.languages.names[0], "en", "first language is en - %s",
        mode_desc);
     is(mmdb->metadata.languages.names[1], "zh", "second language is zh - %s",
        mode_desc);
 
-    ok(2 == mmdb->metadata.description.count, "found 2 descriptions - %s",
-       mode_desc);
+    cmp_ok(mmdb->metadata.description.count, "==", 2,
+           "found 2 descriptions - %s", mode_desc);
     for (int i = 0; i < mmdb->metadata.description.count; i++) {
         const char *language =
             mmdb->metadata.description.descriptions[i]->language;
@@ -58,8 +61,8 @@ void run_tests(int mode, const char *mode_desc)
         }
     }
 
-    ok(6 == mmdb->full_record_byte_size, "full_record_byte_size is 6 - %s",
-       mode_desc);
+    cmp_ok(mmdb->full_record_byte_size, "==", 6,
+           "full_record_byte_size is 6 - %s", mode_desc);
 
     free((void *)path);
     MMDB_close(mmdb);

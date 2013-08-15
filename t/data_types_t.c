@@ -99,7 +99,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "uint32", NULL);
         uint32_t expect = 1 << 28;
-        ok(data.uinteger == expect, "uint32 field is 2**28");
+        cmp_ok(expect, "==", data.uinteger, "uint32 field is 2**28");
     }
 
     {
@@ -132,7 +132,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_BOOLEAN, description, "boolean", NULL);
-        ok(data.uinteger == 1, "boolean field is true (1)");
+        cmp_ok(1, "==", data.uinteger, "boolean field is true (1)");
     }
 
     {
@@ -141,22 +141,22 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_ARRAY, description, "array", NULL);
-        ok(data.data_size == 3, "array field has 3 elements");
+        cmp_ok(3, "==", data.data_size, "array field has 3 elements");
 
         snprintf(description, 500, "array[0] for %s - %s", ip, mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "array", "0", NULL);
-        ok(data.uinteger == 1, "array[0] is 1");
+        cmp_ok(1, "==", data.uinteger, "array[0] is 1");
 
         snprintf(description, 500, "array[1] for %s - %s", ip, mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "array", "1", NULL);
-        ok(data.uinteger == 2, "array[1] is 1");
+        cmp_ok(2, "==", data.uinteger, "array[1] is 1");
 
         snprintf(description, 500, "array[2] for %s - %s", ip, mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "array", "2", NULL);
-        ok(data.uinteger == 3, "array[2] is 1");
+        cmp_ok(3, "==", data.uinteger, "array[2] is 1");
     }
 
     {
@@ -165,13 +165,13 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_MAP, description, "map", NULL);
-        ok(data.data_size == 1, "map field has 1 element");
+        cmp_ok(1, "==", data.data_size, "map field has 1 element");
 
         snprintf(description, 500, "map{mapX} for %s - %s", ip, mode_desc);
 
         data =
             data_ok(result, MMDB_DTYPE_MAP, description, "map", "mapX", NULL);
-        ok(data.data_size == 2, "map{mapX} field has 2 elements");
+        cmp_ok(2, "==", data.data_size, "map{mapX} field has 2 elements");
 
         snprintf(description, 500, "map{mapX}{utf8_stringX} for %s - %s", ip,
                  mode_desc);
@@ -188,28 +188,29 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         data =
             data_ok(result, MMDB_DTYPE_ARRAY, description, "map", "mapX",
                     "arrayX", NULL);
-        ok(data.data_size == 3, "map{mapX}{arrayX} field has 3 elements");
+        cmp_ok(3, "==", data.data_size,
+               "map{mapX}{arrayX} field has 3 elements");
 
         snprintf(description, 500, "map{mapX}{arrayX}[0] for %s - %s", ip,
                  mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "map", "mapX",
                     "arrayX", "0", NULL);
-        ok(data.uinteger == 7, "map{mapX}{arrayX}[0] is 7");
+        cmp_ok(7, "==", data.uinteger, "map{mapX}{arrayX}[0] is 7");
 
         snprintf(description, 500, "map{mapX}{arrayX}[1] for %s - %s", ip,
                  mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "map", "mapX",
                     "arrayX", "1", NULL);
-        ok(data.uinteger == 8, "map{mapX}{arrayX}[1] is 8");
+        cmp_ok(8, "==", data.uinteger, "map{mapX}{arrayX}[1] is 8");
 
         snprintf(description, 500, "map{mapX}{arrayX}[2] for %s - %s", ip,
                  mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "map", "mapX",
                     "arrayX", "2", NULL);
-        ok(data.uinteger == 9, "map{mapX}{arrayX}[2] is 9");
+        cmp_ok(9, "==", data.uinteger, "map{mapX}{arrayX}[2] is 9");
     }
 
 }
@@ -233,8 +234,8 @@ void run_tests(int mode, const char *mode_desc)
         MMDB_lookup_result_s *result =
             MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
 
-        ok(EAI_NONAME == gai_error,
-           "MMDB_lookup populates getaddrinfo error properly - %s", ip);
+        cmp_ok(gai_error, "==", EAI_NONAME,
+               "MMDB_lookup populates getaddrinfo error properly - %s", ip);
 
         ok(NULL == result,
            "no result entry struct returned for invalid IP address '%s'", ip);
@@ -257,9 +258,9 @@ void run_tests(int mode, const char *mode_desc)
            "got a result entry struct for IP address in the database - %s - %s - %s",
            ip, filename, mode_desc);
 
-        ok(result->entry.offset > 0,
-           "result.entry.offset > 0 for address in the database - %s - %s - %s",
-           ip, filename, mode_desc);
+        cmp_ok(result->entry.offset, ">", 0,
+               "result.entry.offset > 0 for address in the database - %s - %s - %s",
+               ip, filename, mode_desc);
 
         test_all_data_types(result, ip, filename, mode_desc);
     }
@@ -272,9 +273,9 @@ void run_tests(int mode, const char *mode_desc)
            "got a result entry struct for IP address in the database - %s - %s - %s",
            ip, filename, mode_desc);
 
-        ok(result->entry.offset > 0,
-           "result.entry.offset > 0 for address in the database - %s - %s - %s",
-           ip, filename, mode_desc);
+        cmp_ok(result->entry.offset, ">", 0,
+               "result.entry.offset > 0 for address in the database - %s - %s - %s",
+               ip, filename, mode_desc);
 
         test_all_data_types(result, ip, filename, mode_desc);
     }
