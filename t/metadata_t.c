@@ -6,7 +6,6 @@ void run_tests(int mode, const char *mode_desc)
     const char *file = "MaxMind-DB-test-ipv4-24.mmdb";
     const char *path = test_database_path(file);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    int i;
 
     // All of the remaining tests require an open mmdb
     if (NULL == mmdb) {
@@ -42,7 +41,7 @@ void run_tests(int mode, const char *mode_desc)
 
     ok(2 == mmdb->metadata.description.count, "found 2 descriptions - %s",
        mode_desc);
-    for (i = 0; i < mmdb->metadata.description.count; i++) {
+    for (int i = 0; i < mmdb->metadata.description.count; i++) {
         const char *language =
             mmdb->metadata.description.descriptions[i]->language;
         const char *description =

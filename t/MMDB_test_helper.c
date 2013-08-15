@@ -27,27 +27,25 @@ const char *test_database_path(const char *filename)
 MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
 {
     MMDB_s *mmdb = (MMDB_s *)calloc(1, sizeof(MMDB_s));
-    uint16_t status;
-    int ok;
 
     if (NULL == mmdb) {
         BAIL_OUT("could not allocate memory for our MMDB_s struct");
     }
 
-    status = MMDB_open(db_file, mode, mmdb);
+    uint16_t status = MMDB_open(db_file, mode, mmdb);
 
-    ok = ok(MMDB_SUCCESS == status, "open %s status is success - %s",
+    int is_ok = ok(MMDB_SUCCESS == status, "open %s status is success - %s",
             db_file, mode_desc);
 
-    if (!ok) {
+    if (!is_ok) {
         diag("open status code = %d", status);
         return NULL;
     }
 
-    ok = ok(NULL != mmdb, "returned mmdb struct is not null for %s - %s",
+    is_ok = ok(NULL != mmdb, "returned mmdb struct is not null for %s - %s",
             db_file, mode_desc);
 
-    if (!ok) {
+    if (!is_ok) {
         return NULL;
     }
 
@@ -58,12 +56,9 @@ MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
                                 const char *file, const char *mode_desc)
 {
     int gai_error, mmdb_error;
-    MMDB_lookup_result_s *root;
-    int is_ok;
+    MMDB_lookup_result_s *root = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
 
-    root = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
-
-    is_ok = ok(0 == gai_error,
+    int is_ok = ok(0 == gai_error,
                "no getaddrinfo error in call to MMDB_lookup for %s - %s - %s",
                ip, file, mode_desc);
 
@@ -87,9 +82,11 @@ MMDB_return_s data_ok(MMDB_lookup_result_s *result, int expect_type,
                       const char *description, ...)
 {
     va_list keys;
+    va_start(keys, description);
+
     MMDB_return_s data;
-    va_start(keys, expect_type);
     int error = MMDB_vget_value(&result->entry, &data, keys);
+
     va_end(keys);
 
     ok(!error, "no error from call to MMDB_vget_value - %s", description);

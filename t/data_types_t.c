@@ -78,7 +78,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_BYTES, description, "bytes", NULL);
         uint8_t expect[] = { 0x00, 0x00, 0x00, 0x2a };
-        ok(memcmp((uint8_t *) data.ptr, expect, 4) == 0,
+        ok(memcmp((uint8_t *)data.ptr, expect, 4) == 0,
            "bytes field has expected value");
     }
 
@@ -89,7 +89,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_UINT16, description, "uint16", NULL);
         uint16_t expect = 100;
-        ok((uint16_t) data.uinteger == expect, "uint16 field is 100");
+        ok((uint16_t)data.uinteger == expect, "uint16 field is 100");
     }
 
     {
@@ -228,10 +228,10 @@ void run_tests(int mode, const char *mode_desc)
 
     {
         const char *ip = "not an ip";
-        int gai_error, mmdb_error;
-        MMDB_lookup_result_s *result;
 
-        result = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
+        int gai_error, mmdb_error;
+        MMDB_lookup_result_s *result =
+            MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
 
         ok(EAI_NONAME == gai_error,
            "MMDB_lookup populates getaddrinfo error properly - %s", ip);
@@ -242,9 +242,7 @@ void run_tests(int mode, const char *mode_desc)
 
     {
         const char *ip = "e900::";
-        MMDB_lookup_result_s *result;
-
-        result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, mode_desc);
 
         ok(NULL == result,
            "no result entry struct returned for IP address not in the database - %s - %s - %s",
@@ -253,9 +251,7 @@ void run_tests(int mode, const char *mode_desc)
 
     {
         const char *ip = "::1.1.1.1";
-        MMDB_lookup_result_s *result;
-
-        result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, mode_desc);
 
         ok(NULL != result,
            "got a result entry struct for IP address in the database - %s - %s - %s",
@@ -270,9 +266,7 @@ void run_tests(int mode, const char *mode_desc)
 
     {
         const char *ip = "::4.5.6.7";
-        MMDB_lookup_result_s *result;
-
-        result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, mode_desc);
 
         ok(NULL != result,
            "got a result entry struct for IP address in the database - %s - %s - %s",
