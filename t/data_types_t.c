@@ -236,6 +236,10 @@ void run_tests(int mode, const char *mode_desc)
 
         ok(NULL == result,
            "no result entry struct returned for invalid IP address '%s'", ip);
+
+        if (NULL != result) {
+            free(result);
+        }
     }
 
     {
@@ -245,6 +249,10 @@ void run_tests(int mode, const char *mode_desc)
         ok(NULL == result,
            "no result entry struct returned for IP address not in the database - %s - %s - %s",
            ip, filename, mode_desc);
+
+        if (NULL != result) {
+            free(result);
+        }
     }
 
     {
@@ -260,6 +268,8 @@ void run_tests(int mode, const char *mode_desc)
                ip, filename, mode_desc);
 
         test_all_data_types(result, ip, filename, mode_desc);
+
+        free(result);
     }
 
     {
@@ -275,6 +285,8 @@ void run_tests(int mode, const char *mode_desc)
                ip, filename, mode_desc);
 
         test_all_data_types(result, ip, filename, mode_desc);
+
+        free(result);
     }
 
     free((void *)path);
