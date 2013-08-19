@@ -520,7 +520,7 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags)
     } else {
         file_content =
             (uint8_t *)mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
-        if (-1 == file_content) {
+        if (MAP_FAILED == file_content) {
             return MMDB_IO_ERROR;
         }
     }
