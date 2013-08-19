@@ -138,7 +138,7 @@ MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
         return NULL;
     }
 
-    MMDB_lookup_result_s *root = malloc(sizeof(MMDB_lookup_result_s *));
+    MMDB_lookup_result_s *root = malloc(sizeof(MMDB_lookup_result_s));
     assert(root != NULL);
 
     root->entry.mmdb = mmdb;
