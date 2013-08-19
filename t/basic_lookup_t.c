@@ -37,6 +37,7 @@ void test_one_ip(MMDB_s *mmdb, const char *ip, const char *expect,
     is(string, real_expect, "found expected result for ip key - %s - %s - %s",
        ip, filename, mode_desc);
 
+    free(result);
     free(real_expect);
     free(string);
 }
@@ -61,6 +62,8 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
         ok(NULL == result,
            "no result entry struct returned for IP address not in the database - %s - %s - %s",
            ip, filename, mode_desc);
+
+        free(result);
     }
 
     for (int i = 0; i < pairs_rows; i += 1) {
@@ -69,6 +72,9 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
 
         test_one_ip(mmdb, ip_to_lookup, expect, filename, mode_desc);
     }
+
+    free(path);
+    MMDB_close(mmdb);
 }
 
 void run_ipv4_tests(int record_size, const char *filename, const char *ignored)
