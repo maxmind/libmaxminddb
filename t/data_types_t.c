@@ -29,7 +29,8 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
             0xaf, 0x20, 0x2d, 0x20, 0xe2, 0x99, 0xab, 0x00
         };
         is(string, expect, "got expected utf8_string value");
-        free(string);
+
+        free((char *)string);
     }
 
     {
@@ -178,7 +179,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
                     "utf8_stringX", NULL);
         const char *string = strndup((const char *)data.ptr, data.data_size);
         is(string, "hello", "map{mapX}{utf8_stringX} is 'hello'");
-        free(string);
+        free((char *)string);
 
         snprintf(description, 500, "map{mapX}{arrayX} for %s - %s", ip,
                  mode_desc);

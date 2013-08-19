@@ -73,7 +73,7 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
         test_one_ip(mmdb, ip_to_lookup, expect, filename, mode_desc);
     }
 
-    free(path);
+    free((char *)path);
     MMDB_close(mmdb);
 }
 
