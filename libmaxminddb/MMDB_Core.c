@@ -1,14 +1,14 @@
 #include "MMDB.h"
-#include <sys/stat.h>
 #include <arpa/inet.h>
-#include <string.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <assert.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #if HAVE_CONFIG_H
 #include <config.h>
