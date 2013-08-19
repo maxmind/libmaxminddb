@@ -144,7 +144,7 @@ MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
     }
 
     if (is_ipv4) {
-        *mmdb_error = MMDB_lookup_by_ipnum(in_addr.v4.s_addr, root);
+        *mmdb_error = MMDB_lookup_by_ipnum(htonl(in_addr.v4.s_addr), root);
     } else {
         *mmdb_error = MMDB_lookup_by_ipnum_128(in_addr.v6, root);
     }
