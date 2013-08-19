@@ -185,7 +185,7 @@ LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
 
     if (hints.ai_family == AF_INET) {
         memcpy(&((struct in_addr *)in_addr)->s_addr,
-               &((struct sockaddr_in *)addresses->ai_addr)->sin_addr, 4);
+               &((struct sockaddr_in *)addresses->ai_addr)->sin_addr.s_addr, 4);
     } else if (hints.ai_family == AF_INET6) {
         memcpy(&((struct in6_addr *)in_addr)->s6_addr,
                ((struct sockaddr_in6 *)addresses->ai_addr)->sin6_addr.s6_addr,
