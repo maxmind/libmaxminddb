@@ -132,16 +132,16 @@ MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
     int is_ipv4 = mmdb->metadata.ip_version == 4 ? 1 : 0;
     in_addr_any in_addr;
 
-    MMDB_lookup_result_s *root = malloc(sizeof(MMDB_lookup_result_s *));
-    assert(root != NULL);
-
-    root->entry.mmdb = mmdb;
-
     *gai_error = resolve_any_address(ipstr, is_ipv4, &in_addr);
 
     if (*gai_error) {
         return NULL;
     }
+
+    MMDB_lookup_result_s *root = malloc(sizeof(MMDB_lookup_result_s *));
+    assert(root != NULL);
+
+    root->entry.mmdb = mmdb;
 
     if (is_ipv4) {
         *mmdb_error = MMDB_lookup_by_ipnum(htonl(in_addr.v4.s_addr), root);
@@ -150,12 +150,14 @@ MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
     }
 
     if (*mmdb_error) {
+        free(root);
         return NULL;
     }
 
     if (root->entry.offset > 0) {
         return root;
     } else {
+        free(root);
         return NULL;
     }
 }
