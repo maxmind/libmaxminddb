@@ -12,6 +12,10 @@
 
 #define MAX_DESCRIPTION_LENGTH 500
 
+void for_all_record_sizes(const char *filename_fmt,
+                          void (*tests) (int record_size, const char *filename,
+                                         const char *description));
+
 void for_all_modes(void (*tests) (int mode, const char *description));
 
 const char *test_database_path(const char *filename);
