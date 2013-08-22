@@ -49,6 +49,8 @@ LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
                               in_addr_any *in_addr);
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *res);
+LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
+LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
 LOCAL void populate_description_metadata(MMDB_s *mmdb);
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size);
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
@@ -215,47 +217,59 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     const uint8_t *search_tree = mmdb->file_in_mem_ptr;
     const uint8_t *record_pointer;
     uint32_t max_depth0 = mmdb->depth - 1;
-    uint32_t offset = 0;
+    uint32_t value = 0;
+
+    uint32_t (*left_record_value)(const uint8_t *);
+    uint32_t (*right_record_value)(const uint8_t *);
+    uint8_t right_record_offset;
+
+    if (record_length == 6) {
+        left_record_value = &get_uint24;
+        right_record_value = &get_uint24;
+        right_record_offset = 3;
+    } else if (record_length == 7) {
+        left_record_value = &get_left_28_bit_record;
+        right_record_value = &get_right_28_bit_record;
+        right_record_offset = 3;
+    } else if (record_length == 8) {
+        left_record_value = &get_uint32;
+        right_record_value = &get_uint32;
+        right_record_offset = 4;
+    }
 
     for (uint32_t current_bit = max_depth0; current_bit >= 0; current_bit--) {
-        record_pointer = &search_tree[offset * record_length];
-        if (record_length == 6) {
-            if (address[(max_depth0 - current_bit) >> 3] &
-                (1U << (~(max_depth0 - current_bit) & 7))) {
+        record_pointer = &search_tree[value * record_length];
+        if (address[(max_depth0 - current_bit) >> 3] &
+            (1U << (~(max_depth0 - current_bit) & 7))) {
 
-                record_pointer += 3;
-            }
-            offset = get_uint24(record_pointer);
-        } else if (record_length == 7) {
-            if (address[(max_depth0 - current_bit) >> 3] &
-                (1U << (~(max_depth0 - current_bit) & 7))) {
-
-                record_pointer += 3;
-                offset = get_uint32(record_pointer);
-                offset &= 0xfffffff;
-            } else {
-                offset =
-                    record_pointer[0] * 65536 + record_pointer[1] * 256 +
-                    record_pointer[2] + ((record_pointer[3] & 0xf0) << 20);
-            }
-        } else if (record_length == 8) {
-            if (address[(max_depth0 - current_bit) >> 3] &
-                (1U << (~(max_depth0 - current_bit) & 7))) {
-
-                record_pointer += 4;
-            }
-            offset = get_uint32(record_pointer);
+            record_pointer += right_record_offset;
+            value = right_record_value(record_pointer);
+        }
+        else {
+            value = left_record_value(record_pointer);
         }
 
-        if (offset >= node_count) {
+        if (value >= node_count) {
             res->netmask = mmdb->depth - current_bit;
-            res->entry.offset = offset - node_count;
+            res->entry.offset = value - node_count;
             return MMDB_SUCCESS;
         }
     }
 
     // We should not be able to reach this return. If we do, something very bad happened.
     return MMDB_CORRUPT_DATABASE;
+}
+
+LOCAL uint32_t get_left_28_bit_record(const uint8_t *record)
+{
+    return record[0] * 65536 + record[1] * 256 + record[2] +
+        ((record[3] & 0xf0) << 20);
+}
+
+LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
+{
+    uint32_t value = get_uint32(record);
+    return value & 0xfffffff;
 }
 
 int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
