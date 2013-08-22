@@ -3,7 +3,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <stdarg.h>
-#include "MMDB.h"
+#include "maxminddb.h"
 #include "MMDB_test_helper.h"
 
 void for_all_record_sizes(const char *filename_fmt,

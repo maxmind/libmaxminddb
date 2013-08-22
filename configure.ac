@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.65])
 AC_INIT([libmaxminddb], [0.4.0], [support@maxmind.com])
-AC_CONFIG_SRCDIR([libmaxminddb/MMDB.h])
+AC_CONFIG_SRCDIR([include/maxminddb.h])
 AC_CONFIG_HEADERS([config.h])
 
 LT_INIT
@@ -38,7 +38,7 @@ AC_FUNC_MMAP
 AC_CHECK_FUNCS([memchr strtol memset gettimeofday strdup memmem])
 
 AC_CONFIG_FILES([Makefile
-                 libmaxminddb/Makefile
+                 src/Makefile
                  apps/Makefile
                  t/Makefile])
 AC_OUTPUT

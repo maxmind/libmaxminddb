@@ -12,8 +12,8 @@
 
 ## Getting started ##
 
-`MMDB.h` contains all public API functions and definitions. Start with
-`#include <MMDB.h>`.
+`maxminddb.h` contains all public API functions and definitions. Start with
+`#include <maxminddb.h>`.
 
 It is recommended to browse the example CAPI for python in the pydemo directory.
 I would start with `MMDB_lookup_Py` in `py_libmaxmind.c` and go from there,

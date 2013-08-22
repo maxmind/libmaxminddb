@@ -2,7 +2,7 @@
 #ifndef TEST_HELPER_C
 #define TEST_HELPER_C (1)
 
-#include "MMDB.h"
+#include "maxminddb.h"
 
 typedef union {
     struct in_addr v4;

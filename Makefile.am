@@ -1,4 +1,4 @@
 SUBDIRS = \
-  libmaxminddb	\
-  apps		\
+  src     \
+  apps    \
   t

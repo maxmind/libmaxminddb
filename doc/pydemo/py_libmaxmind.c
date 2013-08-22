@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 
 #include <Python.h>
-#include <MMDB.h>
+#include <maxminddb.h>
 #include <netdb.h>
 
 staticforward PyTypeObject MMDB_MMDBType;

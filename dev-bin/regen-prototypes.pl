@@ -7,7 +7,7 @@ use FindBin qw( $Bin );
 use File::Basename qw( basename dirname );
 
 sub main {
-    my $c_file = "$Bin/../libmaxminddb/MMDB_Core.c";
+    my $c_file = "$Bin/../src/maxminddb.c";
     my $code   = read_file($c_file);
 
     my $script_name = basename($0);

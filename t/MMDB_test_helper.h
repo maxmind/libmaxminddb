@@ -4,7 +4,7 @@
 #include <math.h>
 #include <netdb.h>
 #include <string.h>
-#include "MMDB.h"
+#include "maxminddb.h"
 #include "libtap/tap.h"
 
 #ifndef MMDB_TEST_HELPER_C

@@ -1,6 +1,6 @@
-AM_CPPFLAGS = -I$(top_srcdir)/libmaxminddb
+AM_CPPFLAGS = -I$(top_srcdir)/include
 
-AM_LDFLAGS = $(top_builddir)/libmaxminddb/libmaxminddb.la
+AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
 
 lib_LTLIBRARIES = libmaxminddbapp.la
 libmaxminddbapp_la_SOURCES = MMDB_Helper.c

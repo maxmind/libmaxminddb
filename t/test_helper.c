@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "MMDB.h"
+#include "maxminddb.h"
 #include <netdb.h>
 #include <stdio.h>
 #include "test_helper.h"

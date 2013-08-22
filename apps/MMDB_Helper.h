@@ -1,6 +1,6 @@
 #ifndef GEODB_HELPER
 #define GEODB_HELPER (1)
-#include "MMDB.h"
+#include "maxminddb.h"
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>

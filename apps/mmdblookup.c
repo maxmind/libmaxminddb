@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "MMDB.h"
+#include "maxminddb.h"
 #include "MMDB_Helper.h"
 #include "getopt.h"
 #include <assert.h>
