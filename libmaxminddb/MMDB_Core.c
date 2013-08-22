@@ -417,6 +417,11 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     mmdb->metadata.record_size =
         value_for_key_as_uint32(&mmdb->meta, "record_size");
 
+    if (mmdb->metadata.record_size != 24 && mmdb->metadata.record_size != 28
+        && mmdb->metadata.record_size != 32) {
+        return MMDB_UNKNOWN_DATABASE_FORMAT;
+    }
+
     mmdb->metadata.ip_version =
         value_for_key_as_uint32(&mmdb->meta, "ip_version");
 
