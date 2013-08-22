@@ -649,8 +649,8 @@ LOCAL void free_all(MMDB_s *mmdb)
         int i;
         for (i = 0; i < mmdb->metadata.description.count; i++) {
             free((char *)mmdb->metadata.description.descriptions[i]->language);
-            free((char *)mmdb->metadata.description.descriptions[i]->
-                 description);
+            free((char *)mmdb->metadata.description.
+                 descriptions[i]->description);
             free(mmdb->metadata.description.descriptions[i]);
         }
         free(mmdb->metadata.description.descriptions);
