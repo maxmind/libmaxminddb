@@ -60,7 +60,6 @@ LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key);
 LOCAL void populate_languages_metadata(MMDB_s *mmdb);
 LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags);
 LOCAL void free_all(MMDB_s *mmdb);
-LOCAL char *bytesdup(MMDB_return_s const *const ret);
 LOCAL void skip_hash_array(MMDB_s *mmdb, MMDB_decode_s *decode);
 LOCAL void decode_one_follow(MMDB_s *mmdb, uint32_t offset,
                              MMDB_decode_s *decode);
@@ -762,38 +761,6 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
     return MMDB_SUCCESS;
 }
 
-// XXX - this is only used in a test file and needs to be moved to the test lib
-int MMDB_strcmp_result(MMDB_s *mmdb, MMDB_return_s const *const result,
-                       char *str)
-{
-    if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-
-        if (result->offset > 0) {
-            char *str1 = bytesdup(result);
-            int ret = strcmp(str1, str);
-            if (str1) {
-                free(str1);
-            }
-            return ret;
-        }
-        return 1;
-    }
-}
-
-// XXX - only called from MMDB_strcmp_result so can be moved with it
-LOCAL char *bytesdup(MMDB_return_s const *const ret)
-{
-    char *mem = NULL;
-    if (ret->offset) {
-        mem = malloc(ret->data_size + 1);
-        assert(mem != NULL);
-
-        memcpy(mem, ret->ptr, ret->data_size);
-        mem[ret->data_size] = '\0';
-    }
-    return mem;
-}
-
 LOCAL void skip_hash_array(MMDB_s *mmdb, MMDB_decode_s *decode)
 {
     if (decode->data.type == MMDB_DTYPE_MAP) {
@@ -1133,11 +1100,6 @@ LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset)
         buffer += have_read;
     }
     return MMDB_SUCCESS;
-}
-
-int MMDB_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset)
-{
-    return int_pread(fd, buffer, to_read, offset);
 }
 
 MMDB_decode_all_s *MMDB_alloc_decode_all(void)
