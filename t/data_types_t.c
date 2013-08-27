@@ -1,16 +1,5 @@
 #include "MMDB_test_helper.h"
 
-uint64_t c8_to_uint64(uint8_t c8[])
-{
-    uint64_t value = 0;
-    for (int i = 0; i < 8; i++) {
-        value <<= 8;
-        value += c8[i];
-    }
-
-    return value;
-}
-
 void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
                          const char *filename, const char *mode_desc)
 {
@@ -108,8 +97,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
             data_ok(result, MMDB_DTYPE_UINT64, description, "uint64", NULL);
         uint64_t expect = 1;
         expect <<= 60;
-        uint64_t got = c8_to_uint64(data.c8);
-        ok(got == expect, "uint64 field is 2**60");
+        ok(data.uinteger == expect, "uint64 field is 2**60");
     }
 
     {

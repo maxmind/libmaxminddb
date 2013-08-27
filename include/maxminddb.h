@@ -81,8 +81,7 @@ extern "C" {
             float float_value;
             double double_value;
             int sinteger;
-            uint32_t uinteger;
-            uint8_t c8[8];
+            uint64_t uinteger;
             uint8_t c16[16];
             const void *ptr;
         };

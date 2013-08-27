@@ -55,7 +55,6 @@ LOCAL void populate_description_metadata(MMDB_s *mmdb);
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size);
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key);
-LOCAL uint64_t c8_to_uint64(uint8_t c8[]);
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key);
 LOCAL void populate_languages_metadata(MMDB_s *mmdb);
 LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags);
@@ -75,7 +74,7 @@ LOCAL double get_ieee754_double(const uint8_t *restrict p);
 LOCAL uint32_t get_uint32(const uint8_t *p);
 LOCAL uint32_t get_uint24(const uint8_t *p);
 LOCAL uint32_t get_uint16(const uint8_t *p);
-LOCAL uint32_t get_uintX(const uint8_t *p, int length);
+LOCAL uint64_t get_uintX(const uint8_t *p, int length);
 LOCAL int get_sintX(const uint8_t *p, int length);
 LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset);
 LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
@@ -465,25 +464,14 @@ LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
-    return result.uinteger;
+    return (uint32_t)result.uinteger;
 }
 
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
-    return c8_to_uint64(result.c8);
-}
-
-LOCAL uint64_t c8_to_uint64(uint8_t c8[])
-{
-    uint64_t value = 0;
-    for (int i = 0; i < 8; i++) {
-        value <<= 8;
-        value += c8[i];
-    }
-
-    return value;
+    return result.uinteger;
 }
 
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)
@@ -854,16 +842,10 @@ LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode)
         return;
     }
 
-    if ((type == MMDB_DTYPE_UINT32) || (type == MMDB_DTYPE_UINT16)) {
+    if ((type == MMDB_DTYPE_UINT64) || (type == MMDB_DTYPE_UINT32) || (type == MMDB_DTYPE_UINT16)) {
         decode->data.uinteger = get_uintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_INT32) {
         decode->data.sinteger = get_sintX(&mem[offset], size);
-    } else if (type == MMDB_DTYPE_UINT64) {
-        assert(size >= 0 && size <= 8);
-        memset(decode->data.c8, 0, 8);
-        if (size > 0) {
-            memcpy(decode->data.c8 + 8 - size, &mem[offset], size);
-        }
     } else if (type == MMDB_DTYPE_UINT128) {
         assert(size >= 0 && size <= 16);
         memset(decode->data.c16, 0, 16);
@@ -1070,14 +1052,14 @@ LOCAL uint32_t get_uint16(const uint8_t *p)
     return (p[0] * 256U + p[1]);
 }
 
-LOCAL uint32_t get_uintX(const uint8_t *p, int length)
+LOCAL uint64_t get_uintX(const uint8_t *p, int length)
 {
-    uint32_t r = 0;
+    uint64_t value = 0;
     while (length-- > 0) {
-        r <<= 8;
-        r += *p++;
+        value <<= 8;
+        value += *p++;
     }
-    return r;
+    return value;
 }
 
 LOCAL int get_sintX(const uint8_t *p, int length)
@@ -1191,17 +1173,17 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
         break;
     case MMDB_DTYPE_UINT16:
         silly_pindent(indent);
-        fprintf(stdout, "uint16 = %u\n", decode_all->decode.data.uinteger);
+        fprintf(stdout, "uint16 = %u\n", (uint16_t)decode_all->decode.data.uinteger);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_UINT32:
         silly_pindent(indent);
-        fprintf(stdout, "uint32 = %u\n", decode_all->decode.data.uinteger);
+        fprintf(stdout, "uint32 = %u\n", (uint32_t)decode_all->decode.data.uinteger);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_BOOLEAN:
         silly_pindent(indent);
-        fprintf(stdout, "boolean = %u\n", decode_all->decode.data.uinteger);
+        fprintf(stdout, "boolean = %u\n", (uint32_t)decode_all->decode.data.uinteger);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_UINT64:
