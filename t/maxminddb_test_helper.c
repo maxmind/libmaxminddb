@@ -4,7 +4,7 @@
 #include <netdb.h>
 #include <stdarg.h>
 #include "maxminddb.h"
-#include "MMDB_test_helper.h"
+#include "maxminddb_test_helper.h"
 
 void for_all_record_sizes(const char *filename_fmt,
                           void (*tests) (int record_size, const char *filename,

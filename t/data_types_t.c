@@ -1,4 +1,4 @@
-#include "MMDB_test_helper.h"
+#include "maxminddb_test_helper.h"
 
 void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
                          const char *filename, const char *mode_desc)

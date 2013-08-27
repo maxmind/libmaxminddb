@@ -1,4 +1,4 @@
-#include "MMDB_test_helper.h"
+#include "maxminddb_test_helper.h"
 
 int main(void)
 {

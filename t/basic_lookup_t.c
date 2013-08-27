@@ -1,4 +1,4 @@
-#include "MMDB_test_helper.h"
+#include "maxminddb_test_helper.h"
 
 /* These globals are gross but it's the easiest way to mix calling
  * for_all_modes() and for_all_record_sizes() */
