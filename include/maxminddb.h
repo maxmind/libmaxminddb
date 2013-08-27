@@ -140,9 +140,6 @@ extern "C" {
 
     extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb);
     extern void MMDB_close(MMDB_s *mmdb);
-    extern int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s *res);
-    extern int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
-                                        MMDB_lookup_result_s *result);
 
     extern int MMDB_get_value(MMDB_entry_s *start, MMDB_return_s *result, ...);
     extern int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result,
@@ -166,8 +163,7 @@ extern "C" {
                                              const char *ipstr,
                                              int *gai_error, int *mmdb_error);
 
-    extern int MMDB_pread(int fd, uint8_t *buffer, ssize_t to_read,
-                          off_t offset);
+    extern const char *MMDB_strerror(uint16_t error_code);
 #ifdef __cplusplus
 }
 #endif

@@ -10,3 +10,8 @@
 * Remove MMDB_DEFAULT_DATABASE
 * Better handling of 64-bit ints - use long long?
 ** and is there something better for 128 bit ints?
+* Fix mmdb* apps
+** fix segfaults
+** better usage info and error messages
+** more shared code
+** don't assume GeoIP2 data format

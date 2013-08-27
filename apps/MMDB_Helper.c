@@ -1,7 +1,10 @@
 #include "MMDB_Helper.h"
 #include <assert.h>
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 int is_ipv4(MMDB_s * mmdb)
 {
@@ -49,6 +52,26 @@ void dump_meta(MMDB_s * mmdb)
 static const char *na(char const *string)
 {
     return string ? string : "N/A";
+}
+
+MMDB_lookup_result_s *lookup_or_die (MMDB_s *mmdb, const char *ipstr)
+{
+    int gai_error, mmdb_error;
+    MMDB_lookup_result_s *result =
+        MMDB_lookup(mmdb, ipstr, &gai_error, &mmdb_error);
+
+    if (0 != gai_error) {
+        fprintf(stderr, "error from call to getaddrinfo for %s - %s\n", ipstr,
+                gai_strerror(gai_error));
+        exit(1);
+    }
+
+    if (MMDB_SUCCESS != mmdb_error) {
+        fprintf(stderr, "got an error from the maxminddb library: %s\n", MMDB_strerror(mmdb_error));
+        exit(2);
+    }
+
+    return result;
 }
 
 void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s * ipinfo)

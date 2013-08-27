@@ -39,38 +39,21 @@ int main(int argc, char *const argv[])
     assert(fname != NULL);
 
     status = MMDB_open(fname, MMDB_MODE_STANDARD, mmdb);
-    if (!mmdb)
+    if (!mmdb) {
         die("Can't open %s\n", fname);
+    }
 
     free(fname);
 
     char *ipstr = argv[0];
-    union {
-        struct in_addr v4;
-        struct in6_addr v6;
-    } ip;
 
-    int ai_family = is_ipv4(mmdb) ? AF_INET : AF_INET6;
-    int ai_flags = AI_V4MAPPED; // accept everything
-
-    if (ipstr == NULL || 0 != MMDB_resolve_address(ipstr, ai_family, ai_flags,
-                                                  &ip)) {
-        fprintf(stderr, "Invalid IP\n");
-        exit(1);
-    }
+    MMDB_lookup_result_s *result = lookup_or_die(mmdb, ipstr);
 
     if (verbose) {
         dump_meta(mmdb);
     }
 
-    MMDB_lookup_result_s root = {.entry.mmdb = mmdb };
-    status = is_ipv4(mmdb)
-        ? MMDB_lookup_by_ipnum(htonl(ip.v4.s_addr), &root)
-        : MMDB_lookup_by_ipnum_128(ip.v6, &root);
-
-    if (status == MMDB_SUCCESS) {
-        dump_ipinfo(ipstr, &root);
-    }
+    dump_ipinfo(ipstr, result);
 
     return (0);
 }

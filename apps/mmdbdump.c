@@ -66,19 +66,14 @@ int main(int argc, char *const argv[])
         dump_meta(mmdb);
     }
 
-    MMDB_lookup_result_s root = {.entry.mmdb = mmdb };
+    MMDB_lookup_result_s *result = lookup_or_die(mmdb, ipstr);
 
-    status = is_ipv4(mmdb)
-        ? MMDB_lookup_by_ipnum(htonl(ip.v4.s_addr), &root)
-        : MMDB_lookup_by_ipnum_128(ip.v6, &root);
-
-    if (status == MMDB_SUCCESS) {
-        if (root.entry.offset > 0) {
-            MMDB_decode_all_s *decode_all;
-            MMDB_get_tree(&root.entry, &decode_all);
-        } else {
-            puts("Sorry, nothing found");       // not found
-        }
+    if (result->entry.offset > 0) {
+        MMDB_decode_all_s *decode_all;
+        MMDB_get_tree(&result->entry, &decode_all);
+    } else {
+        puts("Sorry, nothing found");
     }
+
     return (0);
 }

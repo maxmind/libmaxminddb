@@ -26,21 +26,6 @@ typedef union {
 } in_addr_any;
 
 #define MMDB_DATA_SECTION_SEPARATOR (16)
-#define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
-
-#define RETURN_ON_END_OF_SEARCHX(offset, segments, depth, maxdepth, res)   \
-    if ((offset) >= (segments)) {                                       \
-        (res)->netmask = (maxdepth) - (depth);                          \
-        (res)->entry.offset = (offset) - (segments);                    \
-        return MMDB_SUCCESS;                                            \
-    }
-
-#define RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res)           \
-    MMDB_DBG_CARP( "RETURN_ON_END_OF_SEARCH32 depth:%d offset:%u segments:%d\n", depth, (unsigned int)offset, segments); \
-    RETURN_ON_END_OF_SEARCHX(offset,segments,depth, 32, res)
-
-#define RETURN_ON_END_OF_SEARCH128(offset, segments, depth, res)  \
-    RETURN_ON_END_OF_SEARCHX(offset,segments,depth,128, res)
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 #define METADATA_BLOCK_MAX_SIZE 20000
@@ -269,100 +254,6 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
 {
     uint32_t value = get_uint32(record);
     return value & 0xfffffff;
-}
-
-int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
-                             MMDB_lookup_result_s *result)
-{
-    MMDB_s *mmdb = result->entry.mmdb;
-
-    uint32_t segments = mmdb->metadata.node_count;
-    uint32_t offset = 0;
-    uint16_t rl = mmdb->full_record_byte_size;
-    const uint8_t *mem = mmdb->file_in_mem_ptr;
-    const uint8_t *p;
-    uint16_t depth;
-    if (rl == 6) {
-        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
-            p = &mem[offset * rl];
-            if (MMDB_CHKBIT_128(depth, (uint8_t *)&ipnum)) {
-                p += 3;
-            }
-            offset = get_uint24(p);
-            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
-        }
-    } else if (rl == 7) {
-        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
-            p = &mem[offset * rl];
-            if (MMDB_CHKBIT_128(depth, (uint8_t *)&ipnum)) {
-                p += 3;
-                offset = get_uint32(p);
-                offset &= 0xfffffff;
-            } else {
-                offset =
-                    p[0] * 65536 + p[1] * 256 + p[2] + ((p[3] & 0xf0) << 20);
-            }
-            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
-        }
-    } else if (rl == 8) {
-        for (depth = mmdb->depth - 1; depth >= 0; depth--) {
-            p = &mem[offset * rl];
-            if (MMDB_CHKBIT_128(depth, (uint8_t *)&ipnum)) {
-                p += 4;
-            }
-            offset = get_uint32(p);
-            RETURN_ON_END_OF_SEARCH128(offset, segments, depth, result);
-        }
-    }
-    //uhhh should never happen !
-    return MMDB_CORRUPT_DATABASE;
-}
-
-int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s *res)
-{
-    MMDB_s *mmdb = res->entry.mmdb;
-
-    uint32_t segments = mmdb->metadata.node_count;
-    uint32_t offset = 0;
-    uint16_t rl = mmdb->full_record_byte_size;
-    const uint8_t *mem = mmdb->file_in_mem_ptr;
-    const uint8_t *p;
-    uint32_t mask = 0x80000000U;
-    uint16_t depth;
-    if (rl == 6) {
-        for (depth = mmdb->depth - 1; depth >= 0; depth--, mask >>= 1) {
-            p = &mem[offset * rl];
-            if (ipnum & mask) {
-                p += 3;
-            }
-            offset = get_uint24(p);
-            RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res);
-        }
-    } else if (rl == 7) {
-        for (depth = mmdb->depth - 1; depth >= 0; depth--, mask >>= 1) {
-            p = &mem[offset * rl];
-            if (ipnum & mask) {
-                p += 3;
-                offset = get_uint32(p);
-                offset &= 0xfffffff;
-            } else {
-                offset =
-                    p[0] * 65536 + p[1] * 256 + p[2] + ((p[3] & 0xf0) << 20);
-            }
-            RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res);
-        }
-    } else if (rl == 8) {
-        for (depth = mmdb->depth - 1; depth >= 0; depth--, mask >>= 1) {
-            p = &mem[offset * rl];
-            if (ipnum & mask) {
-                p += 4;
-            }
-            offset = get_uint32(p);
-            RETURN_ON_END_OF_SEARCH32(offset, segments, depth, res);
-        }
-    }
-    //uhhh should never happen !
-    return MMDB_CORRUPT_DATABASE;
 }
 
 LOCAL void populate_description_metadata(MMDB_s *mmdb)
@@ -1221,4 +1112,28 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
         assert(0);
     }
     return decode_all;
+}
+
+const char *MMDB_strerror(uint16_t error_code)
+{
+    if (MMDB_SUCCESS == error_code) {
+        return "Success (not an error)";
+    } else if (MMDB_FILE_OPEN_ERROR == error_code) {
+        return "Error opening the specified MaxMind DB file";
+    }
+    else if (MMDB_CORRUPT_DATABASE == error_code) {
+        return "The MaxMind DB file's search tree is corrupt";
+    }
+    else if (MMDB_INVALID_DATABASE == error_code) {
+        return "The MaxMind DB file is invalid (bad metadata)";
+    }
+    else if (MMDB_IO_ERROR == error_code) {
+        return "An attempt to read data from the MaxMind DB file failed";
+    }
+    else if (MMDB_OUT_OF_MEMORY == error_code) {
+        return "A memory allocation call failed";
+    }
+    else if (MMDB_UNKNOWN_DATABASE_FORMAT == error_code) {
+        return "The MaxMind DB file is in a format this library can't handle (unknown record size or binary format version)";
+    }
 }
