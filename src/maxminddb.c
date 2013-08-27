@@ -852,10 +852,10 @@ LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode)
         if (size > 0) {
             memcpy(decode->data.c16 + 16 - size, &mem[offset], size);
         }
-    } else if (type == MMDB_DTYPE_IEEE754_FLOAT) {
+    } else if (type == MMDB_DTYPE_FLOAT) {
         size = 4;
         decode->data.float_value = get_ieee754_float(&mem[offset]);
-    } else if (type == MMDB_DTYPE_IEEE754_DOUBLE) {
+    } else if (type == MMDB_DTYPE_DOUBLE) {
         size = 8;
         decode->data.double_value = get_ieee754_double(&mem[offset]);
     } else {
@@ -1161,12 +1161,12 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
         free(bytes);
         decode_all = decode_all->next;
         break;
-    case MMDB_DTYPE_IEEE754_DOUBLE:
+    case MMDB_DTYPE_DOUBLE:
         silly_pindent(indent);
         fprintf(stdout, "double = %f\n", decode_all->decode.data.double_value);
         decode_all = decode_all->next;
         break;
-    case MMDB_DTYPE_IEEE754_FLOAT:
+    case MMDB_DTYPE_FLOAT:
         silly_pindent(indent);
         fprintf(stdout, "float = %f\n", decode_all->decode.data.float_value);
         decode_all = decode_all->next;

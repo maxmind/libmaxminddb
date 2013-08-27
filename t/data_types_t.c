@@ -27,8 +27,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         snprintf(description, 500, "double field for %s - %s", ip, mode_desc);
 
         MMDB_return_s data =
-            data_ok(result, MMDB_DTYPE_IEEE754_DOUBLE, description, "double",
-                    NULL);
+            data_ok(result, MMDB_DTYPE_DOUBLE, description, "double", NULL);
         double expect = 42.123456;
         double diff = fabs(data.double_value - expect);
         int is_ok =
@@ -45,8 +44,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         snprintf(description, 500, "float field for %s - %s", ip, mode_desc);
 
         MMDB_return_s data =
-            data_ok(result, MMDB_DTYPE_IEEE754_FLOAT, description, "float",
-                    NULL);
+            data_ok(result, MMDB_DTYPE_FLOAT, description, "float", NULL);
         float expect = 1.1;
         float diff = fabs(data.float_value - expect);
         int is_ok =
