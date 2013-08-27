@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "maxminddb.h"
-#include "MMDB_Helper.h"
+#include "maxminddb_app_helper.h"
 #include "getopt.h"
 #include <assert.h>
 #include <netdb.h>
