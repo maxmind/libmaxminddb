@@ -219,8 +219,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     uint32_t max_depth0 = mmdb->depth - 1;
     uint32_t value = 0;
 
-    uint32_t (*left_record_value)(const uint8_t *);
-    uint32_t (*right_record_value)(const uint8_t *);
+    uint32_t (*left_record_value) (const uint8_t *);
+    uint32_t (*right_record_value) (const uint8_t *);
     uint8_t right_record_offset;
 
     if (record_length == 6) {
@@ -244,8 +244,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 
             record_pointer += right_record_offset;
             value = right_record_value(record_pointer);
-        }
-        else {
+        } else {
             value = left_record_value(record_pointer);
         }
 
@@ -649,8 +648,8 @@ LOCAL void free_all(MMDB_s *mmdb)
         int i;
         for (i = 0; i < mmdb->metadata.description.count; i++) {
             free((char *)mmdb->metadata.description.descriptions[i]->language);
-            free((char *)mmdb->metadata.description.
-                 descriptions[i]->description);
+            free((char *)mmdb->metadata.description.descriptions[i]->
+                 description);
             free(mmdb->metadata.description.descriptions[i]);
         }
         free(mmdb->metadata.description.descriptions);
