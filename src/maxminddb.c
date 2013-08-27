@@ -915,7 +915,7 @@ LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
         new_offset = get_uint32(ptr);
         break;
     }
-    return MMDB_DATASECTION_NOOP_SIZE + new_offset;
+    return MMDB_DATA_SECTION_SEPARATOR + new_offset;
 }
 
 void MMDB_get_tree(MMDB_entry_s *start, MMDB_decode_all_s **decode_all)

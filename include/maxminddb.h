@@ -32,7 +32,7 @@ extern "C" {
 
 #define MMDB_DTYPE_MAX (MMDB_DTYPE_FLOAT)
 
-#define MMDB_DATASECTION_NOOP_SIZE (16)
+#define MMDB_DATA_SECTION_SEPARATOR (16)
 
 /* GEOIPDB flags */
 #define MMDB_MODE_STANDARD (1)
