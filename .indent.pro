@@ -47,3 +47,4 @@
 -T uint16_t
 -T uint32_t
 -T uint64_t
+-T int32_t

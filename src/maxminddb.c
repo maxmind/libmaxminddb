@@ -53,6 +53,7 @@ LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
 LOCAL void populate_description_metadata(MMDB_s *mmdb);
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size);
+LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key);
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key);
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key);
@@ -75,7 +76,7 @@ LOCAL uint32_t get_uint32(const uint8_t *p);
 LOCAL uint32_t get_uint24(const uint8_t *p);
 LOCAL uint32_t get_uint16(const uint8_t *p);
 LOCAL uint64_t get_uintX(const uint8_t *p, int length);
-LOCAL int get_sintX(const uint8_t *p, int length);
+LOCAL int32_t get_sintX(const uint8_t *p, int length);
 LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset);
 LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
                               int indent);
@@ -395,13 +396,13 @@ LOCAL void populate_description_metadata(MMDB_s *mmdb)
         member = member->next;
         assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
         mmdb->metadata.description.descriptions[i]->language =
-            strndup((char *)member->decode.data.ptr,
+            strndup((char *)member->decode.data.utf8_string,
                     member->decode.data.data_size);
 
         member = member->next;
         assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
         mmdb->metadata.description.descriptions[i]->description =
-            strndup((char *)member->decode.data.ptr,
+            strndup((char *)member->decode.data.utf8_string,
                     member->decode.data.data_size);
     }
 
@@ -426,7 +427,7 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
         value_for_key_as_uint32(&mmdb->meta, "node_count");
 
     mmdb->metadata.record_size =
-        value_for_key_as_uint32(&mmdb->meta, "record_size");
+        value_for_key_as_uint16(&mmdb->meta, "record_size");
 
     if (mmdb->metadata.record_size != 24 && mmdb->metadata.record_size != 28
         && mmdb->metadata.record_size != 32) {
@@ -434,7 +435,7 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     }
 
     mmdb->metadata.ip_version =
-        value_for_key_as_uint32(&mmdb->meta, "ip_version");
+        value_for_key_as_uint16(&mmdb->meta, "ip_version");
 
     mmdb->metadata.database_type =
         value_for_key_as_string(&mmdb->meta, "database_type");
@@ -442,43 +443,49 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     populate_languages_metadata(mmdb);
 
     mmdb->metadata.binary_format_major_version =
-        value_for_key_as_uint32(&mmdb->meta, "binary_format_major_version");
+        value_for_key_as_uint16(&mmdb->meta, "binary_format_major_version");
 
     mmdb->metadata.binary_format_minor_version =
-        value_for_key_as_uint32(&mmdb->meta, "binary_format_minor_version");
+        value_for_key_as_uint16(&mmdb->meta, "binary_format_minor_version");
 
     mmdb->metadata.build_epoch =
         value_for_key_as_uint64(&mmdb->meta, "build_epoch");
 
     populate_description_metadata(mmdb);
 
-    mmdb->full_record_byte_size =
-        value_for_key_as_uint32(&mmdb->meta, "record_size") * 2 / 8U;
+    mmdb->full_record_byte_size = mmdb->metadata.record_size * 2 / 8U;
 
     mmdb->depth = mmdb->metadata.ip_version == 4 ? 32 : 128;
 
     return MMDB_SUCCESS;
 }
 
+LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
+{
+    MMDB_return_s result;
+    MMDB_get_value(start, &result, key, NULL);
+    return result.uint16;
+}
+
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
-    return (uint32_t)result.uinteger;
+    return result.uint32;
 }
 
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
-    return result.uinteger;
+    return result.uint64;
 }
 
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)
 {
     MMDB_return_s result;
     MMDB_get_value(start, &result, key, NULL);
-    return strndup((char *)result.ptr, result.data_size);
+    return strndup((char *)result.utf8_string, result.data_size);
 }
 
 LOCAL void populate_languages_metadata(MMDB_s *mmdb)
@@ -510,7 +517,7 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
         assert(member->decode.data.type == MMDB_DTYPE_UTF8_STRING);
 
         mmdb->metadata.languages.names[i] =
-            strndup((char *)member->decode.data.ptr,
+            strndup((char *)member->decode.data.utf8_string,
                     member->decode.data.data_size);
         assert(mmdb->metadata.languages.names[i] != NULL);
     }
@@ -635,8 +642,8 @@ LOCAL void free_all(MMDB_s *mmdb)
         int i;
         for (i = 0; i < mmdb->metadata.description.count; i++) {
             free((char *)mmdb->metadata.description.descriptions[i]->language);
-            free((char *)mmdb->metadata.description.descriptions[i]->
-                 description);
+            free((char *)mmdb->metadata.description.
+                 descriptions[i]->description);
             free(mmdb->metadata.description.descriptions[i]);
         }
         free(mmdb->metadata.description.descriptions);
@@ -669,7 +676,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
         switch (decode.data.type) {
         case MMDB_DTYPE_PTR:
             // we follow the pointer
-            decode_one(mmdb, decode.data.uinteger, &decode);
+            decode_one(mmdb, decode.data.pointer, &decode);
             break;
 
             // learn to skip this
@@ -706,16 +713,13 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
                     uint32_t offset_to_value = key.offset_to_next;
 
                     if (key.data.type == MMDB_DTYPE_PTR) {
-                        // while (key.data.type == MMDB_DTYPE_PTR) {
-                        decode_one(mmdb, key.data.uinteger, &key);
-                        // }
+                        decode_one(mmdb, key.data.pointer, &key);
                     }
 
-                    assert(key.data.type == MMDB_DTYPE_BYTES ||
-                           key.data.type == MMDB_DTYPE_UTF8_STRING);
+                    assert(key.data.type == MMDB_DTYPE_UTF8_STRING);
 
                     if (key.data.data_size == src_keylen &&
-                        !memcmp(src_key, key.data.ptr, src_keylen)) {
+                        !memcmp(src_key, key.data.utf8_string, src_keylen)) {
                         if (src_key = va_arg(params, char *)) {
                             // DPRINT_KEY(&key.data);
                             decode_one_follow(mmdb, offset_to_value, &decode);
@@ -773,7 +777,7 @@ LOCAL void decode_one_follow(MMDB_s *mmdb, uint32_t offset,
 {
     decode_one(mmdb, offset, decode);
     if (decode->data.type == MMDB_DTYPE_PTR) {
-        decode_one(mmdb, decode->data.uinteger, decode);
+        decode_one(mmdb, decode->data.pointer, decode);
     }
 }
 
@@ -794,12 +798,12 @@ LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode)
 
     if (type == MMDB_DTYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
-        decode->data.uinteger = get_ptr_from(ctrl, &mem[offset], psize);
+        decode->data.pointer = get_ptr_from(ctrl, &mem[offset], psize);
         decode->data.data_size = psize + 1;
         decode->offset_to_next = offset + psize + 1;
         MMDB_DBG_CARP
             ("decode_one{ptr} ctrl:%d, offset:%d psize:%d point_to:%d\n", ctrl,
-             offset, psize, decode->data.uinteger);
+             offset, psize, decode->data.pointer);
         return;
     }
 
@@ -827,7 +831,7 @@ LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode)
     }
 
     if (type == MMDB_DTYPE_BOOLEAN) {
-        decode->data.uinteger = size ? 1 : 0;
+        decode->data.boolean = size ? true : false;
         decode->data.data_size = 0;
         decode->offset_to_next = offset;
         MMDB_DBG_CARP("decode_one type:%d size:%d\n", type, 0);
@@ -836,21 +840,26 @@ LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode)
 
     if (size == 0 && type != MMDB_DTYPE_UINT16 && type != MMDB_DTYPE_UINT32
         && type != MMDB_DTYPE_INT32) {
-        decode->data.ptr = NULL;
+        decode->data.bytes = NULL;
+        decode->data.utf8_string = NULL;
         decode->data.data_size = 0;
         decode->offset_to_next = offset;
         return;
     }
 
-    if ((type == MMDB_DTYPE_UINT64) || (type == MMDB_DTYPE_UINT32) || (type == MMDB_DTYPE_UINT16)) {
-        decode->data.uinteger = get_uintX(&mem[offset], size);
+    if (type == MMDB_DTYPE_UINT16) {
+        decode->data.uint16 = (uint16_t)get_uintX(&mem[offset], size);
+    } else if (type == MMDB_DTYPE_UINT32) {
+        decode->data.uint32 = (uint32_t)get_uintX(&mem[offset], size);
+    } else if (type == MMDB_DTYPE_UINT64) {
+        decode->data.uint64 = get_uintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_INT32) {
-        decode->data.sinteger = get_sintX(&mem[offset], size);
+        decode->data.int32 = get_sintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_UINT128) {
         assert(size >= 0 && size <= 16);
-        memset(decode->data.c16, 0, 16);
+        memset(decode->data.uint128, 0, 16);
         if (size > 0) {
-            memcpy(decode->data.c16 + 16 - size, &mem[offset], size);
+            memcpy(decode->data.uint128 + 16 - size, &mem[offset], size);
         }
     } else if (type == MMDB_DTYPE_FLOAT) {
         size = 4;
@@ -858,8 +867,11 @@ LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode)
     } else if (type == MMDB_DTYPE_DOUBLE) {
         size = 8;
         decode->data.double_value = get_ieee754_double(&mem[offset]);
-    } else {
-        decode->data.ptr = &mem[offset];
+    } else if (type == MMDB_DTYPE_UTF8_STRING) {
+        decode->data.utf8_string = &mem[offset];
+        decode->data.data_size = size;
+    } else if (type == MMDB_DTYPE_BYTES) {
+        decode->data.bytes = &mem[offset];
         decode->data.data_size = size;
     }
     decode->offset_to_next = offset + size;
@@ -878,7 +890,7 @@ LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_return_s *data)
     uint8_t str[256];
     int len = data->data_size > 255 ? 255 : data->data_size;
 
-    memcpy(str, data->ptr, len);
+    memcpy(str, data->utf8_string, len);
 
     str[len] = '\0';
     fprintf(stderr, "%s\n", str);
@@ -924,7 +936,7 @@ LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset, MMDB_decode_all_s *decode)
             uint32_t last_offset;
             while (decode->decode.data.type == MMDB_DTYPE_PTR) {
                 decode_one(mmdb, last_offset =
-                           decode->decode.data.uinteger, &decode->decode);
+                           decode->decode.data.pointer, &decode->decode);
             }
 
             if (decode->decode.data.type == MMDB_DTYPE_ARRAY
@@ -1145,7 +1157,7 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
         break;
     case MMDB_DTYPE_UTF8_STRING:
         string =
-            strndup((char *)decode_all->decode.data.ptr,
+            strndup((char *)decode_all->decode.data.utf8_string,
                     decode_all->decode.data.data_size);
         silly_pindent(indent);
         fprintf(stdout, "utf8_string = %s\n", string);
@@ -1154,7 +1166,7 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
         break;
     case MMDB_DTYPE_BYTES:
         bytes =
-            strndup((char *)decode_all->decode.data.ptr,
+            strndup((char *)decode_all->decode.data.bytes,
                     decode_all->decode.data.data_size);
         silly_pindent(indent);
         fprintf(stdout, "bytes = %s\n", bytes);
@@ -1173,17 +1185,19 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
         break;
     case MMDB_DTYPE_UINT16:
         silly_pindent(indent);
-        fprintf(stdout, "uint16 = %u\n", (uint16_t)decode_all->decode.data.uinteger);
+        fprintf(stdout, "uint16 = %u\n", decode_all->decode.data.uint16);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_UINT32:
         silly_pindent(indent);
-        fprintf(stdout, "uint32 = %u\n", (uint32_t)decode_all->decode.data.uinteger);
+        fprintf(stdout, "uint32 = %u\n",
+                (uint32_t)decode_all->decode.data.uint32);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_BOOLEAN:
         silly_pindent(indent);
-        fprintf(stdout, "boolean = %u\n", (uint32_t)decode_all->decode.data.uinteger);
+        fprintf(stdout, "boolean = %u\n",
+                (uint32_t)decode_all->decode.data.boolean);
         decode_all = decode_all->next;
         break;
     case MMDB_DTYPE_UINT64:
@@ -1198,7 +1212,7 @@ LOCAL MMDB_decode_all_s *dump(MMDB_s *mmdb, MMDB_decode_all_s *decode_all,
         break;
     case MMDB_DTYPE_INT32:
         silly_pindent(indent);
-        fprintf(stdout, "int32 = %d\n", decode_all->decode.data.sinteger);
+        fprintf(stdout, "int32 = %d\n", decode_all->decode.data.int32);
         decode_all = decode_all->next;
         break;
     default:

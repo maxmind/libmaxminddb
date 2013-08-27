@@ -11,7 +11,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_UTF8_STRING, description, "utf8_string",
                     NULL);
-        const char *string = strndup((const char *)data.ptr, data.data_size);
+        const char *string = strndup(data.utf8_string, data.data_size);
         // This is hex for "unicode! ☯ - ♫" as bytes
         char expect[19] =
             { 0x75, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x21, 0x20, 0xe2, 0x98,
@@ -63,7 +63,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_BYTES, description, "bytes", NULL);
         uint8_t expect[] = { 0x00, 0x00, 0x00, 0x2a };
-        ok(memcmp((uint8_t *)data.ptr, expect, 4) == 0,
+        ok(memcmp((uint8_t *)data.bytes, expect, 4) == 0,
            "bytes field has expected value");
     }
 
@@ -74,7 +74,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_UINT16, description, "uint16", NULL);
         uint16_t expect = 100;
-        ok((uint16_t)data.uinteger == expect, "uint16 field is 100");
+        ok(data.uint16 == expect, "uint16 field is 100");
     }
 
     {
@@ -84,7 +84,18 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "uint32", NULL);
         uint32_t expect = 1 << 28;
-        cmp_ok(expect, "==", data.uinteger, "uint32 field is 2**28");
+        ok(data.uint32 == expect, "uint32 field is 2**28");
+    }
+
+    {
+        char description[500];
+        snprintf(description, 500, "int32 field for %s - %s", ip, mode_desc);
+
+        MMDB_return_s data =
+            data_ok(result, MMDB_DTYPE_INT32, description, "int32", NULL);
+        int32_t expect = 1 << 28;
+        expect *= -1;
+        cmp_ok(data.int32, "==", expect, "int32 field is -(2**28)");
     }
 
     {
@@ -95,7 +106,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
             data_ok(result, MMDB_DTYPE_UINT64, description, "uint64", NULL);
         uint64_t expect = 1;
         expect <<= 60;
-        ok(data.uinteger == expect, "uint64 field is 2**60");
+        ok(data.uint64 == expect, "uint64 field is 2**60");
     }
 
     {
@@ -107,7 +118,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         uint8_t expect[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
-        ok(memcmp(data.c16, expect, 16) == 0, "uint128 field is 2**120");
+        ok(memcmp(data.uint128, expect, 16) == 0, "uint128 field is 2**120");
     }
 
     {
@@ -116,7 +127,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_BOOLEAN, description, "boolean", NULL);
-        cmp_ok(1, "==", data.uinteger, "boolean field is true (1)");
+        cmp_ok(data.boolean, "==", true, "boolean field is true");
     }
 
     {
@@ -125,22 +136,22 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_ARRAY, description, "array", NULL);
-        cmp_ok(3, "==", data.data_size, "array field has 3 elements");
+        ok(data.data_size == 3, "array field has 3 elements");
 
         snprintf(description, 500, "array[0] for %s - %s", ip, mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "array", "0", NULL);
-        cmp_ok(1, "==", data.uinteger, "array[0] is 1");
+        ok(data.uint32 == 1, "array[0] is 1");
 
         snprintf(description, 500, "array[1] for %s - %s", ip, mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "array", "1", NULL);
-        cmp_ok(2, "==", data.uinteger, "array[1] is 1");
+        ok(data.uint32 == 2, "array[1] is 1");
 
         snprintf(description, 500, "array[2] for %s - %s", ip, mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "array", "2", NULL);
-        cmp_ok(3, "==", data.uinteger, "array[2] is 1");
+        ok(data.uint32 == 3, "array[2] is 1");
     }
 
     {
@@ -149,13 +160,13 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         MMDB_return_s data =
             data_ok(result, MMDB_DTYPE_MAP, description, "map", NULL);
-        cmp_ok(1, "==", data.data_size, "map field has 1 element");
+        ok(data.data_size == 1, "map field has 1 element");
 
         snprintf(description, 500, "map{mapX} for %s - %s", ip, mode_desc);
 
         data =
             data_ok(result, MMDB_DTYPE_MAP, description, "map", "mapX", NULL);
-        cmp_ok(2, "==", data.data_size, "map{mapX} field has 2 elements");
+        ok(data.data_size == 2, "map{mapX} field has 2 elements");
 
         snprintf(description, 500, "map{mapX}{utf8_stringX} for %s - %s", ip,
                  mode_desc);
@@ -163,7 +174,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         data =
             data_ok(result, MMDB_DTYPE_UTF8_STRING, description, "map", "mapX",
                     "utf8_stringX", NULL);
-        const char *string = strndup((const char *)data.ptr, data.data_size);
+        const char *string = strndup(data.utf8_string, data.data_size);
         is(string, "hello", "map{mapX}{utf8_stringX} is 'hello'");
         free((char *)string);
 
@@ -172,29 +183,28 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         data =
             data_ok(result, MMDB_DTYPE_ARRAY, description, "map", "mapX",
                     "arrayX", NULL);
-        cmp_ok(3, "==", data.data_size,
-               "map{mapX}{arrayX} field has 3 elements");
+        ok(data.data_size == 3, "map{mapX}{arrayX} field has 3 elements");
 
         snprintf(description, 500, "map{mapX}{arrayX}[0] for %s - %s", ip,
                  mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "map", "mapX",
                     "arrayX", "0", NULL);
-        cmp_ok(7, "==", data.uinteger, "map{mapX}{arrayX}[0] is 7");
+        ok(data.uint32 == 7, "map{mapX}{arrayX}[0] is 7");
 
         snprintf(description, 500, "map{mapX}{arrayX}[1] for %s - %s", ip,
                  mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "map", "mapX",
                     "arrayX", "1", NULL);
-        cmp_ok(8, "==", data.uinteger, "map{mapX}{arrayX}[1] is 8");
+        ok(data.uint32 == 8, "map{mapX}{arrayX}[1] is 8");
 
         snprintf(description, 500, "map{mapX}{arrayX}[2] for %s - %s", ip,
                  mode_desc);
         data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "map", "mapX",
                     "arrayX", "2", NULL);
-        cmp_ok(9, "==", data.uinteger, "map{mapX}{arrayX}[2] is 9");
+        ok(data.uint32 == 9, "map{mapX}{arrayX}[2] is 9");
     }
 
 }

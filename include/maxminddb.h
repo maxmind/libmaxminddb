@@ -8,6 +8,8 @@ extern "C" {
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #define MMDB_DEFAULT_DATABASE "/usr/local/share/GeoIP2/GeoIP2-City.mmdb"
 
@@ -78,16 +80,21 @@ extern "C" {
     typedef struct MMDB_return_s {
         /* return values */
         union {
-            float float_value;
+            uint32_t pointer;
+            const char *utf8_string;
             double double_value;
-            int sinteger;
-            uint64_t uinteger;
-            uint8_t c16[16];
-            const void *ptr;
+            const uint8_t *bytes;
+            uint16_t uint16;
+            uint32_t uint32;
+            int32_t int32;
+            uint64_t uint64;
+            uint8_t uint128[16];
+            bool boolean;
+            float float_value;
         };
         uint32_t offset;        /* start of our field or zero for not found */
-        int data_size;          /* only valid for strings, utf8_strings or binary data */
-        int type;               /* type like string utf8_string, int32, ... */
+        uint32_t data_size;     /* only valid for strings, utf8_strings or binary data */
+        uint32_t type;          /* type like string utf8_string, int32, ... */
     } MMDB_return_s;
 
     typedef struct MMDB_description_s {
@@ -97,15 +104,15 @@ extern "C" {
 
     typedef struct MMDB_metadata_s {
         int node_count;
-        int record_size;
-        int ip_version;
+        uint16_t record_size;
+        uint16_t ip_version;
         char *database_type;
         struct {
             size_t count;
             const char **names;
         } languages;
-        int binary_format_major_version;
-        int binary_format_minor_version;
+        uint16_t binary_format_major_version;
+        uint16_t binary_format_minor_version;
         uint64_t build_epoch;
         struct {
             size_t count;

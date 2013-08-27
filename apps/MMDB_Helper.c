@@ -15,7 +15,7 @@ char *bytesdup(MMDB_s * mmdb, MMDB_return_s const *const ret)
     if (ret->offset) {
         mem = malloc(ret->data_size + 1);
 
-        memcpy(mem, ret->ptr, ret->data_size);
+        memcpy(mem, ret->utf8_string, ret->data_size);
         mem[ret->data_size] = '\0';
     }
     return mem;
