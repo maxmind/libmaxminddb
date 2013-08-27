@@ -25,6 +25,7 @@ typedef union {
     struct in6_addr v6;
 } in_addr_any;
 
+#define MMDB_DATA_SECTION_SEPARATOR (16)
 #define MMDB_CHKBIT_128(bit,ptr) ((ptr)[((127U - (bit)) >> 3)] & (1U << (~(127U - (bit)) & 7)))
 
 #define RETURN_ON_END_OF_SEARCHX(offset, segments, depth, maxdepth, res)   \
