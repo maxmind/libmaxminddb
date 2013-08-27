@@ -1,14 +1,10 @@
 * Check all memory allocations & frees
 * Replace all (or almost all) asserts with error codes
-* Refactor reading code to unify IPv4 & IPv6 paths as well as file & mem paths
-** or remove file path entirely in favor of mmap
 * Rename various structs and functions to better reflect what they do
-** MMDB_root_entry_s, MMDB_entry_s, MMDB_decode_all_s, MMDB_decode_s
+** MMDB_entry_s, MMDB_decode_all_s, MMDB_decode_s
 ** MMDB_get_tree
 * Make MMDB_get_value work with no varargs so you can get the value of an entry
 * Remove MMDB_lookup_by_ipnum and MMDB_lookup_by_ipnum_128 in favor of MMDB_lookup
-* Should MMDB_pread be external? and why is it named pread?
-* Same with MMDB_strcmp_result
 * Hide definition of MMDB_s (and MMDB_metadata_s?) from public API
 * Add accessors of some sort for metadata?
 * Remove MMDB_DEFAULT_DATABASE
