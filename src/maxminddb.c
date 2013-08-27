@@ -142,10 +142,10 @@ MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
         return NULL;
     }
 
-    MMDB_lookup_result_s *root = malloc(sizeof(MMDB_lookup_result_s));
-    assert(root != NULL);
+    MMDB_lookup_result_s *result = malloc(sizeof(MMDB_lookup_result_s));
+    assert(result != NULL);
 
-    root->entry.mmdb = mmdb;
+    result->entry.mmdb = mmdb;
 
     uint8_t *address;
     if (is_ipv4) {
@@ -154,17 +154,17 @@ MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
         address = (uint8_t *)&in_addr.v6;
     }
 
-    *mmdb_error = find_address_in_search_tree(mmdb, address, root);
+    *mmdb_error = find_address_in_search_tree(mmdb, address, result);
 
     if (*mmdb_error) {
-        free(root);
+        free(result);
         return NULL;
     }
 
-    if (root->entry.offset > 0) {
-        return root;
+    if (result->entry.offset > 0) {
+        return result;
     } else {
-        free(root);
+        free(result);
         return NULL;
     }
 }

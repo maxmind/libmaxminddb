@@ -76,7 +76,8 @@ MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
                                 const char *file, const char *mode_desc)
 {
     int gai_error, mmdb_error;
-    MMDB_lookup_result_s *root = MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
+    MMDB_lookup_result_s *result =
+        MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
 
     int is_ok = ok(0 == gai_error,
                    "no getaddrinfo error in call to MMDB_lookup for %s - %s - %s",
@@ -95,7 +96,7 @@ MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
         diag("MMDB error - %d", mmdb_error);
     }
 
-    return root;
+    return result;
 }
 
 MMDB_return_s data_ok(MMDB_lookup_result_s *result, int expect_type,
