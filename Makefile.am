@@ -1,4 +1,4 @@
 SUBDIRS = \
   src     \
-  apps    \
+  bin     \
   t

@@ -10,9 +10,9 @@ aclocal.m4
 *.la
 */.deps
 */.libs
-/apps/country_lookup
-/apps/mmdbdump
-/apps/mmdblookup
+/bin/country_lookup
+/bin/mmdbdump
+/bin/mmdblookup
 /autom4te.cache
 /config.*
 /configure

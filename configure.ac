@@ -39,6 +39,6 @@ AC_CHECK_FUNCS([memchr strtol memset gettimeofday strdup memmem])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
-                 apps/Makefile
+                 bin/Makefile
                  t/Makefile])
 AC_OUTPUT
