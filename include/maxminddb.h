@@ -48,19 +48,13 @@ extern "C" {
 #define MMDB_OUT_OF_MEMORY (5)
 #define MMDB_UNKNOWN_DATABASE_FORMAT (6)
 
-/* Looks better */
-#define MMDB_TRUE (1)
-#define MMDB_FALSE (0)
-
 /* */
 #define MMDB_DEBUG (0)
 
 #if MMDB_DEBUG
 #define MMDB_DBG_CARP(...) fprintf(stderr, __VA_ARGS__ );
-#define MMDB_DBG_ASSERT(ex) assert(#ex)
 #else
 #define MMDB_DBG_CARP(...)
-#define MMDB_DBG_ASSERT(ex)
 #endif
     // This is the starting point for every search.
     // It is like the hash to start the search. It may or may not the root hash
