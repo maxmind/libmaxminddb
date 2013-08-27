@@ -66,14 +66,14 @@ extern "C" {
     // It is like the hash to start the search. It may or may not the root hash
     typedef struct MMDB_entry_s {
         struct MMDB_s *mmdb;
-        unsigned int offset;    /* A pointer to the start of the data for an IP */
+        uint32_t offset;    /* A pointer to the start of the data for an IP */
     } MMDB_entry_s;
 
     // This is a pointer to the first 
     // think of it as the root of all informations about the IP.
     typedef struct MMDB_lookup_result_s {
         MMDB_entry_s entry;
-        int netmask;
+        uint16_t netmask;
     } MMDB_lookup_result_s;
 
     // this is the result for every field
@@ -103,7 +103,7 @@ extern "C" {
     } MMDB_description_s;
 
     typedef struct MMDB_metadata_s {
-        int node_count;
+        uint32_t node_count;
         uint16_t record_size;
         uint16_t ip_version;
         char *database_type;
@@ -126,8 +126,8 @@ extern "C" {
         ssize_t file_size;
         const uint8_t *file_in_mem_ptr;
         const uint8_t *dataptr;
-        uint32_t full_record_byte_size;
-        int depth;
+        uint16_t full_record_byte_size;
+        uint16_t depth;
         MMDB_metadata_s metadata;
         struct MMDB_s *fake_metadata_db;
         MMDB_entry_s meta;      // should change to entry_s

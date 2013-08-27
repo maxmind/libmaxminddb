@@ -211,11 +211,11 @@ LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *res)
 {
-    int node_count = mmdb->metadata.node_count;
-    int record_length = mmdb->full_record_byte_size;
+    uint32_t node_count = mmdb->metadata.node_count;
+    uint16_t record_length = mmdb->full_record_byte_size;
     const uint8_t *search_tree = mmdb->file_in_mem_ptr;
     const uint8_t *record_pointer;
-    uint32_t max_depth0 = mmdb->depth - 1;
+    uint16_t max_depth0 = mmdb->depth - 1;
     uint32_t value = 0;
 
     uint32_t (*left_record_value) (const uint8_t *);
@@ -236,7 +236,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         right_record_offset = 4;
     }
 
-    for (uint32_t current_bit = max_depth0; current_bit >= 0; current_bit--) {
+    for (uint16_t current_bit = max_depth0; current_bit >= 0; current_bit--) {
         record_pointer = &search_tree[value * record_length];
         if (address[(max_depth0 - current_bit) >> 3] &
             (1U << (~(max_depth0 - current_bit) & 7))) {
@@ -275,12 +275,12 @@ int MMDB_lookup_by_ipnum_128(struct in6_addr ipnum,
 {
     MMDB_s *mmdb = result->entry.mmdb;
 
-    int segments = mmdb->metadata.node_count;
+    uint32_t segments = mmdb->metadata.node_count;
     uint32_t offset = 0;
-    int rl = mmdb->full_record_byte_size;
+    uint16_t rl = mmdb->full_record_byte_size;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
-    int depth;
+    uint16_t depth;
     if (rl == 6) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--) {
             p = &mem[offset * rl];
@@ -321,13 +321,13 @@ int MMDB_lookup_by_ipnum(uint32_t ipnum, MMDB_lookup_result_s *res)
 {
     MMDB_s *mmdb = res->entry.mmdb;
 
-    int segments = mmdb->metadata.node_count;
+    uint32_t segments = mmdb->metadata.node_count;
     uint32_t offset = 0;
-    int rl = mmdb->full_record_byte_size;
+    uint16_t rl = mmdb->full_record_byte_size;
     const uint8_t *mem = mmdb->file_in_mem_ptr;
     const uint8_t *p;
     uint32_t mask = 0x80000000U;
-    int depth;
+    uint16_t depth;
     if (rl == 6) {
         for (depth = mmdb->depth - 1; depth >= 0; depth--, mask >>= 1) {
             p = &mem[offset * rl];
