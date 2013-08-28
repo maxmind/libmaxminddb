@@ -13,3 +13,4 @@
 ** better usage info and error messages
 ** more shared code
 ** don't assume GeoIP2 data format
+* Write tests for apps
