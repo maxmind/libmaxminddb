@@ -22,12 +22,17 @@ sub main {
 
     for my $content ( $c_code, $h_code ) {
         $content
-            =~ s{\Q$prototypes_start\E.+\Q$prototypes_end\E\n}{__PROTOTYPES__}s;
+            =~ s{ *\Q$prototypes_start\E.+\Q$prototypes_end\E\n}{__PROTOTYPES__}s;
     }
 
-    my @prototypes          = parse_prototypes($c_code);
-    my $external_prototypes = join q{},
-        map  { '    extern ' . $_->{prototype} . ";\n" }
+    my @prototypes = parse_prototypes($c_code);
+
+    my $external_prototypes = join q{}, map {
+        my $p = 'extern ' . $_->{prototype};
+        $p =~ s/^/    /;                # first line
+        $p =~ s/\n/\n           /gm;    # the rest
+        $p . ";\n"
+        }
         grep { $_->{external} } @prototypes;
     $h_code
         =~ s/__PROTOTYPES__/    $prototypes_start\n$external_prototypes    $prototypes_end\n/;
