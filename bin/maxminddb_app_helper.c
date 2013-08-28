@@ -43,7 +43,7 @@ void usage(char *prg)
 void dump_meta(MMDB_s * mmdb)
 {
     MMDB_entry_data_list_s *entry_data_list = calloc(1, sizeof(MMDB_entry_data_list_s));
-    MMDB_get_tree(&mmdb->meta, &entry_data_list);
+    MMDB_get_entry_data_list(&mmdb->meta, &entry_data_list);
 
     if (entry_data_list != NULL)
         MMDB_dump(NULL, entry_data_list, 0);

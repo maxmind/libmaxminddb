@@ -55,8 +55,8 @@ LOCAL int get_ext_type(int raw_ext_type);
 LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size);
-LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset,
-                    MMDB_entry_data_list_s *entry_data_list);
+LOCAL void get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
+                               MMDB_entry_data_list_s *entry_data_list);
 LOCAL void silly_pindent(int i);
 LOCAL float get_ieee754_float(const uint8_t *restrict p);
 LOCAL double get_ieee754_double(const uint8_t *restrict p);
@@ -275,7 +275,7 @@ LOCAL void populate_description_metadata(MMDB_s *mmdb)
     map_start.mmdb = mmdb->fake_metadata_db;
     map_start.offset = entry_data.offset;
 
-    MMDB_get_tree(&map_start, &member);
+    MMDB_get_entry_data_list(&map_start, &member);
 
     first_member = member;
 
@@ -399,7 +399,7 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
     array_start.mmdb = mmdb->fake_metadata_db;
     array_start.offset = entry_data.offset;
 
-    MMDB_get_tree(&array_start, &member);
+    MMDB_get_entry_data_list(&array_start, &member);
 
     first_member = member;
 
@@ -814,15 +814,15 @@ LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
     return MMDB_DATA_SECTION_SEPARATOR + new_offset;
 }
 
-void MMDB_get_tree(MMDB_entry_s *start,
-                   MMDB_entry_data_list_s **entry_data_list)
+void MMDB_get_entry_data_list(MMDB_entry_s *start,
+                              MMDB_entry_data_list_s **entry_data_list)
 {
     *entry_data_list = MMDB_alloc_entry_data_list();
-    get_tree(start->mmdb, start->offset, *entry_data_list);
+    get_entry_data_list(start->mmdb, start->offset, *entry_data_list);
 }
 
-LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset,
-                    MMDB_entry_data_list_s *entry_data_list)
+LOCAL void get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
+                               MMDB_entry_data_list_s *entry_data_list)
 {
     decode_one(mmdb, offset, &entry_data_list->entry_data);
 
@@ -840,7 +840,7 @@ LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset,
 
             if (entry_data_list->entry_data.type == MMDB_DTYPE_ARRAY
                 || entry_data_list->entry_data.type == MMDB_DTYPE_MAP) {
-                get_tree(mmdb, last_offset, entry_data_list);
+                get_entry_data_list(mmdb, last_offset, entry_data_list);
             }
             entry_data_list->entry_data.offset_to_next = next_offset;
         }
@@ -854,7 +854,7 @@ LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset,
             while (array_size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
                     MMDB_alloc_entry_data_list();
-                get_tree(mmdb, array_offset, entry_data_list_to);
+                get_entry_data_list(mmdb, array_offset, entry_data_list_to);
                 array_offset = entry_data_list_to->entry_data.offset_to_next;
                 while (previous->next) {
                     previous = previous->next;
@@ -877,7 +877,7 @@ LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset,
             while (size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
                     MMDB_alloc_entry_data_list();
-                get_tree(mmdb, offset, entry_data_list_to);
+                get_entry_data_list(mmdb, offset, entry_data_list_to);
                 while (previous->next) {
                     previous = previous->next;
                 }
@@ -889,7 +889,7 @@ LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset,
                 offset = entry_data_list_to->entry_data.offset_to_next;
                 entry_data_list_to = previous->next =
                     MMDB_alloc_entry_data_list();
-                get_tree(mmdb, offset, entry_data_list_to);
+                get_entry_data_list(mmdb, offset, entry_data_list_to);
                 while (previous->next) {
                     previous = previous->next;
                 }

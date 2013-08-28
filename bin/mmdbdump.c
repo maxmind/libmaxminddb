@@ -70,7 +70,7 @@ int main(int argc, char *const argv[])
 
     if (result->entry.offset > 0) {
         MMDB_entry_data_list_s *entry_data_list;
-        MMDB_get_tree(&result->entry, &entry_data_list);
+        MMDB_get_entry_data_list(&result->entry, &entry_data_list);
     } else {
         puts("Sorry, nothing found");
     }
