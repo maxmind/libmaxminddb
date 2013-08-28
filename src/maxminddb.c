@@ -34,7 +34,7 @@ typedef union {
 LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
                               in_addr_any *in_addr);
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
-                                      MMDB_lookup_result_s *res);
+                                      MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
 LOCAL void populate_description_metadata(MMDB_s *mmdb);
@@ -195,7 +195,7 @@ LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
 }
 
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
-                                      MMDB_lookup_result_s *res)
+                                      MMDB_lookup_result_s *result)
 {
     uint32_t node_count = mmdb->metadata.node_count;
     uint16_t record_length = mmdb->full_record_byte_size;
@@ -234,8 +234,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         }
 
         if (value >= node_count) {
-            res->netmask = mmdb->depth - current_bit;
-            res->entry.offset = value - node_count;
+            result->netmask = mmdb->depth - current_bit;
+            result->entry.offset = value - node_count;
             return MMDB_SUCCESS;
         }
     }
