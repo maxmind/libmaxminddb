@@ -966,9 +966,9 @@ LOCAL uint64_t get_uintX(const uint8_t *p, int length)
     return value;
 }
 
-LOCAL int get_sintX(const uint8_t *p, int length)
+LOCAL int32_t get_sintX(const uint8_t *p, int length)
 {
-    return (int)get_uintX(p, length);
+    return (int32_t)get_uintX(p, length);
 }
 
 LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset)
