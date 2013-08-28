@@ -1,7 +1,7 @@
 * Check all memory allocations & frees
 * Replace all (or almost all) asserts with error codes
 * Rename various structs and functions to better reflect what they do
-** MMDB_entry_s, MMDB_decode_all_s, MMDB_decode_s
+** MMDB_decode_all_s, MMDB_decode_s
 ** MMDB_get_tree
 * Make MMDB_get_value work with no varargs so you can get the value of an entry
 * Hide definition of MMDB_s (and MMDB_metadata_s?) from public API
@@ -14,3 +14,4 @@
 ** more shared code
 ** don't assume GeoIP2 data format
 * Write tests for apps
+* Some sort of data validation testing when decoding a data entry
