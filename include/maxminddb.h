@@ -11,8 +11,6 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MMDB_DEFAULT_DATABASE "/usr/local/share/GeoIP2/GeoIP2-City.mmdb"
-
 #define MMDB_DTYPE_EXT (0)
 #define MMDB_DTYPE_PTR (1)
 #define MMDB_DTYPE_UTF8_STRING (2)

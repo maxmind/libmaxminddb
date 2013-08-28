@@ -33,10 +33,9 @@ int main(int argc, char *const argv[])
     argv += optind;
 
     if (!fname) {
-        fname = strdup(MMDB_DEFAULT_DATABASE);
+        fprintf(stderr, "You must provide a filename with -f");
+        exit(1);
     }
-
-    assert(fname != NULL);
 
     status = MMDB_open(fname, MMDB_MODE_STANDARD, mmdb);
     if (!mmdb) {

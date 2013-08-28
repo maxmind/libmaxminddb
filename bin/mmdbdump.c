@@ -33,16 +33,15 @@ int main(int argc, char *const argv[])
     argv += optind;
 
     if (!fname) {
-        fname = strdup(MMDB_DEFAULT_DATABASE);
+        fprintf(stderr, "You must provide a filename with -f");
+        exit(1);
     }
-
-    assert(fname != NULL);
 
     status = MMDB_open(fname, MMDB_MODE_STANDARD, mmdb);
 
     if (!mmdb) {
         fprintf(stderr, "Can't open %s\n", fname);
-        exit(1);
+        exit(2);
     }
 
     free(fname);
@@ -59,7 +58,7 @@ int main(int argc, char *const argv[])
     if (ipstr == NULL || 0 != MMDB_resolve_address(ipstr, ai_family, ai_flags,
                                                   &ip)) {
         fprintf(stderr, "Invalid IP\n");
-        exit(1);
+        exit(3);
     }
 
     if (verbose) {
