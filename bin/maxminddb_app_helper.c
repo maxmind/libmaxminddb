@@ -39,14 +39,15 @@ void usage(char *prg)
     die("Usage: %s -f database addr\n", prg);
 }
 
+// XXX - this should use the metadata struct, not re-decode the metadata
 void dump_meta(MMDB_s * mmdb)
 {
-    MMDB_decode_all_s *decode_all = calloc(1, sizeof(MMDB_decode_all_s));
-    MMDB_get_tree(&mmdb->meta, &decode_all);
+    MMDB_entry_data_list_s *entry_data_list = calloc(1, sizeof(MMDB_entry_data_list_s));
+    MMDB_get_tree(&mmdb->meta, &entry_data_list);
 
-    if (decode_all != NULL)
-        MMDB_dump(NULL, decode_all, 0);
-    free(decode_all);
+    if (entry_data_list != NULL)
+        MMDB_dump(NULL, entry_data_list, 0);
+    free(entry_data_list);
 }
 
 static const char *na(char const *string)

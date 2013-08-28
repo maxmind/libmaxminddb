@@ -33,7 +33,7 @@
 --space-special-semicolon
 --swallow-optional-blank-lines
 --tab-size8
--T MMDB_decode_all_s
+-T MMDB_entry_data_list_s
 -T MMDB_decode_s
 -T MMDB_description_s
 -T MMDB_entry_s

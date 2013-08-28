@@ -69,8 +69,8 @@ int main(int argc, char *const argv[])
     MMDB_lookup_result_s *result = lookup_or_die(mmdb, ipstr);
 
     if (result->entry.offset > 0) {
-        MMDB_decode_all_s *decode_all;
-        MMDB_get_tree(&result->entry, &decode_all);
+        MMDB_entry_data_list_s *entry_data_list;
+        MMDB_get_tree(&result->entry, &entry_data_list);
     } else {
         puts("Sorry, nothing found");
     }
