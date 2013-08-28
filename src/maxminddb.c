@@ -51,7 +51,7 @@ LOCAL void decode_one_follow(MMDB_s *mmdb, uint32_t offset,
                              MMDB_decode_s *decode);
 LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset, MMDB_decode_s *decode);
 LOCAL int get_ext_type(int raw_ext_type);
-LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_return_s *data);
+LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size);
 LOCAL void get_tree(MMDB_s *mmdb, uint32_t offset, MMDB_decode_all_s *decode);
@@ -258,19 +258,19 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
 
 LOCAL void populate_description_metadata(MMDB_s *mmdb)
 {
-    MMDB_return_s result;
+    MMDB_entry_data_s entry_data;
     MMDB_entry_s map_start;
     size_t map_size;
     MMDB_decode_all_s *member;
     MMDB_decode_all_s *first_member;
     int i;
 
-    MMDB_get_value(&mmdb->meta, &result, "description", NULL);
+    MMDB_get_value(&mmdb->meta, &entry_data, "description", NULL);
 
-    assert(result.type == MMDB_DTYPE_MAP);
+    assert(entry_data.type == MMDB_DTYPE_MAP);
 
     map_start.mmdb = mmdb->fake_metadata_db;
-    map_start.offset = result.offset;
+    map_start.offset = entry_data.offset;
 
     MMDB_get_tree(&map_start, &member);
 
@@ -354,47 +354,47 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
 
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
 {
-    MMDB_return_s result;
-    MMDB_get_value(start, &result, key, NULL);
-    return result.uint16;
+    MMDB_entry_data_s entry_data;
+    MMDB_get_value(start, &entry_data, key, NULL);
+    return entry_data.uint16;
 }
 
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key)
 {
-    MMDB_return_s result;
-    MMDB_get_value(start, &result, key, NULL);
-    return result.uint32;
+    MMDB_entry_data_s entry_data;
+    MMDB_get_value(start, &entry_data, key, NULL);
+    return entry_data.uint32;
 }
 
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key)
 {
-    MMDB_return_s result;
-    MMDB_get_value(start, &result, key, NULL);
-    return result.uint64;
+    MMDB_entry_data_s entry_data;
+    MMDB_get_value(start, &entry_data, key, NULL);
+    return entry_data.uint64;
 }
 
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)
 {
-    MMDB_return_s result;
-    MMDB_get_value(start, &result, key, NULL);
-    return strndup((char *)result.utf8_string, result.data_size);
+    MMDB_entry_data_s entry_data;
+    MMDB_get_value(start, &entry_data, key, NULL);
+    return strndup((char *)entry_data.utf8_string, entry_data.data_size);
 }
 
 LOCAL void populate_languages_metadata(MMDB_s *mmdb)
 {
-    MMDB_return_s result;
+    MMDB_entry_data_s entry_data;
     MMDB_entry_s array_start;
     size_t array_size;
     MMDB_decode_all_s *member;
     MMDB_decode_all_s *first_member;
     int i;
 
-    MMDB_get_value(&mmdb->meta, &result, "languages", NULL);
+    MMDB_get_value(&mmdb->meta, &entry_data, "languages", NULL);
 
-    assert(result.type == MMDB_DTYPE_ARRAY);
+    assert(entry_data.type == MMDB_DTYPE_ARRAY);
 
     array_start.mmdb = mmdb->fake_metadata_db;
-    array_start.offset = result.offset;
+    array_start.offset = entry_data.offset;
 
     MMDB_get_tree(&array_start, &member);
 
@@ -534,8 +534,8 @@ LOCAL void free_all(MMDB_s *mmdb)
         int i;
         for (i = 0; i < mmdb->metadata.description.count; i++) {
             free((char *)mmdb->metadata.description.descriptions[i]->language);
-            free((char *)mmdb->metadata.description.
-                 descriptions[i]->description);
+            free((char *)mmdb->metadata.description.descriptions[i]->
+                 description);
             free(mmdb->metadata.description.descriptions[i]);
         }
         free(mmdb->metadata.description.descriptions);
@@ -543,16 +543,17 @@ LOCAL void free_all(MMDB_s *mmdb)
     free((void *)mmdb);
 }
 
-int MMDB_get_value(MMDB_entry_s *start, MMDB_return_s *result, ...)
+int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)
 {
     va_list keys;
-    va_start(keys, result);
-    int ioerror = MMDB_vget_value(start, result, keys);
+    va_start(keys, entry_data);
+    int ioerror = MMDB_vget_value(start, entry_data, keys);
     va_end(keys);
     return ioerror;
 }
 
-int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
+int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
+                    va_list params)
 {
     MMDB_decode_s decode, key, value;
     MMDB_s *mmdb = start->mmdb;
@@ -577,7 +578,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
                 int size = decode.data.data_size;
                 int offset = strtol(src_key, NULL, 10);
                 if (offset >= size || offset < 0) {
-                    result->offset = 0; // not found.
+                    entry_data->offset = 0;     // not found.
                     goto end;
                 }
                 for (int i = 0; i < offset; i++) {
@@ -590,7 +591,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
                     goto donotdecode;
                 }
                 decode_one_follow(mmdb, decode.offset_to_next, &value);
-                memcpy(result, &value.data, sizeof(MMDB_return_s));
+                memcpy(entry_data, &value.data, sizeof(MMDB_entry_data_s));
                 goto end;
             }
             break;
@@ -621,7 +622,8 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
                         }
                         // found it!
                         decode_one_follow(mmdb, offset_to_value, &value);
-                        memcpy(result, &value.data, sizeof(MMDB_return_s));
+                        memcpy(entry_data, &value.data,
+                               sizeof(MMDB_entry_data_s));
                         goto end;
                     } else {
                         // we search for another key skip  this
@@ -633,7 +635,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result, va_list params)
                 // not found!! do something
                 //DPRINT_KEY(&key.data);
                 //
-                result->offset = 0;     // not found.
+                entry_data->offset = 0; // not found.
                 goto end;
             }
         default:
@@ -777,12 +779,12 @@ LOCAL int get_ext_type(int raw_ext_type)
     return 7 + raw_ext_type;
 }
 
-LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_return_s *data)
+LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
 {
     uint8_t str[256];
-    int len = data->data_size > 255 ? 255 : data->data_size;
+    int len = entry_data->data_size > 255 ? 255 : entry_data->data_size;
 
-    memcpy(str, data->utf8_string, len);
+    memcpy(str, entry_data->utf8_string, len);
 
     str[len] = '\0';
     fprintf(stderr, "%s\n", str);
@@ -1120,20 +1122,16 @@ const char *MMDB_strerror(uint16_t error_code)
         return "Success (not an error)";
     } else if (MMDB_FILE_OPEN_ERROR == error_code) {
         return "Error opening the specified MaxMind DB file";
-    }
-    else if (MMDB_CORRUPT_DATABASE == error_code) {
+    } else if (MMDB_CORRUPT_DATABASE == error_code) {
         return "The MaxMind DB file's search tree is corrupt";
-    }
-    else if (MMDB_INVALID_DATABASE == error_code) {
+    } else if (MMDB_INVALID_DATABASE == error_code) {
         return "The MaxMind DB file is invalid (bad metadata)";
-    }
-    else if (MMDB_IO_ERROR == error_code) {
+    } else if (MMDB_IO_ERROR == error_code) {
         return "An attempt to read data from the MaxMind DB file failed";
-    }
-    else if (MMDB_OUT_OF_MEMORY == error_code) {
+    } else if (MMDB_OUT_OF_MEMORY == error_code) {
         return "A memory allocation call failed";
-    }
-    else if (MMDB_UNKNOWN_DATABASE_FORMAT == error_code) {
-        return "The MaxMind DB file is in a format this library can't handle (unknown record size or binary format version)";
+    } else if (MMDB_UNKNOWN_DATABASE_FORMAT == error_code) {
+        return
+            "The MaxMind DB file is in a format this library can't handle (unknown record size or binary format version)";
     }
 }

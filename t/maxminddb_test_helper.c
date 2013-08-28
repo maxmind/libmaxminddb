@@ -99,13 +99,13 @@ MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
     return result;
 }
 
-MMDB_return_s data_ok(MMDB_lookup_result_s *result, int expect_type,
-                      const char *description, ...)
+MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, int expect_type,
+                          const char *description, ...)
 {
     va_list keys;
     va_start(keys, description);
 
-    MMDB_return_s data;
+    MMDB_entry_data_s data;
     int error = MMDB_vget_value(&result->entry, &data, keys);
 
     va_end(keys);

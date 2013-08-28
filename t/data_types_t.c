@@ -8,7 +8,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         snprintf(description, 500, "utf8_string field for %s - %s", ip,
                  mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_UTF8_STRING, description, "utf8_string",
                     NULL);
         const char *string = strndup(data.utf8_string, data.data_size);
@@ -26,7 +26,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "double field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_DOUBLE, description, "double", NULL);
         double expect = 42.123456;
         double diff = fabs(data.double_value - expect);
@@ -43,7 +43,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "float field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_FLOAT, description, "float", NULL);
         float expect = 1.1;
         float diff = fabs(data.float_value - expect);
@@ -60,7 +60,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "bytes field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_BYTES, description, "bytes", NULL);
         uint8_t expect[] = { 0x00, 0x00, 0x00, 0x2a };
         ok(memcmp((uint8_t *)data.bytes, expect, 4) == 0,
@@ -71,7 +71,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "uint16 field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_UINT16, description, "uint16", NULL);
         uint16_t expect = 100;
         ok(data.uint16 == expect, "uint16 field is 100");
@@ -81,7 +81,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "uint32 field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_UINT32, description, "uint32", NULL);
         uint32_t expect = 1 << 28;
         ok(data.uint32 == expect, "uint32 field is 2**28");
@@ -91,7 +91,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "int32 field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_INT32, description, "int32", NULL);
         int32_t expect = 1 << 28;
         expect *= -1;
@@ -102,7 +102,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "uint64 field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_UINT64, description, "uint64", NULL);
         uint64_t expect = 1;
         expect <<= 60;
@@ -113,7 +113,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "uint128 field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_UINT128, description, "uint128", NULL);
         uint8_t expect[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
@@ -125,7 +125,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "boolean field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_BOOLEAN, description, "boolean", NULL);
         cmp_ok(data.boolean, "==", true, "boolean field is true");
     }
@@ -134,7 +134,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "array field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_ARRAY, description, "array", NULL);
         ok(data.data_size == 3, "array field has 3 elements");
 
@@ -158,7 +158,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         char description[500];
         snprintf(description, 500, "map field for %s - %s", ip, mode_desc);
 
-        MMDB_return_s data =
+        MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_MAP, description, "map", NULL);
         ok(data.data_size == 1, "map field has 1 element");
 

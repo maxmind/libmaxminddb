@@ -11,15 +11,15 @@ int is_ipv4(MMDB_s * mmdb)
     return mmdb->depth == 32;
 }
 
-char *bytesdup(MMDB_s * mmdb, MMDB_return_s const *const ret)
+char *bytesdup(MMDB_s * mmdb, MMDB_entry_data_s const *const entry_data)
 {
     char *mem = NULL;
 
-    if (ret->offset) {
-        mem = malloc(ret->data_size + 1);
+    if (entry_data->offset) {
+        mem = malloc(entry_data->data_size + 1);
 
-        memcpy(mem, ret->utf8_string, ret->data_size);
-        mem[ret->data_size] = '\0';
+        memcpy(mem, entry_data->utf8_string, entry_data->data_size);
+        mem[entry_data->data_size] = '\0';
     }
     return mem;
 }
@@ -81,14 +81,14 @@ void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s * ipinfo)
     double dlat, dlon;
     dlat = dlon = 0;
     if (ipinfo->entry.offset > 0) {
-        MMDB_return_s res_location;
-        MMDB_get_value(&ipinfo->entry, &res_location, "location", NULL);
+        MMDB_entry_data_s entry_data;
+        MMDB_get_value(&ipinfo->entry, &entry_data, "location", NULL);
         // TODO handle failed search somehow.
-        MMDB_return_s lat, lon;
+        MMDB_entry_data_s lat, lon;
         MMDB_entry_s location = {.mmdb = ipinfo->entry.mmdb,.offset =
-                res_location.offset
+                entry_data.offset
         };
-        if (res_location.offset) {
+        if (entry_data.offset) {
             MMDB_get_value(&location, &lat, "latitude", NULL);
             MMDB_get_value(&location, &lon, "longitude", NULL);
             if (lat.offset)
@@ -97,7 +97,7 @@ void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s * ipinfo)
                 dlon = lon.double_value;
         }
 
-        MMDB_return_s res;
+        MMDB_entry_data_s res;
         MMDB_get_value(&ipinfo->entry, &res, "city", "names", "en", NULL);
         city = bytesdup(ipinfo->entry.mmdb, &res);
         MMDB_get_value(&ipinfo->entry, &res, "country", "names", "en", NULL);

@@ -88,7 +88,7 @@ The calling sequene looks like
  The `MMDB_decode_all_s` structure contains _one_ decoded entry, and an internal offset
  to the next entry to decode. This offset is only useful for the decode functions.
 
- The `MMDB_return_s` structure inside `MMDB_decode_s` is much more interesting, 
+ The `MMDB_entry_data_s` structure inside `MMDB_decode_s` is much more interesting, 
  it contains the almost decoded data for all data types returning something.
 
     MMDB_DTYPE_UTF8_STRING
@@ -104,9 +104,9 @@ The calling sequene looks like
     MMDB_DTYPE_BOOLEAN
     MMDB_DTYPE_IEEE754_FLOAT
 
-`MMDB_return_s` looks like:
+`MMDB_entry_data_s` looks like:
 
-    struct MMDB_return_s {
+    struct MMDB_entry_data_s {
         /* return values */
         union {
             float float_value;
@@ -122,8 +122,8 @@ The calling sequene looks like
         int type;
     };
 
-The sturcture is valid whenever `MMDB_return_s.offset > 0`.
-`MMDB_return_s.type` contains the type from above for example `MMDB_DTYPE_INT32`.
+The sturcture is valid whenever `MMDB_entry_data_s.offset > 0`.
+`MMDB_entry_data_s.type` contains the type from above for example `MMDB_DTYPE_INT32`.
 and the value of the field. Sometimes the size, if it makes sense ( for `MMDB_DTYPE_BYTES`,`MMDB_DTYPE_UTF8_STRING`, `MMDB_DTYPE_ARRAY` and `MMDB_DTYPE_MAP` ).
 
 

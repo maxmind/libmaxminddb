@@ -58,7 +58,7 @@ extern "C" {
     // It is like the hash to start the search. It may or may not the root hash
     typedef struct MMDB_entry_s {
         struct MMDB_s *mmdb;
-        uint32_t offset;    /* A pointer to the start of the data for an IP */
+        uint32_t offset;        /* A pointer to the start of the data for an IP */
     } MMDB_entry_s;
 
     // This is a pointer to the first 
@@ -69,7 +69,7 @@ extern "C" {
     } MMDB_lookup_result_s;
 
     // this is the result for every field
-    typedef struct MMDB_return_s {
+    typedef struct MMDB_entry_data_s {
         /* return values */
         union {
             uint32_t pointer;
@@ -87,7 +87,7 @@ extern "C" {
         uint32_t offset;        /* start of our field or zero for not found */
         uint32_t data_size;     /* only valid for strings, utf8_strings or binary data */
         uint32_t type;          /* type like string utf8_string, int32, ... */
-    } MMDB_return_s;
+    } MMDB_entry_data_s;
 
     typedef struct MMDB_description_s {
         const char *language;
@@ -129,7 +129,7 @@ extern "C" {
     // of the next entry. For example if we search for a key but this is the
     // wrong key.
     typedef struct MMDB_decode_s {
-        MMDB_return_s data;
+        MMDB_entry_data_s data;
         uint32_t offset_to_next;
     } MMDB_decode_s;
 
@@ -141,11 +141,13 @@ extern "C" {
     extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb);
     extern void MMDB_close(MMDB_s *mmdb);
 
-    extern int MMDB_get_value(MMDB_entry_s *start, MMDB_return_s *result, ...);
-    extern int MMDB_vget_value(MMDB_entry_s *start, MMDB_return_s *result,
+    extern int MMDB_get_value(MMDB_entry_s *start,
+                              MMDB_entry_data_s *entry_data, ...);
+    extern int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *result,
                                va_list params);
     extern int MMDB_strcmp_result(MMDB_s *mmdb,
-                                  MMDB_return_s const *const result, char *str);
+                                  MMDB_entry_data_s const *const result,
+                                  char *str);
 
     extern const char *MMDB_lib_version(void);
 

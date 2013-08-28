@@ -39,7 +39,7 @@
 -T MMDB_entry_s
 -T MMDB_lookup_result_s
 -T MMDB_metadata_s
--T MMDB_return_s
+-T MMDB_entry_data_s
 -T MMDB_s
 -T in_addrX
 -T in_addr_any
