@@ -1,5 +1,5 @@
-#ifndef MMDB_H
-#define MMDB_H
+#ifndef MAXMINDDB_H
+#define MAXMINDDB_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -153,4 +153,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif                          /* MMDB_H */
+#endif                          /* MAXMINDDB_H */
