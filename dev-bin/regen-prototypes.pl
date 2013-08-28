@@ -3,12 +3,15 @@
 use strict;
 use warnings;
 
+use C::Scan;
 use FindBin qw( $Bin );
 use File::Basename qw( basename dirname );
 
 sub main {
     my $c_file = "$Bin/../src/maxminddb.c";
-    my $code   = read_file($c_file);
+    my $h_file = "$Bin/../include/maxminddb.h";
+    my $c_code = read_file($c_file);
+    my $h_code = read_file($h_file);
 
     my $script_name = basename($0);
     my $dir         = basename($Bin);
@@ -17,27 +20,67 @@ sub main {
     my $prototypes_end
         = "/* --prototypes end - don't remove this comment-- */";
 
-    $code =~ s{\Q$prototypes_start\E.+\Q$prototypes_end\E\n}{__PROTOTYPES__}s;
+    for my $content ( $c_code, $h_code ) {
+        $content
+            =~ s{\Q$prototypes_start\E.+\Q$prototypes_end\E\n}{__PROTOTYPES__}s;
+    }
 
-    my $prototypes = join q{}, map { $_ . ";\n" } parse_prototypes($code);
-    $code
-        =~ s/__PROTOTYPES__/$prototypes_start\n$prototypes$prototypes_end\n/;
+    my @prototypes          = parse_prototypes($c_code);
+    my $external_prototypes = join q{},
+        map  { '    extern ' . $_->{prototype} . ";\n" }
+        grep { $_->{external} } @prototypes;
+    $h_code
+        =~ s/__PROTOTYPES__/    $prototypes_start\n$external_prototypes    $prototypes_end\n/;
 
-    write_file( $c_file, $code );
+    my $internal_prototypes = join q{},
+        map { $_->{prototype} . ";\n" } grep { !$_->{external} } @prototypes;
+    $c_code
+        =~ s/__PROTOTYPES__/$prototypes_start\n$internal_prototypes$prototypes_end\n/;
+
+    write_file( $c_file, $c_code );
+    write_file( $h_file, $h_code );
 }
+
+my $return_type_re = qr/(?:\w+\s+)+?\**?/;
+my $signature_re   = qr/\([^\(\)]+?\)/;
+my $c_function_re  = qr/($return_type_re(\w+)$signature_re)(?>\n{)/s;
+
+# Shamelessly stolen from Inline::C::ParseRegExp
+my $sp = qr{[ \t]|\n(?![ \t]*\n)};
+
+my $re_type = qr {
+                     (?: \w+ $sp* )+? # words
+                     (?: \*  $sp* )*  # stars
+             }x;
+
+my $re_identifier = qr{ \w+ $sp* }x;
+
+my $re_args = qr/\(.+?\)/s;
+
+# and again from Inline::C::ParseRegExp
+my $re_signature = qr/^($re_type ($re_identifier) $re_args) (?>[\ \t\n]*?{)/x;
 
 {
     my %skip = map { $_ => 1 } qw( memmem );
 
     sub parse_prototypes {
-        my $code = shift;
+        my $c_code = shift;
 
-        my @protos = map {
-            my ($name) = $_ =~ /^LOCAL\s+\w+\s+\*?(\w+)/;
-            { name => $name, prototype => $_ };
-        } $code =~ /^(LOCAL.+?)\n{/msg;
+        my @protos;
 
-        return map { $_->{prototype} } grep { !$skip{ $_->{name} } } @protos;
+        for my $chunk ( $c_code =~ /^(\w+.+?{)/gsm ) {
+            my ( $prototype, $name ) = $chunk =~ /^$re_signature/ms
+                or next;
+
+            push @protos,
+                {
+                name      => $name,
+                prototype => $prototype,
+                external  => $prototype =~ /^LOCAL/ ? 0 : 1,
+                };
+        }
+
+        return grep { !$skip{ $_->{name} } } @protos;
     }
 }
 
