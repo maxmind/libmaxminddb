@@ -5,7 +5,7 @@ AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
 lib_LTLIBRARIES = libmmdbtest.la
 libmmdbtest_la_SOURCES = maxminddb_test_helper.c libtap/tap.c
 
-check_PROGRAMS = basic_lookup_t data_types_t metadata_t version_t
+check_PROGRAMS = basic_lookup_t data_types_t metadata_t no_map_get_value_t version_t
 
 TESTS = $(check_PROGRAMS)
 

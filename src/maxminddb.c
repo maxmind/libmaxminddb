@@ -566,10 +566,17 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 
     memset(entry_data, 0, sizeof(MMDB_entry_data_s));
 
-    while (src_key = va_arg(params, char *)) {
-        MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
+    do {
         decode_one(mmdb, offset, entry_data);
- donotdecode:
+
+        src_key = va_arg(params, char *);
+        MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
+
+        if (NULL == src_key) {
+            goto end;
+        }
+
+ one_key:
         src_keylen = strlen(src_key);
         switch (entry_data->type) {
         case MMDB_DTYPE_PTR:
@@ -594,7 +601,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                     decode_one_follow(mmdb, entry_data->offset_to_next,
                                       entry_data);
                     offset = entry_data->offset_to_next;
-                    goto donotdecode;
+                    goto one_key;
                 }
                 decode_one_follow(mmdb, entry_data->offset_to_next, &value);
                 memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
@@ -624,7 +631,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                                               entry_data);
                             offset = entry_data->offset_to_next;
 
-                            goto donotdecode;
+                            goto one_key;
                         }
                         // found it!
                         decode_one_follow(mmdb, offset_to_value, &value);
@@ -645,6 +652,8 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
             break;
         }
     }
+    while (src_key);
+
  end:
     va_end(params);
     return MMDB_SUCCESS;
