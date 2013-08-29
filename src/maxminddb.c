@@ -883,7 +883,7 @@ LOCAL void get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                 }
 #if MMDB_DEBUG
                 MMDB_DBG_CARP("key num: %d (%u)", size, rnd);
-                DPRINT_KEY(mmdb, &entry_data_list_to->entry_data.data);
+                DPRINT_KEY(mmdb, &entry_data_list_to->entry_data);
 #endif
 
                 offset = entry_data_list_to->entry_data.offset_to_next;
