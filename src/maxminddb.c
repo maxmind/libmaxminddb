@@ -550,9 +550,9 @@ int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)
 {
     va_list keys;
     va_start(keys, entry_data);
-    int ioerror = MMDB_vget_value(start, entry_data, keys);
+    int status = MMDB_vget_value(start, entry_data, keys);
     va_end(keys);
-    return ioerror;
+    return status;
 }
 
 int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
