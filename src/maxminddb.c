@@ -564,6 +564,8 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     char *src_key;              // = va_arg(params, char *);
     int src_keylen;
 
+    memset(entry_data, 0, sizeof(MMDB_entry_data_s));
+
     while (src_key = va_arg(params, char *)) {
         MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
         decode_one(mmdb, offset, entry_data);
