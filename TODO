@@ -1,7 +1,5 @@
 * Check all memory allocations & frees
 * Replace all (or almost all) asserts with error codes
-* Add accessors of some sort for metadata?
-** and is there something better for 128 bit ints?
 * Fix mmdb* apps
 ** fix segfaults
 ** better usage info and error messages
