@@ -37,13 +37,15 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
-LOCAL void populate_description_metadata(MMDB_s *mmdb);
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size);
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key);
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key);
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key);
-LOCAL void populate_languages_metadata(MMDB_s *mmdb);
+LOCAL void populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
+                                       MMDB_entry_s *metadata_start);
+LOCAL void populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
+                                         MMDB_entry_s *metadata_start);
 LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags);
 LOCAL void free_all(MMDB_s *mmdb);
 LOCAL void skip_hash_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
@@ -259,51 +261,6 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
     return value & 0xfffffff;
 }
 
-LOCAL void populate_description_metadata(MMDB_s *mmdb)
-{
-    MMDB_entry_data_s entry_data;
-    MMDB_entry_s map_start;
-    size_t map_size;
-    MMDB_entry_data_list_s *member;
-    MMDB_entry_data_list_s *first_member;
-    int i;
-
-    MMDB_get_value(&mmdb->meta, &entry_data, "description", NULL);
-
-    assert(entry_data.type == MMDB_DTYPE_MAP);
-
-    map_start.mmdb = mmdb->fake_metadata_db;
-    map_start.offset = entry_data.offset;
-
-    MMDB_get_entry_data_list(&map_start, &member);
-
-    first_member = member;
-
-    map_size = member->entry_data.data_size;
-    mmdb->metadata.description.count = map_size;
-    mmdb->metadata.description.descriptions =
-        malloc(map_size * sizeof(MMDB_description_s *));
-
-    for (i = 0; i < map_size; i++) {
-        mmdb->metadata.description.descriptions[i] =
-            malloc(sizeof(MMDB_description_s));
-
-        member = member->next;
-        assert(member->entry_data.type == MMDB_DTYPE_UTF8_STRING);
-        mmdb->metadata.description.descriptions[i]->language =
-            strndup((char *)member->entry_data.utf8_string,
-                    member->entry_data.data_size);
-
-        member = member->next;
-        assert(member->entry_data.type == MMDB_DTYPE_UTF8_STRING);
-        mmdb->metadata.description.descriptions[i]->description =
-            strndup((char *)member->entry_data.utf8_string,
-                    member->entry_data.data_size);
-    }
-
-    MMDB_free_entry_data_list(first_member);
-}
-
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
 {
     const uint8_t *metadata = memmem(metadata_content, size, METADATA_MARKER,
@@ -312,17 +269,18 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
         return MMDB_INVALID_DATABASE;
     }
 
-    mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));
-    assert(mmdb->fake_metadata_db != NULL);
+    MMDB_s metadata_db;
+    metadata_db.data_section = metadata + strlen(METADATA_MARKER);
 
-    mmdb->fake_metadata_db->data_section = metadata + strlen(METADATA_MARKER);
-    mmdb->meta.mmdb = mmdb->fake_metadata_db;
+    MMDB_entry_s metadata_start;
+    metadata_start.mmdb = &metadata_db;
+    metadata_start.offset = 0;
 
     mmdb->metadata.node_count =
-        value_for_key_as_uint32(&mmdb->meta, "node_count");
+        value_for_key_as_uint32(&metadata_start, "node_count");
 
     mmdb->metadata.record_size =
-        value_for_key_as_uint16(&mmdb->meta, "record_size");
+        value_for_key_as_uint16(&metadata_start, "record_size");
 
     if (mmdb->metadata.record_size != 24 && mmdb->metadata.record_size != 28
         && mmdb->metadata.record_size != 32) {
@@ -330,23 +288,23 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     }
 
     mmdb->metadata.ip_version =
-        value_for_key_as_uint16(&mmdb->meta, "ip_version");
+        value_for_key_as_uint16(&metadata_start, "ip_version");
 
     mmdb->metadata.database_type =
-        value_for_key_as_string(&mmdb->meta, "database_type");
+        value_for_key_as_string(&metadata_start, "database_type");
 
-    populate_languages_metadata(mmdb);
+    populate_languages_metadata(mmdb, &metadata_db, &metadata_start);
 
     mmdb->metadata.binary_format_major_version =
-        value_for_key_as_uint16(&mmdb->meta, "binary_format_major_version");
+        value_for_key_as_uint16(&metadata_start, "binary_format_major_version");
 
     mmdb->metadata.binary_format_minor_version =
-        value_for_key_as_uint16(&mmdb->meta, "binary_format_minor_version");
+        value_for_key_as_uint16(&metadata_start, "binary_format_minor_version");
 
     mmdb->metadata.build_epoch =
-        value_for_key_as_uint64(&mmdb->meta, "build_epoch");
+        value_for_key_as_uint64(&metadata_start, "build_epoch");
 
-    populate_description_metadata(mmdb);
+    populate_description_metadata(mmdb, &metadata_db, &metadata_start);
 
     mmdb->full_record_byte_size = mmdb->metadata.record_size * 2 / 8U;
 
@@ -383,7 +341,8 @@ LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)
     return strndup((char *)entry_data.utf8_string, entry_data.data_size);
 }
 
-LOCAL void populate_languages_metadata(MMDB_s *mmdb)
+LOCAL void populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
+                                       MMDB_entry_s *metadata_start)
 {
     MMDB_entry_data_s entry_data;
     MMDB_entry_s array_start;
@@ -392,11 +351,11 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
     MMDB_entry_data_list_s *first_member;
     int i;
 
-    MMDB_get_value(&mmdb->meta, &entry_data, "languages", NULL);
+    MMDB_get_value(metadata_start, &entry_data, "languages", NULL);
 
     assert(entry_data.type == MMDB_DTYPE_ARRAY);
 
-    array_start.mmdb = mmdb->fake_metadata_db;
+    array_start.mmdb = metadata_db;
     array_start.offset = entry_data.offset;
 
     MMDB_get_entry_data_list(&array_start, &member);
@@ -415,6 +374,52 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb)
             strndup((char *)member->entry_data.utf8_string,
                     member->entry_data.data_size);
         assert(mmdb->metadata.languages.names[i] != NULL);
+    }
+
+    MMDB_free_entry_data_list(first_member);
+}
+
+LOCAL void populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
+                                         MMDB_entry_s *metadata_start)
+{
+    MMDB_entry_data_s entry_data;
+    MMDB_entry_s map_start;
+    size_t map_size;
+    MMDB_entry_data_list_s *member;
+    MMDB_entry_data_list_s *first_member;
+    int i;
+
+    MMDB_get_value(metadata_start, &entry_data, "description", NULL);
+
+    assert(entry_data.type == MMDB_DTYPE_MAP);
+
+    map_start.mmdb = metadata_db;
+    map_start.offset = entry_data.offset;
+
+    MMDB_get_entry_data_list(&map_start, &member);
+
+    first_member = member;
+
+    map_size = member->entry_data.data_size;
+    mmdb->metadata.description.count = map_size;
+    mmdb->metadata.description.descriptions =
+        malloc(map_size * sizeof(MMDB_description_s *));
+
+    for (i = 0; i < map_size; i++) {
+        mmdb->metadata.description.descriptions[i] =
+            malloc(sizeof(MMDB_description_s));
+
+        member = member->next;
+        assert(member->entry_data.type == MMDB_DTYPE_UTF8_STRING);
+        mmdb->metadata.description.descriptions[i]->language =
+            strndup((char *)member->entry_data.utf8_string,
+                    member->entry_data.data_size);
+
+        member = member->next;
+        assert(member->entry_data.type == MMDB_DTYPE_UTF8_STRING);
+        mmdb->metadata.description.descriptions[i]->description =
+            strndup((char *)member->entry_data.utf8_string,
+                    member->entry_data.data_size);
     }
 
     MMDB_free_entry_data_list(first_member);
@@ -520,9 +525,6 @@ LOCAL void free_all(MMDB_s *mmdb)
             munmap((void *)mmdb->file_content, mmdb->file_size);
         }
     }
-    if (mmdb->fake_metadata_db) {
-        free(mmdb->fake_metadata_db);
-    }
     if (mmdb->metadata.database_type) {
         free(mmdb->metadata.database_type);
     }
@@ -537,8 +539,8 @@ LOCAL void free_all(MMDB_s *mmdb)
         int i;
         for (i = 0; i < mmdb->metadata.description.count; i++) {
             free((char *)mmdb->metadata.description.descriptions[i]->language);
-            free((char *)mmdb->metadata.description.descriptions[i]->
-                 description);
+            free((char *)mmdb->metadata.description.
+                 descriptions[i]->description);
             free(mmdb->metadata.description.descriptions[i]);
         }
         free(mmdb->metadata.description.descriptions);
