@@ -141,12 +141,12 @@ extern "C" {
     extern int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...);
     extern int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                                va_list params);
-    extern void MMDB_get_entry_data_list(MMDB_entry_s *start,
-                                         MMDB_entry_data_list_s **entry_data_list);
+    extern int MMDB_get_entry_data_list(MMDB_entry_s *start,
+                                        MMDB_entry_data_list_s **entry_data_list);
     extern MMDB_entry_data_list_s *MMDB_alloc_entry_data_list(void);
     extern void MMDB_free_entry_data_list(MMDB_entry_data_list_s *freeme);
     extern const char *MMDB_lib_version(void);
-    extern int MMDB_dump(MMDB_s *mmdb, MMDB_entry_data_list_s *entry_data_list, int indent);
+    extern int MMDB_dump(MMDB_entry_data_list_s *entry_data_list, int indent);
     extern const char *MMDB_strerror(uint16_t error_code);
     /* --prototypes end - don't remove this comment-- */
 
