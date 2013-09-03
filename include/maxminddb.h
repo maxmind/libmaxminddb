@@ -120,8 +120,8 @@ extern "C" {
         uint32_t flags;
         char *fname;
         ssize_t file_size;
-        const uint8_t *file_in_mem_ptr;
-        const uint8_t *dataptr;
+        const uint8_t *file_content;
+        const uint8_t *data_section;
         uint16_t full_record_byte_size;
         uint16_t depth;
         MMDB_metadata_s metadata;

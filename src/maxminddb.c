@@ -202,7 +202,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 {
     uint32_t node_count = mmdb->metadata.node_count;
     uint16_t record_length = mmdb->full_record_byte_size;
-    const uint8_t *search_tree = mmdb->file_in_mem_ptr;
+    const uint8_t *search_tree = mmdb->file_content;
     const uint8_t *record_pointer;
     uint16_t max_depth0 = mmdb->depth - 1;
     uint32_t value = 0;
@@ -315,7 +315,7 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     mmdb->fake_metadata_db = calloc(1, sizeof(struct MMDB_s));
     assert(mmdb->fake_metadata_db != NULL);
 
-    mmdb->fake_metadata_db->dataptr = metadata + strlen(METADATA_MARKER);
+    mmdb->fake_metadata_db->data_section = metadata + strlen(METADATA_MARKER);
     mmdb->meta.mmdb = mmdb->fake_metadata_db;
 
     mmdb->metadata.node_count =
@@ -492,8 +492,8 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags)
 
     close(fd);
 
-    mmdb->file_in_mem_ptr = file_content;
-    mmdb->dataptr =
+    mmdb->file_content = file_content;
+    mmdb->data_section =
         file_content + mmdb->metadata.node_count * mmdb->full_record_byte_size;
 
     return MMDB_SUCCESS;
@@ -513,11 +513,11 @@ LOCAL void free_all(MMDB_s *mmdb)
     if (mmdb->fname) {
         free(mmdb->fname);
     }
-    if (mmdb->file_in_mem_ptr) {
+    if (mmdb->file_content) {
         if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-            free((void *)mmdb->file_in_mem_ptr);
+            free((void *)mmdb->file_content);
         } else {
-            munmap((void *)mmdb->file_in_mem_ptr, mmdb->file_size);
+            munmap((void *)mmdb->file_content, mmdb->file_size);
         }
     }
     if (mmdb->fake_metadata_db) {
@@ -690,7 +690,7 @@ LOCAL void decode_one_follow(MMDB_s *mmdb, uint32_t offset,
 LOCAL void decode_one(MMDB_s *mmdb, uint32_t offset,
                       MMDB_entry_data_s *entry_data)
 {
-    const uint8_t *mem = mmdb->dataptr;
+    const uint8_t *mem = mmdb->data_section;
     uint8_t ctrl;
     int type;
 
