@@ -37,7 +37,7 @@ int main(int argc, char *const argv[])
         exit(1);
     }
 
-    status = MMDB_open(fname, MMDB_MODE_STANDARD, mmdb);
+    status = MMDB_open(fname, MMDB_MODE_MMAP, mmdb);
 
     if (!mmdb) {
         fprintf(stderr, "Can't open %s\n", fname);

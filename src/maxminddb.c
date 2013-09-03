@@ -427,7 +427,7 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
     fstat(fd, &s);
 
     if ((flags & MMDB_MODE_MASK) == 0) {
-        flags |= MMDB_MODE_STANDARD;
+        flags |= MMDB_MODE_MMAP;
     }
     mmdb->flags = flags;
     ssize_t size;
