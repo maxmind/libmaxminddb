@@ -118,7 +118,7 @@ extern "C" {
 
     typedef struct MMDB_s {
         uint32_t flags;
-        char *fname;
+        char *filename;
         ssize_t file_size;
         const uint8_t *file_content;
         const uint8_t *data_section;
@@ -132,7 +132,7 @@ extern "C" {
                                     void *ip);
     extern MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
                                              int *gai_error, int *mmdb_error);
-    extern uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb);
+    extern uint16_t MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb);
     extern void MMDB_close(MMDB_s *mmdb);
     extern int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...);
     extern int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,

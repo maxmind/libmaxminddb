@@ -46,7 +46,7 @@ LOCAL void populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                                        MMDB_entry_s *metadata_start);
 LOCAL void populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                                          MMDB_entry_s *metadata_start);
-LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags);
+LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags);
 LOCAL void free_all(MMDB_s *mmdb);
 LOCAL void skip_hash_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
 LOCAL void decode_one_follow(MMDB_s *mmdb, uint32_t offset,
@@ -429,23 +429,23 @@ LOCAL void populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     MMDB_free_entry_data_list(first_member);
 }
 
-uint16_t MMDB_open(const char *fname, uint32_t flags, MMDB_s *mmdb)
+uint16_t MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
 {
     uint16_t status;
 
-    MMDB_DBG_CARP("MMDB_open %s %d\n", fname, flags);
+    MMDB_DBG_CARP("MMDB_open %s %d\n", filename, flags);
 
-    return init(mmdb, fname, flags);
+    return init(mmdb, filename, flags);
 }
 
-LOCAL uint16_t init(MMDB_s *mmdb, const char *fname, uint32_t flags)
+LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
 {
-    mmdb->fname = strdup(fname);
-    if (mmdb->fname == NULL) {
+    mmdb->filename = strdup(filename);
+    if (mmdb->filename == NULL) {
         return MMDB_OUT_OF_MEMORY;
     }
 
-    int fd = open(fname, O_RDONLY);
+    int fd = open(filename, O_RDONLY);
     if (fd < 0) {
         return MMDB_FILE_OPEN_ERROR;
     }
@@ -519,8 +519,8 @@ LOCAL void free_all(MMDB_s *mmdb)
         return;
     }
 
-    if (mmdb->fname) {
-        free(mmdb->fname);
+    if (mmdb->filename) {
+        free(mmdb->filename);
     }
     if (mmdb->file_content) {
         if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
