@@ -340,7 +340,9 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
     MMDB_get_value(metadata_start, &entry_data, "languages", NULL);
 
-    assert(entry_data.type == MMDB_DTYPE_ARRAY);
+    if (MMDB_DTYPE_ARRAY != entry_data.type) {
+        return MMDB_INVALID_DATABASE;
+    }
 
     array_start.mmdb = metadata_db;
     array_start.offset = entry_data.offset;
@@ -358,7 +360,9 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
     for (int i = 0; i < array_size; i++) {
         member = member->next;
-        assert(member->entry_data.type == MMDB_DTYPE_UTF8_STRING);
+        if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
+            return MMDB_INVALID_DATABASE;
+        }
 
         mmdb->metadata.languages.names[i] =
             strndup((char *)member->entry_data.utf8_string,
@@ -389,7 +393,9 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
     MMDB_get_value(metadata_start, &entry_data, "description", NULL);
 
-    assert(entry_data.type == MMDB_DTYPE_MAP);
+    if (MMDB_DTYPE_MAP  != entry_data.type) {
+        return MMDB_INVALID_DATABASE;
+    }
 
     map_start.mmdb = metadata_db;
     map_start.offset = entry_data.offset;
@@ -418,7 +424,11 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         mmdb->metadata.description.descriptions[i]->description = NULL;
 
         member = member->next;
-        assert(member->entry_data.type == MMDB_DTYPE_UTF8_STRING);
+
+        if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
+            return MMDB_INVALID_DATABASE;
+        }
+
         mmdb->metadata.description.descriptions[i]->language =
             strndup((char *)member->entry_data.utf8_string,
                     member->entry_data.data_size);
@@ -428,7 +438,11 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         }
 
         member = member->next;
-        assert(member->entry_data.type == MMDB_DTYPE_UTF8_STRING);
+
+        if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
+            return MMDB_INVALID_DATABASE;
+        }
+
         mmdb->metadata.description.descriptions[i]->description =
             strndup((char *)member->entry_data.utf8_string,
                     member->entry_data.data_size);
