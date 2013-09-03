@@ -52,21 +52,17 @@ extern "C" {
 #else
 #define MMDB_DBG_CARP(...)
 #endif
-    // This is the starting point for every search.
-    // It is like the hash to start the search. It may or may not the root hash
+    /* This is a pointer into the data section for a given IP address lookup */
     typedef struct MMDB_entry_s {
         struct MMDB_s *mmdb;
-        uint32_t offset;        /* A pointer to the start of the data for an IP */
+        uint32_t offset;
     } MMDB_entry_s;
 
-    // This is a pointer to the first 
-    // think of it as the root of all informations about the IP.
     typedef struct MMDB_lookup_result_s {
         MMDB_entry_s entry;
         uint16_t netmask;
     } MMDB_lookup_result_s;
 
-    // this is the result for every field
     typedef struct MMDB_entry_data_s {
         /* return values */
         union {
@@ -82,12 +78,22 @@ extern "C" {
             bool boolean;
             float float_value;
         };
-        uint32_t offset;        /* start of our field or zero for not found */
+        /* This is a 0 if a given entry cannot be found. This can only happen
+         * when a call MMDB_(v)get_value() asks for hash keys or array indices
+         * that don't exist. */
+        uint32_t offset;
+        /* This is the next entry in the data section, but it's really only
+         * relevant for entries that part of a larger map or array
+         * struct. There's no good reason for an end user to look at this
+         * directly. */
         uint32_t offset_to_next;
-        uint32_t data_size;     /* only valid for strings, utf8_strings or binary data */
-        uint32_t type;          /* type like string utf8_string, int32, ... */
+        /* This is only valid for strings, utf8_strings or binary data */
+        uint32_t data_size;
+        /* This is an MMDB_DTYPE_* constant */
+        uint32_t type;
     } MMDB_entry_data_s;
 
+    /* This is the return type when someone asks for all the entry data in a map or array */
     typedef struct MMDB_entry_data_list_s {
         MMDB_entry_data_s entry_data;
         struct MMDB_entry_data_list_s *next;

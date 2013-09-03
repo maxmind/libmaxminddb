@@ -567,7 +567,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     MMDB_entry_data_s key, value;
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
-    char *src_key;              // = va_arg(params, char *);
+    char *src_key;
     int src_keylen;
 
     memset(entry_data, 0, sizeof(MMDB_entry_data_s));
@@ -586,17 +586,20 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         src_keylen = strlen(src_key);
         switch (entry_data->type) {
         case MMDB_DTYPE_PTR:
-            // we follow the pointer
             decode_one(mmdb, entry_data->pointer, entry_data);
             break;
 
-            // learn to skip this
+            /* XXX - it'd be good to find a quicker way to skip through these
+               entries that doesn't involve decoding them
+               completely. Basically we need to just use the size from the
+               control byte to advance our pointer rather than calling
+               decode_one(). */
         case MMDB_DTYPE_ARRAY:
             {
                 int size = entry_data->data_size;
                 int offset = strtol(src_key, NULL, 10);
                 if (offset >= size || offset < 0) {
-                    entry_data->offset = 0;     // not found.
+                    entry_data->offset = 0;
                     goto end;
                 }
                 for (int i = 0; i < offset; i++) {
@@ -639,12 +642,10 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 
                             goto one_key;
                         }
-                        // found it!
                         decode_one_follow(mmdb, offset_to_value, &value);
                         memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
                         goto end;
                     } else {
-                        // we search for another key skip  this
                         decode_one(mmdb, offset_to_value, &value);
                         skip_hash_array(mmdb, &value);
                         offset = value.offset_to_next;
@@ -1043,7 +1044,8 @@ int MMDB_dump(MMDB_s *mmdb, MMDB_entry_data_list_s *entry_data_list, int indent)
     while (entry_data_list) {
         entry_data_list = dump(mmdb, entry_data_list, indent);
     }
-    // not sure about the return type right now
+
+    // XXX - not sure about the return type right now
     return MMDB_SUCCESS;
 }
 
