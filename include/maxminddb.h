@@ -43,6 +43,7 @@ extern "C" {
 #define MMDB_IO_ERROR (4)
 #define MMDB_OUT_OF_MEMORY (5)
 #define MMDB_UNKNOWN_DATABASE_FORMAT (6)
+#define MMDB_INVALID_DATA (7)
 
 /* */
 #define MMDB_DEBUG (0)
