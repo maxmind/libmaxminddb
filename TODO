@@ -1,6 +1,5 @@
 * Check all memory allocations & frees
 * Replace all (or almost all) asserts with error codes
-* Hide definition of MMDB_s (and MMDB_metadata_s?) from public API
 * Add accessors of some sort for metadata?
 ** and is there something better for 128 bit ints?
 * Fix mmdb* apps
