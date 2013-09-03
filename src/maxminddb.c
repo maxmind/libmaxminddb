@@ -486,11 +486,6 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
         return MMDB_OUT_OF_MEMORY;
     }
 
-    if (metadata_content == NULL) {
-        free_mmdb_struct(mmdb);
-        return MMDB_INVALID_DATABASE;
-    }
-
     off_t offset = size > METADATA_BLOCK_MAX_SIZE ? METADATA_BLOCK_MAX_SIZE : 0;
     if (MMDB_SUCCESS != int_pread(fd, metadata_content, size, offset)) {
         free_mmdb_struct(mmdb);
