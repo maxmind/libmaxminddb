@@ -93,33 +93,6 @@ LOCAL void *memmem(const void *big, size_t big_len, const void *little,
 }
 #endif
 
-int MMDB_resolve_address(const char *host, int ai_family, int ai_flags,
-                         void *ip)
-{
-    struct addrinfo hints = {.ai_family = ai_family,
-        .ai_flags = ai_flags,
-        .ai_socktype = SOCK_STREAM
-    }, *aifirst;
-    int gaierr = getaddrinfo(host, NULL, &hints, &aifirst);
-
-    if (gaierr == 0) {
-        if (ai_family == AF_INET) {
-            memcpy(&((struct in_addr *)ip)->s_addr,
-                   &((struct sockaddr_in *)aifirst->ai_addr)->sin_addr, 4);
-        } else if (ai_family == AF_INET6) {
-            memcpy(&((struct in6_addr *)ip)->s6_addr,
-                   ((struct sockaddr_in6 *)aifirst->ai_addr)->sin6_addr.s6_addr,
-                   16);
-
-        } else {
-            /* should never happen */
-            assert(0);
-        }
-        freeaddrinfo(aifirst);
-    }
-    return gaierr;
-}
-
 MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
                                   int *gai_error, int *mmdb_error)
 {
