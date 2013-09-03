@@ -5,6 +5,7 @@
 ** better usage info and error messages
 ** more shared code
 ** don't assume GeoIP2 data format
-* Write tests for apps
+* More tests
+** tests for apps
+** tests for MMDB_get_entry_data_list with various structures
 * Some sort of data validation testing when decoding a data entry
-
