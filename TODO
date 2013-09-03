@@ -1,6 +1,7 @@
 * Somehow check memory allocations in dump() function
 ** this might require a more major reworking of that bit of code
-* Replace all (or almost all) asserts with error codes
+* Replace assert in dump() function
+** there is one in resolve_any_address() that can be left as-is
 * Fix mmdb* apps
 ** fix segfaults
 ** better usage info and error messages
