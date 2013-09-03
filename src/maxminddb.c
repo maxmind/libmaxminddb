@@ -269,6 +269,10 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
         return MMDB_INVALID_DATABASE;
     }
 
+    /* We need to create a fake MMDB_s struct in order to decode values from
+       the metadata. The metadata is basically just like the data section, so we
+       want to use the same functions we use for the data section to get metadata
+       values. */
     MMDB_s metadata_db;
     metadata_db.data_section = metadata + strlen(METADATA_MARKER);
 
