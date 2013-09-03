@@ -1,4 +1,5 @@
-* Check all memory allocations & frees
+* Somehow check memory allocations in dump() function
+** this might require a more major reworking of that bit of code
 * Replace all (or almost all) asserts with error codes
 * Fix mmdb* apps
 ** fix segfaults
