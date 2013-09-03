@@ -7,5 +7,4 @@
 ** don't assume GeoIP2 data format
 * Write tests for apps
 * Some sort of data validation testing when decoding a data entry
-* Remove and/or update comments
-* Remove commented-out code
+
