@@ -8,7 +8,7 @@
 
 int is_ipv4(MMDB_s * mmdb)
 {
-    return mmdb->depth == 32;
+    return mmdb->metadata.ip_version == 4;
 }
 
 char *bytesdup(MMDB_s * mmdb, MMDB_entry_data_s const *const entry_data)
