@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-char *bytesdup(MMDB_s * mmdb, MMDB_entry_data_s const *const entry_data)
+char *bytesdup(MMDB_s *mmdb, MMDB_entry_data_s const *const entry_data)
 {
     char *mem = NULL;
 
@@ -36,7 +36,7 @@ static const char *na(char const *string)
     return string ? string : "N/A";
 }
 
-MMDB_s open_or_die (const char *fname, int mode)
+MMDB_s open_or_die(const char *fname, int mode)
 {
     MMDB_s mmdb;
     int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
@@ -49,7 +49,7 @@ MMDB_s open_or_die (const char *fname, int mode)
     return mmdb;
 }
 
-MMDB_lookup_result_s *lookup_or_die (MMDB_s *mmdb, const char *ipstr)
+MMDB_lookup_result_s *lookup_or_die(MMDB_s *mmdb, const char *ipstr)
 {
     int gai_error, mmdb_error;
     MMDB_lookup_result_s *result =
@@ -62,14 +62,15 @@ MMDB_lookup_result_s *lookup_or_die (MMDB_s *mmdb, const char *ipstr)
     }
 
     if (MMDB_SUCCESS != mmdb_error) {
-        fprintf(stderr, "got an error from the maxminddb library: %s\n", MMDB_strerror(mmdb_error));
+        fprintf(stderr, "got an error from the maxminddb library: %s\n",
+                MMDB_strerror(mmdb_error));
         exit(2);
     }
 
     return result;
 }
 
-void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s * ipinfo)
+void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s *ipinfo)
 {
 
     char *city, *country, *region;
@@ -98,11 +99,12 @@ void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s * ipinfo)
         MMDB_get_value(&ipinfo->entry, &res, "country", "names", "en", NULL);
         country = bytesdup(ipinfo->entry.mmdb, &res);
 
-        MMDB_get_value(&ipinfo->entry, &res, "subdivisions", "0", "names", "en", NULL);
+        MMDB_get_value(&ipinfo->entry, &res, "subdivisions", "0", "names", "en",
+                       NULL);
         region = bytesdup(ipinfo->entry.mmdb, &res);
 
         printf("%s %f %f %s %s %s\n", ipstr, dlat, dlon,
-	       na(region),na(city), na(country));
+               na(region), na(city), na(country));
         free_list(city, country, region);
     } else {
         puts("Sorry, nothing found");   // not found

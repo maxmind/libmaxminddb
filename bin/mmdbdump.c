@@ -51,7 +51,8 @@ int main(int argc, char *const argv[])
         MMDB_entry_data_list_s *entry_data_list;
         int status = MMDB_get_entry_data_list(&result->entry, &entry_data_list);
         if (MMDB_SUCCESS != status) {
-            fprintf(stderr, "Got an error looking up the entry data - %s\n", MMDB_strerror(status));
+            fprintf(stderr, "Got an error looking up the entry data - %s\n",
+                    MMDB_strerror(status));
             exit(3);
         }
         MMDB_dump_entry_data_list(stdout, entry_data_list, 0);

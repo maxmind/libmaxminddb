@@ -8,8 +8,21 @@ use FindBin qw( $Bin );
 use File::Basename qw( basename dirname );
 
 sub main {
-    my $c_file = "$Bin/../src/maxminddb.c";
-    my $h_file = "$Bin/../include/maxminddb.h";
+    _regen_prototypes(
+        "$Bin/../src/maxminddb.c",
+        "$Bin/../include/maxminddb.h"
+    );
+
+    _regen_prototypes(
+        "$Bin/../bin/maxminddb_app_helper.c",
+        "$Bin/../bin/maxminddb_app_helper.h",
+    );
+}
+
+sub _regen_prototypes {
+    my $c_file = shift;
+    my $h_file = shift;
+
     my $c_code = read_file($c_file);
     my $h_code = read_file($h_file);
 
