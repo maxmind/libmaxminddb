@@ -10,6 +10,7 @@ extern "C" {
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define MMDB_DTYPE_EXT (0)
 #define MMDB_DTYPE_PTR (1)
@@ -147,7 +148,9 @@ extern "C" {
     extern MMDB_entry_data_list_s *MMDB_alloc_entry_data_list(void);
     extern void MMDB_free_entry_data_list(MMDB_entry_data_list_s *freeme);
     extern const char *MMDB_lib_version(void);
-    extern int MMDB_dump(MMDB_entry_data_list_s *entry_data_list, int indent);
+    extern int MMDB_dump_entry_data_list(FILE *stream,
+                                         MMDB_entry_data_list_s *entry_data_list,
+                                         int indent);
     extern const char *MMDB_strerror(uint16_t error_code);
     /* --prototypes end - don't remove this comment-- */
 

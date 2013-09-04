@@ -33,18 +33,19 @@
 --space-special-semicolon
 --swallow-optional-blank-lines
 --tab-size8
--T MMDB_entry_data_list_s
+-T FILE
 -T MMDB_decode_s
 -T MMDB_description_s
+-T MMDB_entry_data_list_s
+-T MMDB_entry_data_s
 -T MMDB_entry_s
 -T MMDB_lookup_result_s
 -T MMDB_metadata_s
--T MMDB_entry_data_s
 -T MMDB_s
 -T in_addrX
 -T in_addr_any
--T uint8_t
+-T int32_t
 -T uint16_t
 -T uint32_t
 -T uint64_t
--T int32_t
+-T uint8_t

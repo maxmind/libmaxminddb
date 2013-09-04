@@ -68,7 +68,7 @@ int main(int argc, char *const argv[])
             fprintf(stderr, "Got an error looking up the entry data - %s\n", MMDB_strerror(status));
             exit(3);
         }
-        MMDB_dump(entry_data_list, 0);
+        MMDB_dump_entry_data_list(stdout, entry_data_list, 0);
     } else {
         puts("Sorry, nothing found");
     }
