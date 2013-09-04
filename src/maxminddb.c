@@ -39,6 +39,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size);
+LOCAL const uint8_t *find_metadata(uint8_t *metadata_content, ssize_t size);
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key);
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key);
@@ -257,8 +258,8 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
 
 LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
 {
-    const uint8_t *metadata = memmem(metadata_content, size, METADATA_MARKER,
-                                     strlen(METADATA_MARKER));
+    const uint8_t *metadata;
+    metadata = find_metadata(metadata_content, size);
     if (NULL == metadata) {
         return MMDB_INVALID_DATABASE;
     }
@@ -268,7 +269,7 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
        want to use the same functions we use for the data section to get metadata
        values. */
     MMDB_s metadata_db;
-    metadata_db.data_section = metadata + strlen(METADATA_MARKER);
+    metadata_db.data_section = metadata;
 
     MMDB_entry_s metadata_start;
     metadata_start.mmdb = &metadata_db;
@@ -316,6 +317,22 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     mmdb->depth = mmdb->metadata.ip_version == 4 ? 32 : 128;
 
     return MMDB_SUCCESS;
+}
+
+LOCAL const uint8_t *find_metadata(uint8_t *metadata_content, ssize_t size)
+{
+    uint8_t *tmp;
+    do {
+        tmp = memmem(metadata_content, size,
+                     METADATA_MARKER, strlen(METADATA_MARKER));
+
+        if (NULL != tmp) {
+            size -= tmp - metadata_content;
+            metadata_content = tmp;
+        }
+    } while (NULL != tmp && tmp != metadata_content);
+
+    return metadata_content + strlen(METADATA_MARKER);
 }
 
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
