@@ -80,8 +80,8 @@ extern "C" {
             float float_value;
         };
         /* This is a 0 if a given entry cannot be found. This can only happen
-         * when a call MMDB_(v)get_value() asks for hash keys or array indices
-         * that don't exist. */
+         * when a call to MMDB_(v)get_value() asks for hash keys or array
+         * indices that don't exist. */
         uint32_t offset;
         /* This is the next entry in the data section, but it's really only
          * relevant for entries that part of a larger map or array
