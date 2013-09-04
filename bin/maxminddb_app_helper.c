@@ -51,6 +51,19 @@ static const char *na(char const *string)
     return string ? string : "N/A";
 }
 
+MMDB_s *open_or_die (const char *fname, int mode)
+{
+    MMDB_s *mmdb = (MMDB_s *)calloc(1, sizeof(MMDB_s));
+    int status = MMDB_open(fname, MMDB_MODE_MMAP, mmdb);
+
+    if (MMDB_SUCCESS != status) {
+        fprintf(stderr, "Can't open %s\n", fname);
+        exit(2);
+    }
+
+    return mmdb;
+}
+
 MMDB_lookup_result_s *lookup_or_die (MMDB_s *mmdb, const char *ipstr)
 {
     int gai_error, mmdb_error;

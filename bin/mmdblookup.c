@@ -13,8 +13,6 @@ int main(int argc, char *const argv[])
     int verbose = 0;
     int character;
     char *fname = NULL;
-    MMDB_s *mmdb;
-    uint16_t status;
 
     while ((character = getopt(argc, argv, "vf:")) != -1) {
         switch (character) {
@@ -37,10 +35,7 @@ int main(int argc, char *const argv[])
         exit(1);
     }
 
-    status = MMDB_open(fname, MMDB_MODE_MMAP, mmdb);
-    if (!mmdb) {
-        die("Can't open %s\n", fname);
-    }
+    MMDB_s *mmdb = open_or_die(fname, MMDB_MODE_MMAP);
 
     free(fname);
 

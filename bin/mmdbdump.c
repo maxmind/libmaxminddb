@@ -13,8 +13,6 @@ int main(int argc, char *const argv[])
     int verbose = 0;
     int character;
     char *fname = NULL;
-    MMDB_s *mmdb;
-    uint16_t status;
 
     while ((character = getopt(argc, argv, "vf:")) != -1) {
         switch (character) {
@@ -37,23 +35,11 @@ int main(int argc, char *const argv[])
         exit(1);
     }
 
-    status = MMDB_open(fname, MMDB_MODE_MMAP, mmdb);
-
-    if (!mmdb) {
-        fprintf(stderr, "Can't open %s\n", fname);
-        exit(2);
-    }
+    MMDB_s *mmdb = open_or_die(fname, MMDB_MODE_MMAP);
 
     free(fname);
 
     char *ipstr = argv[0];
-    union {
-        struct in_addr v4;
-        struct in6_addr v6;
-    } ip;
-
-    int ai_family = is_ipv4(mmdb) ? AF_INET : AF_INET6;
-    int ai_flags = AI_V4MAPPED;
 
     if (verbose) {
         dump_meta(mmdb);
