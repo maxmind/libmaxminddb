@@ -7,12 +7,12 @@
 
 /* dummy content */
 
-#define die(...) do { \
+#define DIE(...) do { \
     fprintf(stderr, __VA_ARGS__); \
     exit(1); \
 } while(0)
 
-#define free_list(...) do{ \
+#define FREE_LIST(...) do{ \
     { \
         void *ptr[] = { __VA_ARGS__ }; \
         for (int i = 0; i < sizeof(ptr)/sizeof(void *); i++){ \

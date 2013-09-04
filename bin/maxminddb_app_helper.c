@@ -21,7 +21,7 @@ char *bytesdup(MMDB_s *mmdb, MMDB_entry_data_s const *const entry_data)
 
 void usage(char *prg)
 {
-    die("Usage: %s -f database addr\n", prg);
+    DIE("Usage: %s -f database addr\n", prg);
 }
 
 // XXX - this should use the metadata struct, not re-decode the metadata
@@ -105,7 +105,7 @@ void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s *ipinfo)
 
         printf("%s %f %f %s %s %s\n", ipstr, dlat, dlon,
                na(region), na(city), na(country));
-        free_list(city, country, region);
+        FREE_LIST(city, country, region);
     } else {
         puts("Sorry, nothing found");   // not found
     }
