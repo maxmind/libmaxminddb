@@ -6,11 +6,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-int is_ipv4(MMDB_s * mmdb)
-{
-    return mmdb->metadata.ip_version == 4;
-}
-
 char *bytesdup(MMDB_s * mmdb, MMDB_entry_data_s const *const entry_data)
 {
     char *mem = NULL;
@@ -22,16 +17,6 @@ char *bytesdup(MMDB_s * mmdb, MMDB_entry_data_s const *const entry_data)
         mem[entry_data->data_size] = '\0';
     }
     return mem;
-}
-
-int addr_to_num(char *addr, struct in_addr *result)
-{
-    return inet_pton(AF_INET, addr, result);
-}
-
-int addr6_to_num(char *addr, struct in6_addr *result)
-{
-    return inet_pton(AF_INET6, addr, result);
 }
 
 void usage(char *prg)
