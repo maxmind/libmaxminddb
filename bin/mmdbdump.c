@@ -35,7 +35,7 @@ int main(int argc, char *const argv[])
         exit(1);
     }
 
-    MMDB_s *mmdb = open_or_die(fname, MMDB_MODE_MMAP);
+    MMDB_s mmdb = open_or_die(fname, MMDB_MODE_MMAP);
 
     free(fname);
 
@@ -45,7 +45,7 @@ int main(int argc, char *const argv[])
         dump_meta(mmdb);
     }
 
-    MMDB_lookup_result_s *result = lookup_or_die(mmdb, ipstr);
+    MMDB_lookup_result_s *result = lookup_or_die(&mmdb, ipstr);
 
     if (result->entry.offset > 0) {
         MMDB_entry_data_list_s *entry_data_list;

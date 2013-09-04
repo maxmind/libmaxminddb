@@ -25,9 +25,10 @@
 int addr_to_num(char *addr, struct in_addr *result);
 int addr6_to_num(char *addr, struct in6_addr *result);
 char *bytesdup(MMDB_s * mmdb, MMDB_entry_data_s const *const ret);
-void dump_meta(MMDB_s * mmdb);
+void dump_meta(MMDB_s mmdb);
 void usage(char *prg);
 int is_ipv4(MMDB_s * mmdb);
+MMDB_s open_or_die (const char *fname, int mode);
 MMDB_lookup_result_s *lookup_or_die (MMDB_s *mmdb, const char *ipstr);
 void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s * ipinfo);
 #endif

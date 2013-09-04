@@ -40,7 +40,7 @@ void usage(char *prg)
 }
 
 // XXX - this should use the metadata struct, not re-decode the metadata
-void dump_meta(MMDB_s * mmdb)
+void dump_meta(MMDB_s mmdb)
 {
     // XXX - temporarily a no-op until I can make it use the metadata struct
     return;
@@ -51,10 +51,10 @@ static const char *na(char const *string)
     return string ? string : "N/A";
 }
 
-MMDB_s *open_or_die (const char *fname, int mode)
+MMDB_s open_or_die (const char *fname, int mode)
 {
-    MMDB_s *mmdb = (MMDB_s *)calloc(1, sizeof(MMDB_s));
-    int status = MMDB_open(fname, MMDB_MODE_MMAP, mmdb);
+    MMDB_s mmdb;
+    int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
 
     if (MMDB_SUCCESS != status) {
         fprintf(stderr, "Can't open %s\n", fname);
