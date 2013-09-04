@@ -26,7 +26,6 @@
     extern char *bytesdup(MMDB_s *mmdb, MMDB_entry_data_s const *const entry_data);
     extern void usage(char *prg);
     extern void dump_meta(MMDB_s mmdb);
-    extern static const char *na(char const *string);
     extern MMDB_s open_or_die(const char *fname, int mode);
     extern MMDB_lookup_result_s *lookup_or_die(MMDB_s *mmdb, const char *ipstr);
     extern void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s *ipinfo);

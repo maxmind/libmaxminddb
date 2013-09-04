@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#define LOCAL
+
 char *bytesdup(MMDB_s *mmdb, MMDB_entry_data_s const *const entry_data)
 {
     char *mem = NULL;
@@ -31,7 +33,7 @@ void dump_meta(MMDB_s mmdb)
     return;
 }
 
-static const char *na(char const *string)
+LOCAL static const char *na(char const *string)
 {
     return string ? string : "N/A";
 }
