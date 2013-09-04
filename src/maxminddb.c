@@ -38,8 +38,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
-LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size);
-LOCAL const uint8_t *find_metadata(uint8_t *metadata_content, ssize_t size);
+LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size);
+LOCAL const uint8_t *find_metadata(uint8_t *last_128kb, ssize_t size);
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key);
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key);
@@ -256,10 +256,10 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
     return value & 0xfffffff;
 }
 
-LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
+LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size)
 {
     const uint8_t *metadata;
-    metadata = find_metadata(metadata_content, size);
+    metadata = find_metadata(last_128kb, size);
     if (NULL == metadata) {
         return MMDB_INVALID_DATABASE;
     }
@@ -319,20 +319,20 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *metadata_content, ssize_t size)
     return MMDB_SUCCESS;
 }
 
-LOCAL const uint8_t *find_metadata(uint8_t *metadata_content, ssize_t size)
+LOCAL const uint8_t *find_metadata(uint8_t *last_128kb, ssize_t size)
 {
     uint8_t *tmp;
     do {
-        tmp = memmem(metadata_content, size,
+        tmp = memmem(last_128kb, size,
                      METADATA_MARKER, strlen(METADATA_MARKER));
 
         if (NULL != tmp) {
-            size -= tmp - metadata_content;
-            metadata_content = tmp;
+            size -= tmp - last_128kb;
+            last_128kb = tmp;
         }
-    } while (NULL != tmp && tmp != metadata_content);
+    } while (NULL != tmp && tmp != last_128kb);
 
-    return metadata_content + strlen(METADATA_MARKER);
+    return last_128kb + strlen(METADATA_MARKER);
 }
 
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
@@ -525,20 +525,20 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
     ssize_t size;
     mmdb->file_size = size = s.st_size;
 
-    uint8_t *metadata_content = malloc(METADATA_BLOCK_MAX_SIZE);
-    if (NULL == metadata_content) {
+    uint8_t *last_128kb = malloc(METADATA_BLOCK_MAX_SIZE);
+    if (NULL == last_128kb) {
         free_mmdb_struct(mmdb);
         return MMDB_OUT_OF_MEMORY;
     }
 
     off_t offset = size > METADATA_BLOCK_MAX_SIZE ? METADATA_BLOCK_MAX_SIZE : 0;
-    if (MMDB_SUCCESS != int_pread(fd, metadata_content, size, offset)) {
+    if (MMDB_SUCCESS != int_pread(fd, last_128kb, size, offset)) {
         free_mmdb_struct(mmdb);
         return MMDB_IO_ERROR;
     }
 
-    int status = read_metadata(mmdb, metadata_content, size);
-    free(metadata_content);
+    int status = read_metadata(mmdb, last_128kb, size);
+    free(last_128kb);
     if (MMDB_SUCCESS != status) {
         free_mmdb_struct(mmdb);
         return status;
