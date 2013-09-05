@@ -74,7 +74,8 @@ LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset);
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s
                                                    *entry_data_list, int indent,
                                                    int *status);
-LOCAL void print_indentation(int i);
+LOCAL void print_indentation(FILE *stream, int i);
+LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
 /* --prototypes end - don't remove this comment-- */
 
 #define CHECKED_DECODE_ONE(mmdb, offset, entry_data)         \
@@ -1182,8 +1183,6 @@ int MMDB_dump_entry_data_list(FILE *stream,
                               MMDB_entry_data_list_s *entry_data_list,
                               int indent)
 {
-    fprintf(stream, "Dumping data structure\n");
-
     int status;
     MMDB_entry_data_list_s *rval =
         dump_entry_data_list(stream, entry_data_list, indent, &status);
@@ -1202,38 +1201,60 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
     case MMDB_DATA_TYPE_MAP:
         {
             uint32_t size = entry_data_list->entry_data.data_size;
-            fprintf(stream, "map with %d pairs\n", size);
+
+            print_indentation(stream, indent);
+            fprintf(stream, "{\n");
+            indent += 2;
+
             for (entry_data_list = entry_data_list->next;
                  size && entry_data_list; size--) {
-                entry_data_list =
-                    dump_entry_data_list(stream, entry_data_list, indent + 2,
-                                         status);
-                if (NULL == entry_data_list) {
+
+                char *key =
+                    strndup((char *)entry_data_list->entry_data.utf8_string,
+                            entry_data_list->entry_data.data_size);
+                if (NULL == key) {
+                    *status = MMDB_OUT_OF_MEMORY_ERROR;
                     return NULL;
                 }
 
+                print_indentation(stream, indent);
+                fprintf(stream, "\"%s\": \n", key);
+                entry_data_list = entry_data_list->next;
                 entry_data_list =
                     dump_entry_data_list(stream, entry_data_list, indent + 2,
                                          status);
-                if (NULL == entry_data_list) {
+
+                if (MMDB_SUCCESS != *status) {
                     return NULL;
                 }
             }
+
+            indent -= 2;
+            print_indentation(stream, indent);
+            fprintf(stream, "}\n");
         }
         break;
     case MMDB_DATA_TYPE_ARRAY:
         {
             uint32_t size = entry_data_list->entry_data.data_size;
-            fprintf(stream, "array with %d elements\n", size);
+
+            print_indentation(stream, indent);
+            fprintf(stream, "[\n");
+            indent += 2;
+
             for (entry_data_list = entry_data_list->next;
                  size && entry_data_list; size--) {
                 entry_data_list =
-                    dump_entry_data_list(stream, entry_data_list, indent + 2,
+                    dump_entry_data_list(stream, entry_data_list, indent,
                                          status);
-                if (NULL == entry_data_list) {
+                if (MMDB_SUCCESS != *status) {
                     return NULL;
                 }
             }
+
+            indent -= 2;
+            print_indentation(stream, indent);
+            fprintf(stream, "]\n");
         }
         break;
     case MMDB_DATA_TYPE_UTF8_STRING:
@@ -1245,68 +1266,73 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
                 *status = MMDB_OUT_OF_MEMORY_ERROR;
                 return NULL;
             }
-            print_indentation(indent);
-            fprintf(stream, "utf8_string = %s\n", string);
+            print_indentation(stream, indent);
+            fprintf(stream, "\"%s\" <utf8_string>\n", string);
             free(string);
             entry_data_list = entry_data_list->next;
         }
         break;
     case MMDB_DATA_TYPE_BYTES:
         {
-            char *bytes = strndup((char *)entry_data_list->entry_data.bytes,
-                                  entry_data_list->entry_data.data_size);
-            if (NULL == bytes) {
+            char *hex_string =
+                bytes_to_hex((uint8_t *)entry_data_list->entry_data.bytes,
+                             entry_data_list->entry_data.data_size);
+            if (NULL == hex_string) {
                 *status = MMDB_OUT_OF_MEMORY_ERROR;
                 return NULL;
             }
-            print_indentation(indent);
-            fprintf(stream, "bytes = %s\n", bytes);
-            free(bytes);
+
+            print_indentation(stream, indent);
+            fprintf(stream, "%s <bytes>\n", hex_string);
+            free(hex_string);
+
             entry_data_list = entry_data_list->next;
         }
         break;
     case MMDB_DATA_TYPE_DOUBLE:
-        print_indentation(indent);
-        fprintf(stream, "double = %f\n",
+        print_indentation(stream, indent);
+        fprintf(stream, "%f <double>\n",
                 entry_data_list->entry_data.double_value);
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_FLOAT:
-        print_indentation(indent);
-        fprintf(stream, "float = %f\n",
+        print_indentation(stream, indent);
+        fprintf(stream, "%f <float>\n",
                 entry_data_list->entry_data.float_value);
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_UINT16:
-        print_indentation(indent);
-        fprintf(stream, "uint16 = %u\n", entry_data_list->entry_data.uint16);
+        print_indentation(stream, indent);
+        fprintf(stream, "%u <uint16>\n", entry_data_list->entry_data.uint16);
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_UINT32:
-        print_indentation(indent);
-        fprintf(stream, "uint32 = %u\n",
-                (uint32_t)entry_data_list->entry_data.uint32);
+        print_indentation(stream, indent);
+        fprintf(stream, "%u <uint32>\n", entry_data_list->entry_data.uint32);
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_BOOLEAN:
-        print_indentation(indent);
-        fprintf(stream, "boolean = %u\n",
-                (uint32_t)entry_data_list->entry_data.boolean);
+        print_indentation(stream, indent);
+        fprintf(stream, "%s <boolean>\n",
+                entry_data_list->entry_data.boolean ? "true" : "false");
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_UINT64:
-        print_indentation(indent);
-        fprintf(stream, "uint64 = XXX\n");
+        print_indentation(stream, indent);
+        fprintf(stream, "%lu <uint64>\n", entry_data_list->entry_data.uint64);
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_UINT128:
-        print_indentation(indent);
-        fprintf(stream, "uint128 = XXX\n");
+        print_indentation(stream, indent);
+        char *hex_string =
+            bytes_to_hex((uint8_t *)entry_data_list->entry_data.uint128, 16);
+        fprintf(stream, "%s <uint128>\n", hex_string);
+        free(hex_string);
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_INT32:
-        print_indentation(indent);
-        fprintf(stream, "int32 = %d\n", entry_data_list->entry_data.int32);
+        print_indentation(stream, indent);
+        fprintf(stream, "%d <int32>\n", entry_data_list->entry_data.int32);
         entry_data_list = entry_data_list->next;
         break;
     default:
@@ -1315,16 +1341,29 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
         return NULL;
     }
 
+    *status = MMDB_SUCCESS;
     return entry_data_list;
 }
 
-LOCAL void print_indentation(int i)
+LOCAL void print_indentation(FILE *stream, int i)
 {
     char buffer[1024];
     int size = i >= 1024 ? 1023 : i;
     memset(buffer, 32, size);
     buffer[size] = '\0';
-    fputs(buffer, stderr);
+    fputs(buffer, stream);
+}
+
+LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
+{
+    char *hex_string = malloc((size * 2) + 1);
+    char *hex_pointer = hex_string;
+
+    for (uint32_t i = 0; i < size; i++) {
+        hex_pointer += sprintf(hex_pointer, "%02X", bytes[i]);
+    }
+    *(hex_pointer + 1) = '\0';
+    return hex_string;
 }
 
 const char *MMDB_strerror(uint16_t error_code)
