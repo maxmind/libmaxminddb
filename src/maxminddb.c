@@ -953,7 +953,7 @@ LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
 int MMDB_get_entry_data_list(MMDB_entry_s *start,
                              MMDB_entry_data_list_s **entry_data_list)
 {
-    *entry_data_list = MMDB_alloc_entry_data_list();
+    *entry_data_list = MMDB_new_entry_data_list();
     if (NULL == &entry_data_list) {
         return MMDB_OUT_OF_MEMORY;
     }
@@ -997,7 +997,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
             MMDB_entry_data_list_s *previous = entry_data_list;
             while (array_size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
-                    MMDB_alloc_entry_data_list();
+                    MMDB_new_entry_data_list();
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY;
                 }
@@ -1029,7 +1029,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
             MMDB_entry_data_list_s *previous = entry_data_list;
             while (size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
-                    MMDB_alloc_entry_data_list();
+                    MMDB_new_entry_data_list();
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY;
                 }
@@ -1050,7 +1050,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
 
                 offset = entry_data_list_to->entry_data.offset_to_next;
                 entry_data_list_to = previous->next =
-                    MMDB_alloc_entry_data_list();
+                    MMDB_new_entry_data_list();
 
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY;
@@ -1158,7 +1158,7 @@ LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset)
     return MMDB_SUCCESS;
 }
 
-MMDB_entry_data_list_s *MMDB_alloc_entry_data_list(void)
+MMDB_entry_data_list_s *MMDB_new_entry_data_list(void)
 {
     return calloc(1, sizeof(MMDB_entry_data_list_s));
 }
