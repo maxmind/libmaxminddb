@@ -606,7 +606,6 @@ LOCAL void free_mmdb_struct(MMDB_s *mmdb)
 
     free_languages_metadata(mmdb);
     free_descriptions_metadata(mmdb);
-    free((void *)mmdb);
 }
 
 LOCAL void free_languages_metadata(MMDB_s *mmdb)
