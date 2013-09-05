@@ -1183,11 +1183,13 @@ int MMDB_dump_entry_data_list(FILE *stream,
                               int indent)
 {
     fprintf(stream, "Dumping data structure\n");
-    while (entry_data_list) {
-        entry_data_list = dump_entry_data_list(stream, entry_data_list, indent);
+    MMDB_entry_data_list_s *rval =
+        dump_entry_data_list(stream, entry_data_list, indent);
+    if (NULL == rval) {
+        return MMDB_OUT_OF_MEMORY;
+    } else {
+        return MMDB_SUCCESS;
     }
-
-    return MMDB_SUCCESS;
 }
 
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s
@@ -1202,8 +1204,15 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
                  size && entry_data_list; size--) {
                 entry_data_list =
                     dump_entry_data_list(stream, entry_data_list, indent + 2);
+                if (NULL == entry_data_list) {
+                    return NULL;
+                }
+
                 entry_data_list =
                     dump_entry_data_list(stream, entry_data_list, indent + 2);
+                if (NULL == entry_data_list) {
+                    return NULL;
+                }
             }
         }
         break;
@@ -1215,6 +1224,9 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
                  size && entry_data_list; size--) {
                 entry_data_list =
                     dump_entry_data_list(stream, entry_data_list, indent + 2);
+                if (NULL == entry_data_list) {
+                    return NULL;
+                }
             }
         }
         break;
@@ -1224,7 +1236,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
                 strndup((char *)entry_data_list->entry_data.utf8_string,
                         entry_data_list->entry_data.data_size);
             if (NULL == string) {
-                //return MMDB_OUT_OF_MEMORY;
+                return NULL;
             }
             print_indentation(indent);
             fprintf(stream, "utf8_string = %s\n", string);
@@ -1237,7 +1249,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             char *bytes = strndup((char *)entry_data_list->entry_data.bytes,
                                   entry_data_list->entry_data.data_size);
             if (NULL == bytes) {
-                //return MMDB_OUT_OF_MEMORY;
+                return NULL;
             }
             print_indentation(indent);
             fprintf(stream, "bytes = %s\n", bytes);
