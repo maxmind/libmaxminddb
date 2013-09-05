@@ -38,7 +38,7 @@ Free's all memory associated with the database and the filehandle.
 
 Resolves the IP address addr into ip. ip is a pointer to `in_addr` or `in6_addr` depend on your inputs.
 
-For IPv4 it is probpaly 
+For IPv4 it is probably 
 
     status = MMDB_resolve_address( addr, AF_INET, 0, ip );
 
