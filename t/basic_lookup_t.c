@@ -51,6 +51,7 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
     const char *mode_desc = Current_Mode_Description;
 
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
+    free((void *)path);
 
     char desc_suffix[500];
     snprintf(desc_suffix, 500, "%s - %s", filename, mode_desc);
@@ -73,7 +74,6 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
         test_one_ip(mmdb, ip_to_lookup, expect, filename, mode_desc);
     }
 
-    free((char *)path);
     MMDB_close(mmdb);
     free(mmdb);
 }

@@ -5,7 +5,7 @@ void run_tests(int mode, const char *mode_desc)
     const char *file = "MaxMind-DB-test-ipv4-24.mmdb";
     const char *path = test_database_path(file);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free(path);
+    free((void *)path);
 
     // All of the remaining tests require an open mmdb
     if (NULL == mmdb) {

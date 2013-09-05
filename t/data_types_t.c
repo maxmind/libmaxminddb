@@ -200,7 +200,7 @@ void run_tests(int mode, const char *mode_desc)
     const char *filename = "MaxMind-DB-test-decoder.mmdb";
     const char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free(path);
+    free((void *)path);
 
     // All of the remaining tests require an open mmdb
     if (NULL == mmdb) {
