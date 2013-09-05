@@ -1,7 +1,4 @@
-* Somehow check memory allocations in dump() function
-** this might require a more major reworking of that bit of code
-* Replace assert in dump() function
-** there is one in resolve_any_address() that can be left as-is
+* Make MMDB_dump output saner (something JSON-ish)
 * Fix mmdb* apps
 ** better usage info and error messages
 ** more shared code
@@ -10,4 +7,3 @@
 ** tests for apps
 ** test for MMDB_dump
 * Some sort of data validation testing when decoding a data entry
-* Make MMDB_dump output saner (something JSON-ish)
