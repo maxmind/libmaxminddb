@@ -1193,8 +1193,6 @@ int MMDB_dump_entry_data_list(FILE *stream,
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s
                                                    *entry_data_list, int indent)
 {
-    char *string, *bytes;
-
     switch (entry_data_list->entry_data.type) {
     case MMDB_DTYPE_MAP:
         {
@@ -1221,28 +1219,31 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
         }
         break;
     case MMDB_DTYPE_UTF8_STRING:
-        string =
-            strndup((char *)entry_data_list->entry_data.utf8_string,
-                    entry_data_list->entry_data.data_size);
-        if (NULL == string) {
-            //return MMDB_OUT_OF_MEMORY;
+        {
+            char *string =
+                strndup((char *)entry_data_list->entry_data.utf8_string,
+                        entry_data_list->entry_data.data_size);
+            if (NULL == string) {
+                //return MMDB_OUT_OF_MEMORY;
+            }
+            print_indentation(indent);
+            fprintf(stream, "utf8_string = %s\n", string);
+            free(string);
+            entry_data_list = entry_data_list->next;
         }
-        print_indentation(indent);
-        fprintf(stream, "utf8_string = %s\n", string);
-        free(string);
-        entry_data_list = entry_data_list->next;
         break;
     case MMDB_DTYPE_BYTES:
-        bytes =
-            strndup((char *)entry_data_list->entry_data.bytes,
-                    entry_data_list->entry_data.data_size);
-        if (NULL == bytes) {
-            //return MMDB_OUT_OF_MEMORY;
+        {
+            char *bytes = strndup((char *)entry_data_list->entry_data.bytes,
+                                  entry_data_list->entry_data.data_size);
+            if (NULL == bytes) {
+                //return MMDB_OUT_OF_MEMORY;
+            }
+            print_indentation(indent);
+            fprintf(stream, "bytes = %s\n", bytes);
+            free(bytes);
+            entry_data_list = entry_data_list->next;
         }
-        print_indentation(indent);
-        fprintf(stream, "bytes = %s\n", bytes);
-        free(bytes);
-        entry_data_list = entry_data_list->next;
         break;
     case MMDB_DTYPE_DOUBLE:
         print_indentation(indent);
