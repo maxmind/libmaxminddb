@@ -28,15 +28,8 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_DOUBLE, description, "double", NULL);
-        double expect = 42.123456;
-        double diff = fabs(data.double_value - expect);
-        int is_ok =
-            ok(diff < 0.01, "double value was approximately %2.6f", description,
-               expect);
-        if (!is_ok) {
-            diag("  got %2.6f but expected %2.6f (diff = %2.6f)",
-                 data.double_value, expect, diff);
-        }
+
+        compare_double(data.double_value, 42.123456);
     }
 
     {
