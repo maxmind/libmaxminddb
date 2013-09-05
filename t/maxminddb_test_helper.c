@@ -1,8 +1,10 @@
 #include <assert.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include <libgen.h>
 #include <netdb.h>
 #include <stdarg.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "maxminddb.h"
 #include "maxminddb_test_helper.h"
 
@@ -30,10 +32,19 @@ void for_all_modes(void (*tests) (int mode, const char *description))
     tests(MMDB_MODE_MEMORY_CACHE, "memory cache mode");
 }
 
-static const char *test_db_dir = "../maxmind-db/test-data";
-
 const char *test_database_path(const char *filename)
 {
+    char cwd[500];
+    getcwd(cwd, 500);
+
+    char *test_db_dir;
+    if (strcmp(basename(cwd), "t") == 0){
+        test_db_dir = "../maxmind-db/test-data";
+    }
+    else {
+        test_db_dir = "./maxmind-db/test-data";
+    }
+
     char *path = malloc(500);
     assert(path != NULL);
 
