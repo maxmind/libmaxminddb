@@ -8,4 +8,6 @@
 ** don't assume GeoIP2 data format in mmdblookup
 * More tests
 ** tests for apps
+** test for MMDB_dump
 * Some sort of data validation testing when decoding a data entry
+* Make MMDB_dump output saner (something JSON-ish)
