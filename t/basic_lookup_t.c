@@ -75,6 +75,7 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
 
     free((char *)path);
     MMDB_close(mmdb);
+    free(mmdb);
 }
 
 void run_ipv4_tests(int record_size, const char *filename, const char *ignored)
