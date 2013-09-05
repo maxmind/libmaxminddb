@@ -1344,5 +1344,10 @@ const char *MMDB_strerror(uint16_t error_code)
     } else if (MMDB_UNKNOWN_DATABASE_FORMAT == error_code) {
         return
             "The MaxMind DB file is in a format this library can't handle (unknown record size or binary format version)";
+    } else if (MMDB_INVALID_DATA == error_code) {
+        return
+            "The MaxMind DB file's data section contains bad data (unknown data type or corrupt data)";
+    } else {
+        return "Unknown error code";
     }
 }
