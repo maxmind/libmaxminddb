@@ -486,7 +486,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     return MMDB_SUCCESS;
 }
 
-MMDB_s *MMDB_new()
+MMDB_s *MMDB_new_mmdb()
 {
     return calloc(1, sizeof(MMDB_s));
 }
