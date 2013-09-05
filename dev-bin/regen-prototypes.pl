@@ -91,7 +91,7 @@ my $re_signature = qr/^($re_type ($re_identifier) $re_args) (?>[\ \t\n]*?{)/x;
 
         my @protos;
 
-        for my $chunk ( $c_code =~ /^(\w+.+?{)/gsm ) {
+        for my $chunk ( $c_code =~ /^(\w+.+?[;{])/gsm ) {
             my ( $prototype, $name ) = $chunk =~ /^$re_signature/ms
                 or next;
 
