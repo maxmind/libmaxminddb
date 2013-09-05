@@ -29,8 +29,6 @@ extern "C" {
 #define MMDB_DTYPE_BOOLEAN (14)
 #define MMDB_DTYPE_FLOAT (15)
 
-#define MMDB_DTYPE_MAX (MMDB_DTYPE_FLOAT)
-
 /* GEOIPDB flags */
 #define MMDB_MODE_MMAP (1)
 #define MMDB_MODE_MEMORY_CACHE (2)
