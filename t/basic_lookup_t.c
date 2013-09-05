@@ -19,7 +19,7 @@ void test_one_ip(MMDB_s *mmdb, const char *ip, const char *expect,
     }
 
     MMDB_entry_data_s data =
-        data_ok(result, MMDB_DTYPE_UTF8_STRING, "result{ip}", "ip", NULL);
+        data_ok(result, MMDB_DATA_TYPE_UTF8_STRING, "result{ip}", "ip", NULL);
 
     char *string = strndup(data.utf8_string, data.data_size);
 

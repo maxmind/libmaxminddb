@@ -12,22 +12,22 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 
-#define MMDB_DTYPE_EXT (0)
-#define MMDB_DTYPE_PTR (1)
-#define MMDB_DTYPE_UTF8_STRING (2)
-#define MMDB_DTYPE_DOUBLE (3)
-#define MMDB_DTYPE_BYTES (4)
-#define MMDB_DTYPE_UINT16 (5)
-#define MMDB_DTYPE_UINT32 (6)
-#define MMDB_DTYPE_MAP (7)      /* HASH */
-#define MMDB_DTYPE_INT32 (8)
-#define MMDB_DTYPE_UINT64 (9)
-#define MMDB_DTYPE_UINT128 (10)
-#define MMDB_DTYPE_ARRAY (11)
-#define MMDB_DTYPE_CONTAINER (12)
-#define MMDB_DTYPE_END_MARKER (13)
-#define MMDB_DTYPE_BOOLEAN (14)
-#define MMDB_DTYPE_FLOAT (15)
+#define MMDB_DATA_TYPE_EXT (0)
+#define MMDB_DATA_TYPE_PTR (1)
+#define MMDB_DATA_TYPE_UTF8_STRING (2)
+#define MMDB_DATA_TYPE_DOUBLE (3)
+#define MMDB_DATA_TYPE_BYTES (4)
+#define MMDB_DATA_TYPE_UINT16 (5)
+#define MMDB_DATA_TYPE_UINT32 (6)
+#define MMDB_DATA_TYPE_MAP (7)      /* HASH */
+#define MMDB_DATA_TYPE_INT32 (8)
+#define MMDB_DATA_TYPE_UINT64 (9)
+#define MMDB_DATA_TYPE_UINT128 (10)
+#define MMDB_DATA_TYPE_ARRAY (11)
+#define MMDB_DATA_TYPE_CONTAINER (12)
+#define MMDB_DATA_TYPE_END_MARKER (13)
+#define MMDB_DATA_TYPE_BOOLEAN (14)
+#define MMDB_DATA_TYPE_FLOAT (15)
 
 /* GEOIPDB flags */
 #define MMDB_MODE_MMAP (1)
@@ -89,7 +89,7 @@ extern "C" {
         uint32_t offset_to_next;
         /* This is only valid for strings, utf8_strings or binary data */
         uint32_t data_size;
-        /* This is an MMDB_DTYPE_* constant */
+        /* This is an MMDB_DATA_TYPE_* constant */
         uint32_t type;
     } MMDB_entry_data_s;
 

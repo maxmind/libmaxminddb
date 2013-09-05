@@ -139,7 +139,7 @@ static PyObject *mkobj_r(MMDB_s * mmdb, MMDB_decode_all_s ** current)
 {
     PyObject *sv = NULL;
     switch ((*current)->decode.data.type) {
-    case MMDB_DTYPE_MAP:
+    case MMDB_DATA_TYPE_MAP:
         {
             PyObject *hv = PyDict_New();
             int size = (*current)->decode.data.data_size;
@@ -159,7 +159,7 @@ static PyObject *mkobj_r(MMDB_s * mmdb, MMDB_decode_all_s ** current)
             return hv;
         }
         break;
-    case MMDB_DTYPE_ARRAY:
+    case MMDB_DATA_TYPE_ARRAY:
         {
             int size = (*current)->decode.data.data_size;
             PyObject *av = PyList_New(0);
@@ -171,14 +171,14 @@ static PyObject *mkobj_r(MMDB_s * mmdb, MMDB_decode_all_s ** current)
             return av;
         }
         break;
-    case MMDB_DTYPE_UTF8_STRING:
+    case MMDB_DATA_TYPE_UTF8_STRING:
         {
             int size = (*current)->decode.data.data_size;
             void *ptr = size ? (void*)(*current)->decode.data.ptr : "";
             sv = build_PyUnicode_DecodeUTF8(mmdb, ptr, size);
         }
         break;
-    case MMDB_DTYPE_BYTES:
+    case MMDB_DATA_TYPE_BYTES:
         {
             int size = (*current)->decode.data.data_size;
             sv = build_PyString_FromStringAndSize(mmdb,
@@ -186,28 +186,28 @@ static PyObject *mkobj_r(MMDB_s * mmdb, MMDB_decode_all_s ** current)
                                                   decode.data.ptr, size);
         }
         break;
-    case MMDB_DTYPE_IEEE754_FLOAT:
+    case MMDB_DATA_TYPE_IEEE754_FLOAT:
         sv = Py_BuildValue("d", (*current)->decode.data.float_value);
         break;
-    case MMDB_DTYPE_IEEE754_DOUBLE:
+    case MMDB_DATA_TYPE_IEEE754_DOUBLE:
         sv = Py_BuildValue("d", (*current)->decode.data.double_value);
         break;
-    case MMDB_DTYPE_UINT32:
+    case MMDB_DATA_TYPE_UINT32:
         sv = Py_BuildValue("I", (*current)->decode.data.uinteger);
         break;
-    case MMDB_DTYPE_UINT64:
+    case MMDB_DATA_TYPE_UINT64:
         sv = build_PyString_FromStringAndSize(mmdb,
                                               (void *)(*current)->decode.
                                               data.c8, 8);
         break;
-    case MMDB_DTYPE_UINT128:
+    case MMDB_DATA_TYPE_UINT128:
         sv = build_PyString_FromStringAndSize(mmdb,
                                               (void *)(*current)->decode.
                                               data.c16, 16);
         break;
-    case MMDB_DTYPE_BOOLEAN:
-    case MMDB_DTYPE_UINT16:
-    case MMDB_DTYPE_INT32:
+    case MMDB_DATA_TYPE_BOOLEAN:
+    case MMDB_DATA_TYPE_UINT16:
+    case MMDB_DATA_TYPE_INT32:
         sv = PyInt_FromLong((*current)->decode.data.sinteger);
         break;
     default:

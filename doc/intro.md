@@ -91,18 +91,18 @@ The calling sequene looks like
  The `MMDB_entry_data_s` structure inside `MMDB_decode_s` is much more interesting, 
  it contains the almost decoded data for all data types returning something.
 
-    MMDB_DTYPE_UTF8_STRING
-    MMDB_DTYPE_IEEE754_DOUBLE
-    MMDB_DTYPE_BYTES
-    MMDB_DTYPE_UINT16
-    MMDB_DTYPE_UINT32
-    MMDB_DTYPE_MAP
-    MMDB_DTYPE_INT32
-    MMDB_DTYPE_UINT64
-    MMDB_DTYPE_UINT128
-    MMDB_DTYPE_ARRAY
-    MMDB_DTYPE_BOOLEAN
-    MMDB_DTYPE_IEEE754_FLOAT
+    MMDB_DATA_TYPE_UTF8_STRING
+    MMDB_DATA_TYPE_IEEE754_DOUBLE
+    MMDB_DATA_TYPE_BYTES
+    MMDB_DATA_TYPE_UINT16
+    MMDB_DATA_TYPE_UINT32
+    MMDB_DATA_TYPE_MAP
+    MMDB_DATA_TYPE_INT32
+    MMDB_DATA_TYPE_UINT64
+    MMDB_DATA_TYPE_UINT128
+    MMDB_DATA_TYPE_ARRAY
+    MMDB_DATA_TYPE_BOOLEAN
+    MMDB_DATA_TYPE_IEEE754_FLOAT
 
 `MMDB_entry_data_s` looks like:
 
@@ -123,66 +123,66 @@ The calling sequene looks like
     };
 
 The sturcture is valid whenever `MMDB_entry_data_s.offset > 0`.
-`MMDB_entry_data_s.type` contains the type from above for example `MMDB_DTYPE_INT32`.
-and the value of the field. Sometimes the size, if it makes sense ( for `MMDB_DTYPE_BYTES`,`MMDB_DTYPE_UTF8_STRING`, `MMDB_DTYPE_ARRAY` and `MMDB_DTYPE_MAP` ).
+`MMDB_entry_data_s.type` contains the type from above for example `MMDB_DATA_TYPE_INT32`.
+and the value of the field. Sometimes the size, if it makes sense ( for `MMDB_DATA_TYPE_BYTES`,`MMDB_DATA_TYPE_UTF8_STRING`, `MMDB_DATA_TYPE_ARRAY` and `MMDB_DATA_TYPE_MAP` ).
 
 
-#### `MMDB_DTYPE_UTF8_STRING`
+#### `MMDB_DATA_TYPE_UTF8_STRING`
 
-    type: MMDB_DTYPE_UTF8_STRING
+    type: MMDB_DATA_TYPE_UTF8_STRING
     data_size: is the length of the string in bytes
     ptr: is a pointer to the string in memory, or for diskbased databases an offset into the datasection of the file.
 
-#### `MMDB_DTYPE_IEEE754_DOUBLE`
+#### `MMDB_DATA_TYPE_IEEE754_DOUBLE`
 
-    type: MMDB_DTYPE_IEEE754_DOUBLE
+    type: MMDB_DATA_TYPE_IEEE754_DOUBLE
     double_value: contains the value
 
-#### `MMDB_DTYPE_BYTES`
+#### `MMDB_DATA_TYPE_BYTES`
     
-    type: MMDB_DTYPE_BYTES
+    type: MMDB_DATA_TYPE_BYTES
     data_size:  Length in bytes
     ptr: is a pointer to the string in memory, or for diskbased databases an offset into the datasection of the file.
 
-#### `MMDB_DTYPE_UINT16`
+#### `MMDB_DATA_TYPE_UINT16`
 
-    type: MMDB_DTYPE_UINT16
+    type: MMDB_DATA_TYPE_UINT16
     sinteger: contains the value
 
-#### `MMDB_DTYPE_UINT32`
+#### `MMDB_DATA_TYPE_UINT32`
 
-    type: MMDB_DTYPE_UINT32
+    type: MMDB_DATA_TYPE_UINT32
     uinteger: contains the value
 
-#### `MMDB_DTYPE_INT32`
+#### `MMDB_DATA_TYPE_INT32`
 
-    type: MMDB_DTYPE_INT32
+    type: MMDB_DATA_TYPE_INT32
     sinteger: contains the value
 
-#### `MMDB_DTYPE_INT64`
+#### `MMDB_DATA_TYPE_INT64`
 
-    type: MMDB_DTYPE_UINT64
+    type: MMDB_DATA_TYPE_UINT64
     c8: contains eight bytes in network order
 
-#### `MMDB_DTYPE_INT128`
+#### `MMDB_DATA_TYPE_INT128`
 
-    type: MMDB_DTYPE_UINT128
+    type: MMDB_DATA_TYPE_UINT128
     c16: contains 16 bytes in network order
 
-#### `MMDB_DTYPE_BOOLEAN`
-    type: MMDB_DTYPE_BOOLEAN
+#### `MMDB_DATA_TYPE_BOOLEAN`
+    type: MMDB_DATA_TYPE_BOOLEAN
     sinteger: contains the value
     
-#### `MMDB_DTYPE_MAP`
-    type: MMDB_DTYPE_MAP
+#### `MMDB_DATA_TYPE_MAP`
+    type: MMDB_DATA_TYPE_MAP
     data_size:  count key/value pairs in the dict
 
-#### `MMDB_DTYPE_ARRAY`
-    type: MMDB_DTYPE_ARRAY
+#### `MMDB_DATA_TYPE_ARRAY`
+    type: MMDB_DATA_TYPE_ARRAY
     data_size:  Length of the array
 
-#### `MMDB_DTYPE_IEEE754_FLOAT`
-    type: MMDB_DTYPE_IEEE754_FLOAT
+#### `MMDB_DATA_TYPE_IEEE754_FLOAT`
+    type: MMDB_DATA_TYPE_IEEE754_FLOAT
     double_value: contains the value
 
 

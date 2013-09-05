@@ -370,7 +370,7 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
     MMDB_get_value(metadata_start, &entry_data, "languages", NULL);
 
-    if (MMDB_DTYPE_ARRAY != entry_data.type) {
+    if (MMDB_DATA_TYPE_ARRAY != entry_data.type) {
         return MMDB_INVALID_METADATA_ERROR;
     }
 
@@ -392,7 +392,7 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
     for (int i = 0; i < array_size; i++) {
         member = member->next;
-        if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
+        if (MMDB_DATA_TYPE_UTF8_STRING != member->entry_data.type) {
             return MMDB_INVALID_METADATA_ERROR;
         }
 
@@ -420,7 +420,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
     MMDB_get_value(metadata_start, &entry_data, "description", NULL);
 
-    if (MMDB_DTYPE_MAP != entry_data.type) {
+    if (MMDB_DATA_TYPE_MAP != entry_data.type) {
         return MMDB_INVALID_METADATA_ERROR;
     }
 
@@ -454,7 +454,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
         member = member->next;
 
-        if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
+        if (MMDB_DATA_TYPE_UTF8_STRING != member->entry_data.type) {
             return MMDB_INVALID_METADATA_ERROR;
         }
 
@@ -468,7 +468,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
         member = member->next;
 
-        if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
+        if (MMDB_DATA_TYPE_UTF8_STRING != member->entry_data.type) {
             return MMDB_INVALID_METADATA_ERROR;
         }
 
@@ -677,7 +677,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
  one_key:
         src_keylen = strlen(src_key);
         switch (entry_data->type) {
-        case MMDB_DTYPE_PTR:
+        case MMDB_DATA_TYPE_PTR:
             CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
             break;
 
@@ -686,7 +686,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                completely. Basically we need to just use the size from the
                control byte to advance our pointer rather than calling
                decode_one(). */
-        case MMDB_DTYPE_ARRAY:
+        case MMDB_DATA_TYPE_ARRAY:
             {
                 uint32_t size = entry_data->data_size;
                 int offset = strtol(src_key, NULL, 10);
@@ -714,7 +714,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                 goto end;
             }
             break;
-        case MMDB_DTYPE_MAP:
+        case MMDB_DATA_TYPE_MAP:
             {
                 uint32_t size = entry_data->data_size;
                 offset = entry_data->offset_to_next;
@@ -723,11 +723,11 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 
                     uint32_t offset_to_value = key.offset_to_next;
 
-                    if (key.type == MMDB_DTYPE_PTR) {
+                    if (key.type == MMDB_DATA_TYPE_PTR) {
                         CHECKED_DECODE_ONE(mmdb, key.pointer, &key);
                     }
 
-                    if (MMDB_DTYPE_UTF8_STRING != key.type) {
+                    if (MMDB_DATA_TYPE_UTF8_STRING != key.type) {
                         return MMDB_INVALID_DATA_ERROR;
                     }
 
@@ -771,7 +771,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 
 LOCAL int skip_hash_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
 {
-    if (entry_data->type == MMDB_DTYPE_MAP) {
+    if (entry_data->type == MMDB_DATA_TYPE_MAP) {
         uint32_t size = entry_data->data_size;
         while (size-- > 0) {
             CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);   // key
@@ -779,7 +779,7 @@ LOCAL int skip_hash_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
             skip_hash_array(mmdb, entry_data);
         }
 
-    } else if (entry_data->type == MMDB_DTYPE_ARRAY) {
+    } else if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
         uint32_t size = entry_data->data_size;
         while (size-- > 0) {
             CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);   // value
@@ -794,7 +794,7 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
                             MMDB_entry_data_s *entry_data)
 {
     CHECKED_DECODE_ONE(mmdb, offset, entry_data);
-    if (entry_data->type == MMDB_DTYPE_PTR) {
+    if (entry_data->type == MMDB_DATA_TYPE_PTR) {
         CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
     }
 }
@@ -806,13 +806,13 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     entry_data->offset = offset;
     uint8_t ctrl = mem[offset++];
     int type = (ctrl >> 5) & 7;
-    if (type == MMDB_DTYPE_EXT) {
+    if (type == MMDB_DATA_TYPE_EXT) {
         type = get_ext_type(mem[offset++]);
     }
 
     entry_data->type = type;
 
-    if (type == MMDB_DTYPE_PTR) {
+    if (type == MMDB_DATA_TYPE_PTR) {
         int psize = (ctrl >> 3) & 3;
         entry_data->pointer = get_ptr_from(ctrl, &mem[offset], psize);
         entry_data->data_size = psize + 1;
@@ -839,14 +839,14 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         break;
     }
 
-    if (type == MMDB_DTYPE_MAP || type == MMDB_DTYPE_ARRAY) {
+    if (type == MMDB_DATA_TYPE_MAP || type == MMDB_DATA_TYPE_ARRAY) {
         entry_data->data_size = size;
         entry_data->offset_to_next = offset;
         MMDB_DBG_CARP("decode_one type:%d size:%d\n", type, size);
         return MMDB_SUCCESS;
     }
 
-    if (type == MMDB_DTYPE_BOOLEAN) {
+    if (type == MMDB_DATA_TYPE_BOOLEAN) {
         entry_data->boolean = size ? true : false;
         entry_data->data_size = 0;
         entry_data->offset_to_next = offset;
@@ -854,8 +854,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         return MMDB_SUCCESS;
     }
 
-    if (size == 0 && type != MMDB_DTYPE_UINT16 && type != MMDB_DTYPE_UINT32
-        && type != MMDB_DTYPE_INT32) {
+    if (size == 0 && type != MMDB_DATA_TYPE_UINT16
+        && type != MMDB_DATA_TYPE_UINT32 && type != MMDB_DATA_TYPE_INT32) {
         entry_data->bytes = NULL;
         entry_data->utf8_string = NULL;
         entry_data->data_size = 0;
@@ -863,27 +863,27 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         return MMDB_SUCCESS;
     }
 
-    if (type == MMDB_DTYPE_UINT16) {
+    if (type == MMDB_DATA_TYPE_UINT16) {
         if (size < 0 || size > 2) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint16 = (uint16_t)get_uintX(&mem[offset], size);
-    } else if (type == MMDB_DTYPE_UINT32) {
+    } else if (type == MMDB_DATA_TYPE_UINT32) {
         if (size < 0 || size > 4) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint32 = (uint32_t)get_uintX(&mem[offset], size);
-    } else if (type == MMDB_DTYPE_INT32) {
+    } else if (type == MMDB_DATA_TYPE_INT32) {
         if (size < 0 || size > 4) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->int32 = get_sintX(&mem[offset], size);
-    } else if (type == MMDB_DTYPE_UINT64) {
+    } else if (type == MMDB_DATA_TYPE_UINT64) {
         if (size < 0 || size > 8) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint64 = get_uintX(&mem[offset], size);
-    } else if (type == MMDB_DTYPE_UINT128) {
+    } else if (type == MMDB_DATA_TYPE_UINT128) {
         if (size < 0 || size > 16) {
             return MMDB_INVALID_DATA_ERROR;
         }
@@ -892,16 +892,16 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         if (size > 0) {
             memcpy(entry_data->uint128 + 16 - size, &mem[offset], size);
         }
-    } else if (type == MMDB_DTYPE_FLOAT) {
+    } else if (type == MMDB_DATA_TYPE_FLOAT) {
         size = 4;
         entry_data->float_value = get_ieee754_float(&mem[offset]);
-    } else if (type == MMDB_DTYPE_DOUBLE) {
+    } else if (type == MMDB_DATA_TYPE_DOUBLE) {
         size = 8;
         entry_data->double_value = get_ieee754_double(&mem[offset]);
-    } else if (type == MMDB_DTYPE_UTF8_STRING) {
+    } else if (type == MMDB_DATA_TYPE_UTF8_STRING) {
         entry_data->utf8_string = &mem[offset];
         entry_data->data_size = size;
-    } else if (type == MMDB_DTYPE_BYTES) {
+    } else if (type == MMDB_DATA_TYPE_BYTES) {
         entry_data->bytes = &mem[offset];
         entry_data->data_size = size;
     }
@@ -965,19 +965,19 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
     CHECKED_DECODE_ONE(mmdb, offset, &entry_data_list->entry_data);
 
     switch (entry_data_list->entry_data.type) {
-    case MMDB_DTYPE_PTR:
+    case MMDB_DATA_TYPE_PTR:
         {
             MMDB_DBG_CARP("Skip ptr\n");
             uint32_t next_offset = entry_data_list->entry_data.offset_to_next;
             uint32_t last_offset;
-            while (entry_data_list->entry_data.type == MMDB_DTYPE_PTR) {
+            while (entry_data_list->entry_data.type == MMDB_DATA_TYPE_PTR) {
                 CHECKED_DECODE_ONE(mmdb, last_offset =
                                    entry_data_list->entry_data.pointer,
                                    &entry_data_list->entry_data);
             }
 
-            if (entry_data_list->entry_data.type == MMDB_DTYPE_ARRAY
-                || entry_data_list->entry_data.type == MMDB_DTYPE_MAP) {
+            if (entry_data_list->entry_data.type == MMDB_DATA_TYPE_ARRAY
+                || entry_data_list->entry_data.type == MMDB_DATA_TYPE_MAP) {
 
                 int status =
                     get_entry_data_list(mmdb, last_offset, entry_data_list);
@@ -988,7 +988,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
             entry_data_list->entry_data.offset_to_next = next_offset;
         }
         break;
-    case MMDB_DTYPE_ARRAY:
+    case MMDB_DATA_TYPE_ARRAY:
         {
             uint32_t array_size = entry_data_list->entry_data.data_size;
             MMDB_DBG_CARP("Decode array with %d entries\n", array_size);
@@ -1016,7 +1016,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
 
         }
         break;
-    case MMDB_DTYPE_MAP:
+    case MMDB_DATA_TYPE_MAP:
         {
             uint32_t size = entry_data_list->entry_data.data_size;
 
@@ -1199,7 +1199,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
                                                    int *status)
 {
     switch (entry_data_list->entry_data.type) {
-    case MMDB_DTYPE_MAP:
+    case MMDB_DATA_TYPE_MAP:
         {
             uint32_t size = entry_data_list->entry_data.data_size;
             fprintf(stream, "map with %d pairs\n", size);
@@ -1221,7 +1221,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             }
         }
         break;
-    case MMDB_DTYPE_ARRAY:
+    case MMDB_DATA_TYPE_ARRAY:
         {
             uint32_t size = entry_data_list->entry_data.data_size;
             fprintf(stream, "array with %d elements\n", size);
@@ -1236,7 +1236,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             }
         }
         break;
-    case MMDB_DTYPE_UTF8_STRING:
+    case MMDB_DATA_TYPE_UTF8_STRING:
         {
             char *string =
                 strndup((char *)entry_data_list->entry_data.utf8_string,
@@ -1251,7 +1251,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             entry_data_list = entry_data_list->next;
         }
         break;
-    case MMDB_DTYPE_BYTES:
+    case MMDB_DATA_TYPE_BYTES:
         {
             char *bytes = strndup((char *)entry_data_list->entry_data.bytes,
                                   entry_data_list->entry_data.data_size);
@@ -1265,46 +1265,46 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             entry_data_list = entry_data_list->next;
         }
         break;
-    case MMDB_DTYPE_DOUBLE:
+    case MMDB_DATA_TYPE_DOUBLE:
         print_indentation(indent);
         fprintf(stream, "double = %f\n",
                 entry_data_list->entry_data.double_value);
         entry_data_list = entry_data_list->next;
         break;
-    case MMDB_DTYPE_FLOAT:
+    case MMDB_DATA_TYPE_FLOAT:
         print_indentation(indent);
         fprintf(stream, "float = %f\n",
                 entry_data_list->entry_data.float_value);
         entry_data_list = entry_data_list->next;
         break;
-    case MMDB_DTYPE_UINT16:
+    case MMDB_DATA_TYPE_UINT16:
         print_indentation(indent);
         fprintf(stream, "uint16 = %u\n", entry_data_list->entry_data.uint16);
         entry_data_list = entry_data_list->next;
         break;
-    case MMDB_DTYPE_UINT32:
+    case MMDB_DATA_TYPE_UINT32:
         print_indentation(indent);
         fprintf(stream, "uint32 = %u\n",
                 (uint32_t)entry_data_list->entry_data.uint32);
         entry_data_list = entry_data_list->next;
         break;
-    case MMDB_DTYPE_BOOLEAN:
+    case MMDB_DATA_TYPE_BOOLEAN:
         print_indentation(indent);
         fprintf(stream, "boolean = %u\n",
                 (uint32_t)entry_data_list->entry_data.boolean);
         entry_data_list = entry_data_list->next;
         break;
-    case MMDB_DTYPE_UINT64:
+    case MMDB_DATA_TYPE_UINT64:
         print_indentation(indent);
         fprintf(stream, "uint64 = XXX\n");
         entry_data_list = entry_data_list->next;
         break;
-    case MMDB_DTYPE_UINT128:
+    case MMDB_DATA_TYPE_UINT128:
         print_indentation(indent);
         fprintf(stream, "uint128 = XXX\n");
         entry_data_list = entry_data_list->next;
         break;
-    case MMDB_DTYPE_INT32:
+    case MMDB_DATA_TYPE_INT32:
         print_indentation(indent);
         fprintf(stream, "int32 = %d\n", entry_data_list->entry_data.int32);
         entry_data_list = entry_data_list->next;

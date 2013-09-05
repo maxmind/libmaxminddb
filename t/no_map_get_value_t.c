@@ -17,7 +17,7 @@ void run_tests(int mode, const char *mode_desc)
     cmp_ok(status, "==", MMDB_SUCCESS,
            "status for MMDB_get_value() is MMDB_SUCCESS");
     ok(entry_data.offset, "found a value when varargs list is just NULL");
-    cmp_ok(entry_data.type, "==", MMDB_DTYPE_UTF8_STRING,
+    cmp_ok(entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
            "returned entry type is utf8_string");
 
     MMDB_close(mmdb);
