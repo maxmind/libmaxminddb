@@ -151,6 +151,7 @@ MMDB_entry_data_list_s *test_mapX_key_value_pair(MMDB_entry_data_list_s
         char *utf8_stringX_value = dup_entry_or_bail(mapX_value->entry_data);
         ok(strcmp(utf8_stringX_value, "hello") == 0,
            "map{mapX}{utf8_stringX} value is 'hello'");
+        free(utf8_stringX_value);
     } else if (strcmp(mapX_key_name, "arrayX") == 0) {
         entry_data_list = test_arrayX_value(entry_data_list);
     } else {
@@ -262,6 +263,8 @@ MMDB_entry_data_list_s *test_utf8_string_value(MMDB_entry_data_list_s
 
     is(utf8_string, expect, "got expected value for utf8_string key");
 
+    free(utf8_string);
+
     return entry_data_list;
 }
 
@@ -270,12 +273,15 @@ void run_tests(int mode, const char *description)
     const char *filename = "MaxMind-DB-test-decoder.mmdb";
     const char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, description);
+    free(path);
 
     char *ip = "1.1.1.1";
     MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, description);
 
-    MMDB_entry_data_list_s *entry_data_list;
+    MMDB_entry_data_list_s *entry_data_list, *first;
     int status = MMDB_get_entry_data_list(&result->entry, &entry_data_list);
+    free(result);
+
     if (MMDB_SUCCESS != status) {
         BAIL_OUT("MMDB_get_entry_data_list failed with %s",
                  MMDB_strerror(status));
@@ -283,6 +289,8 @@ void run_tests(int mode, const char *description)
         cmp_ok(status, "==", MMDB_SUCCESS,
                "MMDB_get_entry_data_list succeeded");
     }
+
+    first = entry_data_list;
 
     cmp_ok(entry_data_list->entry_data.type, "==", MMDB_DTYPE_MAP,
            "first entry in entry data list is a map");
@@ -327,10 +335,14 @@ void run_tests(int mode, const char *description)
         } else {
             ok(0, "unknown key found in map - %s", key_name);
         }
+
+        free(key_name);
     }
 
+    MMDB_free_entry_data_list(first);
 
     MMDB_close(mmdb);
+    free(mmdb);
 }
 
 int main(void)
