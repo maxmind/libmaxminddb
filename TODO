@@ -1,8 +1,8 @@
-* Make MMDB_dump output saner (something JSON-ish)
 * Fix mmdb* apps
 ** better usage info and error messages
 ** more shared code
-** don't assume GeoIP2 data format in mmdblookup
+** combine dump & lookup - can dump by default or print out a partial dump if
+   given a path to a given item
 * More tests
 ** tests for apps
 ** test for MMDB_dump
