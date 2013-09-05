@@ -127,7 +127,7 @@ MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
 
     MMDB_lookup_result_s *result = malloc(sizeof(MMDB_lookup_result_s));
     if (NULL == result) {
-        *mmdb_error = MMDB_OUT_OF_MEMORY;
+        *mmdb_error = MMDB_OUT_OF_MEMORY_ERROR;
         return NULL;
     }
 
@@ -241,7 +241,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     }
 
     // We should not be able to reach this return. If we do, something very bad happened.
-    return MMDB_CORRUPT_DATABASE;
+    return MMDB_CORRUPT_SEARCH_TREE_ERROR;
 }
 
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record)
@@ -261,7 +261,7 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size)
     const uint8_t *metadata;
     metadata = find_metadata(last_128kb, size);
     if (NULL == metadata) {
-        return MMDB_INVALID_DATABASE;
+        return MMDB_INVALID_METADATA_ERROR;
     }
 
     /* We need to create a fake MMDB_s struct in order to decode values from
@@ -283,7 +283,7 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size)
 
     if (mmdb->metadata.record_size != 24 && mmdb->metadata.record_size != 28
         && mmdb->metadata.record_size != 32) {
-        return MMDB_UNKNOWN_DATABASE_FORMAT;
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
     mmdb->metadata.ip_version =
@@ -371,7 +371,7 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     MMDB_get_value(metadata_start, &entry_data, "languages", NULL);
 
     if (MMDB_DTYPE_ARRAY != entry_data.type) {
-        return MMDB_INVALID_DATABASE;
+        return MMDB_INVALID_METADATA_ERROR;
     }
 
     MMDB_entry_s array_start;
@@ -387,13 +387,13 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     mmdb->metadata.languages.count = 0;
     mmdb->metadata.languages.names = malloc(array_size * sizeof(char *));
     if (NULL == mmdb->metadata.languages.names) {
-        return MMDB_OUT_OF_MEMORY;
+        return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
     for (int i = 0; i < array_size; i++) {
         member = member->next;
         if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
-            return MMDB_INVALID_DATABASE;
+            return MMDB_INVALID_METADATA_ERROR;
         }
 
         mmdb->metadata.languages.names[i] =
@@ -401,7 +401,7 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                     member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.languages.names[i]) {
-            return MMDB_OUT_OF_MEMORY;
+            return MMDB_OUT_OF_MEMORY_ERROR;
         }
         // We assign this as we go so that if we fail a malloc and need to
         // free it, the count is right.
@@ -421,7 +421,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     MMDB_get_value(metadata_start, &entry_data, "description", NULL);
 
     if (MMDB_DTYPE_MAP != entry_data.type) {
-        return MMDB_INVALID_DATABASE;
+        return MMDB_INVALID_METADATA_ERROR;
     }
 
     MMDB_entry_s map_start;
@@ -438,14 +438,14 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     mmdb->metadata.description.descriptions =
         malloc(map_size * sizeof(MMDB_description_s *));
     if (NULL == mmdb->metadata.description.descriptions) {
-        return MMDB_OUT_OF_MEMORY;
+        return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
     for (int i = 0; i < map_size; i++) {
         mmdb->metadata.description.descriptions[i] =
             malloc(sizeof(MMDB_description_s));
         if (NULL == mmdb->metadata.description.descriptions[i]) {
-            return MMDB_OUT_OF_MEMORY;
+            return MMDB_OUT_OF_MEMORY_ERROR;
         }
 
         mmdb->metadata.description.count = i + 1;
@@ -455,7 +455,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         member = member->next;
 
         if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
-            return MMDB_INVALID_DATABASE;
+            return MMDB_INVALID_METADATA_ERROR;
         }
 
         mmdb->metadata.description.descriptions[i]->language =
@@ -463,13 +463,13 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                     member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.description.descriptions[i]->language) {
-            return MMDB_OUT_OF_MEMORY;
+            return MMDB_OUT_OF_MEMORY_ERROR;
         }
 
         member = member->next;
 
         if (MMDB_DTYPE_UTF8_STRING != member->entry_data.type) {
-            return MMDB_INVALID_DATABASE;
+            return MMDB_INVALID_METADATA_ERROR;
         }
 
         mmdb->metadata.description.descriptions[i]->description =
@@ -477,7 +477,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                     member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.description.descriptions[i]->description) {
-            return MMDB_OUT_OF_MEMORY;
+            return MMDB_OUT_OF_MEMORY_ERROR;
         }
     }
 
@@ -506,7 +506,7 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
     mmdb->filename = strdup(filename);
     if (mmdb->filename == NULL) {
         free_mmdb_struct(mmdb);
-        return MMDB_OUT_OF_MEMORY;
+        return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
     int fd = open(filename, O_RDONLY);
@@ -528,7 +528,7 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
     uint8_t *last_128kb = malloc(METADATA_BLOCK_MAX_SIZE);
     if (NULL == last_128kb) {
         free_mmdb_struct(mmdb);
-        return MMDB_OUT_OF_MEMORY;
+        return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
     off_t offset = size > METADATA_BLOCK_MAX_SIZE ? METADATA_BLOCK_MAX_SIZE : 0;
@@ -546,7 +546,7 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
 
     if (mmdb->metadata.binary_format_major_version != 2) {
         free_mmdb_struct(mmdb);
-        return MMDB_UNKNOWN_DATABASE_FORMAT;
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
     uint8_t *file_content;
@@ -554,7 +554,7 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
         file_content = malloc(size);
         if (NULL == file_content) {
             free_mmdb_struct(mmdb);
-            return MMDB_OUT_OF_MEMORY;
+            return MMDB_OUT_OF_MEMORY_ERROR;
         }
         if (MMDB_SUCCESS != int_pread(fd, file_content, size, 0)) {
             free_mmdb_struct(mmdb);
@@ -728,7 +728,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                     }
 
                     if (MMDB_DTYPE_UTF8_STRING != key.type) {
-                        return MMDB_INVALID_DATA;
+                        return MMDB_INVALID_DATA_ERROR;
                     }
 
                     if (key.data_size == src_keylen &&
@@ -865,27 +865,27 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
 
     if (type == MMDB_DTYPE_UINT16) {
         if (size < 0 || size > 2) {
-            return MMDB_INVALID_DATA;
+            return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint16 = (uint16_t)get_uintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_UINT32) {
         if (size < 0 || size > 4) {
-            return MMDB_INVALID_DATA;
+            return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint32 = (uint32_t)get_uintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_INT32) {
         if (size < 0 || size > 4) {
-            return MMDB_INVALID_DATA;
+            return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->int32 = get_sintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_UINT64) {
         if (size < 0 || size > 8) {
-            return MMDB_INVALID_DATA;
+            return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint64 = get_uintX(&mem[offset], size);
     } else if (type == MMDB_DTYPE_UINT128) {
         if (size < 0 || size > 16) {
-            return MMDB_INVALID_DATA;
+            return MMDB_INVALID_DATA_ERROR;
         }
 
         memset(entry_data->uint128, 0, 16);
@@ -954,7 +954,7 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
 {
     *entry_data_list = MMDB_new_entry_data_list();
     if (NULL == &entry_data_list) {
-        return MMDB_OUT_OF_MEMORY;
+        return MMDB_OUT_OF_MEMORY_ERROR;
     }
     return get_entry_data_list(start->mmdb, start->offset, *entry_data_list);
 }
@@ -998,7 +998,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
                     MMDB_new_entry_data_list();
                 if (NULL == entry_data_list_to) {
-                    return MMDB_OUT_OF_MEMORY;
+                    return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
                 int status =
@@ -1030,7 +1030,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
                     MMDB_new_entry_data_list();
                 if (NULL == entry_data_list_to) {
-                    return MMDB_OUT_OF_MEMORY;
+                    return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
                 int status =
@@ -1052,7 +1052,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                     MMDB_new_entry_data_list();
 
                 if (NULL == entry_data_list_to) {
-                    return MMDB_OUT_OF_MEMORY;
+                    return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
                 status = get_entry_data_list(mmdb, offset, entry_data_list_to);
@@ -1188,7 +1188,7 @@ int MMDB_dump_entry_data_list(FILE *stream,
     MMDB_entry_data_list_s *rval =
         dump_entry_data_list(stream, entry_data_list, indent, &status);
     if (NULL == rval) {
-        return MMDB_OUT_OF_MEMORY;
+        return MMDB_OUT_OF_MEMORY_ERROR;
     } else {
         return MMDB_SUCCESS;
     }
@@ -1242,7 +1242,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
                 strndup((char *)entry_data_list->entry_data.utf8_string,
                         entry_data_list->entry_data.data_size);
             if (NULL == string) {
-                *status = MMDB_OUT_OF_MEMORY;
+                *status = MMDB_OUT_OF_MEMORY_ERROR;
                 return NULL;
             }
             print_indentation(indent);
@@ -1256,7 +1256,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             char *bytes = strndup((char *)entry_data_list->entry_data.bytes,
                                   entry_data_list->entry_data.data_size);
             if (NULL == bytes) {
-                *status = MMDB_OUT_OF_MEMORY;
+                *status = MMDB_OUT_OF_MEMORY_ERROR;
                 return NULL;
             }
             print_indentation(indent);
@@ -1311,7 +1311,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
         break;
     default:
         MMDB_DBG_CARP("unknown type! %d\n", entry_data_list->entry_data.type);
-        *status = MMDB_INVALID_DATA;
+        *status = MMDB_INVALID_DATA_ERROR;
         return NULL;
     }
 
@@ -1333,18 +1333,18 @@ const char *MMDB_strerror(uint16_t error_code)
         return "Success (not an error)";
     } else if (MMDB_FILE_OPEN_ERROR == error_code) {
         return "Error opening the specified MaxMind DB file";
-    } else if (MMDB_CORRUPT_DATABASE == error_code) {
+    } else if (MMDB_CORRUPT_SEARCH_TREE_ERROR == error_code) {
         return "The MaxMind DB file's search tree is corrupt";
-    } else if (MMDB_INVALID_DATABASE == error_code) {
-        return "The MaxMind DB file is invalid (bad metadata)";
+    } else if (MMDB_INVALID_METADATA_ERROR == error_code) {
+        return "The MaxMind DB file contains invalid metadata";
     } else if (MMDB_IO_ERROR == error_code) {
         return "An attempt to read data from the MaxMind DB file failed";
-    } else if (MMDB_OUT_OF_MEMORY == error_code) {
+    } else if (MMDB_OUT_OF_MEMORY_ERROR == error_code) {
         return "A memory allocation call failed";
-    } else if (MMDB_UNKNOWN_DATABASE_FORMAT == error_code) {
+    } else if (MMDB_UNKNOWN_DATABASE_FORMAT_ERROR == error_code) {
         return
             "The MaxMind DB file is in a format this library can't handle (unknown record size or binary format version)";
-    } else if (MMDB_INVALID_DATA == error_code) {
+    } else if (MMDB_INVALID_DATA_ERROR == error_code) {
         return
             "The MaxMind DB file's data section contains bad data (unknown data type or corrupt data)";
     } else {
