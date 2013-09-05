@@ -24,6 +24,7 @@
     extern MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, int expect_type,
                                      const char *description, ...);
     extern void compare_double(double got, double expect);
+    extern void compare_float(float got, float expect);
     /* --prototypes end - don't remove this comment-- */
 
 #endif

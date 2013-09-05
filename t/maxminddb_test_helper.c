@@ -129,3 +129,13 @@ void compare_double(double got, double expect)
              got, expect, diff);
     }
 }
+
+void compare_float(float got, float expect)
+{
+    float diff = fabsf(got - expect);
+    int is_ok = ok(diff < 0.01, "float value was approximately %2.1f", expect);
+    if (!is_ok) {
+        diag("  got %2.4f but expected %2.1f (diff = %2.1f)",
+             got, expect, diff);
+    }
+}

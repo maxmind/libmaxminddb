@@ -38,15 +38,8 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         MMDB_entry_data_s data =
             data_ok(result, MMDB_DTYPE_FLOAT, description, "float", NULL);
-        float expect = 1.1;
-        float diff = fabs(data.float_value - expect);
-        int is_ok =
-            ok(diff < 0.01, "float value was approximately %2.1f", description,
-               expect);
-        if (!is_ok) {
-            diag("  got %2.4f but expected %2.4f (diff = %2.4f)",
-                 data.float_value, expect, diff);
-        }
+
+        compare_float(data.float_value, 1.1F);
     }
 
     {
