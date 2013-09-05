@@ -119,3 +119,13 @@ MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, int expect_type,
 
     return data;
 }
+
+void compare_double(double got, double expect)
+{
+    double diff = fabs(got - expect);
+    int is_ok = ok(diff < 0.01, "double value was approximately %2.6f", expect);
+    if (!is_ok) {
+        diag("  got %2.6f but expected %2.6f (diff = %2.6f)",
+             got, expect, diff);
+    }
+}
