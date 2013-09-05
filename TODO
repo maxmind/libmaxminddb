@@ -3,11 +3,9 @@
 * Replace assert in dump() function
 ** there is one in resolve_any_address() that can be left as-is
 * Fix mmdb* apps
-** fix segfaults
 ** better usage info and error messages
 ** more shared code
-** don't assume GeoIP2 data format
+** don't assume GeoIP2 data format in mmdblookup
 * More tests
 ** tests for apps
-** tests for MMDB_get_entry_data_list with various structures
 * Some sort of data validation testing when decoding a data entry
