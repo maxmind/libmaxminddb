@@ -17,6 +17,11 @@ sub main {
         "$Bin/../bin/maxminddb_app_helper.c",
         "$Bin/../bin/maxminddb_app_helper.h",
     );
+
+    _regen_prototypes(
+        "$Bin/../t/maxminddb_test_helper.c",
+        "$Bin/../t/maxminddb_test_helper.h",
+    );
 }
 
 sub _regen_prototypes {
