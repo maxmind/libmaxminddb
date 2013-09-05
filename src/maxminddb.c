@@ -72,8 +72,8 @@ LOCAL uint64_t get_uintX(const uint8_t *p, int length);
 LOCAL int32_t get_sintX(const uint8_t *p, int length);
 LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset);
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s
-                                                   *entry_data_list,
-                                                   int indent);
+                                                   *entry_data_list, int indent,
+                                                   int *status);
 LOCAL void print_indentation(int i);
 /* --prototypes end - don't remove this comment-- */
 
@@ -1183,8 +1183,10 @@ int MMDB_dump_entry_data_list(FILE *stream,
                               int indent)
 {
     fprintf(stream, "Dumping data structure\n");
+
+    int status;
     MMDB_entry_data_list_s *rval =
-        dump_entry_data_list(stream, entry_data_list, indent);
+        dump_entry_data_list(stream, entry_data_list, indent, &status);
     if (NULL == rval) {
         return MMDB_OUT_OF_MEMORY;
     } else {
@@ -1193,7 +1195,8 @@ int MMDB_dump_entry_data_list(FILE *stream,
 }
 
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s
-                                                   *entry_data_list, int indent)
+                                                   *entry_data_list, int indent,
+                                                   int *status)
 {
     switch (entry_data_list->entry_data.type) {
     case MMDB_DTYPE_MAP:
@@ -1203,13 +1206,15 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             for (entry_data_list = entry_data_list->next;
                  size && entry_data_list; size--) {
                 entry_data_list =
-                    dump_entry_data_list(stream, entry_data_list, indent + 2);
+                    dump_entry_data_list(stream, entry_data_list, indent + 2,
+                                         status);
                 if (NULL == entry_data_list) {
                     return NULL;
                 }
 
                 entry_data_list =
-                    dump_entry_data_list(stream, entry_data_list, indent + 2);
+                    dump_entry_data_list(stream, entry_data_list, indent + 2,
+                                         status);
                 if (NULL == entry_data_list) {
                     return NULL;
                 }
@@ -1223,7 +1228,8 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             for (entry_data_list = entry_data_list->next;
                  size && entry_data_list; size--) {
                 entry_data_list =
-                    dump_entry_data_list(stream, entry_data_list, indent + 2);
+                    dump_entry_data_list(stream, entry_data_list, indent + 2,
+                                         status);
                 if (NULL == entry_data_list) {
                     return NULL;
                 }
@@ -1236,6 +1242,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
                 strndup((char *)entry_data_list->entry_data.utf8_string,
                         entry_data_list->entry_data.data_size);
             if (NULL == string) {
+                *status = MMDB_OUT_OF_MEMORY;
                 return NULL;
             }
             print_indentation(indent);
@@ -1249,6 +1256,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
             char *bytes = strndup((char *)entry_data_list->entry_data.bytes,
                                   entry_data_list->entry_data.data_size);
             if (NULL == bytes) {
+                *status = MMDB_OUT_OF_MEMORY;
                 return NULL;
             }
             print_indentation(indent);
@@ -1303,7 +1311,8 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data
         break;
     default:
         MMDB_DBG_CARP("unknown type! %d\n", entry_data_list->entry_data.type);
-        assert(0);
+        *status = MMDB_INVALID_DATA;
+        return NULL;
     }
 
     return entry_data_list;
