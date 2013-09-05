@@ -146,7 +146,7 @@ extern "C" {
     extern int MMDB_get_entry_data_list(MMDB_entry_s *start,
                                         MMDB_entry_data_list_s **entry_data_list);
     extern MMDB_entry_data_list_s *MMDB_new_entry_data_list(void);
-    extern void MMDB_free_entry_data_list(MMDB_entry_data_list_s *freeme);
+    extern void MMDB_free_entry_data_list(MMDB_entry_data_list_s *entry_data_list);
     extern const char *MMDB_lib_version(void);
     extern int MMDB_dump_entry_data_list(FILE *stream,
                                          MMDB_entry_data_list_s *entry_data_list,
