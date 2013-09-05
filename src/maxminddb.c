@@ -1162,15 +1162,15 @@ MMDB_entry_data_list_s *MMDB_new_entry_data_list(void)
     return calloc(1, sizeof(MMDB_entry_data_list_s));
 }
 
-void MMDB_free_entry_data_list(MMDB_entry_data_list_s *freeme)
+void MMDB_free_entry_data_list(MMDB_entry_data_list_s *entry_data_list)
 {
-    if (freeme == NULL) {
+    if (entry_data_list == NULL) {
         return;
     }
-    if (freeme->next) {
-        MMDB_free_entry_data_list(freeme->next);
+    if (entry_data_list->next) {
+        MMDB_free_entry_data_list(entry_data_list->next);
     }
-    free(freeme);
+    free(entry_data_list);
 }
 
 const char *MMDB_lib_version(void)
