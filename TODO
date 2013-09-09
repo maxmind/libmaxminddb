@@ -5,5 +5,4 @@
    given a path to a given item
 * More tests
 ** tests for apps
-** test for MMDB_dump
 * Some sort of data validation testing when decoding a data entry
