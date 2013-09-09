@@ -135,7 +135,7 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
     if (is_ipv4) {
         address = (uint8_t *)&in_addr.v4.s_addr;
     } else {
-        address = (uint8_t *)&in_addr.v6;
+        address = (uint8_t *)&in_addr.v6.s6_addr;
     }
 
     *mmdb_error = find_address_in_search_tree(mmdb, address, &result);
