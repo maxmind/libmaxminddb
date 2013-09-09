@@ -1184,13 +1184,8 @@ int MMDB_dump_entry_data_list(FILE *stream,
                               int indent)
 {
     int status;
-    MMDB_entry_data_list_s *rval =
-        dump_entry_data_list(stream, entry_data_list, indent, &status);
-    if (NULL == rval) {
-        return MMDB_OUT_OF_MEMORY_ERROR;
-    } else {
-        return MMDB_SUCCESS;
-    }
+    dump_entry_data_list(stream, entry_data_list, indent, &status);
+    return status;
 }
 
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s

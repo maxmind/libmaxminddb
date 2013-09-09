@@ -3,6 +3,7 @@
 #endif
 #include <math.h>
 #include <netdb.h>
+#include <stdio.h>
 #include <string.h>
 #include "maxminddb.h"
 #include "libtap/tap.h"
