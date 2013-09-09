@@ -38,10 +38,9 @@ const char *test_database_path(const char *filename)
     getcwd(cwd, 500);
 
     char *test_db_dir;
-    if (strcmp(basename(cwd), "t") == 0){
+    if (strcmp(basename(cwd), "t") == 0) {
         test_db_dir = "../maxmind-db/test-data";
-    }
-    else {
+    } else {
         test_db_dir = "./maxmind-db/test-data";
     }
 
@@ -83,8 +82,8 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
     return mmdb;
 }
 
-MMDB_lookup_result_s lookup_ok(MMDB_s *mmdb, const char *ip,
-                                const char *file, const char *mode_desc)
+MMDB_lookup_result_s string_lookup_ok(MMDB_s *mmdb, const char *ip,
+                                      const char *file, const char *mode_desc)
 {
     int gai_error, mmdb_error;
     MMDB_lookup_result_s result =

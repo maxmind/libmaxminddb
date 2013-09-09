@@ -8,7 +8,8 @@ static const char *Current_Mode_Description;
 void test_one_ip(MMDB_s *mmdb, const char *ip, const char *expect,
                  const char *filename, const char *mode_desc)
 {
-    MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
+    MMDB_lookup_result_s result =
+        string_lookup_ok(mmdb, ip, filename, mode_desc);
 
     int is_ok = ok(result.found_entry,
                    "got a result for an IP in the database - %s - %s - %s",
@@ -57,7 +58,8 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
 
     for (int i = 0; i < missing_ips_length; i++) {
         const char *ip = missing_ips[i];
-        MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s result =
+            string_lookup_ok(mmdb, ip, filename, mode_desc);
 
         ok(!result.found_entry,
            "no result entry struct returned for IP address not in the database - %s - %s - %s",

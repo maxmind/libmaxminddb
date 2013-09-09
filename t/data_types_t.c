@@ -9,7 +9,8 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
                  mode_desc);
 
         MMDB_entry_data_s data =
-            data_ok(result, MMDB_DATA_TYPE_UTF8_STRING, description, "utf8_string",
+            data_ok(result, MMDB_DATA_TYPE_UTF8_STRING, description,
+                    "utf8_string",
                     NULL);
         const char *string = strndup(data.utf8_string, data.data_size);
         // This is hex for "unicode! ☯ - ♫" as bytes
@@ -100,7 +101,8 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         snprintf(description, 500, "uint128 field for %s - %s", ip, mode_desc);
 
         MMDB_entry_data_s data =
-            data_ok(result, MMDB_DATA_TYPE_UINT128, description, "uint128", NULL);
+            data_ok(result, MMDB_DATA_TYPE_UINT128, description, "uint128",
+                    NULL);
         uint8_t expect[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
@@ -112,7 +114,8 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         snprintf(description, 500, "boolean field for %s - %s", ip, mode_desc);
 
         MMDB_entry_data_s data =
-            data_ok(result, MMDB_DATA_TYPE_BOOLEAN, description, "boolean", NULL);
+            data_ok(result, MMDB_DATA_TYPE_BOOLEAN, description, "boolean",
+                    NULL);
         cmp_ok(data.boolean, "==", true, "boolean field is true");
     }
 
@@ -126,17 +129,20 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 
         snprintf(description, 500, "array[0] for %s - %s", ip, mode_desc);
         data =
-            data_ok(result, MMDB_DATA_TYPE_UINT32, description, "array", "0", NULL);
+            data_ok(result, MMDB_DATA_TYPE_UINT32, description, "array", "0",
+                    NULL);
         ok(data.uint32 == 1, "array[0] is 1");
 
         snprintf(description, 500, "array[1] for %s - %s", ip, mode_desc);
         data =
-            data_ok(result, MMDB_DATA_TYPE_UINT32, description, "array", "1", NULL);
+            data_ok(result, MMDB_DATA_TYPE_UINT32, description, "array", "1",
+                    NULL);
         ok(data.uint32 == 2, "array[1] is 1");
 
         snprintf(description, 500, "array[2] for %s - %s", ip, mode_desc);
         data =
-            data_ok(result, MMDB_DATA_TYPE_UINT32, description, "array", "2", NULL);
+            data_ok(result, MMDB_DATA_TYPE_UINT32, description, "array", "2",
+                    NULL);
         ok(data.uint32 == 3, "array[2] is 1");
     }
 
@@ -151,15 +157,16 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         snprintf(description, 500, "map{mapX} for %s - %s", ip, mode_desc);
 
         data =
-            data_ok(result, MMDB_DATA_TYPE_MAP, description, "map", "mapX", NULL);
+            data_ok(result, MMDB_DATA_TYPE_MAP, description, "map", "mapX",
+                    NULL);
         ok(data.data_size == 2, "map{mapX} field has 2 elements");
 
         snprintf(description, 500, "map{mapX}{utf8_stringX} for %s - %s", ip,
                  mode_desc);
 
         data =
-            data_ok(result, MMDB_DATA_TYPE_UTF8_STRING, description, "map", "mapX",
-                    "utf8_stringX", NULL);
+            data_ok(result, MMDB_DATA_TYPE_UTF8_STRING, description, "map",
+                    "mapX", "utf8_stringX", NULL);
         const char *string = strndup(data.utf8_string, data.data_size);
         is(string, "hello", "map{mapX}{utf8_stringX} is 'hello'");
         free((char *)string);
@@ -224,7 +231,8 @@ void run_tests(int mode, const char *mode_desc)
 
     {
         const char *ip = "e900::";
-        MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s result =
+            string_lookup_ok(mmdb, ip, filename, mode_desc);
 
         ok(!result.found_entry,
            "no result entry struct returned for IP address not in the database - %s - %s - %s",
@@ -233,7 +241,8 @@ void run_tests(int mode, const char *mode_desc)
 
     {
         const char *ip = "::1.1.1.1";
-        MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s result =
+            string_lookup_ok(mmdb, ip, filename, mode_desc);
 
         ok(result.found_entry,
            "got a result entry struct for IP address in the database - %s - %s - %s",
@@ -248,7 +257,8 @@ void run_tests(int mode, const char *mode_desc)
 
     {
         const char *ip = "::4.5.6.7";
-        MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s result =
+            string_lookup_ok(mmdb, ip, filename, mode_desc);
 
         ok(result.found_entry,
            "got a result entry struct for IP address in the database - %s - %s - %s",

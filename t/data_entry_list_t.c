@@ -208,7 +208,7 @@ MMDB_entry_data_list_s *test_uint128_value(MMDB_entry_data_list_s
 }
 
 MMDB_entry_data_list_s *test_uint16_value(MMDB_entry_data_list_s
-                                         *entry_data_list)
+                                          *entry_data_list)
 {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
@@ -221,7 +221,7 @@ MMDB_entry_data_list_s *test_uint16_value(MMDB_entry_data_list_s
 }
 
 MMDB_entry_data_list_s *test_uint32_value(MMDB_entry_data_list_s
-                                         *entry_data_list)
+                                          *entry_data_list)
 {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
@@ -234,7 +234,7 @@ MMDB_entry_data_list_s *test_uint32_value(MMDB_entry_data_list_s
 }
 
 MMDB_entry_data_list_s *test_uint64_value(MMDB_entry_data_list_s
-                                         *entry_data_list)
+                                          *entry_data_list)
 {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
@@ -276,7 +276,8 @@ void run_tests(int mode, const char *description)
     free(path);
 
     char *ip = "1.1.1.1";
-    MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, description);
+    MMDB_lookup_result_s result =
+        string_lookup_ok(mmdb, ip, filename, description);
 
     MMDB_entry_data_list_s *entry_data_list, *first;
     int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);

@@ -20,7 +20,7 @@
     extern void for_all_modes(void (*tests) (int mode, const char *description));
     extern const char *test_database_path(const char *filename);
     extern MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc);
-    extern MMDB_lookup_result_s lookup_ok(MMDB_s *mmdb, const char *ip,
+    extern MMDB_lookup_result_s string_lookup_ok(MMDB_s *mmdb, const char *ip,
                                            const char *file, const char *mode_desc);
     extern MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, int expect_type,
                                      const char *description, ...);

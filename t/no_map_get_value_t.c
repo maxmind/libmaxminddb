@@ -8,7 +8,8 @@ void run_tests(int mode, const char *mode_desc)
     free((void *)path);
 
     const char *ip = "1.1.1.1";
-    MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
+    MMDB_lookup_result_s result =
+        string_lookup_ok(mmdb, ip, filename, mode_desc);
 
     MMDB_entry_data_s entry_data;
     int status = MMDB_get_value(&result.entry, &entry_data, NULL);
