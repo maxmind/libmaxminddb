@@ -273,7 +273,7 @@ void run_tests(int mode, const char *description)
     const char *filename = "MaxMind-DB-test-decoder.mmdb";
     const char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, description);
-    free(path);
+    free((void *)path);
 
     char *ip = "1.1.1.1";
     MMDB_lookup_result_s result =
