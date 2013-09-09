@@ -212,65 +212,53 @@ void run_tests(int mode, const char *mode_desc)
         const char *ip = "not an ip";
 
         int gai_error, mmdb_error;
-        MMDB_lookup_result_s *result =
+        MMDB_lookup_result_s result =
             MMDB_lookup_string(mmdb, ip, &gai_error, &mmdb_error);
 
         cmp_ok(gai_error, "==", EAI_NONAME,
                "MMDB_lookup populates getaddrinfo error properly - %s", ip);
 
-        ok(NULL == result,
+        ok(!result.found_entry,
            "no result entry struct returned for invalid IP address '%s'", ip);
-
-        if (NULL != result) {
-            free(result);
-        }
     }
 
     {
         const char *ip = "e900::";
-        MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
 
-        ok(NULL == result,
+        ok(!result.found_entry,
            "no result entry struct returned for IP address not in the database - %s - %s - %s",
            ip, filename, mode_desc);
-
-        if (NULL != result) {
-            free(result);
-        }
     }
 
     {
         const char *ip = "::1.1.1.1";
-        MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
 
-        ok(NULL != result,
+        ok(result.found_entry,
            "got a result entry struct for IP address in the database - %s - %s - %s",
            ip, filename, mode_desc);
 
-        cmp_ok(result->entry.offset, ">", 0,
+        cmp_ok(result.entry.offset, ">", 0,
                "result.entry.offset > 0 for address in the database - %s - %s - %s",
                ip, filename, mode_desc);
 
-        test_all_data_types(result, ip, filename, mode_desc);
-
-        free(result);
+        test_all_data_types(&result, ip, filename, mode_desc);
     }
 
     {
         const char *ip = "::4.5.6.7";
-        MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, mode_desc);
+        MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
 
-        ok(NULL != result,
+        ok(result.found_entry,
            "got a result entry struct for IP address in the database - %s - %s - %s",
            ip, filename, mode_desc);
 
-        cmp_ok(result->entry.offset, ">", 0,
+        cmp_ok(result.entry.offset, ">", 0,
                "result.entry.offset > 0 for address in the database - %s - %s - %s",
                ip, filename, mode_desc);
 
-        test_all_data_types(result, ip, filename, mode_desc);
-
-        free(result);
+        test_all_data_types(&result, ip, filename, mode_desc);
     }
 
     MMDB_close(mmdb);

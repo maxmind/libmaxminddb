@@ -83,11 +83,11 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
     return mmdb;
 }
 
-MMDB_lookup_result_s *lookup_ok(MMDB_s *mmdb, const char *ip,
+MMDB_lookup_result_s lookup_ok(MMDB_s *mmdb, const char *ip,
                                 const char *file, const char *mode_desc)
 {
     int gai_error, mmdb_error;
-    MMDB_lookup_result_s *result =
+    MMDB_lookup_result_s result =
         MMDB_lookup_string(mmdb, ip, &gai_error, &mmdb_error);
 
     int is_ok = ok(0 == gai_error,

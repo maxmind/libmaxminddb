@@ -45,11 +45,11 @@ int main(int argc, char *const argv[])
         dump_meta(mmdb);
     }
 
-    MMDB_lookup_result_s *result = lookup_or_die(&mmdb, ipstr);
+    MMDB_lookup_result_s result = lookup_or_die(&mmdb, ipstr);
 
-    if (result->entry.offset > 0) {
+    if (result.found_entry) {
         MMDB_entry_data_list_s *entry_data_list;
-        int status = MMDB_get_entry_data_list(&result->entry, &entry_data_list);
+        int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
         if (MMDB_SUCCESS != status) {
             fprintf(stderr, "Got an error looking up the entry data - %s\n",
                     MMDB_strerror(status));

@@ -114,25 +114,22 @@ LOCAL void *memmem(const void *big, size_t big_len, const void *little,
 }
 #endif
 
-MMDB_lookup_result_s *MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
-                                         int *gai_error, int *mmdb_error)
+MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
+                                        int *gai_error, int *mmdb_error)
 {
     int is_ipv4 = mmdb->metadata.ip_version == 4 ? 1 : 0;
     in_addr_any in_addr;
 
+    MMDB_lookup_result_s result = {
+        .found_entry = false,
+        .entry.mmdb = mmdb,
+    };
+
     *gai_error = resolve_any_address(ipstr, is_ipv4, &in_addr);
 
     if (*gai_error) {
-        return NULL;
+        return result;
     }
-
-    MMDB_lookup_result_s *result = malloc(sizeof(MMDB_lookup_result_s));
-    if (NULL == result) {
-        *mmdb_error = MMDB_OUT_OF_MEMORY_ERROR;
-        return NULL;
-    }
-
-    result->entry.mmdb = mmdb;
 
     uint8_t *address;
     if (is_ipv4) {
@@ -141,19 +138,9 @@ MMDB_lookup_result_s *MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
         address = (uint8_t *)&in_addr.v6;
     }
 
-    *mmdb_error = find_address_in_search_tree(mmdb, address, result);
+    *mmdb_error = find_address_in_search_tree(mmdb, address, &result);
 
-    if (*mmdb_error) {
-        free(result);
-        return NULL;
-    }
-
-    if (result->entry.offset > 0) {
-        return result;
-    } else {
-        free(result);
-        return NULL;
-    }
+    return result;
 }
 
 LOCAL int resolve_any_address(const char *ipstr, int is_ipv4,
@@ -237,6 +224,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         if (value >= node_count) {
             result->netmask = mmdb->depth - current_bit;
             result->entry.offset = value - node_count;
+            result->found_entry = result->entry.offset > 0 ? true : false;
             return MMDB_SUCCESS;
         }
     }

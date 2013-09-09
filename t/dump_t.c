@@ -8,11 +8,10 @@ void run_tests(int mode, const char *mode_desc)
     free((void *)path);
 
     const char *ip = "1.1.1.1";
-    MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, mode_desc);
+    MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, mode_desc);
 
     MMDB_entry_data_list_s *entry_data_list;
-    int status = MMDB_get_entry_data_list(&result->entry, &entry_data_list);
-    free(result);
+    int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
 
     char *dump_output;
     size_t dump_size;

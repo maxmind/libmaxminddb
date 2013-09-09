@@ -276,11 +276,10 @@ void run_tests(int mode, const char *description)
     free(path);
 
     char *ip = "1.1.1.1";
-    MMDB_lookup_result_s *result = lookup_ok(mmdb, ip, filename, description);
+    MMDB_lookup_result_s result = lookup_ok(mmdb, ip, filename, description);
 
     MMDB_entry_data_list_s *entry_data_list, *first;
-    int status = MMDB_get_entry_data_list(&result->entry, &entry_data_list);
-    free(result);
+    int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
 
     if (MMDB_SUCCESS != status) {
         BAIL_OUT("MMDB_get_entry_data_list failed with %s",

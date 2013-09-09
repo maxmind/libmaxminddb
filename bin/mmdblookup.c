@@ -41,13 +41,13 @@ int main(int argc, char *const argv[])
 
     char *ipstr = argv[0];
 
-    MMDB_lookup_result_s *result = lookup_or_die(&mmdb, ipstr);
+    MMDB_lookup_result_s result = lookup_or_die(&mmdb, ipstr);
 
     if (verbose) {
         dump_meta(mmdb);
     }
 
-    dump_ipinfo(ipstr, result);
+    dump_ipinfo(ipstr, &result);
 
     return (0);
 }
