@@ -114,8 +114,8 @@ LOCAL void *memmem(const void *big, size_t big_len, const void *little,
 }
 #endif
 
-MMDB_lookup_result_s *MMDB_lookup(MMDB_s *mmdb, const char *ipstr,
-                                  int *gai_error, int *mmdb_error)
+MMDB_lookup_result_s *MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
+                                         int *gai_error, int *mmdb_error)
 {
     int is_ipv4 = mmdb->metadata.ip_version == 4 ? 1 : 0;
     in_addr_any in_addr;

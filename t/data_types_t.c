@@ -213,7 +213,7 @@ void run_tests(int mode, const char *mode_desc)
 
         int gai_error, mmdb_error;
         MMDB_lookup_result_s *result =
-            MMDB_lookup(mmdb, ip, &gai_error, &mmdb_error);
+            MMDB_lookup_string(mmdb, ip, &gai_error, &mmdb_error);
 
         cmp_ok(gai_error, "==", EAI_NONAME,
                "MMDB_lookup populates getaddrinfo error properly - %s", ip);
