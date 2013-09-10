@@ -19,6 +19,10 @@ sub main {
     );
 
     _regen_prototypes(
+        "$Bin/../bin/mmdblookup.c",
+    );
+
+    _regen_prototypes(
         "$Bin/../t/maxminddb_test_helper.c",
         "$Bin/../t/maxminddb_test_helper.h",
     );
