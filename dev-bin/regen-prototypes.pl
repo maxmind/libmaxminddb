@@ -78,7 +78,7 @@ sub _regen_prototypes {
             }
             grep { $_->{external} } @prototypes;
         $h_code
-            =~ s/__PROTOTYPES__/    $indent_off\n    $prototypes_start\n$external_prototypes    $prototypes_end\n    $indent_on/;
+            =~ s/__PROTOTYPES__/    $indent_off\n    $prototypes_start\n$external_prototypes    $prototypes_end\n    $indent_on\n/;
         $h_code =~ s{\n *(/\* \*INDENT)}{\n    $1}g;
     }
 
