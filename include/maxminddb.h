@@ -50,7 +50,7 @@ extern "C" {
 #define MMDB_DEBUG (0)
 
 #if MMDB_DEBUG
-#define MMDB_DBG_CARP(...) fprintf(stderr, __VA_ARGS__ );
+#define MMDB_DBG_CARP(...) fprintf(stderr, __VA_ARGS__)
 #else
 #define MMDB_DBG_CARP(...)
 #endif
