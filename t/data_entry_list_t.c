@@ -277,7 +277,7 @@ void run_tests(int mode, const char *description)
 
     char *ip = "1.1.1.1";
     MMDB_lookup_result_s result =
-        string_lookup_ok(mmdb, ip, filename, description);
+        lookup_string_ok(mmdb, ip, filename, description);
 
     MMDB_entry_data_list_s *entry_data_list, *first;
     int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);

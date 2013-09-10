@@ -82,16 +82,59 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
     return mmdb;
 }
 
-MMDB_lookup_result_s string_lookup_ok(MMDB_s *mmdb, const char *ip,
+MMDB_lookup_result_s lookup_string_ok(MMDB_s *mmdb, const char *ip,
                                       const char *file, const char *mode_desc)
 {
     int gai_error, mmdb_error;
     MMDB_lookup_result_s result =
         MMDB_lookup_string(mmdb, ip, &gai_error, &mmdb_error);
 
+    test_lookup_errors(gai_error, mmdb_error, "MMDB_lookup_string", ip, file,
+                       mode_desc);
+
+    return result;
+}
+
+MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
+                                        const char *file, const char *mode_desc)
+{
+    int ai_flags = AI_NUMERICHOST;
+    struct addrinfo hints = {
+        .ai_socktype = SOCK_STREAM
+    };
+    struct addrinfo *addresses;
+
+    if (ip[0] == ':') {
+        hints.ai_flags = ai_flags | AI_V4MAPPED;
+        hints.ai_family = AF_INET6;
+    } else {
+        hints.ai_flags = ai_flags;
+        hints.ai_family = AF_INET;
+    }
+
+    int gai_error = getaddrinfo(ip, NULL, &hints, &addresses);
+
+    int mmdb_error = 0;
+    MMDB_lookup_result_s result;
+    if (gai_error == 0) {
+        result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, &mmdb_error);
+    }
+    freeaddrinfo(addresses);
+
+    test_lookup_errors(gai_error, mmdb_error, "MMDB_lookup_sockaddr", ip, file,
+                       mode_desc);
+
+    return result;
+}
+
+void test_lookup_errors(int gai_error, int mmdb_error,
+                        const char *function, const char *ip,
+                        const char *file, const char *mode_desc)
+{
+
     int is_ok = ok(0 == gai_error,
-                   "no getaddrinfo error in call to MMDB_lookup for %s - %s - %s",
-                   ip, file, mode_desc);
+                   "no getaddrinfo error in call to %s for %s - %s - %s",
+                   function, ip, file, mode_desc);
 
     if (!is_ok) {
         diag("error from call to getaddrinfo for %s - %s",
@@ -99,14 +142,12 @@ MMDB_lookup_result_s string_lookup_ok(MMDB_s *mmdb, const char *ip,
     }
 
     is_ok = ok(0 == mmdb_error,
-               "no MMDB error in call to MMDB_lookup for %s - %s - %s",
-               ip, file, mode_desc);
+               "no MMDB error in call to %s for %s - %s - %s",
+               function, ip, file, mode_desc);
 
     if (!is_ok) {
         diag("MMDB error - %d", mmdb_error);
     }
-
-    return result;
 }
 
 MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, int expect_type,

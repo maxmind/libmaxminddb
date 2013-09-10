@@ -232,7 +232,7 @@ void run_tests(int mode, const char *mode_desc)
     {
         const char *ip = "e900::";
         MMDB_lookup_result_s result =
-            string_lookup_ok(mmdb, ip, filename, mode_desc);
+            lookup_string_ok(mmdb, ip, filename, mode_desc);
 
         ok(!result.found_entry,
            "no result entry struct returned for IP address not in the database - %s - %s - %s",
@@ -242,7 +242,7 @@ void run_tests(int mode, const char *mode_desc)
     {
         const char *ip = "::1.1.1.1";
         MMDB_lookup_result_s result =
-            string_lookup_ok(mmdb, ip, filename, mode_desc);
+            lookup_string_ok(mmdb, ip, filename, mode_desc);
 
         ok(result.found_entry,
            "got a result entry struct for IP address in the database - %s - %s - %s",
@@ -258,7 +258,7 @@ void run_tests(int mode, const char *mode_desc)
     {
         const char *ip = "::4.5.6.7";
         MMDB_lookup_result_s result =
-            string_lookup_ok(mmdb, ip, filename, mode_desc);
+            lookup_string_ok(mmdb, ip, filename, mode_desc);
 
         ok(result.found_entry,
            "got a result entry struct for IP address in the database - %s - %s - %s",

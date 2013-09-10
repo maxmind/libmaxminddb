@@ -9,7 +9,7 @@ void run_tests(int mode, const char *mode_desc)
 
     const char *ip = "1.1.1.1";
     MMDB_lookup_result_s result =
-        string_lookup_ok(mmdb, ip, filename, mode_desc);
+        lookup_string_ok(mmdb, ip, filename, mode_desc);
 
     MMDB_entry_data_list_s *entry_data_list;
     int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
@@ -20,10 +20,9 @@ void run_tests(int mode, const char *mode_desc)
     status = MMDB_dump_entry_data_list(stream, entry_data_list, 0);
     fclose(stream);
 
-    int is_ok =
-        ok(MMDB_SUCCESS == status,
-           "MMDB_dump_entry_data_list is successful - %s",
-           mode_desc);
+    int is_ok = ok(MMDB_SUCCESS == status,
+                   "MMDB_dump_entry_data_list is successful - %s",
+                   mode_desc);
 
     cmp_ok(dump_size, ">", 0, "MMDB_dump produced output - %s", mode_desc);
 

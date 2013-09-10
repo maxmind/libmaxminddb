@@ -5,15 +5,14 @@
 static int Current_Mode;
 static const char *Current_Mode_Description;
 
-void test_one_ip(MMDB_s *mmdb, const char *ip, const char *expect,
-                 const char *filename, const char *mode_desc)
+void test_one_result(MMDB_s *mmdb, MMDB_lookup_result_s result,
+                     const char *ip, const char *expect,
+                     const char *function, const char *filename,
+                     const char *mode_desc)
 {
-    MMDB_lookup_result_s result =
-        string_lookup_ok(mmdb, ip, filename, mode_desc);
-
     int is_ok = ok(result.found_entry,
-                   "got a result for an IP in the database - %s - %s - %s",
-                   ip, filename, mode_desc);
+                   "got a result for an IP in the database - %s - %s - %s - %s",
+                   function, ip, filename, mode_desc);
 
     if (!is_ok) {
         return;
@@ -35,11 +34,26 @@ void test_one_ip(MMDB_s *mmdb, const char *ip, const char *expect,
         snprintf(real_expect, maxlen, "::%s", expect);
     }
 
-    is(string, real_expect, "found expected result for ip key - %s - %s - %s",
-       ip, filename, mode_desc);
+    is(string, real_expect,
+       "found expected result for ip key - %s - %s - %s - %s", function, ip,
+       filename, mode_desc);
 
     free(real_expect);
     free(string);
+}
+
+void test_one_ip(MMDB_s *mmdb, const char *ip, const char *expect,
+                 const char *filename, const char *mode_desc)
+{
+    MMDB_lookup_result_s result =
+        lookup_string_ok(mmdb, ip, filename, mode_desc);
+
+    test_one_result(mmdb, result, ip, expect, "MMDB_lookup_string", filename,
+                    mode_desc);
+
+    result = lookup_sockaddr_ok(mmdb, ip, filename, mode_desc);
+    test_one_result(mmdb, result, ip, expect, "MMDB_lookup_addrinfo", filename,
+                    mode_desc);
 }
 
 void run_ipX_tests(const char *filename, const char **missing_ips,
@@ -58,11 +72,18 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
 
     for (int i = 0; i < missing_ips_length; i++) {
         const char *ip = missing_ips[i];
+
         MMDB_lookup_result_s result =
-            string_lookup_ok(mmdb, ip, filename, mode_desc);
+            lookup_string_ok(mmdb, ip, filename, mode_desc);
 
         ok(!result.found_entry,
-           "no result entry struct returned for IP address not in the database - %s - %s - %s",
+           "no result entry struct returned for IP address not in the database (string lookup) - %s - %s - %s",
+           ip, filename, mode_desc);
+
+        result = lookup_sockaddr_ok(mmdb, ip, filename, mode_desc);
+
+        ok(!result.found_entry,
+           "no result entry struct returned for IP address not in the database (ipv4 lookup) - %s - %s - %s",
            ip, filename, mode_desc);
     }
 

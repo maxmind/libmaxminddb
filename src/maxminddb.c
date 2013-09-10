@@ -2,8 +2,6 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <fcntl.h>
-#include <netdb.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
@@ -181,6 +179,39 @@ LOCAL int resolve_any_address(const char *ipstr, bool is_ipv4,
     freeaddrinfo(addresses);
 
     return 0;
+}
+
+MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
+                                          struct sockaddr *sockaddr,
+                                          int *mmdb_error)
+{
+    MMDB_lookup_result_s result = {
+        .found_entry = false,
+        .entry.mmdb = mmdb,
+    };
+
+    uint8_t *address;
+    if (mmdb->metadata.ip_version == 4) {
+        if (sockaddr->sa_family == AF_INET6) {
+            return result;
+        }
+        address = calloc(1, 4);
+        memcpy(address, &((struct sockaddr_in *)sockaddr)->sin_addr.s_addr, 4);
+    } else {
+        address = calloc(1, 16);
+        if (sockaddr->sa_family == AF_INET6) {
+            memcpy(address,
+                   ((struct sockaddr_in6 *)sockaddr)->sin6_addr.s6_addr, 16);
+        } else {
+            memcpy(address + 12,
+                   &((struct sockaddr_in *)sockaddr)->sin_addr.s_addr, 4);
+        }
+    }
+
+    *mmdb_error = find_address_in_search_tree(mmdb, address, &result);
+    free(address);
+
+    return result;
 }
 
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
