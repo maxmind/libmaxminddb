@@ -32,8 +32,10 @@ sub _regen_prototypes {
     my $c_file = shift;
     my $h_file = shift;
 
-    my $c_code = read_file($c_file);
-    my $h_code = $h_file ? read_file($h_file) : q{};
+    my $c_code      = read_file($c_file);
+    my $h_code      = $h_file ? read_file($h_file) : q{};
+    my $orig_c_code = $c_code;
+    my $orig_h_code = $h_code;
 
     my $script_name = basename($0);
     my $dir         = basename($Bin);
@@ -46,11 +48,10 @@ sub _regen_prototypes {
         = q{/* --prototypes end - don't remove this comment-- */};
 
     ( my $prototypes_start_re = $prototypes_start ) =~ s/ \n /\n */g;
-    ( my $prototypes_end_re = $prototypes_end ) =~ s/\n/\n */g;
+    ( my $prototypes_end_re   = $prototypes_end ) =~ s/\n/\n */g;
 
     for my $content ( $c_code, $h_code ) {
-        $content
-            =~ s{
+        $content =~ s{
                     [ ]*
                     \Q$indent_off\E
                     \n
@@ -86,8 +87,8 @@ sub _regen_prototypes {
     $c_code
         =~ s/__PROTOTYPES__/$indent_off\n$prototypes_start\n$internal_prototypes$prototypes_end\n$indent_on\n/;
 
-    write_file( $c_file, $c_code );
-    write_file( $h_file, $h_code ) if $h_file;
+    write_file( $c_file, $c_code ) if $c_code ne $orig_c_code;
+    write_file( $h_file, $h_code ) if $h_file && $h_code ne $orig_h_code;
 }
 
 my $return_type_re = qr/(?:\w+\s+)+?\**?/;
