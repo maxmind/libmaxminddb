@@ -21,7 +21,7 @@ extern "C" {
 #define MMDB_DATA_TYPE_BYTES (4)
 #define MMDB_DATA_TYPE_UINT16 (5)
 #define MMDB_DATA_TYPE_UINT32 (6)
-#define MMDB_DATA_TYPE_MAP (7)      /* HASH */
+#define MMDB_DATA_TYPE_MAP (7)
 #define MMDB_DATA_TYPE_INT32 (8)
 #define MMDB_DATA_TYPE_UINT64 (9)
 #define MMDB_DATA_TYPE_UINT128 (10)
