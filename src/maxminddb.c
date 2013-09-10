@@ -84,7 +84,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
         if (MMDB_SUCCESS != status) {                        \
             return status;                                   \
         }                                                    \
-    } while (0);
+    } while (0)
 
 #define CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, entry_data)       \
     do {                                                          \
@@ -92,7 +92,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
         if (MMDB_SUCCESS != status) {                             \
             return status;                                        \
         }                                                         \
-    } while (0);
+    } while (0)
 
 #if !defined HAVE_MEMMEM
 LOCAL void *memmem(const void *big, size_t big_len, const void *little,
