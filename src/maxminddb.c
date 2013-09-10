@@ -78,12 +78,12 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
 /* *INDENT-ON* */
 /* --prototypes end - don't remove this comment-- */
 
-#define CHECKED_DECODE_ONE(mmdb, offset, entry_data)         \
-    do {                                                     \
-        int status = decode_one(mmdb, offset, entry_data);   \
-        if (MMDB_SUCCESS != status) {                        \
-            return status;                                   \
-        }                                                    \
+#define CHECKED_DECODE_ONE(mmdb, offset, entry_data)       \
+    do {                                                   \
+        int status = decode_one(mmdb, offset, entry_data); \
+        if (MMDB_SUCCESS != status) {                      \
+            return status;                                 \
+        }                                                  \
     } while (0)
 
 #define CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, entry_data)       \

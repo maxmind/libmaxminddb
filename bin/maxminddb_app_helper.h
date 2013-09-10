@@ -7,21 +7,21 @@
 
 /* dummy content */
 
-#define DIE(...) \
-    do { \
+#define DIE(...)                      \
+    do {                              \
         fprintf(stderr, __VA_ARGS__); \
-        exit(1); \
+        exit(1);                      \
     } while (0)
 
-#define FREE_LIST(...) \
-    do { \
-        { \
-            void *ptr[] = { __VA_ARGS__ }; \
+#define FREE_LIST(...)                                               \
+    do {                                                             \
+        {                                                            \
+            void *ptr[] = { __VA_ARGS__ };                           \
             for (int i = 0; i < sizeof(ptr) / sizeof(void *); i++) { \
-                if (ptr[i]) { \
-                    free(ptr[i]); } \
-            } \
-        } \
+                if (ptr[i]) {                                        \
+                    free(ptr[i]); }                                  \
+            }                                                        \
+        }                                                            \
     } while (0)
 
     /* *INDENT-OFF* */
