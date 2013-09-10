@@ -76,15 +76,17 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
         MMDB_lookup_result_s result =
             lookup_string_ok(mmdb, ip, filename, mode_desc);
 
-        ok(!result.found_entry,
-           "no result entry struct returned for IP address not in the database (string lookup) - %s - %s - %s",
-           ip, filename, mode_desc);
+        ok(
+            !result.found_entry,
+            "no result entry struct returned for IP address not in the database (string lookup) - %s - %s - %s",
+            ip, filename, mode_desc);
 
         result = lookup_sockaddr_ok(mmdb, ip, filename, mode_desc);
 
-        ok(!result.found_entry,
-           "no result entry struct returned for IP address not in the database (ipv4 lookup) - %s - %s - %s",
-           ip, filename, mode_desc);
+        ok(
+            !result.found_entry,
+            "no result entry struct returned for IP address not in the database (ipv4 lookup) - %s - %s - %s",
+            ip, filename, mode_desc);
     }
 
     for (int i = 0; i < pairs_rows; i += 1) {

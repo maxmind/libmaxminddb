@@ -655,7 +655,8 @@ LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
                      language);
             }
 
-            if (NULL != mmdb->metadata.description.descriptions[i]->description) {
+            if (NULL !=
+                mmdb->metadata.description.descriptions[i]->description) {
                 free((char *)mmdb->metadata.description.
                      descriptions[i]->description);
             }
@@ -1208,9 +1209,10 @@ int MMDB_dump_entry_data_list(FILE *stream,
     return status;
 }
 
-LOCAL MMDB_entry_data_list_s *dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s
-                                                   *entry_data_list, int indent,
-                                                   int *status)
+LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
+    FILE *stream, MMDB_entry_data_list_s
+    *entry_data_list, int indent,
+    int *status)
 {
     switch (entry_data_list->entry_data.type) {
     case MMDB_DATA_TYPE_MAP:

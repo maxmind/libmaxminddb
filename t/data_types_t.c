@@ -232,9 +232,10 @@ void run_tests(int mode, const char *mode_desc)
         MMDB_lookup_result_s result =
             lookup_string_ok(mmdb, ip, filename, mode_desc);
 
-        ok(!result.found_entry,
-           "no result entry struct returned for IP address not in the database - %s - %s - %s",
-           ip, filename, mode_desc);
+        ok(
+            !result.found_entry,
+            "no result entry struct returned for IP address not in the database - %s - %s - %s",
+            ip, filename, mode_desc);
     }
 
     {
@@ -242,13 +243,15 @@ void run_tests(int mode, const char *mode_desc)
         MMDB_lookup_result_s result =
             lookup_string_ok(mmdb, ip, filename, mode_desc);
 
-        ok(result.found_entry,
-           "got a result entry struct for IP address in the database - %s - %s - %s",
-           ip, filename, mode_desc);
+        ok(
+            result.found_entry,
+            "got a result entry struct for IP address in the database - %s - %s - %s",
+            ip, filename, mode_desc);
 
-        cmp_ok(result.entry.offset, ">", 0,
-               "result.entry.offset > 0 for address in the database - %s - %s - %s",
-               ip, filename, mode_desc);
+        cmp_ok(
+            result.entry.offset, ">", 0,
+            "result.entry.offset > 0 for address in the database - %s - %s - %s",
+            ip, filename, mode_desc);
 
         test_all_data_types(&result, ip, filename, mode_desc);
     }
@@ -258,13 +261,15 @@ void run_tests(int mode, const char *mode_desc)
         MMDB_lookup_result_s result =
             lookup_string_ok(mmdb, ip, filename, mode_desc);
 
-        ok(result.found_entry,
-           "got a result entry struct for IP address in the database - %s - %s - %s",
-           ip, filename, mode_desc);
+        ok(
+            result.found_entry,
+            "got a result entry struct for IP address in the database - %s - %s - %s",
+            ip, filename, mode_desc);
 
-        cmp_ok(result.entry.offset, ">", 0,
-               "result.entry.offset > 0 for address in the database - %s - %s - %s",
-               ip, filename, mode_desc);
+        cmp_ok(
+            result.entry.offset, ">", 0,
+            "result.entry.offset > 0 for address in the database - %s - %s - %s",
+            ip, filename, mode_desc);
 
         test_all_data_types(&result, ip, filename, mode_desc);
     }
