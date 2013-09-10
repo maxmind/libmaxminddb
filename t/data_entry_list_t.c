@@ -145,7 +145,7 @@ MMDB_entry_data_list_s *test_mapX_key_value_pair(MMDB_entry_data_list_s
 
     if (strcmp(mapX_key_name, "utf8_stringX") == 0) {
         MMDB_entry_data_list_s *mapX_value = entry_data_list =
-            entry_data_list->next;
+                                                 entry_data_list->next;
         cmp_ok(mapX_value->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
                "'map{mapX}{utf8_stringX}' type is utf8_string");
         char *utf8_stringX_value = dup_entry_or_bail(mapX_value->entry_data);
@@ -199,8 +199,7 @@ MMDB_entry_data_list_s *test_uint128_value(MMDB_entry_data_list_s
            "'uint128' key's value is an uint128");
 
     uint8_t expect[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    };
+                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     ok(memcmp(value->entry_data.uint128, expect, 16) == 0,
        "uint128 field is 2**120");
 
@@ -257,9 +256,8 @@ MMDB_entry_data_list_s *test_utf8_string_value(MMDB_entry_data_list_s
     char *utf8_string = dup_entry_or_bail(value->entry_data);
     // This is hex for "unicode! ☯ - ♫" as bytes
     char expect[19] =
-        { 0x75, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x21, 0x20, 0xe2, 0x98,
-        0xaf, 0x20, 0x2d, 0x20, 0xe2, 0x99, 0xab, 0x00
-    };
+    { 0x75, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x21, 0x20, 0xe2, 0x98,
+      0xaf, 0x20, 0x2d, 0x20, 0xe2, 0x99, 0xab, 0x00 };
 
     is(utf8_string, expect, "got expected value for utf8_string key");
 

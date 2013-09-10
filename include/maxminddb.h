@@ -54,90 +54,90 @@ extern "C" {
 #else
 #define MMDB_DBG_CARP(...)
 #endif
-    /* This is a pointer into the data section for a given IP address lookup */
-    typedef struct MMDB_entry_s {
-        struct MMDB_s *mmdb;
-        uint32_t offset;
-    } MMDB_entry_s;
+/* This is a pointer into the data section for a given IP address lookup */
+typedef struct MMDB_entry_s {
+    struct MMDB_s *mmdb;
+    uint32_t offset;
+} MMDB_entry_s;
 
-    typedef struct MMDB_lookup_result_s {
-        bool found_entry;
-        MMDB_entry_s entry;
-        uint16_t netmask;
-    } MMDB_lookup_result_s;
+typedef struct MMDB_lookup_result_s {
+    bool found_entry;
+    MMDB_entry_s entry;
+    uint16_t netmask;
+} MMDB_lookup_result_s;
 
-    typedef struct MMDB_entry_data_s {
-        /* return values */
-        union {
-            uint32_t pointer;
-            const char *utf8_string;
-            double double_value;
-            const uint8_t *bytes;
-            uint16_t uint16;
-            uint32_t uint32;
-            int32_t int32;
-            uint64_t uint64;
-            uint8_t uint128[16];
-            bool boolean;
-            float float_value;
-        };
-        /* This is a 0 if a given entry cannot be found. This can only happen
-         * when a call to MMDB_(v)get_value() asks for hash keys or array
-         * indices that don't exist. */
-        uint32_t offset;
-        /* This is the next entry in the data section, but it's really only
-         * relevant for entries that part of a larger map or array
-         * struct. There's no good reason for an end user to look at this
-         * directly. */
-        uint32_t offset_to_next;
-        /* This is only valid for strings, utf8_strings or binary data */
-        uint32_t data_size;
-        /* This is an MMDB_DATA_TYPE_* constant */
-        uint32_t type;
-    } MMDB_entry_data_s;
+typedef struct MMDB_entry_data_s {
+    /* return values */
+    union {
+        uint32_t pointer;
+        const char *utf8_string;
+        double double_value;
+        const uint8_t *bytes;
+        uint16_t uint16;
+        uint32_t uint32;
+        int32_t int32;
+        uint64_t uint64;
+        uint8_t uint128[16];
+        bool boolean;
+        float float_value;
+    };
+    /* This is a 0 if a given entry cannot be found. This can only happen
+     * when a call to MMDB_(v)get_value() asks for hash keys or array
+     * indices that don't exist. */
+    uint32_t offset;
+    /* This is the next entry in the data section, but it's really only
+     * relevant for entries that part of a larger map or array
+     * struct. There's no good reason for an end user to look at this
+     * directly. */
+    uint32_t offset_to_next;
+    /* This is only valid for strings, utf8_strings or binary data */
+    uint32_t data_size;
+    /* This is an MMDB_DATA_TYPE_* constant */
+    uint32_t type;
+} MMDB_entry_data_s;
 
-    /* This is the return type when someone asks for all the entry data in a map or array */
-    typedef struct MMDB_entry_data_list_s {
-        MMDB_entry_data_s entry_data;
-        struct MMDB_entry_data_list_s *next;
-    } MMDB_entry_data_list_s;
+/* This is the return type when someone asks for all the entry data in a map or array */
+typedef struct MMDB_entry_data_list_s {
+    MMDB_entry_data_s entry_data;
+    struct MMDB_entry_data_list_s *next;
+} MMDB_entry_data_list_s;
 
-    typedef struct MMDB_description_s {
-        const char *language;
-        const char *description;
-    } MMDB_description_s;
+typedef struct MMDB_description_s {
+    const char *language;
+    const char *description;
+} MMDB_description_s;
 
-    typedef struct MMDB_metadata_s {
-        uint32_t node_count;
-        uint16_t record_size;
-        uint16_t ip_version;
-        char *database_type;
-        struct {
-            size_t count;
-            const char **names;
-        } languages;
-        uint16_t binary_format_major_version;
-        uint16_t binary_format_minor_version;
-        uint64_t build_epoch;
-        struct {
-            size_t count;
-            MMDB_description_s **descriptions;
-        } description;
-    } MMDB_metadata_s;
+typedef struct MMDB_metadata_s {
+    uint32_t node_count;
+    uint16_t record_size;
+    uint16_t ip_version;
+    char *database_type;
+    struct {
+        size_t count;
+        const char **names;
+    } languages;
+    uint16_t binary_format_major_version;
+    uint16_t binary_format_minor_version;
+    uint64_t build_epoch;
+    struct {
+        size_t count;
+        MMDB_description_s **descriptions;
+    } description;
+} MMDB_metadata_s;
 
-    typedef struct MMDB_s {
-        uint32_t flags;
-        char *filename;
-        ssize_t file_size;
-        const uint8_t *file_content;
-        const uint8_t *data_section;
-        uint16_t full_record_byte_size;
-        uint16_t depth;
-        MMDB_metadata_s metadata;
-    } MMDB_s;
+typedef struct MMDB_s {
+    uint32_t flags;
+    char *filename;
+    ssize_t file_size;
+    const uint8_t *file_content;
+    const uint8_t *data_section;
+    uint16_t full_record_byte_size;
+    uint16_t depth;
+    MMDB_metadata_s metadata;
+} MMDB_s;
 
-    /* --prototypes automatically generated by dev-bin/regen-prototypes.pl - don't remove this comment */
     /* *INDENT-OFF* */
+    /* --prototypes automatically generated by dev-bin/regen-prototypes.pl - don't remove this comment */
     extern MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
                                                    int *gai_error, int *mmdb_error);
     extern MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
@@ -157,8 +157,8 @@ extern "C" {
                                          MMDB_entry_data_list_s *entry_data_list,
                                          int indent);
     extern const char *MMDB_strerror(uint16_t error_code);
-    /* *INDENT-ON* */
     /* --prototypes end - don't remove this comment-- */
+    /* *INDENT-ON* */
 
 #ifdef __cplusplus
 }

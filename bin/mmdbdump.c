@@ -60,5 +60,5 @@ int main(int argc, char *const argv[])
         puts("Sorry, nothing found");
     }
 
-    return (0);
+    return 0;
 }

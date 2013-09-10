@@ -9,8 +9,8 @@
 #include "maxminddb_test_helper.h"
 
 void for_all_record_sizes(const char *filename_fmt,
-                          void (*tests) (int record_size, const char *filename,
-                                         const char *description))
+                          void (*tests)(int record_size, const char *filename,
+                                        const char *description))
 {
     int sizes[] = { 24, 28, 32 };
     for (int i = 0; i < 3; i++) {
@@ -26,7 +26,7 @@ void for_all_record_sizes(const char *filename_fmt,
     }
 }
 
-void for_all_modes(void (*tests) (int mode, const char *description))
+void for_all_modes(void (*tests)(int mode, const char *description))
 {
     tests(MMDB_MODE_MMAP, "mmap mode");
     tests(MMDB_MODE_MEMORY_CACHE, "memory cache mode");

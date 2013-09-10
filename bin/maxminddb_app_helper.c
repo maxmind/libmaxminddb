@@ -83,16 +83,17 @@ void dump_ipinfo(const char *ipstr, MMDB_lookup_result_s *ipinfo)
         MMDB_get_value(&ipinfo->entry, &entry_data, "location", NULL);
         // TODO handle failed search somehow.
         MMDB_entry_data_s lat, lon;
-        MMDB_entry_s location = {.mmdb = ipinfo->entry.mmdb,.offset =
-                entry_data.offset
-        };
+        MMDB_entry_s location = { .mmdb = ipinfo->entry.mmdb, .offset =
+                                      entry_data.offset };
         if (entry_data.offset) {
             MMDB_get_value(&location, &lat, "latitude", NULL);
             MMDB_get_value(&location, &lon, "longitude", NULL);
-            if (lat.offset)
+            if (lat.offset) {
                 dlat = lat.double_value;
-            if (lon.offset)
+            }
+            if (lon.offset) {
                 dlon = lon.double_value;
+            }
         }
 
         MMDB_entry_data_s res;

@@ -122,7 +122,7 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
 
     MMDB_lookup_result_s result = {
         .found_entry = false,
-        .entry.mmdb = mmdb,
+        .entry.mmdb  = mmdb,
     };
 
     *gai_error = resolve_any_address(ipstr, is_ipv4, &in_addr);
@@ -189,7 +189,7 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
 {
     MMDB_lookup_result_s result = {
         .found_entry = false,
-        .entry.mmdb = mmdb,
+        .entry.mmdb  = mmdb,
     };
 
     uint8_t *address;
@@ -220,8 +220,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result)
 {
     uint16_t record_length = mmdb->full_record_byte_size;
-    uint32_t (*left_record_value) (const uint8_t *);
-    uint32_t (*right_record_value) (const uint8_t *);
+    uint32_t (*left_record_value)(const uint8_t *);
+    uint32_t (*right_record_value)(const uint8_t *);
     uint8_t right_record_offset;
 
     if (record_length == 6) {
@@ -269,7 +269,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record)
 {
     return record[0] * 65536 + record[1] * 256 + record[2] +
-        ((record[3] & 0xf0) << 20);
+           ((record[3] & 0xf0) << 20);
 }
 
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
@@ -703,11 +703,11 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
             CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
             break;
 
-            /* XXX - it'd be good to find a quicker way to skip through these
-               entries that doesn't involve decoding them
-               completely. Basically we need to just use the size from the
-               control byte to advance our pointer rather than calling
-               decode_one(). */
+        /* XXX - it'd be good to find a quicker way to skip through these
+           entries that doesn't involve decoding them
+           completely. Basically we need to just use the size from the
+           control byte to advance our pointer rather than calling
+           decode_one(). */
         case MMDB_DATA_TYPE_ARRAY:
             {
                 uint32_t size = entry_data->data_size;
@@ -783,8 +783,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         default:
             break;
         }
-    }
-    while (src_key);
+    } while (src_key);
 
  end:
     va_end(params);
@@ -841,7 +840,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         entry_data->offset_to_next = offset + psize + 1;
         MMDB_DBG_CARP
             ("decode_one{ptr} ctrl:%d, offset:%d psize:%d point_to:%d\n", ctrl,
-             offset, psize, entry_data->pointer);
+            offset, psize, entry_data->pointer);
         return MMDB_SUCCESS;
     }
 
@@ -994,7 +993,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
             uint32_t last_offset;
             while (entry_data_list->entry_data.type == MMDB_DATA_TYPE_PTR) {
                 CHECKED_DECODE_ONE(mmdb, last_offset =
-                                   entry_data_list->entry_data.pointer,
+                                       entry_data_list->entry_data.pointer,
                                    &entry_data_list->entry_data);
             }
 
@@ -1018,7 +1017,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
             MMDB_entry_data_list_s *previous = entry_data_list;
             while (array_size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
-                    MMDB_new_entry_data_list();
+                                                                 MMDB_new_entry_data_list();
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
@@ -1050,7 +1049,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
             MMDB_entry_data_list_s *previous = entry_data_list;
             while (size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
-                    MMDB_new_entry_data_list();
+                                                                 MMDB_new_entry_data_list();
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
@@ -1071,7 +1070,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
 
                 offset = entry_data_list_to->entry_data.offset_to_next;
                 entry_data_list_to = previous->next =
-                    MMDB_new_entry_data_list();
+                                         MMDB_new_entry_data_list();
 
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
@@ -1134,17 +1133,17 @@ LOCAL double get_ieee754_double(const uint8_t *restrict p)
 
 LOCAL uint32_t get_uint32(const uint8_t *p)
 {
-    return (p[0] * 16777216U + p[1] * 65536 + p[2] * 256 + p[3]);
+    return p[0] * 16777216U + p[1] * 65536 + p[2] * 256 + p[3];
 }
 
 LOCAL uint32_t get_uint24(const uint8_t *p)
 {
-    return (p[0] * 65536U + p[1] * 256 + p[2]);
+    return p[0] * 65536U + p[1] * 256 + p[2];
 }
 
 LOCAL uint32_t get_uint16(const uint8_t *p)
 {
-    return (p[0] * 256U + p[1]);
+    return p[0] * 256U + p[1];
 }
 
 LOCAL uint64_t get_uintX(const uint8_t *p, int length)
