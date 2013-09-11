@@ -713,20 +713,20 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 
     memset(entry_data, 0, sizeof(MMDB_entry_data_s));
 
-    char *src_key;
+    char *path_elem;
     do {
         CHECKED_DECODE_ONE(mmdb, offset, entry_data);
 
-        src_key = *(path++);
-        MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
+        path_elem = *(path++);
+        MMDB_DBG_CARP("decode_one path_elem:%s\n", path_elem);
 
-        if (NULL == src_key) {
+        if (NULL == path_elem) {
             goto end;
         }
 
-        size_t src_keylen;
+        size_t path_elemlen;
  one_key:
-        src_keylen = strlen(src_key);
+        path_elemlen = strlen(path_elem);
         switch (entry_data->type) {
         case MMDB_DATA_TYPE_PTR:
             {
@@ -741,7 +741,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         case MMDB_DATA_TYPE_ARRAY:
             {
                 uint32_t size = entry_data->data_size;
-                int offset = strtol(src_key, NULL, 10);
+                int offset = strtol(path_elem, NULL, 10);
                 if (offset >= size || offset < 0) {
                     entry_data->offset = 0;
                     goto end;
@@ -754,7 +754,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                         return status;
                     }
                 }
-                if (NULL != (src_key = *(path++))) {
+                if (NULL != (path_elem = *(path++))) {
                     CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next,
                                               entry_data);
                     offset = entry_data->offset_to_next;
@@ -782,10 +782,10 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                         return MMDB_INVALID_DATA_ERROR;
                     }
 
-                    if (key.data_size == src_keylen &&
-                        !memcmp(src_key, key.utf8_string, src_keylen)) {
+                    if (key.data_size == path_elemlen &&
+                        !memcmp(path_elem, key.utf8_string, path_elemlen)) {
 
-                        if (NULL != (src_key = *(path++))) {
+                        if (NULL != (path_elem = *(path++))) {
                             CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value,
                                                       entry_data);
                             offset = entry_data->offset_to_next;
@@ -812,7 +812,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         default:
             break;
         }
-    } while (src_key);
+    } while (path_elem);
 
  end:
     return MMDB_SUCCESS;
