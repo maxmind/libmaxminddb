@@ -532,12 +532,13 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
     }
 
     off_t offset = size > METADATA_BLOCK_MAX_SIZE ? METADATA_BLOCK_MAX_SIZE : 0;
-    if (MMDB_SUCCESS != int_pread(fd, last_128kb, size, offset)) {
+    ssize_t max_read = size > METADATA_BLOCK_MAX_SIZE ? METADATA_BLOCK_MAX_SIZE : size;
+    if (MMDB_SUCCESS != int_pread(fd, last_128kb, max_read, offset)) {
         free_mmdb_struct(mmdb);
         return MMDB_IO_ERROR;
     }
 
-    int status = read_metadata(mmdb, last_128kb, size);
+    int status = read_metadata(mmdb, last_128kb, max_read);
     free(last_128kb);
     if (MMDB_SUCCESS != status) {
         free_mmdb_struct(mmdb);
