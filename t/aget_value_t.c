@@ -12,7 +12,7 @@ void run_tests(int mode, const char *mode_desc)
         lookup_string_ok(mmdb, ip, filename, mode_desc);
 
     MMDB_entry_data_s entry_data;
-    char *lookup_path[] = {"array", "0", NULL};
+    char *lookup_path[] = { "array", "0", NULL };
     int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
 
     cmp_ok(status, "==", MMDB_SUCCESS,
