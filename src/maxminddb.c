@@ -490,13 +490,6 @@ MMDB_s *MMDB_new_mmdb()
 
 uint16_t MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
 {
-    MMDB_DBG_CARP("MMDB_open %s %d\n", filename, flags);
-    return init(mmdb, filename, flags);
-}
-
-LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
-{
-    mmdb->filename = NULL;
     mmdb->file_content = NULL;
     mmdb->data_section = NULL;
     mmdb->metadata.database_type = NULL;
