@@ -499,6 +499,9 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
     mmdb->filename = NULL;
     mmdb->file_content = NULL;
     mmdb->data_section = NULL;
+    mmdb->metadata.database_type = NULL;
+    mmdb->metadata.languages.count = 0;
+    mmdb->metadata.description.count = 0;
 
     mmdb->filename = strdup(filename);
     if (mmdb->filename == NULL) {
