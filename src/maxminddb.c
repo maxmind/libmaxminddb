@@ -1248,6 +1248,8 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
 
                 print_indentation(stream, indent);
                 fprintf(stream, "\"%s\": \n", key);
+                free(key);
+
                 entry_data_list = entry_data_list->next;
                 entry_data_list =
                     dump_entry_data_list(stream, entry_data_list, indent + 2,
@@ -1391,7 +1393,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
     for (uint32_t i = 0; i < size; i++) {
         hex_pointer += sprintf(hex_pointer, "%02X", bytes[i]);
     }
-    *(hex_pointer + 1) = '\0';
+
     return hex_string;
 }
 
