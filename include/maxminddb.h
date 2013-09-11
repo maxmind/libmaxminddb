@@ -148,6 +148,8 @@ typedef struct MMDB_s {
     extern int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...);
     extern int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                                va_list params);
+    extern int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
+                               char **path);
     extern int MMDB_get_entry_data_list(MMDB_entry_s *start,
                                         MMDB_entry_data_list_s **entry_data_list);
     extern MMDB_entry_data_list_s *MMDB_new_entry_data_list(void);

@@ -679,17 +679,45 @@ int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)
 int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                     va_list params)
 {
+    char **path = NULL;
+
+    int i = 0;
+    char *path_elem;
+    while (NULL != (path_elem = va_arg(params, char *))) {
+        path = realloc(path, sizeof(char *) * (i + 1));
+        path[i] = strdup(path_elem);
+        i++;
+    }
+
+    path = realloc(path, sizeof(char *) * (i + 1));
+    path[i] = NULL;
+
+    int status = MMDB_aget_value(start, entry_data, path);
+
+    i = 0;
+    char *elem;
+    while (NULL != (elem = path[i++])) {
+        free(elem);
+    }
+    free(path);
+
+    return status;
+}
+
+int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
+                    char **path)
+{
     MMDB_entry_data_s key, value;
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
-    char *src_key;
 
     memset(entry_data, 0, sizeof(MMDB_entry_data_s));
 
+    char *src_key;
     do {
         CHECKED_DECODE_ONE(mmdb, offset, entry_data);
 
-        src_key = va_arg(params, char *);
+        src_key = *(path++);
         MMDB_DBG_CARP("decode_one src_key:%s\n", src_key);
 
         if (NULL == src_key) {
@@ -701,9 +729,10 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         src_keylen = strlen(src_key);
         switch (entry_data->type) {
         case MMDB_DATA_TYPE_PTR:
-            CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
-            break;
-
+            {
+                CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
+                break;
+            }
         /* XXX - it'd be good to find a quicker way to skip through these
            entries that doesn't involve decoding them
            completely. Basically we need to just use the size from the
@@ -725,7 +754,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                         return status;
                     }
                 }
-                if (src_key = va_arg(params, char *)) {
+                if (NULL != (src_key = *(path++))) {
                     CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next,
                                               entry_data);
                     offset = entry_data->offset_to_next;
@@ -736,7 +765,6 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                 memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
                 goto end;
             }
-            break;
         case MMDB_DATA_TYPE_MAP:
             {
                 uint32_t size = entry_data->data_size;
@@ -757,7 +785,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                     if (key.data_size == src_keylen &&
                         !memcmp(src_key, key.utf8_string, src_keylen)) {
 
-                        if (src_key = va_arg(params, char *)) {
+                        if (NULL != (src_key = *(path++))) {
                             CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value,
                                                       entry_data);
                             offset = entry_data->offset_to_next;
@@ -787,7 +815,6 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     } while (src_key);
 
  end:
-    va_end(params);
     return MMDB_SUCCESS;
 }
 
