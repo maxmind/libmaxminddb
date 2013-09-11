@@ -56,7 +56,7 @@ int main(int argc, char **argv)
                     MMDB_entry_s entry =
                     { .mmdb = &mmdb, .offset = entry_data.offset };
                     status = MMDB_get_entry_data_list(&entry, &entry_data_list);
-                }else  {
+                } else {
                     fprintf(
                         stdout,
                         "\n  No data was found at the lookup path you provided\n\n");
@@ -128,13 +128,13 @@ LOCAL char **get_options(int argc, char **argv, char **mmdb_file,
 
     while (1) {
         static struct option options[] = {
-            { "file",    required_argument,      0,                 'f' },
-            { "ip",      required_argument,      0,                 'i' },
-            { "verbose", no_argument,            0,                 'v' },
-            { "version", no_argument,            0,                 'n' },
-            { "help",    no_argument,            0,                 1   },
-            { "?",       no_argument,            0,                 1   },
-            { 0,         0,                      0,                 0   }
+            { "file",    required_argument, 0, 'f' },
+            { "ip",      required_argument, 0, 'i' },
+            { "verbose", no_argument,       0, 'v' },
+            { "version", no_argument,       0, 'n' },
+            { "help",    no_argument,       0, 1   },
+            { "?",       no_argument,       0, 1   },
+            { 0,         0,                 0, 0   }
         };
 
         int opt_index;
@@ -236,7 +236,9 @@ LOCAL MMDB_s dump_meta(MMDB_s *mmdb)
 
     fprintf(stdout, "    Description:\n");
     for (int i = 0; i < mmdb->metadata.description.count; i++) {
-        fprintf(stdout, "      %s:   %s\n", mmdb->metadata.description.descriptions[i]->language, mmdb->metadata.description.descriptions[i]->description);
+        fprintf(stdout, "      %s:   %s\n",
+                mmdb->metadata.description.descriptions[i]->language,
+                mmdb->metadata.description.descriptions[i]->description);
     }
     fprintf(stdout, "\n");
 }
