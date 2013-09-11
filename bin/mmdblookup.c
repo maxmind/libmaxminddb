@@ -1,5 +1,6 @@
 #include "maxminddb.h"
 #include <assert.h>
+#include <errno.h>
 #include <getopt.h>
 #include <libgen.h>
 #include <netdb.h>
@@ -193,7 +194,14 @@ LOCAL MMDB_s open_or_die(const char *fname, int mode)
     int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
 
     if (MMDB_SUCCESS != status) {
-        fprintf(stderr, "\n  Can't open %s\n\n", fname);
+        fprintf(stderr, "\n  Can't open %s - %s\n", fname, MMDB_strerror(status));
+
+        if (MMDB_IO_ERROR == status) {
+            fprintf(stderr, "    IO error: %s\n", strerror(errno));
+        }
+
+        fprintf(stderr, "\n");
+
         exit(2);
     }
 
