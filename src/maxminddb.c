@@ -675,11 +675,21 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     char *path_elem;
     while (NULL != (path_elem = va_arg(params, char *))) {
         path = realloc(path, sizeof(char *) * (i + 1));
+        if (NULL == path) {
+            return MMDB_OUT_OF_MEMORY_ERROR;
+        }
+
         path[i] = strdup(path_elem);
+        if (NULL == path[i]) {
+            return MMDB_OUT_OF_MEMORY_ERROR;
+        }
         i++;
     }
 
     path = realloc(path, sizeof(char *) * (i + 1));
+    if (NULL == path) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
     path[i] = NULL;
 
     int status = MMDB_aget_value(start, entry_data, path);
