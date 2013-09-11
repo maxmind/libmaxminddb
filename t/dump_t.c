@@ -19,6 +19,7 @@ void run_tests(int mode, const char *mode_desc)
     FILE *stream = open_memstream(&dump_output, &dump_size);
     status = MMDB_dump_entry_data_list(stream, entry_data_list, 0);
     fclose(stream);
+    MMDB_free_entry_data_list(entry_data_list);
 
     int is_ok = ok(MMDB_SUCCESS == status,
                    "MMDB_dump_entry_data_list is successful - %s",
@@ -76,6 +77,11 @@ void run_tests(int mode, const char *mode_desc)
            "dump output contains expected line (%s) - %s", expect[i],
            mode_desc);
     }
+
+    free(dump_output);
+
+    MMDB_close(mmdb);
+    free(mmdb);
 }
 
 int main(void)
