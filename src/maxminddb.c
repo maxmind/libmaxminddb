@@ -127,20 +127,7 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
         return result;
     }
 
-    uint8_t *address_bytes;
-    if (is_ipv4) {
-        address_bytes =
-            (uint8_t *)&((struct sockaddr_in *)address.ai_addr)->sin_addr.
-            s_addr;
-    } else {
-        address_bytes =
-            (uint8_t *)((struct sockaddr_in6 *)address.ai_addr)->sin6_addr.
-            s6_addr;
-    }
-
-    *mmdb_error = find_address_in_search_tree(mmdb, address_bytes, &result);
-
-    return result;
+    return MMDB_lookup_sockaddr(mmdb, address.ai_addr, mmdb_error);
 }
 
 LOCAL int resolve_any_address(const char *ipstr, bool is_ipv4,
