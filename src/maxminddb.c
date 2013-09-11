@@ -504,7 +504,7 @@ LOCAL uint16_t init(MMDB_s *mmdb, const char *filename, uint32_t flags)
     mmdb->metadata.description.count = 0;
 
     mmdb->filename = strdup(filename);
-    if (mmdb->filename == NULL) {
+    if (NULL == mmdb->filename) {
         free_mmdb_struct(mmdb);
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
