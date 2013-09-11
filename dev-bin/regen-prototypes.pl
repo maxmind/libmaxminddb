@@ -14,11 +14,6 @@ sub main {
     );
 
     _regen_prototypes(
-        "$Bin/../bin/maxminddb_app_helper.c",
-        "$Bin/../bin/maxminddb_app_helper.h",
-    );
-
-    _regen_prototypes(
         "$Bin/../bin/mmdblookup.c",
     );
 
