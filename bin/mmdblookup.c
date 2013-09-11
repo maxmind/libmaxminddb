@@ -193,7 +193,7 @@ LOCAL MMDB_s open_or_die(const char *fname, int mode)
     int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
 
     if (MMDB_SUCCESS != status) {
-        fprintf(stderr, "Can't open %s\n", fname);
+        fprintf(stderr, "\n  Can't open %s\n\n", fname);
         exit(2);
     }
 
@@ -250,13 +250,13 @@ LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr)
         MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
-        fprintf(stderr, "error from call to getaddrinfo for %s - %s\n", ipstr,
+        fprintf(stderr, "\n  Error from call to getaddrinfo for %s - %s\n\n", ipstr,
                 gai_strerror(gai_error));
         exit(3);
     }
 
     if (MMDB_SUCCESS != mmdb_error) {
-        fprintf(stderr, "got an error from the maxminddb library: %s\n",
+        fprintf(stderr, "\n  Got an error from the maxminddb library: %s\n\n",
                 MMDB_strerror(mmdb_error));
         exit(4);
     }
