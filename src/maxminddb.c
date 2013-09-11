@@ -724,9 +724,9 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
             goto end;
         }
 
-        size_t path_elemlen;
+        size_t path_elem_len;
  one_key:
-        path_elemlen = strlen(path_elem);
+        path_elem_len = strlen(path_elem);
         switch (entry_data->type) {
         case MMDB_DATA_TYPE_PTR:
             {
@@ -782,8 +782,8 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                         return MMDB_INVALID_DATA_ERROR;
                     }
 
-                    if (key.data_size == path_elemlen &&
-                        !memcmp(path_elem, key.utf8_string, path_elemlen)) {
+                    if (key.data_size == path_elem_len &&
+                        !memcmp(path_elem, key.utf8_string, path_elem_len)) {
 
                         if (NULL != (path_elem = *(path++))) {
                             CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value,
