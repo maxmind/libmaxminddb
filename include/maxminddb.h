@@ -47,14 +47,6 @@ extern "C" {
 #define MMDB_INVALID_DATA_ERROR (7)
 #define MMDB_INVALID_LOOKUP_PATH (8)
 
-/* */
-#define MMDB_DEBUG (0)
-
-#if MMDB_DEBUG
-#define MMDB_DBG_CARP(...) fprintf(stderr, __VA_ARGS__)
-#else
-#define MMDB_DBG_CARP(...)
-#endif
 /* This is a pointer into the data section for a given IP address lookup */
 typedef struct MMDB_entry_s {
     struct MMDB_s *mmdb;
