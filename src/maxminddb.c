@@ -339,28 +339,32 @@ LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset)
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
-    MMDB_get_value(start, &entry_data, key, NULL);
+    char *path[] = { key, NULL };
+    MMDB_aget_value(start, &entry_data, path);
     return entry_data.uint16;
 }
 
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
-    MMDB_get_value(start, &entry_data, key, NULL);
+    char *path[] = { key, NULL };
+    MMDB_aget_value(start, &entry_data, path);
     return entry_data.uint32;
 }
 
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
-    MMDB_get_value(start, &entry_data, key, NULL);
+    char *path[] = { key, NULL };
+    MMDB_aget_value(start, &entry_data, path);
     return entry_data.uint64;
 }
 
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
-    MMDB_get_value(start, &entry_data, key, NULL);
+    char *path[] = { key, NULL };
+    MMDB_aget_value(start, &entry_data, path);
     return strndup((char *)entry_data.utf8_string, entry_data.data_size);
 }
 
@@ -369,7 +373,8 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 {
     MMDB_entry_data_s entry_data;
 
-    MMDB_get_value(metadata_start, &entry_data, "languages", NULL);
+    char *path[] = { "languages", NULL };
+    MMDB_aget_value(metadata_start, &entry_data, path);
 
     if (MMDB_DATA_TYPE_ARRAY != entry_data.type) {
         return MMDB_INVALID_METADATA_ERROR;
@@ -419,7 +424,8 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 {
     MMDB_entry_data_s entry_data;
 
-    MMDB_get_value(metadata_start, &entry_data, "description", NULL);
+    char *path[] = { "description", NULL };
+    MMDB_aget_value(metadata_start, &entry_data, path);
 
     if (MMDB_DATA_TYPE_MAP != entry_data.type) {
         return MMDB_INVALID_METADATA_ERROR;
