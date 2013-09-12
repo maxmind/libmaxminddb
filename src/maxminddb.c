@@ -262,9 +262,6 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size)
 
     mmdb->metadata.binary_format_minor_version =
         value_for_key_as_uint16(&metadata_start, "binary_format_minor_version");
-    if (!mmdb->metadata.binary_format_minor_version) {
-        return MMDB_INVALID_METADATA_ERROR;
-    }
 
     mmdb->metadata.build_epoch =
         value_for_key_as_uint64(&metadata_start, "build_epoch");
