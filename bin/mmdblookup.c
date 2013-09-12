@@ -20,8 +20,8 @@ LOCAL void usage(char *program, int exit_code, const char *error);
 LOCAL char **get_options(int argc, char **argv, char **mmdb_file,
                          char **ip_address, int *verbose,
                          int *lookup_path_length);
-LOCAL MMDB_s open_or_die(const char *fname, int mode);
-LOCAL MMDB_s dump_meta(MMDB_s *mmdb);
+LOCAL MMDB_s open_or_die(const char *fname);
+LOCAL void dump_meta(MMDB_s *mmdb);
 LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr);
 /* --prototypes end - don't remove this comment-- */
 /* *INDENT-ON* */
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
         get_options(argc, argv, &mmdb_file, &ip_address, &verbose,
                     &lookup_path_length);
 
-    MMDB_s mmdb = open_or_die(mmdb_file, MMDB_MODE_MMAP);
+    MMDB_s mmdb = open_or_die(mmdb_file);
 
     if (verbose) {
         dump_meta(&mmdb);
@@ -188,7 +188,7 @@ LOCAL char **get_options(int argc, char **argv, char **mmdb_file,
     return lookup_path;
 }
 
-LOCAL MMDB_s open_or_die(const char *fname, int mode)
+LOCAL MMDB_s open_or_die(const char *fname)
 {
     MMDB_s mmdb;
     int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
@@ -208,7 +208,7 @@ LOCAL MMDB_s open_or_die(const char *fname, int mode)
     return mmdb;
 }
 
-LOCAL MMDB_s dump_meta(MMDB_s *mmdb)
+LOCAL void dump_meta(MMDB_s *mmdb)
 {
     const char *meta_dump = "\n"
                             "  Database metadata\n"
@@ -234,7 +234,7 @@ LOCAL MMDB_s dump_meta(MMDB_s *mmdb)
             date,
             mmdb->metadata.database_type);
 
-    for (int i = 0; i < mmdb->metadata.languages.count; i++) {
+    for (size_t i = 0; i < mmdb->metadata.languages.count; i++) {
         fprintf(stdout, "%s", mmdb->metadata.languages.names[i]);
         if (i < mmdb->metadata.languages.count - 1) {
             fprintf(stdout, " ");
@@ -243,7 +243,7 @@ LOCAL MMDB_s dump_meta(MMDB_s *mmdb)
     fprintf(stdout, "\n");
 
     fprintf(stdout, "    Description:\n");
-    for (int i = 0; i < mmdb->metadata.description.count; i++) {
+    for (size_t i = 0; i < mmdb->metadata.description.count; i++) {
         fprintf(stdout, "      %s:   %s\n",
                 mmdb->metadata.description.descriptions[i]->language,
                 mmdb->metadata.description.descriptions[i]->description);
