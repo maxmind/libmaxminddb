@@ -15,8 +15,8 @@ AC_PROG_LIBTOOL
 # Checks for programs.
 AC_PROG_CC_C99
 
-CFLAGS=`echo ${CFLAGS} | set 's/-O2//'`
-CXXFLAGS=`echo ${CXXFLAGS} | set 's/-O2//'`
+CFLAGS=`echo ${CFLAGS} | sed 's/-O2//'`
+CXXFLAGS=`echo ${CXXFLAGS} | sed 's/-O2//'`
 
 AC_C_RESTRICT
 
