@@ -56,7 +56,7 @@ MMDB_entry_data_list_s *test_bytes_value(MMDB_entry_data_list_s
 
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_BYTES,
            "'bytes' key's value is bytes");
-    uint8_t *bytes = dup_entry_or_bail(value->entry_data);
+    uint8_t *bytes = (uint8_t *)dup_entry_or_bail(value->entry_data);
     uint8_t expect[] = { 0x00, 0x00, 0x00, 0x2a };
 
     ok(memcmp(bytes, expect, 4) == 0, "got expected value for bytes key");
