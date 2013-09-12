@@ -49,7 +49,7 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
 LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
                      MMDB_entry_data_s *entry_data);
 LOCAL int get_ext_type(int raw_ext_type);
-LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
+LOCAL void DPRINT_KEY(MMDB_entry_data_s *entry_data);
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size);
 LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
@@ -351,7 +351,7 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    for (int i = 0; i < array_size; i++) {
+    for (uint32_t i = 0; i < array_size; i++) {
         member = member->next;
         if (MMDB_DATA_TYPE_UTF8_STRING != member->entry_data.type) {
             return MMDB_INVALID_METADATA_ERROR;
@@ -402,7 +402,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    for (int i = 0; i < map_size; i++) {
+    for (uint32_t i = 0; i < map_size; i++) {
         mmdb->metadata.description.descriptions[i] =
             malloc(sizeof(MMDB_description_s));
         if (NULL == mmdb->metadata.description.descriptions[i]) {
@@ -453,8 +453,12 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
     bool is_ipv4 = mmdb->metadata.ip_version == 4 ? true : false;
 
     MMDB_lookup_result_s result = {
-        .found_entry = false,
-        .entry.mmdb  = mmdb,
+        .found_entry  = false,
+        .netmask      = 0,
+        .entry = {
+            .mmdb   = mmdb,
+            .offset = 0
+        }
     };
 
     struct addrinfo *addresses;
@@ -500,8 +504,12 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
                                           int *mmdb_error)
 {
     MMDB_lookup_result_s result = {
-        .found_entry = false,
-        .entry.mmdb  = mmdb,
+        .found_entry  = false,
+        .netmask      = 0,
+        .entry = {
+            .mmdb   = mmdb,
+            .offset = 0
+        }
     };
 
     uint8_t *address;
@@ -549,13 +557,16 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         right_record_value = &get_uint32;
         right_record_offset = 4;
     }
+    else {
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
+    }
 
     uint32_t node_count = mmdb->metadata.node_count;
     uint32_t value = 0;
     const uint8_t *search_tree = mmdb->file_content;
     uint16_t max_depth0 = mmdb->depth - 1;
     const uint8_t *record_pointer;
-    for (uint16_t current_bit = max_depth0; current_bit >= 0; current_bit--) {
+    for (int current_bit = max_depth0; current_bit >= 0; current_bit--) {
         record_pointer = &search_tree[value * record_length];
         if (address[(max_depth0 - current_bit) >> 3] &
             (1U << (~(max_depth0 - current_bit) & 7))) {
@@ -675,7 +686,11 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
             {
                 uint32_t size = entry_data->data_size;
                 int offset = strtol(path_elem, NULL, 10);
-                if (offset >= size || offset < 0) {
+                if (offset < 0) {
+                    return MMDB_INVALID_LOOKUP_PATH;
+                }
+
+                if ((uint32_t)offset >= size || offset < 0) {
                     entry_data->offset = 0;
                     goto end;
                 }
@@ -779,6 +794,8 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
     if (entry_data->type == MMDB_DATA_TYPE_PTR) {
         CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
     }
+
+    return MMDB_SUCCESS;
 }
 
 LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
@@ -846,27 +863,27 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     }
 
     if (type == MMDB_DATA_TYPE_UINT16) {
-        if (size < 0 || size > 2) {
+        if (size > 2) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint16 = (uint16_t)get_uintX(&mem[offset], size);
     } else if (type == MMDB_DATA_TYPE_UINT32) {
-        if (size < 0 || size > 4) {
+        if (size > 4) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint32 = (uint32_t)get_uintX(&mem[offset], size);
     } else if (type == MMDB_DATA_TYPE_INT32) {
-        if (size < 0 || size > 4) {
+        if (size > 4) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->int32 = get_sintX(&mem[offset], size);
     } else if (type == MMDB_DATA_TYPE_UINT64) {
-        if (size < 0 || size > 8) {
+        if (size > 8) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint64 = get_uintX(&mem[offset], size);
     } else if (type == MMDB_DATA_TYPE_UINT128) {
-        if (size < 0 || size > 16) {
+        if (size > 16) {
             return MMDB_INVALID_DATA_ERROR;
         }
 
@@ -898,7 +915,7 @@ LOCAL int get_ext_type(int raw_ext_type)
     return 7 + raw_ext_type;
 }
 
-LOCAL void DPRINT_KEY(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
+LOCAL void DPRINT_KEY(MMDB_entry_data_s *entry_data)
 {
     uint32_t len = entry_data->data_size > 255 ? 255 : entry_data->data_size;
 
@@ -935,7 +952,7 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
                              MMDB_entry_data_list_s **entry_data_list)
 {
     *entry_data_list = MMDB_new_entry_data_list();
-    if (NULL == &entry_data_list) {
+    if (NULL == entry_data_list) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
     return get_entry_data_list(start->mmdb, start->offset, *entry_data_list);
@@ -1026,7 +1043,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                 }
 #if MMDB_DEBUG
                 MMDB_DBG_CARP("key num: %d (%u)", size, rnd);
-                DPRINT_KEY(mmdb, &entry_data_list_to->entry_data);
+                DPRINT_KEY(&entry_data_list_to->entry_data);
 #endif
 
                 offset = entry_data_list_to->entry_data.offset_to_next;
@@ -1174,7 +1191,7 @@ LOCAL void free_languages_metadata(MMDB_s *mmdb)
         return;
     }
 
-    for (int i = 0; i < mmdb->metadata.languages.count; i++) {
+    for (size_t i = 0; i < mmdb->metadata.languages.count; i++) {
         free((char *)mmdb->metadata.languages.names[i]);
     }
     free(mmdb->metadata.languages.names);
@@ -1415,6 +1432,8 @@ const char *MMDB_strerror(uint16_t error_code)
     } else if (MMDB_INVALID_DATA_ERROR == error_code) {
         return
             "The MaxMind DB file's data section contains bad data (unknown data type or corrupt data)";
+    } else if (MMDB_INVALID_LOOKUP_PATH == error_code) {
+        return "The lookup path contained an invalid value (like a negative integer for an array index)";
     } else {
         return "Unknown error code";
     }

@@ -45,6 +45,7 @@ extern "C" {
 #define MMDB_OUT_OF_MEMORY_ERROR (5)
 #define MMDB_UNKNOWN_DATABASE_FORMAT_ERROR (6)
 #define MMDB_INVALID_DATA_ERROR (7)
+#define MMDB_INVALID_LOOKUP_PATH (8)
 
 /* */
 #define MMDB_DEBUG (0)
@@ -70,7 +71,7 @@ typedef struct MMDB_entry_data_s {
     /* return values */
     union {
         uint32_t pointer;
-        const char *utf8_string;
+        const unsigned char *utf8_string;
         double double_value;
         const uint8_t *bytes;
         uint16_t uint16;
