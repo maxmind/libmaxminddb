@@ -265,12 +265,14 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size)
        the metadata. The metadata is basically just like the data section, so we
        want to use the same functions we use for the data section to get metadata
        values. */
-    MMDB_s metadata_db;
-    metadata_db.data_section = metadata;
+    MMDB_s metadata_db = {
+        .data_section = metadata
+    };
 
-    MMDB_entry_s metadata_start;
-    metadata_start.mmdb = &metadata_db;
-    metadata_start.offset = 0;
+    MMDB_entry_s metadata_start = {
+        .mmdb =  &metadata_db,
+        .offset = 0
+    };
 
     mmdb->metadata.node_count =
         value_for_key_as_uint32(&metadata_start, "node_count");
