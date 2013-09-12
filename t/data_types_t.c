@@ -1,7 +1,7 @@
 #include "maxminddb_test_helper.h"
 
 void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
-                         const char *filename, const char *mode_desc)
+                         const char *UNUSED(filename), const char *mode_desc)
 {
     {
         char description[500];

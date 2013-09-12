@@ -100,7 +100,9 @@ void run_ipX_tests(const char *filename, const char **missing_ips,
     free(mmdb);
 }
 
-void run_ipv4_tests(int record_size, const char *filename, const char *ignored)
+void run_ipv4_tests(int UNUSED(
+                        record_size), const char *filename, const char *UNUSED(
+                        ignored))
 {
     const char *pairs[9][2] = {
         { "1.1.1.1",  "1.1.1.1"  },
@@ -118,7 +120,9 @@ void run_ipv4_tests(int record_size, const char *filename, const char *ignored)
     run_ipX_tests(filename, missing, 1, pairs, 9);
 }
 
-void run_ipv6_tests(int record_size, const char *filename, const char *ignored)
+void run_ipv6_tests(int UNUSED(
+                        record_size), const char *filename, const char *UNUSED(
+                        ignored))
 {
     const char *pairs[9][2] = {
         { "::1:ffff:ffff", "::1:ffff:ffff" },
