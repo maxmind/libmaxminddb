@@ -242,7 +242,7 @@ LOCAL int read_metadata(MMDB_s *mmdb, const uint8_t *metadata)
     };
 
     MMDB_entry_s metadata_start = {
-        .mmdb =  &metadata_db,
+        .mmdb   = &metadata_db,
         .offset = 0
     };
 
@@ -499,11 +499,11 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
     bool is_ipv4 = mmdb->metadata.ip_version == 4 ? true : false;
 
     MMDB_lookup_result_s result = {
-        .found_entry  = false,
-        .netmask      = 0,
-        .entry = {
-            .mmdb   = mmdb,
-            .offset = 0
+        .found_entry = false,
+        .netmask     = 0,
+        .entry       = {
+            .mmdb    = mmdb,
+            .offset  = 0
         }
     };
 
@@ -550,11 +550,11 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
                                           int *mmdb_error)
 {
     MMDB_lookup_result_s result = {
-        .found_entry  = false,
-        .netmask      = 0,
-        .entry = {
-            .mmdb   = mmdb,
-            .offset = 0
+        .found_entry = false,
+        .netmask     = 0,
+        .entry       = {
+            .mmdb    = mmdb,
+            .offset  = 0
         }
     };
 
@@ -602,8 +602,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         left_record_value = &get_uint32;
         right_record_value = &get_uint32;
         right_record_offset = 4;
-    }
-    else {
+    } else {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
@@ -1548,7 +1547,8 @@ const char *MMDB_strerror(uint16_t error_code)
         return
             "The MaxMind DB file's data section contains bad data (unknown data type or corrupt data)";
     } else if (MMDB_INVALID_LOOKUP_PATH == error_code) {
-        return "The lookup path contained an invalid value (like a negative integer for an array index)";
+        return
+            "The lookup path contained an invalid value (like a negative integer for an array index)";
     } else {
         return "Unknown error code";
     }
