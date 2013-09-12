@@ -66,7 +66,7 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
                    db_file, mode_desc);
 
     if (!is_ok) {
-        diag("open status code = %d", status);
+        diag("open status code = %d (%s)", status, MMDB_strerror(status));
         free(mmdb);
         return NULL;
     }
