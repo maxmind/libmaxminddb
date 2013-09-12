@@ -221,9 +221,15 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size)
 
     mmdb->metadata.node_count =
         value_for_key_as_uint32(&metadata_start, "node_count");
+    if (!mmdb->metadata.node_count) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     mmdb->metadata.record_size =
         value_for_key_as_uint16(&metadata_start, "record_size");
+    if (!mmdb->metadata.record_size) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     if (mmdb->metadata.record_size != 24 && mmdb->metadata.record_size != 28
         && mmdb->metadata.record_size != 32) {
@@ -232,9 +238,15 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size)
 
     mmdb->metadata.ip_version =
         value_for_key_as_uint16(&metadata_start, "ip_version");
+    if (!mmdb->metadata.ip_version) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     mmdb->metadata.database_type =
         value_for_key_as_string(&metadata_start, "database_type");
+    if (NULL == mmdb->metadata.database_type) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     int status =
         populate_languages_metadata(mmdb, &metadata_db, &metadata_start);
@@ -244,12 +256,21 @@ LOCAL int read_metadata(MMDB_s *mmdb, uint8_t *last_128kb, ssize_t size)
 
     mmdb->metadata.binary_format_major_version =
         value_for_key_as_uint16(&metadata_start, "binary_format_major_version");
+    if (!mmdb->metadata.binary_format_major_version) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     mmdb->metadata.binary_format_minor_version =
         value_for_key_as_uint16(&metadata_start, "binary_format_minor_version");
+    if (!mmdb->metadata.binary_format_minor_version) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     mmdb->metadata.build_epoch =
         value_for_key_as_uint64(&metadata_start, "build_epoch");
+    if (!mmdb->metadata.build_epoch) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     status = populate_description_metadata(mmdb, &metadata_db, &metadata_start);
     if (MMDB_SUCCESS != status) {
