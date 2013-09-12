@@ -898,7 +898,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         size = 8;
         entry_data->double_value = get_ieee754_double(&mem[offset]);
     } else if (type == MMDB_DATA_TYPE_UTF8_STRING) {
-        entry_data->utf8_string = &mem[offset];
+        entry_data->utf8_string = (char *)&mem[offset];
         entry_data->data_size = size;
     } else if (type == MMDB_DATA_TYPE_BYTES) {
         entry_data->bytes = &mem[offset];

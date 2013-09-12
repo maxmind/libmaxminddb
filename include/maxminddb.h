@@ -71,7 +71,7 @@ typedef struct MMDB_entry_data_s {
     /* return values */
     union {
         uint32_t pointer;
-        const unsigned char *utf8_string;
+        const char *utf8_string;
         double double_value;
         const uint8_t *bytes;
         uint16_t uint16;
