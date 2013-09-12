@@ -117,6 +117,8 @@ my $re_signature = qr/^($re_type ($re_identifier) $re_args) (?>[\ \t\n]*?{)/x;
             my ( $prototype, $name ) = $chunk =~ /^$re_signature/ms
                 or next;
 
+            next if $prototype =~ /^DEBUG_FUNC/;
+
             push @protos,
                 {
                 name      => $name,

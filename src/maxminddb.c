@@ -16,6 +16,7 @@
 
 #ifdef MMDB_DEBUG
 #define LOCAL
+#define DEBUG_FUNC
 #define DEBUG_MSG(msg) fprintf(stderr, msg "\n")
 #define DEBUG_MSGF(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
 #define DEBUG_BINARY(fmt, byte)                                 \
@@ -67,7 +68,6 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
 LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
                      MMDB_entry_data_s *entry_data);
 LOCAL int get_ext_type(int raw_ext_type);
-LOCAL void DPRINT_KEY(MMDB_entry_data_s *entry_data);
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size);
 LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
@@ -88,8 +88,6 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
     int *status);
 LOCAL void print_indentation(FILE *stream, int i);
 LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
-LOCAL char *byte_to_binary(uint8_t byte);
-LOCAL char *type_num_to_name(uint8_t num);
 /* --prototypes end - don't remove this comment-- */
 /* *INDENT-ON* */
 
@@ -981,19 +979,6 @@ LOCAL int get_ext_type(int raw_ext_type)
     return 7 + raw_ext_type;
 }
 
-#ifdef MMDB_DEBUG
-LOCAL void DPRINT_KEY(MMDB_entry_data_s *entry_data)
-{
-    uint32_t len = entry_data->data_size > 255 ? 255 : entry_data->data_size;
-
-    uint8_t str[256];
-    memcpy(str, entry_data->utf8_string, len);
-
-    str[len] = '\0';
-    fprintf(stderr, "%s\n", str);
-}
-#endif
-
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size)
 {
@@ -1469,8 +1454,47 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
     return hex_string;
 }
 
+const char *MMDB_strerror(uint16_t error_code)
+{
+    if (MMDB_SUCCESS == error_code) {
+        return "Success (not an error)";
+    } else if (MMDB_FILE_OPEN_ERROR == error_code) {
+        return "Error opening the specified MaxMind DB file";
+    } else if (MMDB_CORRUPT_SEARCH_TREE_ERROR == error_code) {
+        return "The MaxMind DB file's search tree is corrupt";
+    } else if (MMDB_INVALID_METADATA_ERROR == error_code) {
+        return "The MaxMind DB file contains invalid metadata";
+    } else if (MMDB_IO_ERROR == error_code) {
+        return "An attempt to read data from the MaxMind DB file failed";
+    } else if (MMDB_OUT_OF_MEMORY_ERROR == error_code) {
+        return "A memory allocation call failed";
+    } else if (MMDB_UNKNOWN_DATABASE_FORMAT_ERROR == error_code) {
+        return
+            "The MaxMind DB file is in a format this library can't handle (unknown record size or binary format version)";
+    } else if (MMDB_INVALID_DATA_ERROR == error_code) {
+        return
+            "The MaxMind DB file's data section contains bad data (unknown data type or corrupt data)";
+    } else if (MMDB_INVALID_LOOKUP_PATH == error_code) {
+        return
+            "The lookup path contained an invalid value (like a negative integer for an array index)";
+    } else {
+        return "Unknown error code";
+    }
+}
+
 #ifdef MMDB_DEBUG
-LOCAL char *byte_to_binary(uint8_t byte)
+DEBUG_FUNC void DPRINT_KEY(MMDB_entry_data_s *entry_data)
+{
+    uint32_t len = entry_data->data_size > 255 ? 255 : entry_data->data_size;
+
+    uint8_t str[256];
+    memcpy(str, entry_data->utf8_string, len);
+
+    str[len] = '\0';
+    fprintf(stderr, "%s\n", str);
+}
+
+DEBUG_FUNC char *byte_to_binary(uint8_t byte)
 {
     char *bits = malloc(sizeof(char) * 9);
     if (NULL == bits) {
@@ -1485,7 +1509,7 @@ LOCAL char *byte_to_binary(uint8_t byte)
     return bits;
 }
 
-LOCAL char *type_num_to_name(uint8_t num)
+DEBUG_FUNC char *type_num_to_name(uint8_t num)
 {
     switch (num) {
     case 0:
@@ -1526,30 +1550,3 @@ LOCAL char *type_num_to_name(uint8_t num)
 }
 #endif
 
-const char *MMDB_strerror(uint16_t error_code)
-{
-    if (MMDB_SUCCESS == error_code) {
-        return "Success (not an error)";
-    } else if (MMDB_FILE_OPEN_ERROR == error_code) {
-        return "Error opening the specified MaxMind DB file";
-    } else if (MMDB_CORRUPT_SEARCH_TREE_ERROR == error_code) {
-        return "The MaxMind DB file's search tree is corrupt";
-    } else if (MMDB_INVALID_METADATA_ERROR == error_code) {
-        return "The MaxMind DB file contains invalid metadata";
-    } else if (MMDB_IO_ERROR == error_code) {
-        return "An attempt to read data from the MaxMind DB file failed";
-    } else if (MMDB_OUT_OF_MEMORY_ERROR == error_code) {
-        return "A memory allocation call failed";
-    } else if (MMDB_UNKNOWN_DATABASE_FORMAT_ERROR == error_code) {
-        return
-            "The MaxMind DB file is in a format this library can't handle (unknown record size or binary format version)";
-    } else if (MMDB_INVALID_DATA_ERROR == error_code) {
-        return
-            "The MaxMind DB file's data section contains bad data (unknown data type or corrupt data)";
-    } else if (MMDB_INVALID_LOOKUP_PATH == error_code) {
-        return
-            "The lookup path contained an invalid value (like a negative integer for an array index)";
-    } else {
-        return "Unknown error code";
-    }
-}
