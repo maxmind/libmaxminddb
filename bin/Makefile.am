@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I$(top_srcdir)/include
+include $(top_srcdir)/common.mk
 
 AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
 

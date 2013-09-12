@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I$(top_srcdir)/include
+include $(top_srcdir)/common.mk
 
 lib_LTLIBRARIES = libmaxminddb.la
 
