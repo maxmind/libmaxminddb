@@ -44,7 +44,7 @@ void run_tests(int mode, const char *mode_desc)
 
     cmp_ok(mmdb->metadata.description.count, "==", 2,
            "found 2 descriptions - %s", mode_desc);
-    for (int i = 0; i < mmdb->metadata.description.count; i++) {
+    for (uint16_t i = 0; i < mmdb->metadata.description.count; i++) {
         const char *language =
             mmdb->metadata.description.descriptions[i]->language;
         const char *description =

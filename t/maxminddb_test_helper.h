@@ -28,7 +28,7 @@
     extern void test_lookup_errors(int gai_error, int mmdb_error,
                                    const char *function, const char *ip,
                                    const char *file, const char *mode_desc);
-    extern MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, int expect_type,
+    extern MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, uint32_t expect_type,
                                      const char *description, ...);
     extern void compare_double(double got, double expect);
     extern void compare_float(float got, float expect);

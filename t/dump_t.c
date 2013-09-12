@@ -21,9 +21,9 @@ void run_tests(int mode, const char *mode_desc)
     fclose(stream);
     MMDB_free_entry_data_list(entry_data_list);
 
-    int is_ok = ok(MMDB_SUCCESS == status,
-                   "MMDB_dump_entry_data_list is successful - %s",
-                   mode_desc);
+    ok(MMDB_SUCCESS == status,
+       "MMDB_dump_entry_data_list is successful - %s",
+       mode_desc);
 
     cmp_ok(dump_size, ">", 0, "MMDB_dump produced output - %s", mode_desc);
 

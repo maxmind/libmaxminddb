@@ -59,7 +59,7 @@ MMDB_entry_data_list_s *test_bytes_value(MMDB_entry_data_list_s
     uint8_t *bytes = dup_entry_or_bail(value->entry_data);
     uint8_t expect[] = { 0x00, 0x00, 0x00, 0x2a };
 
-    is(bytes, expect, "got expected value for bytes key");
+    ok(memcmp(bytes, expect, 4) == 0, "got expected value for bytes key");
 
     free(bytes);
 
