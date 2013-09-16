@@ -4,7 +4,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
+
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdarg.h>
