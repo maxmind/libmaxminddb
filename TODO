@@ -1,8 +1,3 @@
-* Fix mmdb* apps
-** better usage info and error messages
-** more shared code
-** combine dump & lookup - can dump by default or print out a partial dump if
-   given a path to a given item
 * More tests
 ** tests for apps
 * Some sort of data validation testing when decoding a data entry
