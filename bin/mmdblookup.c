@@ -114,6 +114,32 @@ LOCAL void usage(char *program, int exit_code, const char *error)
                   "      --version       Print the program's version number and exit.\n"
                   "\n"
                   "      --help (-h -?)  Show usage information.\n"
+                  "\n"
+                  "  If an IP's data entry resolves to a map or array, you can provide\n"
+                  "  a lookup path to only show part of that data.\n"
+                  "\n"
+                  "  For example, given a JSON structure like this:\n"
+                  "\n"
+                  "    {\n"
+                  "        \"names\": {\n"
+                  "             \"en\": \"Germany\",\n"
+                  "             \"de\": \"Deutschland\"\n"
+                  "        },\n"
+                  "        \"cities\": [ \"Berlin\", \"Frankfurt\" ]\n"
+                  "    }\n"
+                  "\n"
+                  "  You could look up just the English name by calling mmdblookup with a lookup path of:\n"
+                  "\n"
+                  "    mmdblookup --file ... --ip ... names en\n"
+                  "\n"
+                  "  Or you could look up the second city in the list with:\n"
+                  "\n"
+                  "    mmdblookup --file ... --ip ... cities 1\n"
+                  "\n"
+                  "  Array numbering begins with zero (0).\n"
+                  "\n"
+                  "  If you do not provide a path to lookup, all of the information for a given IP\n"
+                  "  will be shown.\n"
                   "\n";
 
     fprintf(stderr, usage, program);
@@ -258,8 +284,9 @@ LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr)
         MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
-        fprintf(stderr, "\n  Error from call to getaddrinfo for %s - %s\n\n", ipstr,
-                gai_strerror(gai_error));
+        fprintf(stderr,
+                "\n  Error from call to getaddrinfo for %s - %s\n\n",
+                ipstr, gai_strerror(gai_error));
         exit(3);
     }
 
