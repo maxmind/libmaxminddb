@@ -1448,7 +1448,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
     char *hex_pointer = hex_string;
 
     for (uint32_t i = 0; i < size; i++) {
-        hex_pointer += sprintf(hex_pointer, "%02X", bytes[i]);
+        sprintf(hex_pointer + (2 * i), "%02X", bytes[i]);
     }
 
     return hex_string;
