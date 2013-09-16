@@ -142,7 +142,7 @@ LOCAL void usage(char *program, int exit_code, const char *error)
                   "  will be shown.\n"
                   "\n";
 
-    fprintf(stderr, usage, program);
+    fprintf(stdout, usage, program);
     exit(exit_code);
 }
 
@@ -159,7 +159,7 @@ LOCAL char **get_options(int argc, char **argv, char **mmdb_file,
             { "ip",      required_argument, 0, 'i' },
             { "verbose", no_argument,       0, 'v' },
             { "version", no_argument,       0, 'n' },
-            { "help",    no_argument,       0, 1   },
+            { "help",    no_argument,       0, 'h' },
             { "?",       no_argument,       0, 1   },
             { 0,         0,                 0, 0   }
         };
