@@ -26,6 +26,7 @@
                                                    const char *description));
     extern void for_all_modes(void (*tests)(int mode, const char *description));
     extern const char *test_database_path(const char *filename);
+    extern const char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data);
     extern MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc);
     extern MMDB_lookup_result_s lookup_string_ok(MMDB_s *mmdb, const char *ip,
                                                  const char *file, const char *mode_desc);

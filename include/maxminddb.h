@@ -128,6 +128,7 @@ typedef struct MMDB_s {
     ssize_t file_size;
     const uint8_t *file_content;
     const uint8_t *data_section;
+    const uint8_t *metadata_section;
     uint16_t full_record_byte_size;
     uint16_t depth;
     MMDB_metadata_s metadata;
@@ -146,6 +147,8 @@ typedef struct MMDB_s {
                                va_list params);
     extern int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                                char **path);
+    extern int MMDB_get_metadata_as_entry_data_list(
+               MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list);
     extern int MMDB_get_entry_data_list(MMDB_entry_s *start,
                                         MMDB_entry_data_list_s **entry_data_list);
     extern MMDB_entry_data_list_s *MMDB_new_entry_data_list(void);

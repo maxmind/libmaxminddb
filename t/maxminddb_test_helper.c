@@ -52,6 +52,16 @@ const char *test_database_path(const char *filename)
     return (const char *)path;
 }
 
+const char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data)
+{
+    const char *string = strndup(entry_data.utf8_string, entry_data.data_size);
+    if (NULL == string) {
+        BAIL_OUT("strndup failed");
+    }
+
+    return string;
+}
+
 MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
 {
     MMDB_s *mmdb = (MMDB_s *)calloc(1, sizeof(MMDB_s));

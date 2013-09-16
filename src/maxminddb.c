@@ -203,6 +203,7 @@ uint16_t MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
     mmdb->file_content = file_content;
     mmdb->data_section =
         file_content + mmdb->metadata.node_count * mmdb->full_record_byte_size;
+    mmdb->metadata_section = metadata;
 
     return MMDB_SUCCESS;
 }
@@ -999,6 +1000,21 @@ LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
         break;
     }
     return MMDB_DATA_SECTION_SEPARATOR + new_offset;
+}
+
+int MMDB_get_metadata_as_entry_data_list(
+    MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list)
+{
+    MMDB_s metadata_db = {
+        .data_section = mmdb->metadata_section
+    };
+
+    MMDB_entry_s metadata_start = {
+        .mmdb   = &metadata_db,
+        .offset = 0
+    };
+
+    return MMDB_get_entry_data_list(&metadata_start, entry_data_list);
 }
 
 int MMDB_get_entry_data_list(MMDB_entry_s *start,

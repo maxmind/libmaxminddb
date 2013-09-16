@@ -1,15 +1,5 @@
 #include "maxminddb_test_helper.h"
 
-char *dup_entry_or_bail(MMDB_entry_data_s entry_data)
-{
-    char *string = strndup(entry_data.utf8_string, entry_data.data_size);
-    if (NULL == string) {
-        BAIL_OUT("strndup failed");
-    }
-
-    return string;
-}
-
 MMDB_entry_data_list_s *test_array_value(MMDB_entry_data_list_s
                                          *entry_data_list)
 {
@@ -56,12 +46,16 @@ MMDB_entry_data_list_s *test_bytes_value(MMDB_entry_data_list_s
 
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_BYTES,
            "'bytes' key's value is bytes");
-    uint8_t *bytes = (uint8_t *)dup_entry_or_bail(value->entry_data);
+    uint8_t *bytes = malloc(value->entry_data.data_size);
+    if (NULL == bytes) {
+        BAIL_OUT("malloc failed");
+    }
+    memcpy(bytes, value->entry_data.bytes, value->entry_data.data_size);
     uint8_t expect[] = { 0x00, 0x00, 0x00, 0x2a };
 
     ok(memcmp(bytes, expect, 4) == 0, "got expected value for bytes key");
 
-    free(bytes);
+    free((void *)bytes);
 
     return entry_data_list;
 }
@@ -141,24 +135,25 @@ MMDB_entry_data_list_s *test_mapX_key_value_pair(MMDB_entry_data_list_s
     MMDB_entry_data_list_s *mapX_key = entry_data_list = entry_data_list->next;
     cmp_ok(mapX_key->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
            "found a map key in 'map{mapX}'");
-    char *mapX_key_name = dup_entry_or_bail(mapX_key->entry_data);
+    const char *mapX_key_name = dup_entry_string_or_bail(mapX_key->entry_data);
 
     if (strcmp(mapX_key_name, "utf8_stringX") == 0) {
-        MMDB_entry_data_list_s *mapX_value = entry_data_list =
-                                                 entry_data_list->next;
+        MMDB_entry_data_list_s *mapX_value =
+            entry_data_list = entry_data_list->next;
         cmp_ok(mapX_value->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
                "'map{mapX}{utf8_stringX}' type is utf8_string");
-        char *utf8_stringX_value = dup_entry_or_bail(mapX_value->entry_data);
+        const char *utf8_stringX_value = dup_entry_string_or_bail(
+            mapX_value->entry_data);
         ok(strcmp(utf8_stringX_value, "hello") == 0,
            "map{mapX}{utf8_stringX} value is 'hello'");
-        free(utf8_stringX_value);
+        free((void *)utf8_stringX_value);
     } else if (strcmp(mapX_key_name, "arrayX") == 0) {
         entry_data_list = test_arrayX_value(entry_data_list);
     } else {
         ok(0, "unknown key found in map{mapX} - %s", mapX_key_name);
     }
 
-    free(mapX_key_name);
+    free((void *)mapX_key_name);
 
     return entry_data_list;
 }
@@ -174,9 +169,9 @@ MMDB_entry_data_list_s *test_map_value(MMDB_entry_data_list_s *entry_data_list)
     MMDB_entry_data_list_s *map_key_1 = entry_data_list = entry_data_list->next;
     cmp_ok(map_key_1->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
            "found a map key in 'map'");
-    char *map_key_1_name = dup_entry_or_bail(map_key_1->entry_data);
+    const char *map_key_1_name = dup_entry_string_or_bail(map_key_1->entry_data);
     ok(strcmp(map_key_1_name, "mapX") == 0, "key name is mapX");
-    free(map_key_1_name);
+    free((void *)map_key_1_name);
 
     MMDB_entry_data_list_s *mapX = entry_data_list = entry_data_list->next;
     cmp_ok(mapX->entry_data.type, "==", MMDB_DATA_TYPE_MAP,
@@ -253,7 +248,7 @@ MMDB_entry_data_list_s *test_utf8_string_value(MMDB_entry_data_list_s
 
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
            "'utf8_string' key's value is a string");
-    char *utf8_string = dup_entry_or_bail(value->entry_data);
+    const char *utf8_string = dup_entry_string_or_bail(value->entry_data);
     // This is hex for "unicode! ☯ - ♫" as bytes
     char expect[19] =
     { 0x75, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x21, 0x20, 0xe2, 0x98,
@@ -261,7 +256,7 @@ MMDB_entry_data_list_s *test_utf8_string_value(MMDB_entry_data_list_s
 
     is(utf8_string, expect, "got expected value for utf8_string key");
 
-    free(utf8_string);
+    free((void *)utf8_string);
 
     return entry_data_list;
 }
@@ -305,7 +300,7 @@ void run_tests(int mode, const char *description)
         cmp_ok(key->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
                "found a map key");
 
-        char *key_name = dup_entry_or_bail(key->entry_data);
+        const char *key_name = dup_entry_string_or_bail(key->entry_data);
         if (strcmp(key_name, "array") == 0) {
             entry_data_list = test_array_value(entry_data_list);
         } else if (strcmp(key_name, "boolean") == 0) {
@@ -334,7 +329,7 @@ void run_tests(int mode, const char *description)
             ok(0, "unknown key found in map - %s", key_name);
         }
 
-        free(key_name);
+        free((void *)key_name);
     }
 
     MMDB_free_entry_data_list(first);
