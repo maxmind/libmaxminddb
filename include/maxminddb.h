@@ -130,6 +130,7 @@ typedef struct MMDB_s {
     const uint8_t *data_section;
     uint32_t data_section_size;
     const uint8_t *metadata_section;
+    uint32_t metadata_section_size;
     uint16_t full_record_byte_size;
     uint16_t depth;
     MMDB_metadata_s metadata;
