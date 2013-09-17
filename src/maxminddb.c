@@ -946,9 +946,15 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
             memcpy(entry_data->uint128 + 16 - size, &mem[offset], size);
         }
     } else if (type == MMDB_DATA_TYPE_FLOAT) {
+        if (size != 4) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         size = 4;
         entry_data->float_value = get_ieee754_float(&mem[offset]);
     } else if (type == MMDB_DATA_TYPE_DOUBLE) {
+        if (size != 8) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         size = 8;
         entry_data->double_value = get_ieee754_double(&mem[offset]);
     } else if (type == MMDB_DATA_TYPE_UTF8_STRING) {
