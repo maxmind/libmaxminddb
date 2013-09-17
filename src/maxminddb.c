@@ -272,6 +272,11 @@ LOCAL int read_metadata(MMDB_s *mmdb, const uint8_t *metadata)
         DEBUG_MSG("could not find ip_version value in metadata");
         return MMDB_INVALID_METADATA_ERROR;
     }
+    if (!(mmdb->metadata.ip_version == 4 || mmdb->metadata.ip_version == 6)) {
+        DEBUG_MSGF("ip_version value in metadata is not 4 or 6 - it was %i",
+                   mmdb->metadata.ip_version);
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     mmdb->metadata.database_type =
         value_for_key_as_string(&metadata_start, "database_type");
@@ -940,7 +945,6 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         if (size > 16) {
             return MMDB_INVALID_DATA_ERROR;
         }
-
         memset(entry_data->uint128, 0, 16);
         if (size > 0) {
             memcpy(entry_data->uint128 + 16 - size, &mem[offset], size);
