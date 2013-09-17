@@ -706,7 +706,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 
     char *path_elem;
     do {
-        CHECKED_DECODE_ONE(mmdb, offset, entry_data);
+        CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, entry_data);
 
         path_elem = *(path++);
         DEBUG_NL;
@@ -743,8 +743,8 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                     goto end;
                 }
                 for (int i = 0; i < offset; i++) {
-                    CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next,
-                                       entry_data);
+                    CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next,
+                                              entry_data);
                     int status = skip_hash_array(mmdb, entry_data);
                     if (MMDB_SUCCESS != status) {
                         return status;
@@ -766,13 +766,9 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                 uint32_t size = entry_data->data_size;
                 offset = entry_data->offset_to_next;
                 while (size-- > 0) {
-                    CHECKED_DECODE_ONE(mmdb, offset, &key);
+                    CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, &key);
 
                     uint32_t offset_to_value = key.offset_to_next;
-
-                    if (key.type == MMDB_DATA_TYPE_PTR) {
-                        CHECKED_DECODE_ONE(mmdb, key.pointer, &key);
-                    }
 
                     if (MMDB_DATA_TYPE_UTF8_STRING != key.type) {
                         return MMDB_INVALID_DATA_ERROR;
@@ -793,7 +789,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                         memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
                         goto end;
                     } else {
-                        CHECKED_DECODE_ONE(mmdb, offset_to_value, &value);
+                        CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value, &value);
                         int status = skip_hash_array(mmdb, &value);
                         if (MMDB_SUCCESS != status) {
                             return status;
