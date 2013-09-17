@@ -34,9 +34,15 @@ AC_TYPE_UINT8_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
 
+# This check is backwards in order to make life easier for people writing
+# extensions in other languages that link to this library. If they want to
+# simply assume that they are using a newish compiler, they don't need to
+# check for this type nor do they need to define anything on the CLI. They'll
+# just get code that assumes this type exists.
 AC_CHECK_TYPE(
         [unsigned __int128],
-        [AC_DEFINE([HAVE_UINT128], [1], [Has an unsigned __int128 type])])
+        [AC_DEFINE([MISSING_UINT128], [0], [Missing the unsigned __int128 type])],
+        [AC_DEFINE([MISSING_UINT128], [1], [Missing the unsigned __int128 type])])
 
 AC_CHECK_FUNC(
         [open_memstream],

@@ -54,10 +54,10 @@ extern "C" {
 #define MMDB_INVALID_DATA_ERROR (7)
 #define MMDB_INVALID_LOOKUP_PATH (8)
 
-#ifdef HAVE_UINT128
-#define MY_UINT128_T(name) unsigned __int128 name
-#else
+#if MISSING_UINT128
 #define MY_UINT128_T(name) uint8_t name[16]
+#else
+#define MY_UINT128_T(name) unsigned __int128 name
 #endif
 
 /* This is a pointer into the data section for a given IP address lookup */

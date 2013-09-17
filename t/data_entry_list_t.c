@@ -193,15 +193,15 @@ MMDB_entry_data_list_s *test_uint128_value(MMDB_entry_data_list_s
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UINT128,
            "'uint128' key's value is an uint128");
 
-#ifdef HAVE_UINT128
-    MY_UINT128_T(expect) = 1;
-    expect <<= 120;
-    ok(value->entry_data.uint128 == expect, "uint128 field is 2**120");
-#else
+#if MISSING_UINT128
     MY_UINT128_T(expect) = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     ok(memcmp(value->entry_data.uint128, expect, 16) == 0,
        "uint128 field is 2**120");
+#else
+    MY_UINT128_T(expect) = 1;
+    expect <<= 120;
+    ok(value->entry_data.uint128 == expect, "uint128 field is 2**120");
 #endif
 
     return entry_data_list;

@@ -101,14 +101,14 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_entry_data_s data =
             data_ok(result, MMDB_DATA_TYPE_UINT128, description, "uint128",
                     NULL);
-#ifdef HAVE_UINT128
-        MY_UINT128_T(expect) = 1;
-        expect <<= 120;
-        ok(data.uint128 == expect, "uint128 field is 2**120");
-#else
+#if MISSING_UINT128
         MY_UINT128_T(expect) = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         ok(memcmp(data.uint128, expect, 16) == 0, "uint128 field is 2**120");
+#else
+        MY_UINT128_T(expect) = 1;
+        expect <<= 120;
+        ok(data.uint128 == expect, "uint128 field is 2**120");
 #endif
     }
 
