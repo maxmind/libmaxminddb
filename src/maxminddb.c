@@ -628,6 +628,13 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
             value = left_record_value(record_pointer);
         }
 
+        /* Ideally we'd check to make sure that a record never points to a
+         * previously seen value, but that's more complicated. For now, we can
+         * at least check that we don't end up at the top of the tree again. */
+        if (0 == value) {
+            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+        }
+
         if (value >= node_count) {
             uint32_t offset = value - node_count;
             if (offset > mmdb->data_section_size) {
