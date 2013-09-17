@@ -46,7 +46,7 @@ AC_CHECK_FUNC(
 
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
-AC_CHECK_FUNCS([memchr strtol memset gettimeofday strdup memmem])
+AC_CHECK_FUNCS([memmem])
 
 AC_ARG_ENABLE(
         [debug],
