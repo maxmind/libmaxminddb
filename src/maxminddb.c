@@ -1540,28 +1540,29 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
 
 const char *MMDB_strerror(uint16_t error_code)
 {
-    if (MMDB_SUCCESS == error_code) {
+    switch (error_code) {
+    case MMDB_SUCCESS:
         return "Success (not an error)";
-    } else if (MMDB_FILE_OPEN_ERROR == error_code) {
+    case MMDB_FILE_OPEN_ERROR:
         return "Error opening the specified MaxMind DB file";
-    } else if (MMDB_CORRUPT_SEARCH_TREE_ERROR == error_code) {
+    case MMDB_CORRUPT_SEARCH_TREE_ERROR:
         return "The MaxMind DB file's search tree is corrupt";
-    } else if (MMDB_INVALID_METADATA_ERROR == error_code) {
+    case MMDB_INVALID_METADATA_ERROR:
         return "The MaxMind DB file contains invalid metadata";
-    } else if (MMDB_IO_ERROR == error_code) {
+    case MMDB_IO_ERROR:
         return "An attempt to read data from the MaxMind DB file failed";
-    } else if (MMDB_OUT_OF_MEMORY_ERROR == error_code) {
+    case MMDB_OUT_OF_MEMORY_ERROR:
         return "A memory allocation call failed";
-    } else if (MMDB_UNKNOWN_DATABASE_FORMAT_ERROR == error_code) {
+    case MMDB_UNKNOWN_DATABASE_FORMAT_ERROR:
         return
             "The MaxMind DB file is in a format this library can't handle (unknown record size or binary format version)";
-    } else if (MMDB_INVALID_DATA_ERROR == error_code) {
+    case MMDB_INVALID_DATA_ERROR:
         return
             "The MaxMind DB file's data section contains bad data (unknown data type or corrupt data)";
-    } else if (MMDB_INVALID_LOOKUP_PATH == error_code) {
+    case MMDB_INVALID_LOOKUP_PATH:
         return
             "The lookup path contained an invalid value (like a negative integer for an array index)";
-    } else {
+    default:
         return "Unknown error code";
     }
 }
