@@ -1,5 +1,6 @@
 #include "maxminddb_test_helper.h"
 
+#ifdef HAVE_OPEN_MEMSTREAM
 void run_tests(int mode, const char *mode_desc)
 {
     const char *filename = "MaxMind-DB-test-decoder.mmdb";
@@ -86,11 +87,13 @@ void run_tests(int mode, const char *mode_desc)
 
 int main(void)
 {
-#ifdef HAVE_OPEN_MEMSTREAM
     plan(NO_PLAN);
     for_all_modes(&run_tests);
     done_testing();
-#else
-    plan(SKIP_ALL, "This test requires the open_memstream() function");
-#endif
 }
+#else
+int main(void)
+{
+    plan(SKIP_ALL, "This test requires the open_memstream() function");
+}
+#endif
