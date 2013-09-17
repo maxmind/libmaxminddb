@@ -592,6 +592,7 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
         address = malloc(4);
         memcpy(address, &((struct sockaddr_in *)sockaddr)->sin_addr.s_addr, 4);
     } else {
+        // We need calloc() here for the IPv4 case - the first 12 bytes must be 0
         address = calloc(1, 16);
         if (sockaddr->sa_family == AF_INET6) {
             memcpy(address,
@@ -1259,6 +1260,8 @@ LOCAL int32_t get_sintX(const uint8_t *p, int length)
 
 MMDB_entry_data_list_s *MMDB_new_entry_data_list(void)
 {
+    /* We need calloc here in order to ensure that the ->next pointer in the
+     * struct doesn't point to some random address. */
     return calloc(1, sizeof(MMDB_entry_data_list_s));
 }
 
