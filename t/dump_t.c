@@ -86,7 +86,11 @@ void run_tests(int mode, const char *mode_desc)
 
 int main(void)
 {
+#ifdef HAS_OPEN_MEMSTREAM
     plan(NO_PLAN);
     for_all_modes(&run_tests);
     done_testing();
+#else
+    plan(SKIP_ALL, "This test requires the open_memstream() function");
+#endif
 }

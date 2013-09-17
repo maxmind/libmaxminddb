@@ -50,7 +50,7 @@ _test_stderr(
 
 _test_stdout(
     [qw( --version )],
-    qr/mmdblookup version 2\.0\.0/,
+    qr/mmdblookup version \d+\.\d+\.\d+/,
     0,
     'output for --version'
 );
