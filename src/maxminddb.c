@@ -1296,7 +1296,7 @@ LOCAL void free_mmdb_struct(MMDB_s *mmdb)
     }
 
     if (NULL != mmdb->metadata.database_type) {
-        free(mmdb->metadata.database_type);
+        free((void *)mmdb->metadata.database_type);
     }
 
     free_languages_metadata(mmdb);
