@@ -1285,7 +1285,7 @@ LOCAL void free_mmdb_struct(MMDB_s *mmdb)
     }
 
     if (NULL != mmdb->filename) {
-        free(mmdb->filename);
+        free((void *)mmdb->filename);
     }
     if (NULL != mmdb->file_content) {
         if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {

@@ -133,7 +133,7 @@ typedef struct MMDB_metadata_s {
 
 typedef struct MMDB_s {
     uint32_t flags;
-    char *filename;
+    const char *filename;
     ssize_t file_size;
     const uint8_t *file_content;
     const uint8_t *data_section;
