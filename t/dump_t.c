@@ -73,7 +73,7 @@ void run_tests(int mode, const char *mode_desc)
     };
 
     for (int i = 0; i < 42; i++) {
-        ok(strcmp(dump_output, expect[i]) != 0,
+        ok(strstr(dump_output, expect[i]) != NULL,
            "dump output contains expected line (%s) - %s", expect[i],
            mode_desc);
     }
