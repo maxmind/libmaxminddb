@@ -881,7 +881,7 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
     return MMDB_SUCCESS;
 }
 
-#ifdef HAS_UINT128
+#ifdef HAVE_UINT128
 NO_PROTO unsigned __int128 get_uint128(const uint8_t *p, int length)
 {
     unsigned __int128 value = 0;
@@ -996,7 +996,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         if (size > 16) {
             return MMDB_INVALID_DATA_ERROR;
         }
-#ifdef HAS_UINT128
+#ifdef HAVE_UINT128
         entry_data->uint128 = get_uint128(&mem[offset], size);
 #else
         memset(entry_data->uint128, 0, 16);
@@ -1488,7 +1488,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
         break;
     case MMDB_DATA_TYPE_UINT128:
         print_indentation(stream, indent);
-#ifdef HAS_UINT128
+#ifdef HAVE_UINT128
         uint64_t high = entry_data_list->entry_data.uint128 >> 64;
         uint64_t low = (uint64_t)entry_data_list->entry_data.uint128;
         fprintf(stream, "0x%016" PRIX64 "%016" PRIX64 " <uint128>\n", high, low);

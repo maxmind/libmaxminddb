@@ -54,7 +54,7 @@ extern "C" {
 #define MMDB_INVALID_DATA_ERROR (7)
 #define MMDB_INVALID_LOOKUP_PATH (8)
 
-#ifdef HAS_UINT128
+#ifdef HAVE_UINT128
 #define MY_UINT128_T(name) unsigned __int128 name
 #else
 #define MY_UINT128_T(name) uint8_t name[16]

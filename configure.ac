@@ -36,11 +36,11 @@ AC_TYPE_UINT64_T
 
 AC_CHECK_TYPE(
         [unsigned __int128],
-        [AC_DEFINE([HAS_UINT128], [1], [Has an unsigned __int128 type])])
+        [AC_DEFINE([HAVE_UINT128], [1], [Has an unsigned __int128 type])])
 
 AC_CHECK_FUNC(
         [open_memstream],
-        [AC_DEFINE([HAS_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
+        [AC_DEFINE([HAVE_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
 
 # Checks for library functions.
 
