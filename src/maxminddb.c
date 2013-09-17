@@ -200,9 +200,11 @@ uint16_t MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
 
     close(fd);
 
+    uint32_t search_tree_size = mmdb->metadata.node_count * mmdb->full_record_byte_size;
+
     mmdb->file_content = file_content;
-    mmdb->data_section =
-        file_content + mmdb->metadata.node_count * mmdb->full_record_byte_size;
+    mmdb->data_section = file_content + search_tree_size;
+    mmdb->data_section_size = mmdb->file_size - search_tree_size;
     mmdb->metadata_section = metadata;
 
     return MMDB_SUCCESS;
@@ -627,8 +629,13 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         }
 
         if (value >= node_count) {
+            uint32_t offset = value - node_count;
+            if (offset > mmdb->data_section_size) {
+                return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+            }
+
             result->netmask = mmdb->depth - current_bit;
-            result->entry.offset = value - node_count;
+            result->entry.offset = offset;
             result->found_entry = result->entry.offset > 0 ? true : false;
             return MMDB_SUCCESS;
         }

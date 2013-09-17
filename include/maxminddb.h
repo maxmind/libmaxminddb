@@ -128,6 +128,7 @@ typedef struct MMDB_s {
     ssize_t file_size;
     const uint8_t *file_content;
     const uint8_t *data_section;
+    uint32_t data_section_size;
     const uint8_t *metadata_section;
     uint16_t full_record_byte_size;
     uint16_t depth;
