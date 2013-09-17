@@ -2,6 +2,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
@@ -16,6 +17,7 @@
 
 #ifdef MMDB_DEBUG
 #define LOCAL
+#define NO_PROTO
 #define DEBUG_FUNC
 #define DEBUG_MSG(msg) fprintf(stderr, msg "\n")
 #define DEBUG_MSGF(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
@@ -32,6 +34,7 @@
 #define DEBUG_NL fprintf(stderr, "\n")
 #else
 #define LOCAL static
+#define NO_PROTO static
 #define DEBUG_MSG(...)
 #define DEBUG_MSGF(...)
 #define DEBUG_BINARY(...)
@@ -878,6 +881,18 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
     return MMDB_SUCCESS;
 }
 
+#ifdef HAS_UINT128
+NO_PROTO unsigned __int128 get_uint128(const uint8_t *p, int length)
+{
+    unsigned __int128 value = 0;
+    while (length-- > 0) {
+        value <<= 8;
+        value += *p++;
+    }
+    return value;
+}
+#endif
+
 LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
                      MMDB_entry_data_s *entry_data)
 {
@@ -981,10 +996,14 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         if (size > 16) {
             return MMDB_INVALID_DATA_ERROR;
         }
+#ifdef HAS_UINT128
+        entry_data->uint128 = get_uint128(&mem[offset], size);
+#else
         memset(entry_data->uint128, 0, 16);
         if (size > 0) {
             memcpy(entry_data->uint128 + 16 - size, &mem[offset], size);
         }
+#endif
     } else if (type == MMDB_DATA_TYPE_FLOAT) {
         if (size != 4) {
             return MMDB_INVALID_DATA_ERROR;
@@ -1469,10 +1488,16 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
         break;
     case MMDB_DATA_TYPE_UINT128:
         print_indentation(stream, indent);
+#ifdef HAS_UINT128
+        uint64_t high = entry_data_list->entry_data.uint128 >> 64;
+        uint64_t low = (uint64_t)entry_data_list->entry_data.uint128;
+        fprintf(stream, "0x%016" PRIX64 "%016" PRIX64 " <uint128>\n", high, low);
+#else
         char *hex_string =
             bytes_to_hex((uint8_t *)entry_data_list->entry_data.uint128, 16);
-        fprintf(stream, "%s <uint128>\n", hex_string);
+        fprintf(stream, "0x%s <uint128>\n", hex_string);
         free(hex_string);
+#endif
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_INT32:

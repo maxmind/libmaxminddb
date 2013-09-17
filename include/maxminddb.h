@@ -51,6 +51,12 @@ extern "C" {
 #define MMDB_INVALID_DATA_ERROR (7)
 #define MMDB_INVALID_LOOKUP_PATH (8)
 
+#ifdef HAS_UINT128
+#define MY_UINT128_T(name) unsigned __int128 name
+#else
+#define MY_UINT128_T(name) uint8_t name[16]
+#endif
+
 /* This is a pointer into the data section for a given IP address lookup */
 typedef struct MMDB_entry_s {
     struct MMDB_s *mmdb;
@@ -74,7 +80,7 @@ typedef struct MMDB_entry_data_s {
         uint32_t uint32;
         int32_t int32;
         uint64_t uint64;
-        uint8_t uint128[16];
+        MY_UINT128_T(uint128);
         bool boolean;
         float float_value;
     };
