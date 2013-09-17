@@ -1,10 +1,6 @@
 #ifndef MAXMINDDB_H
 #define MAXMINDDB_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -173,7 +169,4 @@ typedef struct MMDB_s {
     /* --prototypes end - don't remove this comment-- */
     /* *INDENT-ON* */
 
-#ifdef __cplusplus
-}
-#endif
 #endif                          /* MAXMINDDB_H */
