@@ -589,7 +589,7 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
         if (sockaddr->sa_family == AF_INET6) {
             return result;
         }
-        address = calloc(1, 4);
+        address = malloc(4);
         memcpy(address, &((struct sockaddr_in *)sockaddr)->sin_addr.s_addr, 4);
     } else {
         address = calloc(1, 16);
