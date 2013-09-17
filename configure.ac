@@ -34,6 +34,12 @@ AC_TYPE_UINT8_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
 
+AC_CHECK_TYPE(
+        [unsigned __int128],
+        [CPPFLAGS="$CPPFLAGS -DHAS_UINT128"],
+        [],
+        [])
+
 # Checks for library functions.
 
 AC_FUNC_MALLOC
