@@ -15,6 +15,7 @@ AC_PROG_LIBTOOL
 # Checks for programs.
 AC_PROG_CC_C99
 
+# We will add this back for non-debug builds in the common.mk file
 CFLAGS=`echo ${CFLAGS} | sed 's/-O2//'`
 CXXFLAGS=`echo ${CXXFLAGS} | sed 's/-O2//'`
 
