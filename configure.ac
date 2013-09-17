@@ -48,6 +48,9 @@ AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([memmem])
 
+AC_SEARCH_LIBS([fabs], [m])
+AC_SEARCH_LIBS([fabsf], [m])
+
 AC_ARG_ENABLE(
         [debug],
         [  --enable-debug    Turn on debugging],
