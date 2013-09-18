@@ -151,7 +151,7 @@ typedef struct MMDB_s {
                                                      int *mmdb_error);
     extern int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...);
     extern int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
-                               va_list params);
+                               va_list va_path);
     extern int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                                char **path);
     extern int MMDB_get_metadata_as_entry_data_list(

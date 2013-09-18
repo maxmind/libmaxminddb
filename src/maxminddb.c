@@ -687,21 +687,21 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
 
 int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)
 {
-    va_list keys;
-    va_start(keys, entry_data);
-    int status = MMDB_vget_value(start, entry_data, keys);
-    va_end(keys);
+    va_list path;
+    va_start(path, entry_data);
+    int status = MMDB_vget_value(start, entry_data, path);
+    va_end(path);
     return status;
 }
 
 int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
-                    va_list params)
+                    va_list va_path)
 {
     char **path = NULL;
 
     int i = 0;
     char *path_elem;
-    while (NULL != (path_elem = va_arg(params, char *))) {
+    while (NULL != (path_elem = va_arg(va_path, char *))) {
         path = realloc(path, sizeof(char *) * (i + 1));
         if (NULL == path) {
             return MMDB_OUT_OF_MEMORY_ERROR;
