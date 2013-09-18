@@ -35,7 +35,7 @@ void for_all_modes(void (*tests)(int mode, const char *description))
 const char *test_database_path(const char *filename)
 {
     char cwd[500];
-    char *tmp = getcwd(cwd, 500);
+    char *UNUSED(tmp) = getcwd(cwd, 500);
 
     char *test_db_dir;
     if (strcmp(basename(cwd), "t") == 0) {
