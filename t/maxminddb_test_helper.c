@@ -70,7 +70,7 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
         BAIL_OUT("could not allocate memory for our MMDB_s struct");
     }
 
-    uint16_t status = MMDB_open(db_file, mode, mmdb);
+    int status = MMDB_open(db_file, mode, mmdb);
 
     int is_ok = ok(MMDB_SUCCESS == status, "open %s status is success - %s",
                    db_file, mode_desc);

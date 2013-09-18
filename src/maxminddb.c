@@ -136,7 +136,7 @@ MMDB_s *MMDB_new_mmdb()
     return calloc(1, sizeof(MMDB_s));
 }
 
-uint16_t MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
+int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
 {
     mmdb->file_content = NULL;
     mmdb->data_section = NULL;
