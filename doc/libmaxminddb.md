@@ -184,6 +184,7 @@ maps and arrays. Some members of this struct are not documented as they are
 only for internal use.
 
     typedef struct MMDB_entry_data_s {
+        bool has_data;
         union {
             uint32_t pointer;
             const char *utf8_string;
@@ -202,6 +203,10 @@ only for internal use.
         uint32_t type;
     } MMDB_entry_data_s;
 
+The `has_data` member is true if data was found for a given lookup. See
+`MMDB_get_value()` for more details. If this member is false then none of the
+other values in the struct are meaningful.
+
 The union at the beginning of the struct defines the actual data. To determine
 which union member is populated you should look at the `type` member. The
 `pointer` member of the union should never be populated in any data returned
@@ -215,6 +220,35 @@ type. If that type is not supported you'll get back a 16 byte array of
 The `data_size` member is only relevant for `utf8_string` and `bytes` data.
 
 The `type` member can be compared to one of the `MMDB_DTYPE_*` macros.
+
+### Data Type Macros
+
+This library provides a macro for every data type defined by the MaxMind DB
+spec.
+
+* `MMDB_DATA_TYPE_UTF8_STRING`
+* `MMDB_DATA_TYPE_DOUBLE`
+* `MMDB_DATA_TYPE_BYTES`
+* `MMDB_DATA_TYPE_UINT16`
+* `MMDB_DATA_TYPE_UINT32`
+* `MMDB_DATA_TYPE_MAP`
+* `MMDB_DATA_TYPE_INT32`
+* `MMDB_DATA_TYPE_UINT64`
+* `MMDB_DATA_TYPE_UINT128`
+* `MMDB_DATA_TYPE_ARRAY`
+* `MMDB_DATA_TYPE_BOOLEAN`
+* `MMDB_DATA_TYPE_FLOAT`
+
+There are also a few types that are for internal use only:
+
+* `MMDB_DATA_TYPE_EXTENDED`
+* `MMDB_DATA_TYPE_POINTER`
+* `MMDB_DATA_TYPE_CONTAINER`
+* `MMDB_DATA_TYPE_END_MARKER`
+
+If you see one of these in returned data then something has gone very
+wrong. The database is damaged or was generated incorrectly or there is a bug
+in the libmaxminddb code.
 
 ### Pointer Values and `MMDB_close()`
 
@@ -248,8 +282,8 @@ status codes are:
   file.
 * `MMDB_IO_ERROR` - an IO operation failed. Check errno for more details.
 * `MMDB_CORRUPT_SEARCH_TREE_ERROR` - looking up an IP address in the search
-  tree gave us an impossible result. The database is probably damaged or was
-  generated incorrectly.
+  tree gave us an impossible result. The database is damaged or was generated
+  incorrectly or there is a bug in the libmaxminddb code.
 * `MMDB_INVALID_METADATA_ERROR` - something in the database is wrong. This
   includes missing metadata keys as well as impossible values (like an
   `ip_version` of 7).
@@ -264,21 +298,33 @@ status codes are:
   `MMDB_vget_value`, or `MMDB_aget_value` contains an array offset that is not
   a non-negative integer.
 
+All status codes should be treated as `int` values.
+
+## `const char *MMDB_strerror(int error_code)`
+
+This function takes a status code and returns an English string explaining the
+status.
+
 # FUNCTIONS
 
 This library provides the following exported functions:
 
-## `uint16_t MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)`
+## `int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)`
 
 This function opens a handle to a MaxMind DB file. It's return value is a
 status code as defined above. Always check this call's return value!
 
     MMDB_s mmdb;
-    uint16_t status = MMDB_open("/path/to/file.mmdb", MMDB_MODE_MMAP, &mmdb);
+    int status = MMDB_open("/path/to/file.mmdb", MMDB_MODE_MMAP, &mmdb);
     if (MMDB_SUCCESS != status) { ... }
+    ...
+    MMDB_close(&mmdb);
 
 The `MMDB_s` struct you pass in can be on the stack or allocated from the
-heap.
+heap. However, if the open is successful it will contain heap-allocated data,
+so you need to close it with `MMDB_close()`. If the status returned is not
+`MMDB_SUCCESS` then this library makes sure that all allocated memory is freed
+before returning.
 
 The currently valid flags are:
 
@@ -290,6 +336,12 @@ The "all in memory" mode is faster but uses more memory.
 If you pass in some other value for the `flags` parameter who knows what will
 happen. Don't do that. In the future we may add additional flags that you can
 bitwise-or together with the mode, as well as additional modes.
+
+## `void MMDB_close(MMDB_s *mmdb)`
+
+This frees any allocated or mmap'd memory that is held from the `MMDB_s`
+struct. *It does not free the struct itself!* If you allocated the struct from
+the heap then you are responsible for freeing it.
 
 ## `MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr, int *gai_error, int *mmdb_error)`
 
@@ -339,3 +391,147 @@ the `MMDB_lookup_string()` function.
     if (MMDB_SUCCESS != mmdb_error) { ... }
     
     if (result.found_entry) { ... }
+
+## Data Lookup Functions
+
+There are three functions for looking up data associated with an IP address.
+
+* `int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)`
+* `int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, va_list path)`
+* `int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, char **path)`
+
+The three functions allow three slightly different calling styles, but they
+all do the same thing.
+
+The first parameter is an `MMDB_entry_s` value. In most cases this will come
+from the `MMDB_lookup_result_s` value returned by `MMDB_lookup_string()` or
+`MMDB_lookup_sockaddr()`.
+
+The second parameter is a reference to an `MMDB_entry_data_s` struct. This
+will be populated with the data that is being looked up, if any is found. If
+nothing is found, then the `has_data` member of this struct will be false. If
+it's true then you can look at the `data_type` member.
+
+The final parameter is a lookup path. This allow you to navigate a complex
+data structure. For example, given this example:
+
+    {
+        "names": {
+            "en": "Germany",
+            "de": "Deutschland"
+        },
+        "cities": [ "Berlin", "Frankfurt" ]
+    }
+
+We could look up the English name with this code:
+
+    MMDB_lookup_result_s result =
+        MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
+    MMDB_entry_data_s entry_data;
+    int status = MMDB_get_value(&result.entry, &entry_data, "names", "en", NULL);
+    if (MMDB_SUCCESS != status) { ... }
+    if (entry_data.has_data) { ... }
+
+If we wanted to find the first city the lookup path would be `"cities",
+"0"`. If you don't provide a lookup path at all, you'll get the entry which
+corresponds to the top level map.
+
+If you want to get all of the entry data at once you can call
+`MMDB_get_entry_data_list()` instead.
+
+## `int MMDB_get_entry_data_list(MMDB_entry_s *start, MMDB_entry_data_list_s **entry_data_list)`
+
+This function allows you to get all of the data for a complex data structure
+at once, rather than looking up each piece using repeated calls to
+`MMDB_get_value()`.
+
+    MMDB_lookup_result_s result =
+        MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
+    MMDB_entry_data_list_s *entry_data_list, *first;
+    int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
+    if (MMDB_SUCCESS != status) { ... }
+    // save this so we can free this data later
+    first = entry_data_list;
+
+    while (1) {
+        MMDB_entry_data_list_s *next = entry_data_list = entry_data_list->next;
+        if (NULL == next) {
+            break;
+        }
+        
+        switch (next->entry_data.type) {
+            case MMDB_DATA_TYPE_MAP: { ... }
+            case MMDB_DATA_TYPE_UTF8_STRING: { ... }
+            ...
+        }
+
+    }
+    
+    MMDB_free_entry_data_list(first);
+
+It's up to you to interpret the returned data structure. The list is linked in
+a depth-first traversal. Let's use this structure as an example:
+
+    {
+        "names": {
+            "en": "Germany",
+            "de": "Deutschland"
+        },
+        "cities": [ "Berlin", "Frankfurt" ]
+    }
+
+The returned list will consist of the following items:
+
+1. MAP - top level map
+2. UTF8_STRING - "names" key
+3. MAP - map for "names" key
+4. UTF8_STRING - "en" key
+5. UTF8_STRING - value for "en" key
+6. UTF8_STRING - "de" key
+7. UTF8_STRING - value for "de" key
+8. UTF8_STRING - "cities" key
+9. ARRAY - value for "cities" key
+10. UTF8_STRING - array[0]
+11. UTF8_STRING - array[1]
+
+## `void MMDB_free_entry_data_list(MMDB_entry_data_list_s *entry_data_list)`
+
+The `MMDB_get_entry_data_list()` and `MMDB_get_metadata_as_entry_data_list()`
+functions will allocate the linked list structure from the heap. Call this
+function to free it.
+
+## `int MMDB_get_metadata_as_entry_data_list(MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list)`
+
+This function allows you to retrieve the database metadata as a linked list of
+`MMDB_entry_data_list_s` structs. This can be a more convenient way to deal
+with the metadata than using the metadata struct directly.
+
+    MMDB_entry_data_list_s *entry_data_list, *first;
+    int status = MMDB_get_metadata_as_entry_data_list(mmdb, &entry_data_list);
+    if (MMDB_SUCCESS != status) { ... }
+    first = entry_data_list;
+    ... // do something with the data
+    MMDB_free_entry_data_list(first);
+
+## `int MMDB_dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s *entry_data_list, int indent)`
+
+This function takes a linked list of `MMDB_entry_data_list_s` structs and
+stringifies it to the given `stream`. The `indent` parameter is the starting
+indent level for the generated output. It is incremented for nested data
+structures (maps, array, etc.).
+
+The `stream` must be a filehandle (`stdout`, etc). If your platform provides
+something like the GNU `open_memstream()` you can use that to capture the
+output as a string.
+
+The output is formatted in a JSON-ish fashion, but values are marked with
+their data type (except for maps and arrays which are shown with "{}" and "[]"
+respectively).
+
+The specific output format may change in future releases, so you should not
+rely on the specific formatting produced by this function. It is intended to
+be used to show data to users in a readable way and for debugging purposes.
+
+## `const char *MMDB_lib_version(void)`
+
+This function returns the library verson as a string, something like "2.0.0".
