@@ -760,7 +760,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
  one_key:
         path_elem_len = strlen(path_elem);
         switch (entry_data->type) {
-        case MMDB_DATA_TYPE_PTR:
+        case MMDB_DATA_TYPE_POINTER:
             {
                 CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
                 break;
@@ -875,7 +875,7 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
                             MMDB_entry_data_s *entry_data)
 {
     CHECKED_DECODE_ONE(mmdb, offset, entry_data);
-    if (entry_data->type == MMDB_DATA_TYPE_PTR) {
+    if (entry_data->type == MMDB_DATA_TYPE_POINTER) {
         CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
     }
 
@@ -915,14 +915,14 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     int type = (ctrl >> 5) & 7;
     DEBUG_MSGF("Type: %i (%s)", type, type_num_to_name(type));
 
-    if (type == MMDB_DATA_TYPE_EXT) {
+    if (type == MMDB_DATA_TYPE_EXTENDED) {
         type = get_ext_type(mem[offset++]);
         DEBUG_MSGF("Extended type: %i (%s)", type, type_num_to_name(type));
     }
 
     entry_data->type = type;
 
-    if (type == MMDB_DATA_TYPE_PTR) {
+    if (type == MMDB_DATA_TYPE_POINTER) {
         int psize = (ctrl >> 3) & 3;
         DEBUG_MSGF("Pointer size: %i", psize);
 
@@ -1094,11 +1094,11 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
     CHECKED_DECODE_ONE(mmdb, offset, &entry_data_list->entry_data);
 
     switch (entry_data_list->entry_data.type) {
-    case MMDB_DATA_TYPE_PTR:
+    case MMDB_DATA_TYPE_POINTER:
         {
             uint32_t next_offset = entry_data_list->entry_data.offset_to_next;
             uint32_t last_offset;
-            while (entry_data_list->entry_data.type == MMDB_DATA_TYPE_PTR) {
+            while (entry_data_list->entry_data.type == MMDB_DATA_TYPE_POINTER) {
                 CHECKED_DECODE_ONE(mmdb, last_offset =
                                        entry_data_list->entry_data.pointer,
                                    &entry_data_list->entry_data);

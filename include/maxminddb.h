@@ -17,8 +17,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#define MMDB_DATA_TYPE_EXT (0)
-#define MMDB_DATA_TYPE_PTR (1)
+#define MMDB_DATA_TYPE_EXTENDED (0)
+#define MMDB_DATA_TYPE_POINTER (1)
 #define MMDB_DATA_TYPE_UTF8_STRING (2)
 #define MMDB_DATA_TYPE_DOUBLE (3)
 #define MMDB_DATA_TYPE_BYTES (4)
