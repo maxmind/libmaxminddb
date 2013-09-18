@@ -164,7 +164,7 @@ typedef struct MMDB_s {
     extern int MMDB_dump_entry_data_list(FILE *stream,
                                          MMDB_entry_data_list_s *entry_data_list,
                                          int indent);
-    extern const char *MMDB_strerror(uint16_t error_code);
+    extern const char *MMDB_strerror(int error_code);
     /* --prototypes end - don't remove this comment-- */
     /* *INDENT-ON* */
 
