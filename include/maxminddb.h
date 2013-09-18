@@ -69,7 +69,7 @@ typedef struct MMDB_lookup_result_s {
 } MMDB_lookup_result_s;
 
 typedef struct MMDB_entry_data_s {
-    /* return values */
+    bool has_data;
     union {
         uint32_t pointer;
         const char *utf8_string;

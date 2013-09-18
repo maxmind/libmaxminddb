@@ -904,6 +904,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     }
 
     entry_data->offset = offset;
+    entry_data->has_data = true;
 
     DEBUG_NL;
     DEBUG_MSGF("Offset: %i", offset);
