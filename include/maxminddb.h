@@ -158,7 +158,6 @@ typedef struct MMDB_s {
                MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list);
     extern int MMDB_get_entry_data_list(MMDB_entry_s *start,
                                         MMDB_entry_data_list_s **entry_data_list);
-    extern MMDB_entry_data_list_s *MMDB_new_entry_data_list(void);
     extern void MMDB_free_entry_data_list(MMDB_entry_data_list_s *entry_data_list);
     extern void MMDB_close(MMDB_s *mmdb);
     extern const char *MMDB_lib_version(void);

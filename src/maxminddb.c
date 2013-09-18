@@ -83,6 +83,7 @@ LOCAL uint32_t get_uint24(const uint8_t *p);
 LOCAL uint32_t get_uint16(const uint8_t *p);
 LOCAL uint64_t get_uintX(const uint8_t *p, int length);
 LOCAL int32_t get_sintX(const uint8_t *p, int length);
+LOCAL MMDB_entry_data_list_s *new_entry_data_list(void);
 LOCAL void free_mmdb_struct(MMDB_s *mmdb);
 LOCAL void free_languages_metadata(MMDB_s *mmdb);
 LOCAL void free_descriptions_metadata(MMDB_s *mmdb);
@@ -1081,7 +1082,7 @@ int MMDB_get_metadata_as_entry_data_list(
 int MMDB_get_entry_data_list(MMDB_entry_s *start,
                              MMDB_entry_data_list_s **entry_data_list)
 {
-    *entry_data_list = MMDB_new_entry_data_list();
+    *entry_data_list = new_entry_data_list();
     if (NULL == entry_data_list) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
@@ -1098,7 +1099,8 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
         {
             uint32_t next_offset = entry_data_list->entry_data.offset_to_next;
             uint32_t last_offset;
-            while (entry_data_list->entry_data.type == MMDB_DATA_TYPE_POINTER) {
+            while (entry_data_list->entry_data.type ==
+                   MMDB_DATA_TYPE_POINTER) {
                 CHECKED_DECODE_ONE(mmdb, last_offset =
                                        entry_data_list->entry_data.pointer,
                                    &entry_data_list->entry_data);
@@ -1123,7 +1125,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
             MMDB_entry_data_list_s *previous = entry_data_list;
             while (array_size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
-                                                                 MMDB_new_entry_data_list();
+                                                                 new_entry_data_list();
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
@@ -1151,7 +1153,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
             MMDB_entry_data_list_s *previous = entry_data_list;
             while (size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to = previous->next =
-                                                                 MMDB_new_entry_data_list();
+                                                                 new_entry_data_list();
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
@@ -1168,7 +1170,7 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
 
                 offset = entry_data_list_to->entry_data.offset_to_next;
                 entry_data_list_to = previous->next =
-                                         MMDB_new_entry_data_list();
+                                         new_entry_data_list();
 
                 if (NULL == entry_data_list_to) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
@@ -1259,7 +1261,7 @@ LOCAL int32_t get_sintX(const uint8_t *p, int length)
     return (int32_t)get_uintX(p, length);
 }
 
-MMDB_entry_data_list_s *MMDB_new_entry_data_list(void)
+LOCAL MMDB_entry_data_list_s *new_entry_data_list(void)
 {
     /* We need calloc here in order to ensure that the ->next pointer in the
      * struct doesn't point to some random address. */
