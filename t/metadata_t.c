@@ -115,6 +115,9 @@ MMDB_entry_data_list_s *test_description_value(
         } else {
             ok(0, "unknown key found in description map - %s", key_name);
         }
+
+        free((void *)key_name);
+        free((void *)description);
     }
 
     return entry_data_list;
