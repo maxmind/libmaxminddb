@@ -1541,7 +1541,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
     return hex_string;
 }
 
-const char *MMDB_strerror(uint16_t error_code)
+const char *MMDB_strerror(int error_code)
 {
     switch (error_code) {
     case MMDB_SUCCESS:
