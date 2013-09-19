@@ -68,8 +68,9 @@ libmaxminddb - a library for working with MaxMind DB files
 
 # DESCRIPTION
 
-The libmaxminddb library provides functions for working MaxMind DB files. The
-database and results are all represented by different data
+The libmaxminddb library provides functions for working MaxMind DB files. See
+http://maxmind.github.io/MaxMind-DB/ for the MaxMind DB format
+specification. The database and results are all represented by different data
 structures. Databases are opened by calling `MMDB_open()`. You can look up IP
 addresses as a string with `MMDB_lookup_string()` or as a `struct sockaddr *`
 with `MMDB_lookup_sockaddr()`.
