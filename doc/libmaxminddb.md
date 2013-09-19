@@ -5,7 +5,7 @@ libmaxminddb - a library for working with MaxMind DB files
 # SYNOPSIS
 
     #include <maxminddb.h>
-    
+
     int main(int argc, char **argv)
     {
         MMDB_s mmdb;
@@ -69,18 +69,17 @@ libmaxminddb - a library for working with MaxMind DB files
 # DESCRIPTION
 
 The libmaxminddb library provides functions for working MaxMind DB files. See
-http://maxmind.github.io/MaxMind-DB/ for the MaxMind DB format
-specification. The database and results are all represented by different data
-structures. Databases are opened by calling `MMDB_open()`. You can look up IP
-addresses as a string with `MMDB_lookup_string()` or as a `struct sockaddr *`
-with `MMDB_lookup_sockaddr()`.
+http://maxmind.github.io/MaxMind-DB/ for the MaxMind DB format specification.
+The database and results are all represented by different data structures.
+Databases are opened by calling `MMDB_open()`. You can look up IP addresses as
+a string with `MMDB_lookup_string()` or as a `struct sockaddr *` with
+`MMDB_lookup_sockaddr()`.
 
 If the lookup finds the IP address in the database, it returns a
 `MMDB_lookup_result_s` struct. If that struct indicates that the database has
-data for the IP, there are a number of functions that can be used to fetch
-that data. These include `MMDB_get_value()` and
-`MMDB_get_entry_data_list()`. See the function documentation below for more
-details.
+data for the IP, there are a number of functions that can be used to fetch that
+data. These include `MMDB_get_value()` and `MMDB_get_entry_data_list()`. See
+the function documentation below for more details.
 
 When you are done with the database handle you should call `MMDB_close()`.
 
@@ -115,10 +114,10 @@ handle!
 
 ## `MMDB_metadata_s` and `MMDB_description_s`
 
-This struct can be retrieved from the `MMDB_s` struct. It contains the
-metadata read from the database file. Note that you may find it more
-convenient to access this metadata by calling
-`MMDB_get_metadata_as_data_entry_list()` instead.
+This struct can be retrieved from the `MMDB_s` struct. It contains the metadata
+read from the database file. Note that you may find it more convenient to
+access this metadata by calling `MMDB_get_metadata_as_data_entry_list()`
+instead.
 
     typedef struct MMDB_metadata_s {
         uint32_t node_count;
@@ -168,9 +167,9 @@ not contain meaningful values. Always check that `found_entry` is true first!
 The `entry` member is used to look up the data associated with the IP address.
 
 The `netmask` member tells you what subnet the IP address belongs to in this
-database. For example, if you look up the address `1.1.1.1` in an IPv4
-database and the returned `netmask` is 16, then the address is part of the
-`1.1.1.0/16` subnet.
+database. For example, if you look up the address `1.1.1.1` in an IPv4 database
+and the returned `netmask` is 16, then the address is part of the `1.1.1.0/16`
+subnet.
 
 ## `MMDB_result_s`
 
@@ -180,9 +179,9 @@ You don't really need to dig around in this struct. You'll get this from a
 ## `MMDB_entry_data_s`
 
 This struct is used to return a single data section entry for an IP. These
-entries can in turn point to other entries, as is the case for things like
-maps and arrays. Some members of this struct are not documented as they are
-only for internal use.
+entries can in turn point to other entries, as is the case for things like maps
+and arrays. Some members of this struct are not documented as they are only for
+internal use.
 
     typedef struct MMDB_entry_data_s {
         bool has_data;
@@ -210,8 +209,8 @@ other values in the struct are meaningful.
 
 The union at the beginning of the struct defines the actual data. To determine
 which union member is populated you should look at the `type` member. The
-`pointer` member of the union should never be populated in any data returned
-by the API. Pointers should always be resolved internally.
+`pointer` member of the union should never be populated in any data returned by
+the API. Pointers should always be resolved internally.
 
 The handling of uint128 data depends on whether or not your platform supports
 the `unsigned __int128` type. If it does, then the `uint128` member is of that
@@ -247,9 +246,9 @@ There are also a few types that are for internal use only:
 * `MMDB_DATA_TYPE_CONTAINER`
 * `MMDB_DATA_TYPE_END_MARKER`
 
-If you see one of these in returned data then something has gone very
-wrong. The database is damaged or was generated incorrectly or there is a bug
-in the libmaxminddb code.
+If you see one of these in returned data then something has gone very wrong.
+The database is damaged or was generated incorrectly or there is a bug in the
+libmaxminddb code.
 
 ### Pointer Values and `MMDB_close()`
 
@@ -293,8 +292,8 @@ status codes are:
 * `MMDB_OUT_OF_MEMORY_ERROR` - a memory allocation call (`malloc`, etc.)
   failed.
 * `MMDB_INVALID_DATA_ERROR` - an entry in the data section contains invalid
-  data. For example, a uint16 field is claiming to be more than 2 bytes
-  long. The database is probably damaged or was generated incorrectly.
+  data. For example, a uint16 field is claiming to be more than 2 bytes long.
+  The database is probably damaged or was generated incorrectly.
 * `MMDB_INVALID_LOOKUP_PATH` - The lookup path passed to `MMDB_get_value`,
   `MMDB_vget_value`, or `MMDB_aget_value` contains an array offset that is not
   a non-negative integer.
@@ -312,7 +311,7 @@ This library provides the following exported functions:
 
 ## `int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)`
 
-This function opens a handle to a MaxMind DB file. It's return value is a
+This function opens a handle to a MaxMind DB file. Its return value is a
 status code as defined above. Always check this call's return value!
 
     MMDB_s mmdb;
@@ -357,7 +356,7 @@ rather than resolving the address twice.
         MMDB_lookup_string(mmdb, "1.2.3.4", &gai_error, &mmdb_error);
     if (0 != gai_error) { ... }
     if (MMDB_SUCCESS != mmdb_error) { ... }
-    
+
     if (result.found_entry) { ... }
 
 This function always returns an `MMDB_lookup_result_s` struct, but you should
@@ -390,7 +389,7 @@ the `MMDB_lookup_string()` function.
         MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
     if (0 != gai_error) { ... }
     if (MMDB_SUCCESS != mmdb_error) { ... }
-    
+
     if (result.found_entry) { ... }
 
 ## Data Lookup Functions
@@ -459,7 +458,7 @@ at once, rather than looking up each piece using repeated calls to
         if (NULL == next) {
             break;
         }
-        
+
         switch (next->entry_data.type) {
             case MMDB_DATA_TYPE_MAP: { ... }
             case MMDB_DATA_TYPE_UTF8_STRING: { ... }
@@ -467,7 +466,7 @@ at once, rather than looking up each piece using repeated calls to
         }
 
     }
-    
+
     MMDB_free_entry_data_list(first);
 
 It's up to you to interpret the returned data structure. The list is linked in
@@ -525,13 +524,13 @@ The `stream` must be a filehandle (`stdout`, etc). If your platform provides
 something like the GNU `open_memstream()` you can use that to capture the
 output as a string.
 
-The output is formatted in a JSON-ish fashion, but values are marked with
-their data type (except for maps and arrays which are shown with "{}" and "[]"
+The output is formatted in a JSON-ish fashion, but values are marked with their
+data type (except for maps and arrays which are shown with "{}" and "[]"
 respectively).
 
 The specific output format may change in future releases, so you should not
-rely on the specific formatting produced by this function. It is intended to
-be used to show data to users in a readable way and for debugging purposes.
+rely on the specific formatting produced by this function. It is intended to be
+used to show data to users in a readable way and for debugging purposes.
 
 ## `const char *MMDB_lib_version(void)`
 
