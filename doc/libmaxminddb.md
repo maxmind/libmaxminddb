@@ -498,7 +498,7 @@ The returned list will consist of the following items:
 
 The `MMDB_get_entry_data_list()` and `MMDB_get_metadata_as_entry_data_list()`
 functions will allocate the linked list structure from the heap. Call this
-function to free it.
+function to free the `MMDB_entry_data_list_s` struct.
 
 ## `int MMDB_get_metadata_as_entry_data_list(MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list)`
 
