@@ -42,6 +42,7 @@
 /* GEOIPDB flags */
 #define MMDB_MODE_MMAP (1)
 #define MMDB_MODE_MASK (7)
+#define MMDB_MODE_USE_SHARED_MEMORY (8)
 
 /* GEOIPDB err codes */
 #define MMDB_SUCCESS (0)

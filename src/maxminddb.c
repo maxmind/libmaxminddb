@@ -216,7 +216,7 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    int fd = open(filename, O_RDONLY);
+    int fd = fd_for_database(filename, flags)
     if (fd < 0) {
         free_mmdb_struct(mmdb);
         return MMDB_FILE_OPEN_ERROR;
@@ -272,6 +272,23 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
     mmdb->ipv4_start_node.netmask = 0;
 
     return MMDB_SUCCESS;
+}
+
+LOCAL int fd_for_database(const char *filename, uint32_t flags)
+{
+#if HAVE_SHM_OPEN
+    if (flags & MMDB_MODE_USE_SHARED_MEMORY) {
+        int fd = shm_open("", O_CREAT | O_RDONLY, s_IRUSR | S_RGRP);
+        if (-1 == fd) {
+            return fd;
+        }
+
+    } else {
+        return open(filename, O_RDONLY);
+    }
+#else
+    return open(filename, O_RDONLY);
+#endif
 }
 
 LOCAL const uint8_t *find_metadata(const uint8_t *file_content,

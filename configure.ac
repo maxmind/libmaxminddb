@@ -85,6 +85,10 @@ AC_CHECK_FUNC(
         [open_memstream],
         [AC_DEFINE([HAVE_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
 
+AC_CHECK_FUNC(
+        [shm_open],
+        [AC_DEFINE([HAVE_SHM_OPEN], [1], [Has a shm_open() function])])
+
 # Checks for library functions.
 
 AC_FUNC_MALLOC
