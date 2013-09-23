@@ -116,7 +116,7 @@ handle!
 
 This struct can be retrieved from the `MMDB_s` struct. It contains the metadata
 read from the database file. Note that you may find it more convenient to
-access this metadata by calling `MMDB_get_metadata_as_data_entry_list()`
+access this metadata by calling `MMDB_get_metadata_as_entry_data_list()`
 instead.
 
     typedef struct MMDB_metadata_s {
