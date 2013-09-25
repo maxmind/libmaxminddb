@@ -5,9 +5,7 @@
 #define _GNU_SOURCE
 #endif
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "maxminddb_config.h"
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdarg.h>
