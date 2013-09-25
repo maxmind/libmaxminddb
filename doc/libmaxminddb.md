@@ -212,14 +212,20 @@ which union member is populated you should look at the `type` member. The
 `pointer` member of the union should never be populated in any data returned by
 the API. Pointers should always be resolved internally.
 
+The `data_size` member is only relevant for `utf8_string` and `bytes` data.
+
+The `type` member can be compared to one of the `MMDB_DTYPE_*` macros.
+
+### 128-bit Integers
+
 The handling of uint128 data depends on whether or not your platform supports
 the `unsigned __int128` type. If it does, then the `uint128` member is of that
 type. If that type is not supported you'll get back a 16 byte array of
 `uint8_t` values instead. This is the raw data from the database.
 
-The `data_size` member is only relevant for `utf8_string` and `bytes` data.
-
-The `type` member can be compared to one of the `MMDB_DTYPE_*` macros.
+This library provides a public macro `MMDB_UINT128_IS_BYTE_ARRAY` macro. If
+this is true (1), then `uint128` values are returned as a byte array, if it is
+false then they are an `unsigned __int128`.
 
 ### Data Type Macros
 
