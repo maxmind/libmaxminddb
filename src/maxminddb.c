@@ -128,11 +128,6 @@ LOCAL void *memmem(const void *big, size_t big_len, const void *little,
 }
 #endif
 
-MMDB_s *MMDB_new_mmdb()
-{
-    return calloc(1, sizeof(MMDB_s));
-}
-
 int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
 {
     mmdb->file_content = NULL;
