@@ -323,7 +323,7 @@ so you need to close it with `MMDB_close()`. If the status returned is not
 `MMDB_SUCCESS` then this library makes sure that all allocated memory is freed
 before returning.
 
-The currently valid flags are:
+The flags currently provided are:
 
 * `MMDB_MODE_MMAP` - open the database with `mmap()`.
 
