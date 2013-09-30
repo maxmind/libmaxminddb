@@ -162,24 +162,11 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
     ssize_t size;
     mmdb->file_size = size = s.st_size;
 
-    uint8_t *file_content;
-    if ((flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-        file_content = malloc(size);
-        if (NULL == file_content) {
-            free_mmdb_struct(mmdb);
-            return MMDB_OUT_OF_MEMORY_ERROR;
-        }
-        if (MMDB_SUCCESS != int_pread(fd, file_content, size, 0)) {
-            free_mmdb_struct(mmdb);
-            return MMDB_IO_ERROR;
-        }
-    } else {
-        file_content =
-            (uint8_t *)mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
-        if (MAP_FAILED == file_content) {
-            free_mmdb_struct(mmdb);
-            return MMDB_IO_ERROR;
-        }
+    uint8_t *file_content =
+        (uint8_t *)mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+    if (MAP_FAILED == file_content) {
+        free_mmdb_struct(mmdb);
+        return MMDB_IO_ERROR;
     }
 
     uint32_t metadata_size = 0;
@@ -1289,11 +1276,7 @@ LOCAL void free_mmdb_struct(MMDB_s *mmdb)
         free((void *)mmdb->filename);
     }
     if (NULL != mmdb->file_content) {
-        if ((mmdb->flags & MMDB_MODE_MASK) == MMDB_MODE_MEMORY_CACHE) {
-            free((void *)mmdb->file_content);
-        } else {
-            munmap((void *)mmdb->file_content, mmdb->file_size);
-        }
+        munmap((void *)mmdb->file_content, mmdb->file_size);
     }
 
     if (NULL != mmdb->metadata.database_type) {

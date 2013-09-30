@@ -326,13 +326,14 @@ before returning.
 The currently valid flags are:
 
 * `MMDB_MODE_MMAP` - open the database with `mmap()`.
-* `MMDB_MODE_MEMORY` - read the entire database into memory.
-
-The "all in memory" mode is faster but uses more memory.
 
 Passing in other values for `flags` may yield unpredictable results. In the
 future we may add additional flags that you can bitwise-or together with the
 mode, as well as additional modes.
+
+You can also pass `0` as the `flags` value in which case the database will be
+opened with the default flags. However, these defaults may change in future
+releases. The current default is `MMDB_MODE_MMAP`.
 
 ## `void MMDB_close(MMDB_s *mmdb)`
 

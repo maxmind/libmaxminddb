@@ -122,7 +122,8 @@ LOCAL char **get_options(int argc, char **argv, char **mmdb_file,
         };
 
         int opt_index;
-        int opt_char = getopt_long(argc, argv, "f:i:b:vnh?", options, &opt_index);
+        int opt_char = getopt_long(argc, argv, "f:i:b:vnh?", options,
+                                   &opt_index);
 
         if (-1 == opt_char) {
             break;

@@ -29,7 +29,6 @@ void for_all_record_sizes(const char *filename_fmt,
 void for_all_modes(void (*tests)(int mode, const char *description))
 {
     tests(MMDB_MODE_MMAP, "mmap mode");
-    tests(MMDB_MODE_MEMORY_CACHE, "memory cache mode");
 }
 
 const char *test_database_path(const char *filename)
