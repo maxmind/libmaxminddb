@@ -8,6 +8,7 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <maxminddb_config.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdarg.h>
@@ -49,12 +50,6 @@
 #define MMDB_UNKNOWN_DATABASE_FORMAT_ERROR (6)
 #define MMDB_INVALID_DATA_ERROR (7)
 #define MMDB_INVALID_LOOKUP_PATH (8)
-
-#if MISSING_UINT128
-#define MMDB_UINT128_IS_BYTE_ARRAY 1
-#else
-#define MMDB_UINT128_IS_BYTE_ARRAY 0
-#endif
 
 /* This is a pointer into the data section for a given IP address lookup */
 typedef struct MMDB_entry_s {

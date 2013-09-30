@@ -4,7 +4,7 @@
 AC_PREREQ([2.65])
 AC_INIT([libmaxminddb], [0.4.0], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
 
 LT_INIT
 AM_INIT_AUTOMAKE(m4_esyscmd([case `automake --version | head -n 1` in
@@ -41,8 +41,8 @@ AC_TYPE_UINT64_T
 # just get code that assumes this type exists.
 AC_CHECK_TYPE(
         [unsigned __int128],
-        [AC_DEFINE([MISSING_UINT128], [0], [Missing the unsigned __int128 type])],
-        [AC_DEFINE([MISSING_UINT128], [1], [Missing the unsigned __int128 type])])
+        [AC_DEFINE([MMDB_UINT128_IS_BYTE_ARRAY], [0], [Missing the unsigned __int128 type])],
+        [AC_DEFINE([MMDB_UINT128_IS_BYTE_ARRAY], [1], [Missing the unsigned __int128 type])])
 
 AC_CHECK_FUNC(
         [open_memstream],

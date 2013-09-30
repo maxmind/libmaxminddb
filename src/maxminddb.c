@@ -878,7 +878,7 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
     return MMDB_SUCCESS;
 }
 
-#if !MISSING_UINT128
+#if !MMDB_UINT128_IS_BYTE_ARRAY
 NO_PROTO unsigned __int128 get_uint128(const uint8_t *p, int length)
 {
     unsigned __int128 value = 0;
@@ -994,7 +994,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         if (size > 16) {
             return MMDB_INVALID_DATA_ERROR;
         }
-#if MISSING_UINT128
+#if MMDB_UINT128_IS_BYTE_ARRAY
         memset(entry_data->uint128, 0, 16);
         if (size > 0) {
             memcpy(entry_data->uint128 + 16 - size, &mem[offset], size);
@@ -1489,7 +1489,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
         break;
     case MMDB_DATA_TYPE_UINT128:
         print_indentation(stream, indent);
-#if MISSING_UINT128
+#if MMDB_UINT128_IS_BYTE_ARRAY
         char *hex_string =
             bytes_to_hex((uint8_t *)entry_data_list->entry_data.uint128, 16);
         fprintf(stream, "0x%s <uint128>\n", hex_string);
