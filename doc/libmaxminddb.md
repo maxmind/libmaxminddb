@@ -433,7 +433,18 @@ We could look up the English name with this code:
 
 If we wanted to find the first city the lookup path would be `"cities",
 "0"`. If you don't provide a lookup path at all, you'll get the entry which
-corresponds to the top level map.
+corresponds to the top level map. The lookup path must always end with `NULL`,
+regardless of which function you call.
+
+The `MMDB_get_value` function takes a variable number of arguments. All of the
+arguments after the `MMDB_entry_data_s *` structure pointer are the lookup
+path.
+
+The `MMDB_vget_value` function accepts a `va_list` as the lookup path. The
+last element retrieved by `va_arg()` must be `NULL`.
+
+Finally, the `MMDB_aget_value` accepts an array of strings as the lookup
+path. The last member of this array must be `NULL`.
 
 If you want to get all of the entry data at once you can call
 `MMDB_get_entry_data_list()` instead.
