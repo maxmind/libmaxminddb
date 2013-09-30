@@ -6,65 +6,55 @@ libmaxminddb - a library for working with MaxMind DB files
 
     #include <maxminddb.h>
 
-    int main(int argc, char **argv)
-    {
-        MMDB_s mmdb;
-        int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
+    int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb);
+    void MMDB_close(MMDB_s *mmdb);
 
-        if (MMDB_SUCCESS != status) {
-            fprintf(stderr, "\n  Can't open %s - %s\n", fname, MMDB_strerror(status));
+    MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr, int *gai_error, int *mmdb_error);
+    MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb, struct sockaddr *sockaddr, int *mmdb_error);
+    
+    int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...);
+    int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, va_list path);
+    int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, char **path);
+    
+    int MMDB_get_entry_data_list(MMDB_entry_s *start, MMDB_entry_data_list_s **entry_data_list);
+    void MMDB_free_entry_data_list(MMDB_entry_data_list_s *entry_data_list);
+    int MMDB_get_metadata_as_entry_data_list(MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list);
+    int MMDB_dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s *entry_data_list, int indent);
+    
+    const char *MMDB_lib_version(void);
+    const char *MMDB_strerror(int error_code);
 
-            if (MMDB_IO_ERROR == status) {
-                fprintf(stderr, "    IO error: %s\n", strerror(errno));
-            }
-            exit(1);
-        }
+    typedef struct MMDB_lookup_result_s {
+        bool found_entry;
+        MMDB_entry_s entry;
+        uint16_t netmask;
+    } MMDB_lookup_result_s;
 
-        int gai_error, mmdb_error;
-        MMDB_lookup_result_s result =
-            MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
 
-        if (0 != gai_error) {
-            fprintf(stderr,
-                    "\n  Error from call to getaddrinfo for %s - %s\n\n",
-                    ipstr, gai_strerror(gai_error));
-            exit(2);
-        }
+    typedef struct MMDB_entry_data_s {
+        bool has_data;
+        union {
+            uint32_t pointer;
+            const char *utf8_string;
+            double double_value;
+            const uint8_t *bytes;
+            uint16_t uint16;
+            uint32_t uint32;
+            int32_t int32;
+            uint64_t uint64;
+            {unsigned __int128 or uint8_t[16]} uint128;
+            bool boolean;
+            float float_value;
+        };
+        ...
+        uint32_t data_size;
+        uint32_t type;
+    } MMDB_entry_data_s;
 
-        if (MMDB_SUCCESS != mmdb_error) {
-            fprintf(stderr, "\n  Got an error from the maxminddb library: %s\n\n",
-                    MMDB_strerror(mmdb_error));
-            exit(3);
-        }
-
-        MMDB_entry_data_list_s *entry_data_list = NULL;
-
-        int exit_code = 0;
-        if (result.found_entry) {
-            int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
-
-            if (MMDB_SUCCESS != status) {
-                fprintf(stderr, "Got an error looking up the entry data - %s\n",
-                        MMDB_strerror(status));
-                exit_code = 4;
-                goto end;
-            }
-
-            if (NULL != entry_data_list) {
-                MMDB_dump_entry_data_list(stdout, entry_data_list, 2);
-            }
-        } else {
-            fprintf(stderr,
-                    "\n  Could not find an entry for this IP address (%s)\n\n",
-                    ip_address);
-            exit_code = 5;
-        }
-
-    end:
-        MMDB_free_entry_data_list(entry_data_list);
-        MMDB_close(&mmdb);
-        exit(exit_code);
-    }
+    typedef struct MMDB_entry_data_list_s {
+        MMDB_entry_data_s entry_data;
+        struct MMDB_entry_data_list_s *next;
+    } MMDB_entry_data_list_s;
 
 # DESCRIPTION
 
@@ -543,3 +533,68 @@ used to show data to users in a readable way and for debugging purposes.
 ## `const char *MMDB_lib_version(void)`
 
 This function returns the library version as a string, something like "2.0.0".
+
+# EXAMPLE
+
+
+    #include <maxminddb.h>
+
+    int main(int argc, char **argv)
+    {
+        MMDB_s mmdb;
+        int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
+
+        if (MMDB_SUCCESS != status) {
+            fprintf(stderr, "\n  Can't open %s - %s\n", fname, MMDB_strerror(status));
+
+            if (MMDB_IO_ERROR == status) {
+                fprintf(stderr, "    IO error: %s\n", strerror(errno));
+            }
+            exit(1);
+        }
+
+        int gai_error, mmdb_error;
+        MMDB_lookup_result_s result =
+            MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
+
+        if (0 != gai_error) {
+            fprintf(stderr,
+                    "\n  Error from call to getaddrinfo for %s - %s\n\n",
+                    ipstr, gai_strerror(gai_error));
+            exit(2);
+        }
+
+        if (MMDB_SUCCESS != mmdb_error) {
+            fprintf(stderr, "\n  Got an error from the maxminddb library: %s\n\n",
+                    MMDB_strerror(mmdb_error));
+            exit(3);
+        }
+
+        MMDB_entry_data_list_s *entry_data_list = NULL;
+
+        int exit_code = 0;
+        if (result.found_entry) {
+            int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
+
+            if (MMDB_SUCCESS != status) {
+                fprintf(stderr, "Got an error looking up the entry data - %s\n",
+                        MMDB_strerror(status));
+                exit_code = 4;
+                goto end;
+            }
+
+            if (NULL != entry_data_list) {
+                MMDB_dump_entry_data_list(stdout, entry_data_list, 2);
+            }
+        } else {
+            fprintf(stderr,
+                    "\n  Could not find an entry for this IP address (%s)\n\n",
+                    ip_address);
+            exit_code = 5;
+        }
+
+    end:
+        MMDB_free_entry_data_list(entry_data_list);
+        MMDB_close(&mmdb);
+        exit(exit_code);
+    }
