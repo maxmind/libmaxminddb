@@ -4,7 +4,7 @@
 AC_PREREQ([2.65])
 AC_INIT([libmaxminddb], [0.4.0], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
-AC_CONFIG_HEADERS([include/maxminddb_config.h])
+AC_CONFIG_HEADERS([config.h])
 
 LT_INIT
 AM_INIT_AUTOMAKE(m4_esyscmd([case `automake --version | head -n 1` in

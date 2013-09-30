@@ -1,9 +1,12 @@
-#include "libtap/tap.h"
-#include "maxminddb.h"
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <math.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
+#include "maxminddb.h"
+#include "libtap/tap.h"
 
 #ifndef MMDB_TEST_HELPER_C
 #define MMDB_TEST_HELPER_C (1)
