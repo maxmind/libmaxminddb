@@ -164,7 +164,7 @@ LOCAL char **get_options(int argc, char **argv, char **mmdb_file,
         usage(program, 1, "You must provide a filename with --file");
     }
 
-    if (NULL == *ip_address) {
+    if (NULL == *ip_address && iterations == 0) {
         usage(program, 1, "You must provide an IP address with --ip");
     }
 
