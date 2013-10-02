@@ -175,8 +175,8 @@ void test_metadata_as_data_entry_list(MMDB_s * mmdb,
         } else if (strcmp(key_name, "build_epoch") == 0) {
             MMDB_entry_data_list_s *value
                 = entry_data_list = entry_data_list->next;
-            ok(1373571901 == value->entry_data.uint64,
-               "build_epoch == 1373571901");
+            ok(value->entry_data.uint64 > 1373571901,
+               "build_epoch > 1373571901");
         } else if (strcmp(key_name, "database_type") == 0) {
             MMDB_entry_data_list_s *value
                 = entry_data_list = entry_data_list->next;
