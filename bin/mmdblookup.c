@@ -22,7 +22,8 @@ LOCAL MMDB_s open_or_die(const char *fname);
 LOCAL void dump_meta(MMDB_s *mmdb);
 LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
                            char **lookup_path,
-                           int lookup_path_length, int iterations);
+                           int lookup_path_length);
+LOCAL int benchmark(MMDB_s *mmdb, int iterations);
 LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr);
 /* --prototypes end - don't remove this comment-- */
 /* *INDENT-ON* */
@@ -45,8 +46,12 @@ int main(int argc, char **argv)
         dump_meta(&mmdb);
     }
 
-    exit(lookup_and_print(&mmdb, ip_address, lookup_path, lookup_path_length,
-                          iterations));
+    if (0 == iterations) {
+        exit(lookup_and_print(&mmdb, ip_address, lookup_path,
+                              lookup_path_length));
+    } else {
+        exit(benchmark(&mmdb, iterations));
+    }
 }
 
 LOCAL void usage(char *program, int exit_code, const char *error)
@@ -239,7 +244,7 @@ LOCAL void dump_meta(MMDB_s *mmdb)
 
 LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
                            char **lookup_path,
-                           int lookup_path_length, int iterations)
+                           int lookup_path_length)
 {
 
     MMDB_lookup_result_s result = lookup_or_die(mmdb, ip_address);
@@ -247,67 +252,97 @@ LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
 
     int exit_code = 0;
 
-    bool benchmark_mode = 0 == iterations ? 0 : 1;
-    clock_t time = clock();
-    if (0 == iterations) {
-        iterations = 1;
-    }
-
-    for (int i = 0; i < iterations; i++) {
-        if (result.found_entry) {
-            int status;
-            if (lookup_path_length) {
-                MMDB_entry_data_s entry_data;
-                status = MMDB_aget_value(&result.entry, &entry_data,
-                                         lookup_path);
-                if (MMDB_SUCCESS == status) {
-                    if (entry_data.offset) {
-                        MMDB_entry_s entry =
-                        { .mmdb = mmdb, .offset = entry_data.offset };
-                        status = MMDB_get_entry_data_list(&entry,
-                                                          &entry_data_list);
-                    } else {
-                        fprintf(
-                            stdout,
-                            "\n  No data was found at the lookup path you provided\n\n");
-                    }
+    if (result.found_entry) {
+        int status;
+        if (lookup_path_length) {
+            MMDB_entry_data_s entry_data;
+            status = MMDB_aget_value(&result.entry, &entry_data,
+                                     lookup_path);
+            if (MMDB_SUCCESS == status) {
+                if (entry_data.offset) {
+                    MMDB_entry_s entry =
+                    { .mmdb = mmdb, .offset = entry_data.offset };
+                    status = MMDB_get_entry_data_list(&entry,
+                                                      &entry_data_list);
+                } else {
+                    fprintf(
+                        stdout,
+                        "\n  No data was found at the lookup path you provided\n\n");
                 }
-            } else {
-                status = MMDB_get_entry_data_list(&result.entry,
-                                                  &entry_data_list);
-            }
-
-            if (MMDB_SUCCESS != status) {
-                fprintf(stderr, "Got an error looking up the entry data - %s\n",
-                        MMDB_strerror(status));
-                exit_code = 5;
-                goto end;
-            }
-
-            if (NULL != entry_data_list && !benchmark_mode) {
-                fprintf(stdout, "\n");
-                MMDB_dump_entry_data_list(stdout, entry_data_list, 2);
-                fprintf(stdout, "\n");
             }
         } else {
-            fprintf(stderr,
-                    "\n  Could not find an entry for this IP address (%s)\n\n",
-                    ip_address);
-            exit_code = 6;
+            status = MMDB_get_entry_data_list(&result.entry,
+                                              &entry_data_list);
         }
-    }
 
-    if (benchmark_mode) {
-        time = clock() - time;
-        fprintf(stdout, "\n  Looked up address %s %i times in %.2f seconds\n\n",
-                ip_address, iterations,
-                ((double)time / CLOCKS_PER_SEC));
+        if (MMDB_SUCCESS != status) {
+            fprintf(stderr, "Got an error looking up the entry data - %s\n",
+                    MMDB_strerror(status));
+            exit_code = 5;
+            goto end;
+        }
+
+        if (NULL != entry_data_list) {
+            fprintf(stdout, "\n");
+            MMDB_dump_entry_data_list(stdout, entry_data_list, 2);
+            fprintf(stdout, "\n");
+        }
+    } else {
+        fprintf(stderr,
+                "\n  Could not find an entry for this IP address (%s)\n\n",
+                ip_address);
+        exit_code = 6;
     }
 
  end:
     MMDB_free_entry_data_list(entry_data_list);
     MMDB_close(mmdb);
     free(lookup_path);
+
+    return exit_code;
+}
+
+LOCAL int benchmark(MMDB_s *mmdb, int iterations)
+{
+    int exit_code = 0;
+    srand( time(NULL) );
+
+    clock_t time = clock();
+
+    for (int i = 0; i < iterations; i++) {
+        char *ip_address = random_ipv4();
+
+        MMDB_lookup_result_s result = lookup_or_die(mmdb, ip_address);
+        MMDB_entry_data_list_s *entry_data_list = NULL;
+
+        if (result.found_entry) {
+
+            int status = MMDB_get_entry_data_list(&result.entry,
+                                                  &entry_data_list);
+
+            if (MMDB_SUCCESS != status) {
+                fprintf(stderr, "Got an error looking up the entry data - %s\n",
+                        MMDB_strerror(status));
+                exit_code = 5;
+                free(ip_address);
+                MMDB_free_entry_data_list(entry_data_list);
+                goto end;
+            }
+        }
+
+        free(ip_address);
+        MMDB_free_entry_data_list(entry_data_list);
+    }
+
+    time = clock() - time;
+    double seconds = ((double)time / CLOCKS_PER_SEC);
+    fprintf(
+        stdout,
+        "\n  Looked up %i addresses in %.2f seconds. %.2f lookups per second.\n\n",
+        iterations, seconds, iterations / seconds);
+
+ end:
+    MMDB_close(mmdb);
 
     return exit_code;
 }
@@ -332,4 +367,15 @@ LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr)
     }
 
     return result;
+}
+
+LOCAL char *random_ipv4()
+{
+    int ip_int = rand();
+    uint8_t *bytes = (uint8_t *)&ip_int;
+
+    char *ip;
+    int retval = asprintf(&ip, "%u.%u.%u.%u", *bytes, *(bytes + 1), *(bytes + 2),
+                          *(bytes + 3));
+    return ip;
 }
