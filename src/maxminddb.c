@@ -824,16 +824,16 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         case MMDB_DATA_TYPE_ARRAY:
             {
                 uint32_t size = entry_data->data_size;
-                int offset = strtol(path_elem, NULL, 10);
-                if (offset < 0) {
+                uint32_t array_index = (uint32_t)strtol(path_elem, NULL, 10);
+                if (array_index < 0) {
                     return MMDB_INVALID_LOOKUP_PATH;
                 }
 
-                if ((uint32_t)offset >= size || offset < 0) {
+                if (array_index >= size) {
                     entry_data->offset = 0;
                     goto end;
                 }
-                for (int i = 0; i < offset; i++) {
+                for (int i = 0; i < array_index; i++) {
                     CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next,
                                               entry_data);
                     int status = skip_hash_array(mmdb, entry_data);
