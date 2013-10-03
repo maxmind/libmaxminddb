@@ -42,17 +42,6 @@
 #endif
 
 #ifdef MMDB_DEBUG
-DEBUG_FUNC void DPRINT_KEY(MMDB_entry_data_s *entry_data)
-{
-    uint32_t len = entry_data->data_size > 255 ? 255 : entry_data->data_size;
-
-    uint8_t str[256];
-    memcpy(str, entry_data->utf8_string, len);
-
-    str[len] = '\0';
-    fprintf(stderr, "%s\n", str);
-}
-
 DEBUG_FUNC char *byte_to_binary(uint8_t byte)
 {
     char *bits = malloc(sizeof(char) * 9);
