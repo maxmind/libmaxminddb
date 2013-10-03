@@ -41,6 +41,74 @@
 #define DEBUG_NL
 #endif
 
+#ifdef MMDB_DEBUG
+DEBUG_FUNC void DPRINT_KEY(MMDB_entry_data_s *entry_data)
+{
+    uint32_t len = entry_data->data_size > 255 ? 255 : entry_data->data_size;
+
+    uint8_t str[256];
+    memcpy(str, entry_data->utf8_string, len);
+
+    str[len] = '\0';
+    fprintf(stderr, "%s\n", str);
+}
+
+DEBUG_FUNC char *byte_to_binary(uint8_t byte)
+{
+    char *bits = malloc(sizeof(char) * 9);
+    if (NULL == bits) {
+        return bits;
+    }
+
+    for (uint8_t i = 0; i < 8; i++) {
+        bits[i] = byte & (128 >> i) ? '1' : '0';
+    }
+    bits[8] = '\0';
+
+    return bits;
+}
+
+DEBUG_FUNC char *type_num_to_name(uint8_t num)
+{
+    switch (num) {
+    case 0:
+        return "extended";
+    case 1:
+        return "pointer";
+    case 2:
+        return "utf8_string";
+    case 3:
+        return "double";
+    case 4:
+        return "bytes";
+    case 5:
+        return "uint16";
+    case 6:
+        return "uint32";
+    case 7:
+        return "map";
+    case 8:
+        return "int32";
+    case 9:
+        return "uint64";
+    case 10:
+        return "uint128";
+    case 11:
+        return "array";
+    case 12:
+        return "container";
+    case 13:
+        return "end_marker";
+    case 14:
+        return "boolean";
+    case 15:
+        return "float";
+    default:
+        return "unknown type";
+    }
+}
+#endif
+
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
 #define METADATA_BLOCK_MAX_SIZE 131072
@@ -725,7 +793,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     memset(entry_data, 0, sizeof(MMDB_entry_data_s));
 
     DEBUG_NL;
-    DEBUG_MSG("looking value by path");
+    DEBUG_MSG("looking up value by path");
 
     char *path_elem;
     do {
@@ -1547,72 +1615,3 @@ const char *MMDB_strerror(int error_code)
         return "Unknown error code";
     }
 }
-
-#ifdef MMDB_DEBUG
-DEBUG_FUNC void DPRINT_KEY(MMDB_entry_data_s *entry_data)
-{
-    uint32_t len = entry_data->data_size > 255 ? 255 : entry_data->data_size;
-
-    uint8_t str[256];
-    memcpy(str, entry_data->utf8_string, len);
-
-    str[len] = '\0';
-    fprintf(stderr, "%s\n", str);
-}
-
-DEBUG_FUNC char *byte_to_binary(uint8_t byte)
-{
-    char *bits = malloc(sizeof(char) * 9);
-    if (NULL == bits) {
-        return bits;
-    }
-
-    for (uint8_t i = 0; i < 8; i++) {
-        bits[i] = byte & (128 >> i) ? '1' : '0';
-    }
-    bits[8] = '\0';
-
-    return bits;
-}
-
-DEBUG_FUNC char *type_num_to_name(uint8_t num)
-{
-    switch (num) {
-    case 0:
-        return "extended";
-    case 1:
-        return "pointer";
-    case 2:
-        return "utf8_string";
-    case 3:
-        return "double";
-    case 4:
-        return "bytes";
-    case 5:
-        return "uint16";
-    case 6:
-        return "uint32";
-    case 7:
-        return "map";
-    case 8:
-        return "int32";
-    case 9:
-        return "uint64";
-    case 10:
-        return "uint128";
-    case 11:
-        return "array";
-    case 12:
-        return "container";
-    case 13:
-        return "end_marker";
-    case 14:
-        return "boolean";
-    case 15:
-        return "float";
-    default:
-        return "unknown type";
-    }
-}
-#endif
-
