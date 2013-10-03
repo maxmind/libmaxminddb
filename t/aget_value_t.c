@@ -16,7 +16,7 @@ void run_tests(int mode, const char *mode_desc)
     int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
 
     cmp_ok(status, "==", MMDB_SUCCESS,
-           "status for MMDB_get_value() is MMDB_SUCCESS");
+           "status for MMDB_aget_value() is MMDB_SUCCESS");
     ok(entry_data.has_data, "found a value with MMDB_aget_value");
     cmp_ok(entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "returned entry type is uint32");
