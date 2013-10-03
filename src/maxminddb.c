@@ -134,7 +134,11 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
-LOCAL int skip_hash_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
+LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
+                               MMDB_entry_data_s *entry_data);
+LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
+                             MMDB_entry_data_s *entry_data);
+LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
 LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
                             MMDB_entry_data_s *entry_data);
 LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
@@ -694,10 +698,10 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     const uint8_t *record_pointer;
     for (int current_bit = max_depth0; current_bit >= 0; current_bit--) {
         uint8_t bit_is_true = address[(max_depth0 - current_bit) >> 3] &
-            (1U << (~(max_depth0 - current_bit) & 7)) ? 1 :0;
+                              (1U << (~(max_depth0 - current_bit) & 7)) ? 1 : 0;
 
         DEBUG_MSGF("Looking at bit %i - value is %i", current_bit, bit_is_true);
-        
+
         record_pointer = &search_tree[value * record_length];
         if (bit_is_true) {
             record_pointer += right_record_offset;
@@ -715,7 +719,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 
         if (value >= node_count) {
             uint32_t offset = value - node_count;
-            DEBUG_MSGF("  data section offset is %i (record value = %i)", offset, value);
+            DEBUG_MSGF("  data section offset is %i (record value = %i)",
+                       offset,
+                       value);
 
             if (offset > mmdb->data_section_size) {
                 return MMDB_CORRUPT_SEARCH_TREE_ERROR;
@@ -801,132 +807,124 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     uint32_t offset = start->offset;
 
     memset(entry_data, 0, sizeof(MMDB_entry_data_s));
-
     DEBUG_NL;
     DEBUG_MSG("looking up value by path");
 
-    char *path_elem;
-    do {
-        CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, entry_data);
+    CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, entry_data);
+    /* Can this happen? It'd probably represent a pathological case under
+     * normal use, but there's nothing preventing someone from passing an
+     * invalid MMDB_entry_s struct to this function */
+    if (!entry_data->has_data) {
+        return MMDB_INVALID_LOOKUP_PATH;
+    }
 
-        path_elem = *(path++);
+    char *path_elem;
+    while (NULL != (path_elem = *(path++))) {
         DEBUG_NL;
         DEBUG_MSGF("path elem = %s", path_elem);
 
-        if (NULL == path_elem) {
-            goto end;
-        }
-
-        size_t path_elem_len;
- one_key:
-        path_elem_len = strlen(path_elem);
-        switch (entry_data->type) {
-        case MMDB_DATA_TYPE_POINTER:
-            {
-                CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
-                break;
-            }
         /* XXX - it'd be good to find a quicker way to skip through these
            entries that doesn't involve decoding them
            completely. Basically we need to just use the size from the
            control byte to advance our pointer rather than calling
            decode_one(). */
-        case MMDB_DATA_TYPE_ARRAY:
-            {
-                uint32_t size = entry_data->data_size;
-                uint32_t array_index = (uint32_t)strtol(path_elem, NULL, 10);
-                if (array_index < 0) {
-                    return MMDB_INVALID_LOOKUP_PATH;
-                }
-
-                if (array_index >= size) {
-                    entry_data->offset = 0;
-                    goto end;
-                }
-                for (int i = 0; i < array_index; i++) {
-                    CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next,
+        if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
+            int status = lookup_path_in_array(path_elem, mmdb, &offset,
                                               entry_data);
-                    int status = skip_hash_array(mmdb, entry_data);
-                    if (MMDB_SUCCESS != status) {
-                        return status;
-                    }
-                }
-                if (NULL != (path_elem = *(path++))) {
-                    CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next,
-                                              entry_data);
-                    offset = entry_data->offset_to_next;
-                    goto one_key;
-                }
-                CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next,
-                                          &value);
-                memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
-                goto end;
-            }
-        case MMDB_DATA_TYPE_MAP:
-            {
-                uint32_t size = entry_data->data_size;
-                offset = entry_data->offset_to_next;
-                while (size-- > 0) {
-                    CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, &key);
-
-                    uint32_t offset_to_value = key.offset_to_next;
-
-                    if (MMDB_DATA_TYPE_UTF8_STRING != key.type) {
-                        return MMDB_INVALID_DATA_ERROR;
-                    }
-
-                    if (key.data_size == path_elem_len &&
-                        !memcmp(path_elem, key.utf8_string, path_elem_len)) {
-                        DEBUG_MSG("found key matching path elem");
-
-                        if (NULL != (path_elem = *(path++))) {
-                            CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value,
-                                                      entry_data);
-                            offset = entry_data->offset_to_next;
-
-                            goto one_key;
-                        }
-                        CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value,
-                                                  &value);
-                        memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
-                        goto end;
-                    } else {
-                        CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value, &value);
-                        int status = skip_hash_array(mmdb, &value);
-                        if (MMDB_SUCCESS != status) {
-                            return status;
-                        }
-                        offset = value.offset_to_next;
-                    }
-                }
-
-                entry_data->offset = 0;
-                goto end;
-            }
-        default:
-            break;
+        } else if (entry_data->type == MMDB_DATA_TYPE_MAP) {
+            int status = lookup_path_in_map(path_elem, mmdb, &offset,
+                                            entry_data);
+        } else {
+            return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
         }
-    } while (path_elem);
+    }
 
- end:
     return MMDB_SUCCESS;
 }
 
-LOCAL int skip_hash_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
+LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
+                               MMDB_entry_data_s *entry_data)
+{
+    uint32_t size = entry_data->data_size;
+    uint32_t array_index = (uint32_t)strtol(path_elem, NULL, 10);
+    if (array_index < 0) {
+        return MMDB_INVALID_LOOKUP_PATH;
+    }
+
+    if (array_index >= size) {
+        entry_data->offset = 0;
+        return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
+    }
+
+    for (int i = 0; i < array_index; i++) {
+        CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next, entry_data);
+        int status = skip_map_or_array(mmdb, entry_data);
+        if (MMDB_SUCCESS != status) {
+            return status;
+        }
+    }
+
+    MMDB_entry_data_s value;
+    CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next, &value);
+    memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
+
+    return MMDB_SUCCESS;
+}
+
+LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
+                             MMDB_entry_data_s *entry_data)
+{
+    uint32_t size = entry_data->data_size;
+    *offset = entry_data->offset_to_next;
+    size_t path_elem_len = strlen(path_elem);
+
+    while (size-- > 0) {
+        MMDB_entry_data_s key, value;
+        CHECKED_DECODE_ONE_FOLLOW(mmdb, *offset, &key);
+
+        uint32_t offset_to_value = key.offset_to_next;
+
+        if (MMDB_DATA_TYPE_UTF8_STRING != key.type) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
+
+        if (key.data_size == path_elem_len &&
+            !memcmp(path_elem, key.utf8_string, path_elem_len)) {
+
+            DEBUG_MSG("found key matching path elem");
+
+            CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value, &value);
+            memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
+            return MMDB_SUCCESS;
+        } else {
+            CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value, &value);
+            int status = skip_map_or_array(mmdb, &value);
+            if (MMDB_SUCCESS != status) {
+                return status;
+            }
+            *offset = value.offset_to_next;
+        }
+    }
+
+    entry_data->offset = 0;
+    return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
+}
+
+LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
 {
     if (entry_data->type == MMDB_DATA_TYPE_MAP) {
         uint32_t size = entry_data->data_size;
         while (size-- > 0) {
             CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);   // key
             CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);   // value
-            skip_hash_array(mmdb, entry_data);
+            skip_map_or_array(mmdb, entry_data);
         }
 
     } else if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
         uint32_t size = entry_data->data_size;
         while (size-- > 0) {
             CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);   // value
-            skip_hash_array(mmdb, entry_data);
+            skip_map_or_array(mmdb, entry_data);
         }
     }
 
@@ -1622,6 +1620,9 @@ const char *MMDB_strerror(int error_code)
     case MMDB_INVALID_LOOKUP_PATH:
         return
             "The lookup path contained an invalid value (like a negative integer for an array index)";
+    case MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA:
+        return
+            "The lookup path does not match the data (key that doesn't exist, array index bigger than the array, expected array or map where none exists)";
     default:
         return "Unknown error code";
     }

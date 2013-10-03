@@ -49,6 +49,7 @@
 #define MMDB_UNKNOWN_DATABASE_FORMAT_ERROR (6)
 #define MMDB_INVALID_DATA_ERROR (7)
 #define MMDB_INVALID_LOOKUP_PATH (8)
+#define MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA (9)
 
 /* This is a pointer into the data section for a given IP address lookup */
 typedef struct MMDB_entry_s {

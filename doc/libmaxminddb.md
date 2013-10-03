@@ -294,6 +294,12 @@ status codes are:
 * `MMDB_INVALID_LOOKUP_PATH` - The lookup path passed to `MMDB_get_value`,
   `MMDB_vget_value`, or `MMDB_aget_value` contains an array offset that is not
   a non-negative integer.
+* `MMDB_LOOKUP_PATH_DOES_MATCH_DATA` - The lookup path passed to
+  `MMDB_get_value`,`MMDB_vget_value`, or `MMDB_aget_value` does not match the
+  data structure for the entry. There are number of reasons this can
+  happen. The lookup path could include a key not in a map. The lookup path
+  could include an array index larger than an array. It can also happen when
+  the path expect to find a map or array where none exist.
 
 All status codes should be treated as `int` values.
 
