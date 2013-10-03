@@ -1030,15 +1030,6 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         return MMDB_SUCCESS;
     }
 
-    if (size == 0 && type != MMDB_DATA_TYPE_UINT16
-        && type != MMDB_DATA_TYPE_UINT32 && type != MMDB_DATA_TYPE_INT32) {
-        entry_data->bytes = NULL;
-        entry_data->utf8_string = NULL;
-        entry_data->data_size = 0;
-        entry_data->offset_to_next = offset;
-        return MMDB_SUCCESS;
-    }
-
     if (type == MMDB_DATA_TYPE_UINT16) {
         if (size > 2) {
             return MMDB_INVALID_DATA_ERROR;
@@ -1084,7 +1075,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         size = 8;
         entry_data->double_value = get_ieee754_double(&mem[offset]);
     } else if (type == MMDB_DATA_TYPE_UTF8_STRING) {
-        entry_data->utf8_string = (char *)&mem[offset];
+        entry_data->utf8_string = size == 0 ? "" : (char *)&mem[offset];
         entry_data->data_size = size;
 #ifdef MMDB_DEBUG
         char *string = strndup(entry_data->utf8_string, size > 50 ? 50 : size);
@@ -1098,6 +1089,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         entry_data->bytes = &mem[offset];
         entry_data->data_size = size;
     }
+
     entry_data->offset_to_next = offset + size;
 
     return MMDB_SUCCESS;
