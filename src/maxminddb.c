@@ -684,16 +684,22 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
+    DEBUG_NL;
+    DEBUG_MSG("Looking for address in search tree");
+
     uint32_t node_count = mmdb->metadata.node_count;
     uint32_t value = 0;
     const uint8_t *search_tree = mmdb->file_content;
     uint16_t max_depth0 = mmdb->depth - 1;
     const uint8_t *record_pointer;
     for (int current_bit = max_depth0; current_bit >= 0; current_bit--) {
-        record_pointer = &search_tree[value * record_length];
-        if (address[(max_depth0 - current_bit) >> 3] &
-            (1U << (~(max_depth0 - current_bit) & 7))) {
+        uint8_t bit_is_true = address[(max_depth0 - current_bit) >> 3] &
+            (1U << (~(max_depth0 - current_bit) & 7)) ? 1 :0;
 
+        DEBUG_MSGF("Looking at bit %i - value is %i", current_bit, bit_is_true);
+        
+        record_pointer = &search_tree[value * record_length];
+        if (bit_is_true) {
             record_pointer += right_record_offset;
             value = right_record_value(record_pointer);
         } else {
@@ -709,6 +715,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 
         if (value >= node_count) {
             uint32_t offset = value - node_count;
+            DEBUG_MSGF("  data section offset is %i (record value = %i)", offset, value);
+
             if (offset > mmdb->data_section_size) {
                 return MMDB_CORRUPT_SEARCH_TREE_ERROR;
             }
@@ -717,6 +725,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
             result->entry.offset = offset;
             result->found_entry = result->entry.offset > 0 ? true : false;
             return MMDB_SUCCESS;
+        } else {
+            DEBUG_MSGF("  proceeding to search tree node %i", value);
         }
     }
 
@@ -867,6 +877,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 
                     if (key.data_size == path_elem_len &&
                         !memcmp(path_elem, key.utf8_string, path_elem_len)) {
+                        DEBUG_MSG("found key matching path elem");
 
                         if (NULL != (path_elem = *(path++))) {
                             CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value,
