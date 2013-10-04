@@ -841,7 +841,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
      * normal use, but there's nothing preventing someone from passing an
      * invalid MMDB_entry_s struct to this function */
     if (!entry_data->has_data) {
-        return MMDB_INVALID_LOOKUP_PATH;
+        return MMDB_INVALID_LOOKUP_PATH_ERROR;
     }
 
     char *path_elem;
@@ -874,7 +874,7 @@ LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
     uint32_t size = entry_data->data_size;
     uint32_t array_index = (uint32_t)strtol(path_elem, NULL, 10);
     if (array_index < 0) {
-        return MMDB_INVALID_LOOKUP_PATH;
+        return MMDB_INVALID_LOOKUP_PATH_ERROR;
     }
 
     if (array_index >= size) {
@@ -1640,7 +1640,7 @@ const char *MMDB_strerror(int error_code)
     case MMDB_INVALID_DATA_ERROR:
         return
             "The MaxMind DB file's data section contains bad data (unknown data type or corrupt data)";
-    case MMDB_INVALID_LOOKUP_PATH:
+    case MMDB_INVALID_LOOKUP_PATH_ERROR:
         return
             "The lookup path contained an invalid value (like a negative integer for an array index)";
     case MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA:
