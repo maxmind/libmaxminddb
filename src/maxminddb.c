@@ -1646,6 +1646,9 @@ const char *MMDB_strerror(int error_code)
     case MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA:
         return
             "The lookup path does not match the data (key that doesn't exist, array index bigger than the array, expected array or map where none exists)";
+    case MMDB_INVALID_NODE_NUMBER_ERROR:
+        return
+            "The MMDB_read_node function was called with a node number that does not exist in the search tree";
     default:
         return "Unknown error code";
     }
