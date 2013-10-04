@@ -98,6 +98,13 @@ DEBUG_FUNC char *type_num_to_name(uint8_t num)
 }
 #endif
 
+typedef struct record_info {
+    uint16_t record_length;
+    uint32_t (*left_record_getter)(const uint8_t *);
+    uint32_t (*right_record_getter)(const uint8_t *);
+    uint8_t right_record_offset;
+} record_info;
+
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
 #define METADATA_BLOCK_MAX_SIZE 131072
@@ -121,6 +128,7 @@ LOCAL int resolve_any_address(const char *ipstr, bool is_ipv4,
                               struct addrinfo **addresses);
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result);
+LOCAL record_info record_info_for_database(MMDB_s *mmdb);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
 LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
@@ -656,24 +664,8 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result)
 {
-    uint16_t record_length = mmdb->full_record_byte_size;
-    uint32_t (*left_record_value)(const uint8_t *);
-    uint32_t (*right_record_value)(const uint8_t *);
-    uint8_t right_record_offset;
-
-    if (record_length == 6) {
-        left_record_value = &get_uint24;
-        right_record_value = &get_uint24;
-        right_record_offset = 3;
-    } else if (record_length == 7) {
-        left_record_value = &get_left_28_bit_record;
-        right_record_value = &get_right_28_bit_record;
-        right_record_offset = 3;
-    } else if (record_length == 8) {
-        left_record_value = &get_uint32;
-        right_record_value = &get_uint32;
-        right_record_offset = 4;
-    } else {
+    record_info record_info = record_info_for_database(mmdb);
+    if (0 == record_info.right_record_offset) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
@@ -691,12 +683,12 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 
         DEBUG_MSGF("Looking at bit %i - value is %i", current_bit, bit_is_true);
 
-        record_pointer = &search_tree[value * record_length];
+        record_pointer = &search_tree[value * record_info.record_length];
         if (bit_is_true) {
-            record_pointer += right_record_offset;
-            value = right_record_value(record_pointer);
+            record_pointer += record_info.right_record_offset;
+            value = record_info.right_record_getter(record_pointer);
         } else {
-            value = left_record_value(record_pointer);
+            value = record_info.left_record_getter(record_pointer);
         }
 
         /* Ideally we'd check to make sure that a record never points to a
@@ -729,6 +721,30 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     return MMDB_CORRUPT_SEARCH_TREE_ERROR;
 }
 
+LOCAL record_info record_info_for_database(MMDB_s *mmdb)
+{
+    record_info record_info = {
+        .record_length       = mmdb->full_record_byte_size,
+        .right_record_offset = 0
+    };
+
+    if (record_info.record_length == 6) {
+        record_info.left_record_getter = &get_uint24;
+        record_info.right_record_getter = &get_uint24;
+        record_info.right_record_offset = 3;
+    } else if (record_info.record_length == 7) {
+        record_info.left_record_getter = &get_left_28_bit_record;
+        record_info.right_record_getter = &get_right_28_bit_record;
+        record_info.right_record_offset = 3;
+    } else if (record_info.record_length == 8) {
+        record_info.left_record_getter = &get_uint32;
+        record_info.right_record_getter = &get_uint32;
+        record_info.right_record_offset = 4;
+    }
+
+    return record_info;
+}
+
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record)
 {
     return record[0] * 65536 + record[1] * 256 + record[2] +
@@ -739,6 +755,27 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
 {
     uint32_t value = get_uint32(record);
     return value & 0xfffffff;
+}
+
+int MMDB_read_node(MMDB_s *mmdb, uint32_t node_number, MMDB_search_node_s *node)
+{
+    record_info record_info = record_info_for_database(mmdb);
+    if (0 == record_info.right_record_offset) {
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
+    }
+
+    if (node_number > mmdb->metadata.node_count) {
+        return MMDB_INVALID_NODE_NUMBER_ERROR;
+    }
+
+    const uint8_t *search_tree = mmdb->file_content;
+    const uint8_t *record_pointer =
+        &search_tree[node_number * record_info.record_length];
+    node->left_record = record_info.left_record_getter(record_pointer);
+    record_pointer += record_info.right_record_offset;
+    node->right_record = record_info.right_record_getter(record_pointer);
+
+    return MMDB_SUCCESS;
 }
 
 int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)

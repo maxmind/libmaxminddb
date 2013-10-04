@@ -269,6 +269,17 @@ This structure encapsulates a linked list of `MMDB_entry_data_s` structures.
 This structure lets you look at entire map or array data entry by iterating
 over the linked list.
 
+## `MMDB_search_node_s`
+
+This structure encapsulates the two records in a search node. This is really
+only useful if you want to write code that iterates over the entire search
+tree as opposed to looking up a specific IP address.
+
+    typedef struct MMDB_search_node_s {
+        uint64_t left_record;
+        uint64_t right_record;
+    } MMDB_search_node_s;
+
 # STATUS CODES
 
 This library returns (or populates) status codes for many functions. These
@@ -547,6 +558,16 @@ respectively).
 The specific output format may change in future releases, so you should not
 rely on the specific formatting produced by this function. It is intended to be
 used to show data to users in a readable way and for debugging purposes.
+
+## `extern int MMDB_read_node(MMDB_s *mmdb, uint32_t node_number, MMDB_search_node_s *node)`
+
+This reads a specific node in the search tree. The third argument is a
+reference to an `MMDB_search_node_s` structure that will be populated by this
+function.
+
+The return value is a status code. If you pass a `node_number` that is greater
+than the number of nodes in the database, this function will return
+`MMDB_INVALID_NODE_NUMBER_ERROR`, otherwise it will return `MMDB_SUCCESS`.
 
 ## `const char *MMDB_lib_version(void)`
 
