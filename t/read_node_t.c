@@ -1,6 +1,8 @@
 #include "maxminddb_test_helper.h"
 
-void run_read_node_tests(MMDB_s *mmdb, const uint32_t tests[][3], int test_count, uint8_t record_size)
+void run_read_node_tests(MMDB_s *mmdb, const uint32_t tests[][3],
+                         int test_count,
+                         uint8_t record_size)
 {
     for (int i = 0; i < test_count; i++) {
         uint32_t node_number = tests[i][0];
@@ -14,7 +16,9 @@ void run_read_node_tests(MMDB_s *mmdb, const uint32_t tests[][3], int test_count
                    "left record for node %i is %i - %i bit DB",
                    node_number, tests[i][2], record_size);
         } else {
-            diag("call to MMDB_read_node for node %i failed - %i bit DB", node_number, record_size);
+            diag("call to MMDB_read_node for node %i failed - %i bit DB",
+                 node_number,
+                 record_size);
         }
     }
 }
