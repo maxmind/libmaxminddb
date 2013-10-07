@@ -115,7 +115,6 @@ LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                                    ssize_t file_size, uint32_t *metadata_size);
 LOCAL int read_metadata(MMDB_s *mmdb);
 LOCAL MMDB_s make_fake_metadata_db(MMDB_s *mmdb);
-LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset);
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key);
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key);
@@ -395,23 +394,6 @@ LOCAL MMDB_s make_fake_metadata_db(MMDB_s *mmdb)
     };
 
     return fake_metadata_db;
-}
-
-LOCAL int int_pread(int fd, uint8_t *buffer, ssize_t to_read, off_t offset)
-{
-    while (to_read > 0) {
-        ssize_t have_read = pread(fd, buffer, to_read, offset);
-        if (have_read <= 0) {
-            return MMDB_IO_ERROR;
-        }
-        to_read -= have_read;
-        if (to_read == 0) {
-            break;
-        }
-        offset += have_read;
-        buffer += have_read;
-    }
-    return MMDB_SUCCESS;
 }
 
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
