@@ -25,6 +25,7 @@ LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
                            int lookup_path_length);
 LOCAL int benchmark(MMDB_s *mmdb, int iterations);
 LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr);
+LOCAL char *random_ipv4();
 /* --prototypes end - don't remove this comment-- */
 /* *INDENT-ON* */
 
@@ -374,8 +375,8 @@ LOCAL char *random_ipv4()
     int ip_int = rand();
     uint8_t *bytes = (uint8_t *)&ip_int;
 
-    char *ip;
-    int retval = asprintf(&ip, "%u.%u.%u.%u", *bytes, *(bytes + 1), *(bytes + 2),
-                          *(bytes + 3));
+    char *ip = malloc(16);
+    snprintf(ip, 15, "%u.%u.%u.%u",
+             *bytes, *(bytes + 1), *(bytes + 2), *(bytes + 3));
     return ip;
 }
