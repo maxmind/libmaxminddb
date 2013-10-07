@@ -857,9 +857,15 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
             int status = lookup_path_in_array(path_elem, mmdb, &offset,
                                               entry_data);
+            if (MMDB_SUCCESS != status) {
+                return status;
+            }
         } else if (entry_data->type == MMDB_DATA_TYPE_MAP) {
             int status = lookup_path_in_map(path_elem, mmdb, &offset,
                                             entry_data);
+            if (MMDB_SUCCESS != status) {
+                return status;
+            }
         } else {
             return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
         }
