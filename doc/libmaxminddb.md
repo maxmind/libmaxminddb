@@ -637,3 +637,8 @@ This function returns the library version as a string, something like "2.0.0".
         MMDB_close(&mmdb);
         exit(exit_code);
     }
+
+# AUTHORS
+
+This library was written by Boris Zentner (bzentner@maxmind.com) and Dave
+Rolsky (drolsky@maxmind.com).
