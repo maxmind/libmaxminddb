@@ -828,7 +828,6 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                     char **path)
 {
-    MMDB_entry_data_s key, value;
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
 
@@ -878,12 +877,12 @@ LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
                                MMDB_entry_data_s *entry_data)
 {
     uint32_t size = entry_data->data_size;
-    uint32_t array_index = (uint32_t)strtol(path_elem, NULL, 10);
+    int array_index = strtol(path_elem, NULL, 10);
     if (array_index < 0) {
         return MMDB_INVALID_LOOKUP_PATH_ERROR;
     }
 
-    if (array_index >= size) {
+    if ((uint32_t)array_index >= size) {
         entry_data->offset = 0;
         return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
     }
