@@ -100,7 +100,7 @@ my $re_type = qr {
 
 my $re_identifier = qr{ \w+ $sp* }x;
 
-my $re_args = qr/\(.+?\)/s;
+my $re_args = qr/\(.*?\)/s;
 
 # and again from Inline::C::ParseRegExp
 my $re_signature = qr/^($re_type ($re_identifier) $re_args) (?>[\ \t\n]*?{)/x;
