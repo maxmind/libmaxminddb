@@ -130,9 +130,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 LOCAL record_info record_info_for_database(MMDB_s *mmdb);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
-LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
+LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data);
-LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
+LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb,
                              MMDB_entry_data_s *entry_data);
 LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
 LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
@@ -836,14 +836,12 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
            control byte to advance our pointer rather than calling
            decode_one(). */
         if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
-            int status = lookup_path_in_array(path_elem, mmdb, &offset,
-                                              entry_data);
+            int status = lookup_path_in_array(path_elem, mmdb, entry_data);
             if (MMDB_SUCCESS != status) {
                 return status;
             }
         } else if (entry_data->type == MMDB_DATA_TYPE_MAP) {
-            int status = lookup_path_in_map(path_elem, mmdb, &offset,
-                                            entry_data);
+            int status = lookup_path_in_map(path_elem, mmdb, entry_data);
             if (MMDB_SUCCESS != status) {
                 return status;
             }
@@ -855,7 +853,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     return MMDB_SUCCESS;
 }
 
-LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
+LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data)
 {
     uint32_t size = entry_data->data_size;
@@ -884,16 +882,16 @@ LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
     return MMDB_SUCCESS;
 }
 
-LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
+LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb,
                              MMDB_entry_data_s *entry_data)
 {
     uint32_t size = entry_data->data_size;
-    *offset = entry_data->offset_to_next;
+    uint32_t offset = entry_data->offset_to_next;
     size_t path_elem_len = strlen(path_elem);
 
     while (size-- > 0) {
         MMDB_entry_data_s key, value;
-        CHECKED_DECODE_ONE_FOLLOW(mmdb, *offset, &key);
+        CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, &key);
 
         uint32_t offset_to_value = key.offset_to_next;
 
@@ -915,7 +913,7 @@ LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb, uint32_t *offset,
             if (MMDB_SUCCESS != status) {
                 return status;
             }
-            *offset = value.offset_to_next;
+            offset = value.offset_to_next;
         }
     }
 
