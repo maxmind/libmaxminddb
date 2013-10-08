@@ -42,7 +42,7 @@ libmaxminddb - a library for working with MaxMind DB files
             uint32_t uint32;
             int32_t int32;
             uint64_t uint64;
-            {unsigned __int128 or uint8_t[16]} uint128;
+            {mmdb_uint128_t or uint8_t[16]} uint128;
             bool boolean;
             float float_value;
         };
@@ -185,7 +185,7 @@ for internal use.
             uint32_t uint32;
             int32_t int32;
             uint64_t uint64;
-            {unsigned __int128 or uint8_t[16]} uint128;
+            {mmdb_uint128_t or uint8_t[16]} uint128;
             bool boolean;
             float float_value;
         };
@@ -209,14 +209,21 @@ The `type` member can be compared to one of the `MMDB_DTYPE_*` macros.
 
 ### 128-bit Integers
 
-The handling of `uint128` data depends on whether or not your platform supports
-the `unsigned __int128` type. If it does, then the `uint128` member is of that
-type. If that type is not supported you'll get back a 16 byte array of
-`uint8_t` values instead. This is the raw data from the database.
+The handling of `uint128` data depends on how your platform supports 128-bit
+integers, if it does so at all. With GCC 4.4 and 4.5 we can write `unsigned
+int __attribute__ ((__mode__ (TI)))`. With newer versions of GCC (4.6+) and
+clang (3.2+) we can simply write "unsigned __int128".
+
+In order to work around these differences, this library defines an
+`mmdb_uint128_t` type. This type is defined in the `maxminddb.h` header so you
+can use it in your own code.
+
+With older compilers, we can't use an integer so we instead use a 16 byte
+array of `uint8_t` values. This is the raw data from the database.
 
 This library provides a public macro `MMDB_UINT128_IS_BYTE_ARRAY` macro. If
 this is true (1), then `uint128` values are returned as a byte array, if it is
-false then they are an `unsigned __int128`.
+false then they are returned as a `mmdb_uint128_t` integer.
 
 ### Data Type Macros
 
