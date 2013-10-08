@@ -376,7 +376,7 @@ LOCAL char *random_ipv4()
     uint8_t *bytes = (uint8_t *)&ip_int;
 
     char *ip = malloc(16);
-    snprintf(ip, 15, "%u.%u.%u.%u",
+    snprintf(ip, 16, "%u.%u.%u.%u",
              *bytes, *(bytes + 1), *(bytes + 2), *(bytes + 3));
     return ip;
 }
