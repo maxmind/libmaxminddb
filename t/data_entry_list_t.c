@@ -199,7 +199,7 @@ MMDB_entry_data_list_s *test_uint128_value(MMDB_entry_data_list_s
     ok(memcmp(value->entry_data.uint128, expect, 16) == 0,
        "uint128 field is 2**120");
 #else
-    unsigned __int128 expect = 1;
+    mmdb_uint128_t expect = 1;
     expect <<= 120;
     ok(value->entry_data.uint128 == expect, "uint128 field is 2**120");
 #endif

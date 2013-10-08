@@ -42,7 +42,13 @@ AC_TYPE_UINT64_T
 AC_CHECK_TYPE(
         [unsigned __int128],
         [AC_DEFINE([MMDB_UINT128_IS_BYTE_ARRAY], [0], [Missing the unsigned __int128 type])],
-        [AC_DEFINE([MMDB_UINT128_IS_BYTE_ARRAY], [1], [Missing the unsigned __int128 type])])
+        [AC_CHECK_TYPE(
+                [unsigned int __attribute__((mode(TI)))],
+                [AC_DEFINE([MMDB_UINT128_IS_BYTE_ARRAY], [0], [Missing the unsigned __int128 type])
+                 AC_DEFINE([MMDB_UINT128_USING_MODE], [1], [int128 types are available with __attribute__((mode(TI)))])],
+                [AC_DEFINE([MMDB_UINT128_IS_BYTE_ARRAY], [1], [Missing the unsigned __int128 type])])])
+
+AC_CHECK_TYPES([boolean])
 
 AC_CHECK_FUNC(
         [open_memstream],

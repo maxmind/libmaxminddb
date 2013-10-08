@@ -106,7 +106,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         ok(memcmp(data.uint128, expect, 16) == 0, "uint128 field is 2**120");
 #else
-        unsigned __int128 expect = 1;
+        mmdb_uint128_t expect = 1;
         expect <<= 120;
         ok(data.uint128 == expect, "uint128 field is 2**120");
 #endif
@@ -305,7 +305,7 @@ void test_all_data_types_as_zero(MMDB_lookup_result_s *result, const char *ip,
                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         ok(memcmp(data.uint128, expect, 16) == 0, "uint128 field is 0");
 #else
-        unsigned __int128 expect = 0;
+        mmdb_uint128_t expect = 0;
         ok(data.uint128 == expect, "uint128 field is 0");
 #endif
     }

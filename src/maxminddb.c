@@ -959,9 +959,9 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
 }
 
 #if !MMDB_UINT128_IS_BYTE_ARRAY
-NO_PROTO unsigned __int128 get_uint128(const uint8_t *p, int length)
+NO_PROTO mmdb_uint128_t get_uint128(const uint8_t *p, int length)
 {
-    unsigned __int128 value = 0;
+    mmdb_uint128_t value = 0;
     while (length-- > 0) {
         value <<= 8;
         value += *p++;

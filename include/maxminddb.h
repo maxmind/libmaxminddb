@@ -52,6 +52,14 @@
 #define MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA (9)
 #define MMDB_INVALID_NODE_NUMBER_ERROR (10)
 
+#if !(MMDB_UINT128_IS_BYTE_ARRAY)
+#if MMDB_UINT128_USING_MODE
+typedef unsigned int mmdb_uint128_t __attribute__ ((__mode__ (TI)));
+#else
+typedef unsigned __int128 mmdb_uint128_t;
+#endif
+#endif
+
 /* This is a pointer into the data section for a given IP address lookup */
 typedef struct MMDB_entry_s {
     struct MMDB_s *mmdb;
@@ -78,7 +86,7 @@ typedef struct MMDB_entry_data_s {
 #if MMDB_UINT128_IS_BYTE_ARRAY
         uint8_t uint128[16];
 #else
-        unsigned __int128 uint128;
+        mmdb_uint128_t uint128;
 #endif
         bool boolean;
         float float_value;
