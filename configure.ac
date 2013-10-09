@@ -19,6 +19,9 @@ AC_PROG_CC_C99
 CFLAGS=`echo ${CFLAGS} | sed 's/-O2//'`
 CXXFLAGS=`echo ${CXXFLAGS} | sed 's/-O2//'`
 
+# autoconf insists on giving us gnu99 if it's available
+CC=`echo ${CC} | sed 's/-std=gnu99/-std=c99/'`
+
 AC_C_RESTRICT
 
 # Checks for libraries.
