@@ -1,6 +1,10 @@
 #ifndef MAXMINDDB_H
 #define MAXMINDDB_H
 
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200112L
+#endif
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
