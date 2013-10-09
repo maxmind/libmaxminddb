@@ -9,6 +9,7 @@
 #include "maxminddb.h"
 #include "maxminddb_test_helper.h"
 
+#ifndef strndup
 /* *INDENT-OFF* */
 /* Copied from the libiberty strndup.c, which is LPGPL 2+ */
 char *strndup (const char *s, size_t n)
@@ -27,6 +28,7 @@ char *strndup (const char *s, size_t n)
   return (char *) memcpy (result, s, len);
 }
 /* *INDENT-ON* */
+#endif
 
 void for_all_record_sizes(const char *filename_fmt,
                           void (*tests)(int record_size, const char *filename,
