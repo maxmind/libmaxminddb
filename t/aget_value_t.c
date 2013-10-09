@@ -21,7 +21,7 @@ void test_simple_structure(int mode, const char *mode_desc)
         ok(entry_data.has_data, "found a value with MMDB_aget_value - array[0]");
         cmp_ok(entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
                "returned entry type is uint32 - array[0]");
-        cmp_ok(entry_data.uint32, "==", 1, "entry value is 1 - array[0]");
+        cmp_ok(entry_data.data.uint32, "==", 1, "entry value is 1 - array[0]");
     }
 
     {
@@ -34,7 +34,7 @@ void test_simple_structure(int mode, const char *mode_desc)
         ok(entry_data.has_data, "found a value with MMDB_aget_value - array[2]");
         cmp_ok(entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
                "returned entry type is uint32 - array[2]");
-        cmp_ok(entry_data.uint32, "==", 3, "entry value is 3 - array[2]");
+        cmp_ok(entry_data.data.uint32, "==", 3, "entry value is 3 - array[2]");
     }
 
     MMDB_close(mmdb);
@@ -64,7 +64,7 @@ void test_nested_structure(int mode, const char *mode_desc)
            "found a value with MMDB_aget_value - map1{map2}{array}[0]{map3}{a}");
         cmp_ok(entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
                "returned entry type is uint32 - map1{map2}{array}[0]{map3}{a}");
-        cmp_ok(entry_data.uint32, "==", 1,
+        cmp_ok(entry_data.data.uint32, "==", 1,
                "entry value is 1 - map1{map2}{array}[0]{map3}{a}");
     }
 
@@ -80,7 +80,7 @@ void test_nested_structure(int mode, const char *mode_desc)
            "found a value with MMDB_aget_value - map1{map2}{array}[0]{map3}{c}");
         cmp_ok(entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
                "returned entry type is uint32 - map1{map2}{array}[0]{map3}{c}");
-        cmp_ok(entry_data.uint32, "==", 3,
+        cmp_ok(entry_data.data.uint32, "==", 3,
                "entry value is 3 - map1{map2}{array}[0]{map3}{c}");
     }
 }

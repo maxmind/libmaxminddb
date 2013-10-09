@@ -45,7 +45,7 @@ libmaxminddb - a library for working with MaxMind DB files
             {mmdb_uint128_t or uint8_t[16]} uint128;
             bool boolean;
             float float_value;
-        };
+        } data;
         ...
         uint32_t data_size;
         uint32_t type;

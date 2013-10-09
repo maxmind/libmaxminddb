@@ -12,17 +12,17 @@ MMDB_entry_data_list_s *test_array_value(MMDB_entry_data_list_s
     MMDB_entry_data_list_s *idx0 = entry_data_list = entry_data_list->next;
     cmp_ok(idx0->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "first array entry is a UINT32");
-    cmp_ok(idx0->entry_data.uint32, "==", 1, "first array entry value is 1");
+    cmp_ok(idx0->entry_data.data.uint32, "==", 1, "first array entry value is 1");
 
     MMDB_entry_data_list_s *idx1 = entry_data_list = entry_data_list->next;
     cmp_ok(idx1->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "second array entry is a UINT32");
-    cmp_ok(idx1->entry_data.uint32, "==", 2, "second array entry value is 2");
+    cmp_ok(idx1->entry_data.data.uint32, "==", 2, "second array entry value is 2");
 
     MMDB_entry_data_list_s *idx2 = entry_data_list = entry_data_list->next;
     cmp_ok(idx2->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "third array entry is a UINT32");
-    cmp_ok(idx2->entry_data.uint32, "==", 3, "third array entry value is 3");
+    cmp_ok(idx2->entry_data.data.uint32, "==", 3, "third array entry value is 3");
 
     return entry_data_list;
 }
@@ -34,7 +34,7 @@ MMDB_entry_data_list_s *test_boolean_value(MMDB_entry_data_list_s
 
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_BOOLEAN,
            "'boolean' key's value is a boolean");
-    ok(value->entry_data.boolean, "'boolean' key's value is true");
+    ok(value->entry_data.data.boolean, "'boolean' key's value is true");
 
     return entry_data_list;
 }
@@ -50,7 +50,7 @@ MMDB_entry_data_list_s *test_bytes_value(MMDB_entry_data_list_s
     if (NULL == bytes) {
         BAIL_OUT("malloc failed");
     }
-    memcpy(bytes, value->entry_data.bytes, value->entry_data.data_size);
+    memcpy(bytes, value->entry_data.data.bytes, value->entry_data.data_size);
     uint8_t expect[] = { 0x00, 0x00, 0x00, 0x2a };
 
     ok(memcmp(bytes, expect, 4) == 0, "got expected value for bytes key");
@@ -68,7 +68,7 @@ MMDB_entry_data_list_s *test_double_value(MMDB_entry_data_list_s
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_DOUBLE,
            "'double' key's value is a double");
 
-    compare_double(value->entry_data.double_value, 42.123456);
+    compare_double(value->entry_data.data.double_value, 42.123456);
 
     return entry_data_list;
 }
@@ -81,7 +81,7 @@ MMDB_entry_data_list_s *test_float_value(MMDB_entry_data_list_s
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_FLOAT,
            "'float' key's value is a float");
 
-    compare_float(value->entry_data.float_value, 1.1F);
+    compare_float(value->entry_data.data.float_value, 1.1F);
 
     return entry_data_list;
 }
@@ -96,7 +96,7 @@ MMDB_entry_data_list_s *test_int32_value(MMDB_entry_data_list_s
 
     int32_t expect = 1 << 28;
     expect *= -1;
-    cmp_ok(value->entry_data.int32, "==", expect,
+    cmp_ok(value->entry_data.data.int32, "==", expect,
            "got expected value for int32 key");
 
     return entry_data_list;
@@ -114,17 +114,17 @@ MMDB_entry_data_list_s *test_arrayX_value(MMDB_entry_data_list_s
     MMDB_entry_data_list_s *idx0 = entry_data_list = entry_data_list->next;
     cmp_ok(idx0->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "first array entry is a UINT32");
-    cmp_ok(idx0->entry_data.uint32, "==", 7, "first array entry value is 7");
+    cmp_ok(idx0->entry_data.data.uint32, "==", 7, "first array entry value is 7");
 
     MMDB_entry_data_list_s *idx1 = entry_data_list = entry_data_list->next;
     cmp_ok(idx1->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "second array entry is a UINT32");
-    cmp_ok(idx1->entry_data.uint32, "==", 8, "second array entry value is 8");
+    cmp_ok(idx1->entry_data.data.uint32, "==", 8, "second array entry value is 8");
 
     MMDB_entry_data_list_s *idx2 = entry_data_list = entry_data_list->next;
     cmp_ok(idx2->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "third array entry is a UINT32");
-    cmp_ok(idx2->entry_data.uint32, "==", 9, "third array entry value is 9");
+    cmp_ok(idx2->entry_data.data.uint32, "==", 9, "third array entry value is 9");
 
     return entry_data_list;
 }
@@ -196,12 +196,12 @@ MMDB_entry_data_list_s *test_uint128_value(MMDB_entry_data_list_s
 #if MMDB_UINT128_IS_BYTE_ARRAY
     uint8_t expect[16] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    ok(memcmp(value->entry_data.uint128, expect, 16) == 0,
+    ok(memcmp(value->entry_data.data.uint128, expect, 16) == 0,
        "uint128 field is 2**120");
 #else
     mmdb_uint128_t expect = 1;
     expect <<= 120;
-    ok(value->entry_data.uint128 == expect, "uint128 field is 2**120");
+    ok(value->entry_data.data.uint128 == expect, "uint128 field is 2**120");
 #endif
 
     return entry_data_list;
@@ -215,7 +215,7 @@ MMDB_entry_data_list_s *test_uint16_value(MMDB_entry_data_list_s
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UINT16,
            "'uint16' key's value is an uint16");
     uint16_t expect = 100;
-    ok(value->entry_data.uint16 == expect, "uint16 field is 100");
+    ok(value->entry_data.data.uint16 == expect, "uint16 field is 100");
 
     return entry_data_list;
 }
@@ -228,7 +228,7 @@ MMDB_entry_data_list_s *test_uint32_value(MMDB_entry_data_list_s
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "'uint32' key's value is an uint32");
     uint32_t expect = 1 << 28;
-    ok(value->entry_data.uint32 == expect, "uint32 field is 100");
+    ok(value->entry_data.data.uint32 == expect, "uint32 field is 100");
 
     return entry_data_list;
 }
@@ -242,7 +242,7 @@ MMDB_entry_data_list_s *test_uint64_value(MMDB_entry_data_list_s
            "'uint64' key's value is an uint64");
     uint64_t expect = 1;
     expect <<= 60;
-    ok(value->entry_data.uint64 == expect, "uint64 field is 2**60");
+    ok(value->entry_data.data.uint64 == expect, "uint64 field is 2**60");
 
     return entry_data_list;
 }
