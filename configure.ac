@@ -15,6 +15,34 @@ AC_PROG_LIBTOOL
 # Checks for programs.
 AC_PROG_CC_C99
 
+# Copied from http://stackoverflow.com/a/10682813/9832 and tweaked for C (as
+# opposed to C++)
+#
+# AX_CHECK_CFLAGS(ADDITIONAL-CFLAGS, ACTION-IF-FOUND, ACTION-IF-NOT-FOUND)
+#
+# checks whether the $(CC) compiler accepts the ADDITIONAL-CFLAGS
+# if so, they are added to the CXXFLAGS
+AC_DEFUN([AX_CHECK_CFLAGS],
+[
+  AC_MSG_CHECKING([whether compiler accepts "$1"])
+  cat > conftest.c << EOF
+  int main(){
+    return 0;
+  }
+EOF
+  if $CC $CFLAGS -o conftest.o conftest.c [$1] > /dev/null 2>&1
+  then
+    AC_MSG_RESULT([yes])
+    CFLAGS="${CFLAGS} [$1]"
+    [$2]
+  else
+    AC_MSG_RESULT([no])
+   [$3]
+  fi
+])dnl AX_CHECK_CFLAGS
+
+AX_CHECK_CFLAGS([-fms-extensions])
+
 # We will add this back for non-debug builds in the common.mk file
 CFLAGS=`echo ${CFLAGS} | sed 's/-O2//'`
 CXXFLAGS=`echo ${CXXFLAGS} | sed 's/-O2//'`
