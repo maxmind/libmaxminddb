@@ -21,7 +21,7 @@ void test_one_result(MMDB_s *mmdb, MMDB_lookup_result_s result,
     MMDB_entry_data_s data =
         data_ok(&result, MMDB_DATA_TYPE_UTF8_STRING, "result{ip}", "ip", NULL);
 
-    char *string = strndup(data.data.utf8_string, data.data_size);
+    char *string = strndup(data.utf8_string, data.data_size);
 
     char *real_expect;
     if (mmdb->metadata.ip_version == 4 || strncmp(expect, "::", 2) == 0) {

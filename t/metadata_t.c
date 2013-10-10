@@ -153,29 +153,29 @@ void test_metadata_as_data_entry_list(MMDB_s * mmdb,
         if (strcmp(key_name, "node_count") == 0) {
             MMDB_entry_data_list_s *value
                 = entry_data_list = entry_data_list->next;
-            cmp_ok(value->entry_data.data.uint32, "==", 37, "node_count == 37");
+            cmp_ok(value->entry_data.uint32, "==", 37, "node_count == 37");
         } else if (strcmp(key_name, "record_size") == 0) {
             MMDB_entry_data_list_s *value
                 = entry_data_list = entry_data_list->next;
-            cmp_ok(value->entry_data.data.uint16, "==", 24, "record_size == 24");
+            cmp_ok(value->entry_data.uint16, "==", 24, "record_size == 24");
         } else if (strcmp(key_name, "ip_version") == 0) {
             MMDB_entry_data_list_s *value
                 = entry_data_list = entry_data_list->next;
-            cmp_ok(value->entry_data.data.uint16, "==", 4, "ip_version == 4");
+            cmp_ok(value->entry_data.uint16, "==", 4, "ip_version == 4");
         } else if (strcmp(key_name, "binary_format_major_version") == 0) {
             MMDB_entry_data_list_s *value
                 = entry_data_list = entry_data_list->next;
-            cmp_ok(value->entry_data.data.uint16, "==", 2,
+            cmp_ok(value->entry_data.uint16, "==", 2,
                    "binary_format_major_version == 2");
         } else if (strcmp(key_name, "binary_format_minor_version") == 0) {
             MMDB_entry_data_list_s *value
                 = entry_data_list = entry_data_list->next;
-            cmp_ok(value->entry_data.data.uint16, "==", 0,
+            cmp_ok(value->entry_data.uint16, "==", 0,
                    "binary_format_minor_version == 0");
         } else if (strcmp(key_name, "build_epoch") == 0) {
             MMDB_entry_data_list_s *value
                 = entry_data_list = entry_data_list->next;
-            ok(value->entry_data.data.uint64 > 1373571901,
+            ok(value->entry_data.uint64 > 1373571901,
                "build_epoch > 1373571901");
         } else if (strcmp(key_name, "database_type") == 0) {
             MMDB_entry_data_list_s *value

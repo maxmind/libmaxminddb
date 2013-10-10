@@ -75,7 +75,7 @@ const char *test_database_path(const char *filename)
 
 const char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data)
 {
-    const char *string = strndup(entry_data.data.utf8_string, entry_data.data_size);
+    const char *string = strndup(entry_data.utf8_string, entry_data.data_size);
     if (NULL == string) {
         BAIL_OUT("strndup failed");
     }

@@ -94,7 +94,7 @@ typedef struct MMDB_entry_data_s {
 #endif
         bool boolean;
         float float_value;
-    } data;
+    };
     /* This is a 0 if a given entry cannot be found. This can only happen
      * when a call to MMDB_(v)get_value() asks for hash keys or array
      * indices that don't exist. */
