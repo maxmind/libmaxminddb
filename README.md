@@ -19,7 +19,7 @@ This library is licensed under the Gnu Public Library License version 2.1.
 
 This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
 on any other compiler that supports C99, POSIX 2011.11, and the
--fms-extensions flag. The latter is needed to allow an anonymous union in a
+`-fms-extensions flag`. The latter is needed to allow an anonymous union in a
 struct.
 
 To install this code, run the following commands:
@@ -60,11 +60,12 @@ development easier. These are written in Perl or shell. They are:
 * `regen-prototypes.pl` - This will parse various bits of code and put
   prototypes in header files and at the top of `.c` files so we can order
   functions however we want and keep headers and code in sync.
-* uncrustify-all.sh - This runs `uncrustify` on all the code. It runs
+* `uncrustify-all.sh` - This runs `uncrustify` on all the code. It runs
   `regen-prototypes.pl` first. Please run this before submitting patches if
   you can.
 * `valgrind-all.pl` - This runs valgrind on all the tests and on the
-  mmdblookup program. This helps ensure that the code is free of memory leaks.
+  `mmdblookup` program. This helps ensure that the code is free of memory
+  leaks.
 
 # Copyright and License
 
