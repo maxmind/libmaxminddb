@@ -1,4 +1,6 @@
+include_HEADERS = include/maxminddb.h include/maxminddb_config.h
+
 SUBDIRS = \
-  libmaxminddb	\
-  apps		\
+  src     \
+  bin     \
   t
