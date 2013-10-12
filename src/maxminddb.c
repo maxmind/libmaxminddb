@@ -1,3 +1,6 @@
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "maxminddb.h"
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -7,10 +10,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #define MMDB_DATA_SECTION_SEPARATOR (16)
 
