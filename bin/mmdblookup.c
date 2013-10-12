@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "maxminddb.h"
 #include <errno.h>
 #include <getopt.h>
@@ -185,7 +188,8 @@ LOCAL MMDB_s open_or_die(const char *fname)
     int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
 
     if (MMDB_SUCCESS != status) {
-        fprintf(stderr, "\n  Can't open %s - %s\n", fname, MMDB_strerror(status));
+        fprintf(stderr, "\n  Can't open %s - %s\n", fname,
+                MMDB_strerror(status));
 
         if (MMDB_IO_ERROR == status) {
             fprintf(stderr, "    IO error: %s\n", strerror(errno));

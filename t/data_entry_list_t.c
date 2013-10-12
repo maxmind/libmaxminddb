@@ -169,7 +169,8 @@ MMDB_entry_data_list_s *test_map_value(MMDB_entry_data_list_s *entry_data_list)
     MMDB_entry_data_list_s *map_key_1 = entry_data_list = entry_data_list->next;
     cmp_ok(map_key_1->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
            "found a map key in 'map'");
-    const char *map_key_1_name = dup_entry_string_or_bail(map_key_1->entry_data);
+    const char *map_key_1_name =
+        dup_entry_string_or_bail(map_key_1->entry_data);
     ok(strcmp(map_key_1_name, "mapX") == 0, "key name is mapX");
     free((void *)map_key_1_name);
 
