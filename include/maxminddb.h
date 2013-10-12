@@ -5,9 +5,6 @@
 #define _POSIX_C_SOURCE 200112L
 #endif
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include <maxminddb_config.h>
 #include <netdb.h>
 #include <netinet/in.h>
