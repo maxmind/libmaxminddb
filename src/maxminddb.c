@@ -157,8 +157,7 @@ LOCAL void free_mmdb_struct(MMDB_s *mmdb);
 LOCAL void free_languages_metadata(MMDB_s *mmdb);
 LOCAL void free_descriptions_metadata(MMDB_s *mmdb);
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
-    FILE *stream, MMDB_entry_data_list_s
-    *entry_data_list, int indent,
+    FILE *stream, MMDB_entry_data_list_s *entry_data_list, int indent,
     int *status);
 LOCAL void print_indentation(FILE *stream, int i);
 LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
@@ -1435,8 +1434,10 @@ LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
 
     for (size_t i = 0; i < mmdb->metadata.description.count; i++) {
         if (NULL != mmdb->metadata.description.descriptions[i]) {
-            if (NULL != mmdb->metadata.description.descriptions[i]->language) {
-                free((char *)mmdb->metadata.description.descriptions[i]->
+            if (NULL !=
+                mmdb->metadata.description.descriptions[i]->language) {
+                free((char *)mmdb->metadata.description.descriptions[i]
+                     ->
                      language);
             }
 
@@ -1467,8 +1468,7 @@ int MMDB_dump_entry_data_list(FILE *stream,
 }
 
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
-    FILE *stream, MMDB_entry_data_list_s
-    *entry_data_list, int indent,
+    FILE *stream, MMDB_entry_data_list_s *entry_data_list, int indent,
     int *status)
 {
     switch (entry_data_list->entry_data.type) {

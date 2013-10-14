@@ -58,7 +58,7 @@
 
 #if !(MMDB_UINT128_IS_BYTE_ARRAY)
 #if MMDB_UINT128_USING_MODE
-typedef unsigned int mmdb_uint128_t __attribute__ ((__mode__ (TI)));
+typedef unsigned int mmdb_uint128_t __attribute__ ((__mode__(TI)));
 #else
 typedef unsigned __int128 mmdb_uint128_t;
 #endif
@@ -124,7 +124,7 @@ typedef struct MMDB_description_s {
 typedef struct MMDB_metadata_s {
     uint32_t node_count;
     uint16_t record_size;
-    uint8_t  ip_version;
+    uint8_t ip_version;
     const char *database_type;
     struct {
         size_t count;
