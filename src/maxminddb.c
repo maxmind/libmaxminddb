@@ -98,12 +98,12 @@ DEBUG_FUNC char *type_num_to_name(uint8_t num)
 }
 #endif
 
-typedef struct record_info {
+typedef struct record_info_s {
     uint16_t record_length;
     uint32_t (*left_record_getter)(const uint8_t *);
     uint32_t (*right_record_getter)(const uint8_t *);
     uint8_t right_record_offset;
-} record_info;
+} record_info_s;
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
@@ -127,7 +127,7 @@ LOCAL int resolve_any_address(const char *ipstr, bool is_ipv4,
                               struct addrinfo **addresses);
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result);
-LOCAL record_info record_info_for_database(MMDB_s *mmdb);
+LOCAL record_info_s record_info_for_database(MMDB_s *mmdb);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
 LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
@@ -646,7 +646,7 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result)
 {
-    record_info record_info = record_info_for_database(mmdb);
+    record_info_s record_info = record_info_for_database(mmdb);
     if (0 == record_info.right_record_offset) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
@@ -703,9 +703,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     return MMDB_CORRUPT_SEARCH_TREE_ERROR;
 }
 
-LOCAL record_info record_info_for_database(MMDB_s *mmdb)
+LOCAL record_info_s record_info_for_database(MMDB_s *mmdb)
 {
-    record_info record_info = {
+    record_info_s record_info = {
         .record_length       = mmdb->full_record_byte_size,
         .right_record_offset = 0
     };
@@ -741,7 +741,7 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
 
 int MMDB_read_node(MMDB_s *mmdb, uint32_t node_number, MMDB_search_node_s *node)
 {
-    record_info record_info = record_info_for_database(mmdb);
+    record_info_s record_info = record_info_for_database(mmdb);
     if (0 == record_info.right_record_offset) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
