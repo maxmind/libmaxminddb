@@ -183,7 +183,7 @@ void test_lookup_errors(int gai_error, int mmdb_error,
                function, ip, file, mode_desc);
 
     if (!is_ok) {
-        diag("MMDB error - %d", mmdb_error);
+        diag("MMDB error - %s", MMDB_strerror(mmdb_error));
     }
 }
 
