@@ -13,14 +13,14 @@ See http://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
 
 # License
 
-This library is licensed under the Gnu Public Library License version 2.1.
+This library is licensed under the GNU Lesser General Public License v. 2.1.
 
 # Installing from a Tarball
 
 This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
-on any other compiler that supports C99, POSIX 2011.11, and the
-`-fms-extensions flag`. The latter is needed to allow an anonymous union in a
-struct.
+on other compilers that supports C99, POSIX 2011.11, and the `-fms-extensions
+flag` (or equivalent). The latter is needed to allow an anonymous union in a
+structure.
 
 To install this code, run the following commands:
 
@@ -49,7 +49,7 @@ You can clone this repository and build it by running:
 
 # Bug Reports
 
-Please report bugs by filing an issue with our github repository at
+Please report bugs by filing an issue with our GitHub issue tracker at
 https://github.com/maxmind/libmaxminddb/issues
 
 # Dev Tools
@@ -57,15 +57,12 @@ https://github.com/maxmind/libmaxminddb/issues
 We have a few development tools under the `dev-bin` directory to make
 development easier. These are written in Perl or shell. They are:
 
-* `regen-prototypes.pl` - This will parse various bits of code and put
-  prototypes in header files and at the top of `.c` files so we can order
-  functions however we want and keep headers and code in sync.
+* `regen-prototypes.pl` - This regenerates the prototypes in the header and
+  source files. This keeps keep headers and code in sync.
 * `uncrustify-all.sh` - This runs `uncrustify` on all the code. It runs
-  `regen-prototypes.pl` first. Please run this before submitting patches if
-  you can.
-* `valgrind-all.pl` - This runs valgrind on all the tests and on the
-  `mmdblookup` program. This helps ensure that the code is free of memory
-  leaks.
+  `regen-prototypes.pl` first. Please run this before submitting patches.
+* `valgrind-all.pl` - This runs Valgrind on the tests and `mmdblookup` to
+  check for memory leaks.
 
 # Copyright and License
 
