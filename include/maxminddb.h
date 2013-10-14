@@ -124,7 +124,7 @@ typedef struct MMDB_description_s {
 typedef struct MMDB_metadata_s {
     uint32_t node_count;
     uint16_t record_size;
-    uint16_t ip_version;
+    uint8_t  ip_version;
     const char *database_type;
     struct {
         size_t count;
