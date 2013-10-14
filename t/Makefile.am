@@ -2,7 +2,7 @@ include $(top_srcdir)/common.mk
 
 AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
 
-lib_LTLIBRARIES = libmmdbtest.la
+noinst_LTLIBRARIES = libmmdbtest.la
 libmmdbtest_la_SOURCES = maxminddb_test_helper.c libtap/tap.c
 
 check_PROGRAMS = \
