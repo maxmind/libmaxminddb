@@ -139,6 +139,11 @@ typedef struct MMDB_metadata_s {
     } description;
 } MMDB_metadata_s;
 
+typedef struct MMDB_ipv4_start_node_s {
+    uint16_t netmask;
+    uint32_t node_value;
+} MMDB_ipv4_start_node_s;
+
 typedef struct MMDB_s {
     uint32_t flags;
     const char *filename;
@@ -150,7 +155,7 @@ typedef struct MMDB_s {
     uint32_t metadata_section_size;
     uint16_t full_record_byte_size;
     uint16_t depth;
-    uint32_t ipv4_start_node;
+    MMDB_ipv4_start_node_s ipv4_start_node;
     MMDB_metadata_s metadata;
 } MMDB_s;
 

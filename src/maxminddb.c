@@ -128,7 +128,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       sa_family_t address_family,
                                       MMDB_lookup_result_s *result);
 LOCAL record_info_s record_info_for_database(MMDB_s *mmdb);
-LOCAL uint32_t ipv4_start_node(MMDB_s *mmdb);
+LOCAL MMDB_ipv4_start_node_s find_ipv4_start_node(MMDB_s *mmdb);
+LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
+                          uint16_t netmask, MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
 LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
@@ -266,7 +268,8 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
     mmdb->data_section = file_content + search_tree_size;
     mmdb->data_section_size = mmdb->file_size - search_tree_size;
     mmdb->metadata_section = metadata;
-    mmdb->ipv4_start_node = mmdb->metadata.node_count;
+    mmdb->ipv4_start_node.node_value = 0;
+    mmdb->ipv4_start_node.netmask = 0;
 
     return MMDB_SUCCESS;
 }
@@ -662,14 +665,17 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     uint16_t start_bit = max_depth0;
 
     if (mmdb->metadata.ip_version == 6 && address_family == AF_INET) {
-        value = ipv4_start_node(mmdb);
-        DEBUG_MSGF("IPv4 start node is %i", value);
+        MMDB_ipv4_start_node_s ipv4_start_node = find_ipv4_start_node(mmdb);
+        DEBUG_MSGF("IPv4 start node is %u (netmask %u)",
+                   ipv4_start_node.node_value, ipv4_start_node.netmask);
         /* We have an IPv6 database with no IPv4 data */
-        if (value >= node_count) {
-            return MMDB_SUCCESS;
+        if (ipv4_start_node.node_value >= node_count) {
+            return populate_result(mmdb, node_count, ipv4_start_node.node_value,
+                                   ipv4_start_node.netmask, result);
         }
 
-        start_bit -= 96;
+        value = ipv4_start_node.node_value;
+        start_bit -= ipv4_start_node.netmask;
     }
 
     const uint8_t *search_tree = mmdb->file_content;
@@ -697,19 +703,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         }
 
         if (value >= node_count) {
-            uint32_t offset = value - node_count;
-            DEBUG_MSGF("  data section offset is %i (record value = %i)",
-                       offset,
-                       value);
-
-            if (offset > mmdb->data_section_size) {
-                return MMDB_CORRUPT_SEARCH_TREE_ERROR;
-            }
-
-            result->netmask = mmdb->depth - current_bit;
-            result->entry.offset = offset;
-            result->found_entry = result->entry.offset > 0 ? true : false;
-            return MMDB_SUCCESS;
+            return populate_result(mmdb, node_count, value, current_bit, result);
         } else {
             DEBUG_MSGF("  proceeding to search tree node %i", value);
         }
@@ -743,30 +737,51 @@ LOCAL record_info_s record_info_for_database(MMDB_s *mmdb)
     return record_info;
 }
 
-LOCAL uint32_t ipv4_start_node(MMDB_s *mmdb)
+LOCAL MMDB_ipv4_start_node_s find_ipv4_start_node(MMDB_s *mmdb)
 {
-    uint32_t node_count = mmdb->metadata.node_count;
-    if (mmdb->ipv4_start_node != node_count) {
+    /* In a pathological case of a database with a single node search tree,
+     * this check will be true even after we've found the IPv4 start node, but
+     * that doesn't seem worth trying to fix. */
+    if (mmdb->ipv4_start_node.node_value != 0) {
         return mmdb->ipv4_start_node;
     }
 
     record_info_s record_info = record_info_for_database(mmdb);
 
     const uint8_t *search_tree = mmdb->file_content;
-    uint32_t ipv4_start_node = 0;
+    uint32_t node_value = 0;
     const uint8_t *record_pointer;
-    for (uint32_t i = 1; i <= 96; i++) {
-        record_pointer =
-            &search_tree[ipv4_start_node * record_info.record_length];
-        ipv4_start_node = record_info.left_record_getter(record_pointer);
-        /* This will only happen if there is no IPv4 data in this tree */
-        if (ipv4_start_node >= node_count) {
+    uint32_t netmask;
+    for (netmask = 0; netmask < 96; netmask++) {
+        record_pointer = &search_tree[node_value * record_info.record_length];
+        node_value = record_info.left_record_getter(record_pointer);
+        /* This can happen if there's no IPv4 data _or_ if there is a subnet
+         * with data that contains the entire IPv4 range (like ::/64) */
+        if (node_value >= mmdb->metadata.node_count) {
             break;
         }
     }
 
-    mmdb->ipv4_start_node = ipv4_start_node;
+    mmdb->ipv4_start_node.node_value = node_value;
+    mmdb->ipv4_start_node.netmask = netmask;
+
     return mmdb->ipv4_start_node;
+}
+
+LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
+                          uint16_t netmask, MMDB_lookup_result_s *result)
+{
+    uint32_t offset = value - node_count;
+    DEBUG_MSGF("  data section offset is %i (record value = %i)", offset, value);
+
+    if (offset > mmdb->data_section_size) {
+        return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+    }
+
+    result->netmask = mmdb->depth - netmask;
+    result->entry.offset = offset;
+    result->found_entry = result->entry.offset > 0 ? true : false;
+    return MMDB_SUCCESS;
 }
 
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record)
