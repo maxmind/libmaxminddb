@@ -150,6 +150,7 @@ typedef struct MMDB_s {
     uint32_t metadata_section_size;
     uint16_t full_record_byte_size;
     uint16_t depth;
+    uint32_t ipv4_start_node;
     MMDB_metadata_s metadata;
 } MMDB_s;
 

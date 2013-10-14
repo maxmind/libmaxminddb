@@ -123,11 +123,12 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                                       MMDB_entry_s *metadata_start);
 LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                                         MMDB_entry_s *metadata_start);
-LOCAL int resolve_any_address(const char *ipstr, bool is_ipv4,
-                              struct addrinfo **addresses);
+LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses);
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
+                                      sa_family_t address_family,
                                       MMDB_lookup_result_s *result);
 LOCAL record_info_s record_info_for_database(MMDB_s *mmdb);
+LOCAL uint32_t ipv4_start_node(MMDB_s *mmdb);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
 LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
@@ -266,6 +267,7 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
     mmdb->data_section = file_content + search_tree_size;
     mmdb->data_section_size = mmdb->file_size - search_tree_size;
     mmdb->metadata_section = metadata;
+    mmdb->ipv4_start_node = mmdb->metadata.node_count;
 
     return MMDB_SUCCESS;
 }
@@ -556,8 +558,6 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
                                         int *gai_error, int *mmdb_error)
 {
-    bool is_ipv4 = mmdb->metadata.ip_version == 4 ? true : false;
-
     MMDB_lookup_result_s result = {
         .found_entry = false,
         .netmask     = 0,
@@ -568,7 +568,7 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
     };
 
     struct addrinfo *addresses;
-    *gai_error = resolve_any_address(ipstr, is_ipv4, &addresses);
+    *gai_error = resolve_any_address(ipstr, &addresses);
 
     if (*gai_error) {
         return result;
@@ -581,20 +581,19 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
     return result;
 }
 
-LOCAL int resolve_any_address(const char *ipstr, bool is_ipv4,
-                              struct addrinfo **addresses)
+LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
 {
     struct addrinfo hints = {
         .ai_socktype = SOCK_STREAM
     };
     int gai_status;
 
-    if (is_ipv4) {
-        hints.ai_flags = AI_NUMERICHOST;
-        hints.ai_family = AF_INET;
-    } else {
+    if (NULL != strchr(ipstr, ':')) {
         hints.ai_flags = AI_NUMERICHOST | AI_V4MAPPED;
         hints.ai_family = AF_INET6;
+    } else {
+        hints.ai_flags = AI_NUMERICHOST;
+        hints.ai_family = AF_INET;
     }
 
     gai_status = getaddrinfo(ipstr, NULL, &hints, addresses);
@@ -637,13 +636,17 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
         }
     }
 
-    *mmdb_error = find_address_in_search_tree(mmdb, address, &result);
+    *mmdb_error =
+        find_address_in_search_tree(mmdb, address, sockaddr->sa_family,
+                                    &result);
+
     free(address);
 
     return result;
 }
 
 LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
+                                      sa_family_t address_family,
                                       MMDB_lookup_result_s *result)
 {
     record_info_s record_info = record_info_for_database(mmdb);
@@ -656,12 +659,26 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
 
     uint32_t node_count = mmdb->metadata.node_count;
     uint32_t value = 0;
-    const uint8_t *search_tree = mmdb->file_content;
     uint16_t max_depth0 = mmdb->depth - 1;
+    uint16_t start_bit = max_depth0;
+
+    if (mmdb->metadata.ip_version == 6 && address_family == AF_INET) {
+        value = ipv4_start_node(mmdb);
+        DEBUG_MSGF("IPv4 start node is %i", value);
+        /* We have an IPv6 database with no IPv4 data */
+        if (value >= node_count) {
+            return MMDB_SUCCESS;
+        }
+
+        start_bit -= 96;
+    }
+
+    const uint8_t *search_tree = mmdb->file_content;
     const uint8_t *record_pointer;
-    for (int current_bit = max_depth0; current_bit >= 0; current_bit--) {
-        uint8_t bit_is_true = address[(max_depth0 - current_bit) >> 3] &
-                              (1U << (~(max_depth0 - current_bit) & 7)) ? 1 : 0;
+    for (int current_bit = start_bit; current_bit >= 0; current_bit--) {
+        uint8_t bit_is_true =
+            address[(max_depth0 - current_bit) >> 3]
+            & (1U << (~(max_depth0 - current_bit) & 7)) ? 1 : 0;
 
         DEBUG_MSGF("Looking at bit %i - value is %i", current_bit, bit_is_true);
 
@@ -725,6 +742,32 @@ LOCAL record_info_s record_info_for_database(MMDB_s *mmdb)
     }
 
     return record_info;
+}
+
+LOCAL uint32_t ipv4_start_node(MMDB_s *mmdb)
+{
+    uint32_t node_count = mmdb->metadata.node_count;
+    if (mmdb->ipv4_start_node != node_count) {
+        return mmdb->ipv4_start_node;
+    }
+
+    record_info_s record_info = record_info_for_database(mmdb);
+
+    const uint8_t *search_tree = mmdb->file_content;
+    uint32_t ipv4_start_node = 0;
+    const uint8_t *record_pointer;
+    for (uint32_t i = 1; i <= 96; i++) {
+        record_pointer =
+            &search_tree[ipv4_start_node * record_info.record_length];
+        ipv4_start_node = record_info.left_record_getter(record_pointer);
+        /* This will only happen if there is no IPv4 data in this tree */
+        if (ipv4_start_node >= node_count) {
+            break;
+        }
+    }
+
+    mmdb->ipv4_start_node = ipv4_start_node;
+    return mmdb->ipv4_start_node;
 }
 
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record)
