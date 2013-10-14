@@ -9,10 +9,12 @@
 #include "maxminddb.h"
 #include "maxminddb_test_helper.h"
 
+#define NO_PROTO
+
 #ifndef strndup
 /* *INDENT-OFF* */
 /* Copied from the libiberty strndup.c, which is LPGPL 2+ */
-char *strndup (const char *s, size_t n)
+NO_PROTO char *strndup (const char *s, size_t n)
 {
   char *result;
   size_t len = strlen (s);
