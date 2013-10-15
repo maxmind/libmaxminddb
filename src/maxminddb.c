@@ -1,6 +1,5 @@
 #include "maxminddb.h"
 #include <arpa/inet.h>
-#include <assert.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <stdlib.h>
