@@ -576,6 +576,13 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
         return result;
     }
 
+    if (mmdb->metadata.ip_version == 4
+        && addresses->ai_addr->sa_family == AF_INET6) {
+
+        *mmdb_error = MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR;
+        return result;
+    }
+
     result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
 
     freeaddrinfo(addresses);
@@ -1692,6 +1699,9 @@ const char *MMDB_strerror(int error_code)
     case MMDB_INVALID_NODE_NUMBER_ERROR:
         return
             "The MMDB_read_node function was called with a node number that does not exist in the search tree";
+    case MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR:
+        return
+            "You attempted to look up an IPv6 address in an IPv4-only database";
     default:
         return "Unknown error code";
     }
