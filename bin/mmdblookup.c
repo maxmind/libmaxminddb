@@ -1,5 +1,4 @@
 #include "maxminddb.h"
-#include <assert.h>
 #include <errno.h>
 #include <getopt.h>
 #include <libgen.h>
