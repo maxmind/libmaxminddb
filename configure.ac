@@ -52,7 +52,7 @@ CC=`echo ${CC} | sed 's/-std=gnu99/-std=c99/'`
 
 AC_C_RESTRICT
 
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h math.h netdb.h netinet/in.h stdarg.h stdbool.h stdint.h stdio.h stdlib.h string.h sys/mman.h sys/socket.h sys/stat.h sys/time.h sys/types.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h assert.h fcntl.h inttypes.h libgen.h math.h netdb.h netinet/in.h stdarg.h stdbool.h stdint.h stdio.h stdlib.h string.h sys/mman.h sys/socket.h sys/stat.h sys/time.h sys/types.h unistd.h])
 
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
