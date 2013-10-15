@@ -52,12 +52,8 @@ CC=`echo ${CC} | sed 's/-std=gnu99/-std=c99/'`
 
 AC_C_RESTRICT
 
-# Checks for libraries.
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h math.h netdb.h netinet/in.h stdarg.h stdbool.h stdint.h stdio.h stdlib.h string.h sys/mman.h sys/socket.h sys/stat.h sys/time.h sys/types.h unistd.h])
 
-# Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h string.h sys/time.h unistd.h stdlib.h stdint.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
@@ -84,8 +80,6 @@ AC_CHECK_TYPES([boolean])
 AC_CHECK_FUNC(
         [open_memstream],
         [AC_DEFINE([HAVE_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
-
-# Checks for library functions.
 
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
