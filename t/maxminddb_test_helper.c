@@ -53,6 +53,9 @@ void for_all_record_sizes(const char *filename_fmt,
 void for_all_modes(void (*tests)(int mode, const char *description))
 {
     tests(MMDB_MODE_MMAP, "mmap mode");
+#if HAVE_SHM_OPEN
+    tests(MMDB_MODE_MMAP | MMDB_MODE_USE_SHARED_MEMORY, "mmap mode with shared memory");
+#endif
 }
 
 const char *test_database_path(const char *filename)

@@ -81,16 +81,13 @@ AC_CHECK_FUNC(
         [open_memstream],
         [AC_DEFINE([HAVE_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
 
-AC_CHECK_FUNC(
-        [shm_open],
-        [AC_DEFINE([HAVE_SHM_OPEN], [1], [Has a shm_open() function])])
+AC_SEARCH_LIBS([shm_open], [rt])
+AC_SEARCH_LIBS([fabs], [m])
+AC_SEARCH_LIBS([fabsf], [m])
 
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
-AC_CHECK_FUNCS([memmem])
-
-AC_SEARCH_LIBS([fabs], [m])
-AC_SEARCH_LIBS([fabsf], [m])
+AC_CHECK_FUNCS([memmem shm_open])
 
 AC_ARG_ENABLE(
         [debug],
