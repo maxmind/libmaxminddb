@@ -909,6 +909,9 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                 return status;
             }
         } else {
+            /* Once we make the code traverse maps & arrays without calling
+             * decode_one() we can get rid of this. */
+            memset(entry_data, 0, sizeof(MMDB_entry_data_s));
             return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
         }
     }
@@ -926,7 +929,7 @@ LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
     }
 
     if ((uint32_t)array_index >= size) {
-        entry_data->offset = 0;
+        memset(entry_data, 0, sizeof(MMDB_entry_data_s));
         return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
     }
 
@@ -980,7 +983,7 @@ LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb,
         }
     }
 
-    entry_data->offset = 0;
+    memset(entry_data, 0, sizeof(MMDB_entry_data_s));
     return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
 }
 
