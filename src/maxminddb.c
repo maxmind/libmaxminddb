@@ -994,14 +994,20 @@ LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
         while (size-- > 0) {
             CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);   // key
             CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);   // value
-            skip_map_or_array(mmdb, entry_data);
+            int status = skip_map_or_array(mmdb, entry_data);
+            if (MMDB_SUCCESS != status) {
+                return status;
+            }
         }
 
     } else if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
         uint32_t size = entry_data->data_size;
         while (size-- > 0) {
             CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);   // value
-            skip_map_or_array(mmdb, entry_data);
+            int status = skip_map_or_array(mmdb, entry_data);
+            if (MMDB_SUCCESS != status) {
+                return status;
+            }
         }
     }
 
