@@ -1104,6 +1104,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         entry_data->boolean = size ? true : false;
         entry_data->data_size = 0;
         entry_data->offset_to_next = offset;
+        DEBUG_MSGF("boolean value: %s", entry_data->boolean ? "true" : "false");
         return MMDB_SUCCESS;
     }
 
@@ -1112,21 +1113,25 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint16 = (uint16_t)get_uintX(&mem[offset], size);
+        DEBUG_MSGF("uint16 value: %u", entry_data->uint16);
     } else if (type == MMDB_DATA_TYPE_UINT32) {
         if (size > 4) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint32 = (uint32_t)get_uintX(&mem[offset], size);
+        DEBUG_MSGF("uint32 value: %u", entry_data->uint32);
     } else if (type == MMDB_DATA_TYPE_INT32) {
         if (size > 4) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->int32 = get_sintX(&mem[offset], size);
+        DEBUG_MSGF("int32 value: %i", entry_data->int32);
     } else if (type == MMDB_DATA_TYPE_UINT64) {
         if (size > 8) {
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint64 = get_uintX(&mem[offset], size);
+        DEBUG_MSGF("uint64 value: %lu", entry_data->uint64);
     } else if (type == MMDB_DATA_TYPE_UINT128) {
         if (size > 16) {
             return MMDB_INVALID_DATA_ERROR;
@@ -1145,12 +1150,14 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         }
         size = 4;
         entry_data->float_value = get_ieee754_float(&mem[offset]);
+        DEBUG_MSGF("float value: %f", entry_data->float_value);
     } else if (type == MMDB_DATA_TYPE_DOUBLE) {
         if (size != 8) {
             return MMDB_INVALID_DATA_ERROR;
         }
         size = 8;
         entry_data->double_value = get_ieee754_double(&mem[offset]);
+        DEBUG_MSGF("double value: %f", entry_data->double_value);
     } else if (type == MMDB_DATA_TYPE_UTF8_STRING) {
         entry_data->utf8_string = size == 0 ? "" : (char *)&mem[offset];
         entry_data->data_size = size;
@@ -1159,7 +1166,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         if (NULL == string) {
             abort();
         }
-        DEBUG_MSGF("String value: %s", string);
+        DEBUG_MSGF("string value: %s", string);
         free(string);
 #endif
     } else if (type == MMDB_DATA_TYPE_BYTES) {
