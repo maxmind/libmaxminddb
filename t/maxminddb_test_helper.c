@@ -196,15 +196,21 @@ MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, uint32_t expect_type,
     va_start(keys, description);
 
     MMDB_entry_data_s data;
-    int error = MMDB_vget_value(&result->entry, &data, keys);
+    int status = MMDB_vget_value(&result->entry, &data, keys);
 
     va_end(keys);
 
-    ok(!error, "no error from call to MMDB_vget_value - %s", description);
-    int is_ok = ok(data.type == expect_type, "got the expected data type - %s",
-                   description);
-    if (!is_ok) {
-        diag("  data type value is %i but expected %i", data.type, expect_type);
+    if (cmp_ok(status, "==", MMDB_SUCCESS,
+               "no error from call to MMDB_vget_value - %s", description)) {
+
+        if (!ok(data.type == expect_type, "got the expected data type - %s",
+                description)) {
+
+            diag("  data type value is %i but expected %i", data.type,
+                 expect_type);
+        }
+    } else {
+        diag("  error from MMDB_vget_value - %s", MMDB_strerror(status));
     }
 
     return data;

@@ -16,12 +16,20 @@ void run_tests(int mode, const char *mode_desc)
     MMDB_lookup_result_s result =
         lookup_string_ok(mmdb, ip, filename, mode_desc);
 
-    MMDB_entry_data_s entry_data;
-    char *lookup_path[] = { "country", "iso_code", NULL };
-    int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
-    if (cmp_ok( status, "==", MMDB_SUCCESS, "lookup for country{iso_code} was successful")) {
-        ok(entry_data.has_data, "found data for country{iso_code}");
-        ok(strcmp(entry_data.utf8_string, "JP") == 0, "iso_code is JP");
+    MMDB_entry_data_s entry_data =
+        data_ok(&result, MMDB_DATA_TYPE_UTF8_STRING, "country{iso_code}",
+                "country", "iso_code", NULL);
+
+    if (ok(entry_data.has_data, "found data for country{iso_code}")) {
+        char *string = strndup(entry_data.utf8_string, entry_data.data_size);
+        if (!string) {
+            ok(0, "strndup() call failed");
+            exit(1);
+        }
+        if (!ok(strcmp(string, "JP") == 0, "iso_code is JP")) {
+            diag("  value is %s", string);
+        }
+        free(string);
     }
 }
 
