@@ -1009,7 +1009,6 @@ LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
                 return status;
             }
         }
-
     } else if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
         uint32_t size = entry_data->data_size;
         while (size-- > 0) {
