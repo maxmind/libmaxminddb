@@ -970,15 +970,29 @@ LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb,
 
             DEBUG_MSG("found key matching path elem");
 
-            CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value, &value);
+            // Cannot use CHECKED_DECODE_ONE_FOLLOW here, as it sets value.offset_to_next 
+	    // right after the pointer within this structure, instead of following the pointer as
+	    // we need.
+            CHECKED_DECODE_ONE(mmdb, offset_to_value, &value);
+	    if (value.type == MMDB_DATA_TYPE_POINTER) {
+		CHECKED_DECODE_ONE(mmdb, value.pointer, &value);
+	    }
+
             memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
             return MMDB_SUCCESS;
+
         } else {
-            CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value, &value);
-            int status = skip_map_or_array(mmdb, &value);
-            if (MMDB_SUCCESS != status) {
-                return status;
-            }
+	    // Similarly here, CHECKED_DECODE_ONE_FOLLOW would obliterate the difference between a map/array
+	    // and a pointer to one, but we only need to skip the complex structure when it is NOT a pointer.
+            CHECKED_DECODE_ONE(mmdb, offset_to_value, &value);
+
+	    if (value.type != MMDB_DATA_TYPE_POINTER) {
+		int status = skip_map_or_array(mmdb, &value);
+		if (MMDB_SUCCESS != status) {
+		    return status;
+		}
+	    }
+
             offset = value.offset_to_next;
         }
     }
