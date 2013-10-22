@@ -905,11 +905,13 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
             int status = lookup_path_in_array(path_elem, mmdb, entry_data);
             if (MMDB_SUCCESS != status) {
+                memset(entry_data, 0, sizeof(MMDB_entry_data_s));
                 return status;
             }
         } else if (entry_data->type == MMDB_DATA_TYPE_MAP) {
             int status = lookup_path_in_map(path_elem, mmdb, entry_data);
             if (MMDB_SUCCESS != status) {
+                memset(entry_data, 0, sizeof(MMDB_entry_data_s));
                 return status;
             }
         } else {
