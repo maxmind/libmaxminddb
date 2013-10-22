@@ -881,6 +881,10 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     DEBUG_MSG("looking up value by path");
 
     CHECKED_DECODE_ONE_FOLLOW(mmdb, offset, entry_data);
+
+    DEBUG_NL;
+    DEBUG_MSGF("top level element is a %s", type_num_to_name(entry_data->type));
+
     /* Can this happen? It'd probably represent a pathological case under
      * normal use, but there's nothing preventing someone from passing an
      * invalid MMDB_entry_s struct to this function */
