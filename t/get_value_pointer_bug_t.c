@@ -3,7 +3,11 @@
 /* This test exercises a bug found in MMDB_get_value for certain types of
  * nested data structures which contain pointers. See
  * https://github.com/maxmind/libmaxminddb/issues/2 and
- * https://github.com/maxmind/libmaxminddb/issues/3 */
+ * https://github.com/maxmind/libmaxminddb/issues/3.
+ *
+ * There is also the potential for a similar bug when looking up a value by
+ * path in an array. This is not tested (yet) as we don't have the right test
+ * data for it. */
 
 void run_tests(int mode, const char *mode_desc)
 {

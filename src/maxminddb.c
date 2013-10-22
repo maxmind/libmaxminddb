@@ -940,7 +940,9 @@ LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
     }
 
     for (int i = 0; i < array_index; i++) {
-        CHECKED_DECODE_ONE_FOLLOW(mmdb, entry_data->offset_to_next, entry_data);
+        /* We don't want to follow a pointer here. If the next element is a
+         * pointer we simply skip it and keep going */
+        CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);
         int status = skip_map_or_array(mmdb, entry_data);
         if (MMDB_SUCCESS != status) {
             return status;
@@ -980,7 +982,9 @@ LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb,
             memcpy(entry_data, &value, sizeof(MMDB_entry_data_s));
             return MMDB_SUCCESS;
         } else {
-            CHECKED_DECODE_ONE_FOLLOW(mmdb, offset_to_value, &value);
+            /* We don't want to follow a pointer here. If the next element is
+             * a pointer we simply skip it and keep going */
+            CHECKED_DECODE_ONE(mmdb, offset_to_value, &value);
             int status = skip_map_or_array(mmdb, &value);
             if (MMDB_SUCCESS != status) {
                 return status;
