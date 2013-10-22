@@ -19,9 +19,10 @@ void run_tests(int mode, const char *mode_desc)
     MMDB_entry_data_s entry_data;
     char *lookup_path[] = { "country", "iso_code", NULL };
     int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
-    cmp_ok( status, "==", MMDB_SUCCESS, "lookup for country{iso_code} was successful");
-    ok(entry_data.has_data, "found data for country{iso_code}");
-    ok(strcmp(entry_data.utf8_string, "JP") == 0, "iso_code is JP");
+    if (cmp_ok( status, "==", MMDB_SUCCESS, "lookup for country{iso_code} was successful")) {
+        ok(entry_data.has_data, "found data for country{iso_code}");
+        ok(strcmp(entry_data.utf8_string, "JP") == 0, "iso_code is JP");
+    }
 }
 
 int main(void)
