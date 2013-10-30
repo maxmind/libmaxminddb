@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 
-use C::Scan;
 use FindBin qw( $Bin );
 use File::Basename qw( basename dirname );
 
