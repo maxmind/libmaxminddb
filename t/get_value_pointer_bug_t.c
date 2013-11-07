@@ -7,16 +7,16 @@
  *
  * There is also the potential for a similar bug when looking up a value by
  * path in an array. This is not tested (yet) as we don't have the right test
- * data for it. */
+ * data for it.
+ *
+ * These tests are somewhat fragile since they depend on a specific data
+ * layout in the database. Ideally the test would check that this layout
+ * exists before checking to see if the lookups are correct.
+ */
 
-void run_tests(int mode, const char *mode_desc)
+void test_one_ip(MMDB_s *mmdb, const char *filename, const char *mode_desc,
+                 char *ip, char *country_code)
 {
-    const char *filename = "GeoIP2-City-Test.mmdb";
-    const char *path = test_database_path(filename);
-    MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
-
-    const char *ip = "2001:218::";
     MMDB_lookup_result_s result =
         lookup_string_ok(mmdb, ip, filename, mode_desc);
 
@@ -30,11 +30,29 @@ void run_tests(int mode, const char *mode_desc)
             ok(0, "strndup() call failed");
             exit(1);
         }
-        if (!ok(strcmp(string, "JP") == 0, "iso_code is JP")) {
+        if (!ok(strcmp(string,
+                       country_code) == 0, "iso_code is %s", country_code)) {
             diag("  value is %s", string);
         }
         free(string);
     }
+}
+
+void run_tests(int mode, const char *mode_desc)
+{
+    const char *filename = "GeoIP2-City-Test.mmdb";
+    const char *path = test_database_path(filename);
+    MMDB_s *mmdb = open_ok(path, mode, mode_desc);
+    free((void *)path);
+
+    /* This exercises a bug where the entire top-level value is a pointer to
+     * another part of the data section. */
+    test_one_ip(mmdb, filename, mode_desc, "2001:218::", "JP");
+    /* This exercises a bug where one subnet's data shares part of the data
+    * with another subnet - in this case it is the "country" key (and others)
+    * in the top level map. We are testing that the "country" key's value is
+    * handled correctly. The value _should_ be a pointer to another map. */
+    test_one_ip(mmdb, filename, mode_desc, "81.2.69.160", "GB");
 }
 
 int main(void)
