@@ -107,8 +107,8 @@ void test_complex_map_c_result(int status, MMDB_entry_data_s entry_data,
 void test_no_result(int status, MMDB_entry_data_s entry_data, char *function,
                     char *path_description)
 {
-    cmp_ok(status, "==", MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA,
-           "status for %s() is MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA - %s",
+    cmp_ok(status, "==", MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
+           "status for %s() is MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR - %s",
            function, path_description);
     ok(!entry_data.has_data, "did not find a value for %s", path_description);
 }

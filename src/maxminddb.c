@@ -918,7 +918,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
             /* Once we make the code traverse maps & arrays without calling
              * decode_one() we can get rid of this. */
             memset(entry_data, 0, sizeof(MMDB_entry_data_s));
-            return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
+            return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
         }
     }
 
@@ -936,7 +936,7 @@ LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
 
     if ((uint32_t)array_index >= size) {
         memset(entry_data, 0, sizeof(MMDB_entry_data_s));
-        return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
+        return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
     }
 
     for (int i = 0; i < array_index; i++) {
@@ -994,7 +994,7 @@ LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb,
     }
 
     memset(entry_data, 0, sizeof(MMDB_entry_data_s));
-    return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA;
+    return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
 }
 
 LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data)
@@ -1717,7 +1717,7 @@ const char *MMDB_strerror(int error_code)
     case MMDB_INVALID_LOOKUP_PATH_ERROR:
         return
             "The lookup path contained an invalid value (like a negative integer for an array index)";
-    case MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA:
+    case MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR:
         return
             "The lookup path does not match the data (key that doesn't exist, array index bigger than the array, expected array or map where none exists)";
     case MMDB_INVALID_NODE_NUMBER_ERROR:
