@@ -312,7 +312,7 @@ status codes are:
 * `MMDB_INVALID_LOOKUP_PATH_ERROR` - The lookup path passed to
   `MMDB_get_value`, `MMDB_vget_value`, or `MMDB_aget_value` contains an array
   offset that is not a non-negative integer.
-* `MMDB_LOOKUP_PATH_DOES_MATCH_DATA_ERROR` - The lookup path passed to
+* `MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR` - The lookup path passed to
   `MMDB_get_value`,`MMDB_vget_value`, or `MMDB_aget_value` does not match the
   data structure for the entry. There are number of reasons this can
   happen. The lookup path could include a key not in a map. The lookup path
