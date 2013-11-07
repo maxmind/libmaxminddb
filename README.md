@@ -42,7 +42,7 @@ https://github.com/maxmind/libmaxminddb
 
 You can clone this repository and build it by running:
 
-    $ git clone https://github.com/maxmind/libmaxminddb
+    $ git clone --recursive https://github.com/maxmind/libmaxminddb
     $ ./bootstrap
     $ ./configure
     $ make check
