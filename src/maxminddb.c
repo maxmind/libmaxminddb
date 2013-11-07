@@ -1029,11 +1029,18 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
     CHECKED_DECODE_ONE(mmdb, offset, entry_data);
     if (entry_data->type == MMDB_DATA_TYPE_POINTER) {
         /* The pointer could point to any part of the data section but the
-         * next entry for this particular offset is the one after the pointer,
-         * not the one after whatever the pointer points to. */
+         * next entry for this particular offset may be the one after the
+         * pointer, not the one after whatever the pointer points to. This
+         * depends on whether the pointer points to something that is a simple
+         * value or a compound value. For a compound value, the next one is
+         * the one after the pointer result, not the one after the pointer. */
         uint32_t next = entry_data->offset_to_next;
         CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
-        entry_data->offset_to_next = next;
+        if (entry_data->type != MMDB_DATA_TYPE_MAP
+            && entry_data->type != MMDB_DATA_TYPE_ARRAY) {
+
+            entry_data->offset_to_next = next;
+        }
     }
 
     return MMDB_SUCCESS;
