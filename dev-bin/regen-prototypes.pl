@@ -4,7 +4,9 @@ use strict;
 use warnings;
 
 use FindBin qw( $Bin );
+
 use File::Basename qw( basename dirname );
+use File::Slurp qw( read_file write_file );
 
 sub main {
     _regen_prototypes(
@@ -128,21 +130,6 @@ my $re_signature = qr/^($re_type ($re_identifier) $re_args) (?>[\ \t\n]*?{)/x;
 
         return grep { !$skip{ $_->{name} } } @protos;
     }
-}
-
-sub read_file {
-    open my $fh, '<', $_[0] or die "Cannot read $_[0]: $!";
-
-    return do {
-        local $/;
-        <$fh>;
-    };
-}
-
-sub write_file {
-    open my $fh, '>', $_[0] or die "Cannot write to $_[0]: $!";
-    print {$fh} $_[1] or die "Cannot write to $_[0]: $!";
-    close $fh or die "Cannot write to $_[0]: $!";
 }
 
 main();

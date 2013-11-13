@@ -11,16 +11,16 @@ libmaxminddb - a library for working with MaxMind DB files
 
     MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr, int *gai_error, int *mmdb_error);
     MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb, struct sockaddr *sockaddr, int *mmdb_error);
-    
+
     int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...);
     int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, va_list path);
     int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, char **path);
-    
+
     int MMDB_get_entry_data_list(MMDB_entry_s *start, MMDB_entry_data_list_s **entry_data_list);
     void MMDB_free_entry_data_list(MMDB_entry_data_list_s *entry_data_list);
     int MMDB_get_metadata_as_entry_data_list(MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list);
     int MMDB_dump_entry_data_list(FILE *stream, MMDB_entry_data_list_s *entry_data_list, int indent);
-    
+
     const char *MMDB_lib_version(void);
     const char *MMDB_strerror(int error_code);
 
@@ -29,7 +29,6 @@ libmaxminddb - a library for working with MaxMind DB files
         MMDB_entry_s entry;
         uint16_t netmask;
     } MMDB_lookup_result_s;
-
 
     typedef struct MMDB_entry_data_s {
         bool has_data;
