@@ -9,4 +9,8 @@ EXTRA_DIST = doc
 dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
 
-man_MANS = man/man3/*.3
+man3_MANS = man/man3/*.3
+
+man/man3/*.3:
+	true
+.PHONE: man/man3*.3
