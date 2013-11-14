@@ -7,7 +7,7 @@ use autodie qw( :all );
 use FindBin qw( $Bin );
 
 use File::Path qw( mkpath );
-use File::Slurp qw( read_file write_file );
+use File::Slurp qw( edit_file read_file write_file );
 use File::Temp qw( tempdir );
 use File::Which qw( which );
 
@@ -32,10 +32,8 @@ EOF
     my $tempfile = "$tempdir/libmaxminddb.3.md";
     write_file( $tempfile, $markdown );
 
-    system(
-        qw( pandoc -s -t man ), $tempfile, '-o',
-        "$man_dir/libmaxminddb.3"
-    );
+    my $man3_file = "$man_dir/libmaxminddb.3";
+    system( qw( pandoc -s -t man ), $tempfile, '-o', $man3_file );
 
     my $header = read_file("$Bin/../include/maxminddb.h");
     for my $proto ( $header =~ /^ +extern.+?(\w+)\(/gsm ) {
@@ -43,6 +41,21 @@ EOF
         print {$fh} ".so man3/libmaxminddb.3\n";
         close $fh;
     }
+
+    _fix_indentation($man3_file);
+}
+
+# AFAICT there's no way to control the indentation depth for code blocks with
+# Pandoc.
+sub _fix_indentation {
+    my $file = shift;
+
+    edit_file(
+        sub {
+            s/^\.IP\n\.nf/.IP "" 4\n.nf/gm;
+        },
+        $file
+    );
 }
 
 main(shift);
