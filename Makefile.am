@@ -15,3 +15,4 @@ man3_MANS = man/man3/*.3
 man/man3/*.3:
 	true
 
+.PHONY: man/man3/*.3
