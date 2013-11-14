@@ -19,6 +19,7 @@
 /libmaxminddb-*.tar.gz
 /libtool
 /ltmain.sh
+/man
 /missing
 /t/*_t
 Makefile
