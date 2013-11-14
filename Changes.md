@@ -8,4 +8,4 @@
 * Fixed some bugs with the MMDB_get_*value functions when navigating a data
   structure that included pointers. Fixes github issue #3. Reported by
   bagadon.
-* Distro tarball now includes man pages
+* Distro tarball now includes man pages, tests, and test data
