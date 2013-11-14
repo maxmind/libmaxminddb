@@ -13,6 +13,6 @@ dist-hook:
 man3_MANS = man/man3/*.3
 
 man/man3/*.3:
-	true
+	dev-bin/maybe-fake-man.sh
 
 .PHONY: man/man3/*.3
