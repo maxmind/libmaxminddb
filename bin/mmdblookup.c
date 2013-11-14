@@ -27,7 +27,7 @@ LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
                            int lookup_path_length);
 LOCAL int benchmark(MMDB_s *mmdb, int iterations);
 LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr);
-LOCAL char *random_ipv4();
+LOCAL void random_ipv4(char *ip);
 /* --prototypes end - don't remove this comment-- */
 /* *INDENT-ON* */
 
@@ -308,13 +308,14 @@ LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
 
 LOCAL int benchmark(MMDB_s *mmdb, int iterations)
 {
+    char ip_address[16];
     int exit_code = 0;
-    srand( time(NULL) );
 
+    srand( time(NULL) );
     clock_t time = clock();
 
     for (int i = 0; i < iterations; i++) {
-        char *ip_address = random_ipv4();
+        random_ipv4(ip_address);
 
         MMDB_lookup_result_s result = lookup_or_die(mmdb, ip_address);
         MMDB_entry_data_list_s *entry_data_list = NULL;
@@ -328,13 +329,11 @@ LOCAL int benchmark(MMDB_s *mmdb, int iterations)
                 fprintf(stderr, "Got an error looking up the entry data - %s\n",
                         MMDB_strerror(status));
                 exit_code = 5;
-                free(ip_address);
                 MMDB_free_entry_data_list(entry_data_list);
                 goto end;
             }
         }
 
-        free(ip_address);
         MMDB_free_entry_data_list(entry_data_list);
     }
 
@@ -373,13 +372,11 @@ LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr)
     return result;
 }
 
-LOCAL char *random_ipv4()
+LOCAL void random_ipv4(char *ip)
 {
     int ip_int = rand();
     uint8_t *bytes = (uint8_t *)&ip_int;
 
-    char *ip = malloc(16);
     snprintf(ip, 16, "%u.%u.%u.%u",
              *bytes, *(bytes + 1), *(bytes + 2), *(bytes + 3));
-    return ip;
 }

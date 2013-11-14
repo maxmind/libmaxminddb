@@ -683,20 +683,20 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
         }
     };
 
-    uint8_t *address;
+    uint8_t mapped_address[16], *address;
     if (mmdb->metadata.ip_version == 4) {
         if (sockaddr->sa_family == AF_INET6) {
             return result;
         }
-        address = malloc(4);
-        memcpy(address, &((struct sockaddr_in *)sockaddr)->sin_addr.s_addr, 4);
+        address = (uint8_t *)&((struct sockaddr_in *)sockaddr)->sin_addr.s_addr;
     } else {
-        // We need calloc() here for the IPv4 case - the first 12 bytes must be 0
-        address = calloc(1, 16);
         if (sockaddr->sa_family == AF_INET6) {
-            memcpy(address,
-                   ((struct sockaddr_in6 *)sockaddr)->sin6_addr.s6_addr, 16);
+            address =
+                (uint8_t *)&((struct sockaddr_in6 *)sockaddr)->sin6_addr.
+                s6_addr;
         } else {
+            address = mapped_address;
+            memset(address, 0, 12);
             memcpy(address + 12,
                    &((struct sockaddr_in *)sockaddr)->sin_addr.s_addr, 4);
         }
@@ -705,8 +705,6 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
     *mmdb_error =
         find_address_in_search_tree(mmdb, address, sockaddr->sa_family,
                                     &result);
-
-    free(address);
 
     return result;
 }
@@ -1708,7 +1706,8 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
         break;
     case MMDB_DATA_TYPE_UINT64:
         print_indentation(stream, indent);
-        fprintf(stream, "%" PRIu64 " <uint64>\n", entry_data_list->entry_data.uint64);
+        fprintf(stream, "%" PRIu64 " <uint64>\n",
+                entry_data_list->entry_data.uint64);
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_UINT128:
