@@ -5,7 +5,7 @@ SUBDIRS = \
   bin     \
   t
 
-EXTRA_DIST = doc
+EXTRA_DIST = doc t
 dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
 
