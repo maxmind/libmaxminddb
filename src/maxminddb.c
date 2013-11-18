@@ -634,6 +634,7 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
         && addresses->ai_addr->sa_family == AF_INET6) {
 
         *mmdb_error = MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR;
+        freeaddrinfo(addresses);
         return result;
     }
 
