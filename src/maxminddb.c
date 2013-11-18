@@ -652,7 +652,10 @@ LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
     int gai_status;
 
     if (NULL != strchr(ipstr, ':')) {
-        hints.ai_flags = AI_NUMERICHOST | AI_V4MAPPED;
+        hints.ai_flags = AI_NUMERICHOST;
+#ifdef AI_V4MAPPED
+        hints.ai_flags |= AI_V4MAPPED;
+#endif
         hints.ai_family = AF_INET6;
     } else {
         hints.ai_flags = AI_NUMERICHOST;

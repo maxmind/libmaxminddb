@@ -144,7 +144,10 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
     struct addrinfo *addresses;
 
     if (ip[0] == ':') {
-        hints.ai_flags = ai_flags | AI_V4MAPPED;
+        hints.ai_flags = ai_flags;
+#ifdef AI_V4MAPPED
+        hints.ai_flags |= AI_V4MAPPED;
+#endif
         hints.ai_family = AF_INET6;
     } else {
         hints.ai_flags = ai_flags;
