@@ -11,16 +11,7 @@ my $top_dir = "$Bin/..";
 
 my $output;
 
-my @tests = map { ["$top_dir/t/.libs/$_"] } qw(
-    lt-aget_value_t
-    lt-basic_lookup_t
-    lt-data_entry_list_t
-    lt-data_types_t
-    lt-dump_t
-    lt-metadata_t
-    lt-no_map_get_value_t
-    lt-version_t
-);
+my @tests = glob "$top_dir/t/.libs/lt-*_t";
 
 my @mmdblookup = (
     "$top_dir/bin/mmdblookup",
@@ -34,7 +25,7 @@ my @ips = ( '1.1.1.1', '10.0.0.0', 'abcd::', '0900::' );
 
 my @cmds = (
     ( map { [ @mmdblookup, $_ ] } @ips ),
-    @tests,
+    ( map { [$_] } @tests ),
 );
 
 for my $cmd (@cmds) {
