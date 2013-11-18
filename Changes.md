@@ -8,4 +8,6 @@
 * Fixed some bugs with the MMDB_get_*value functions when navigating a data
   structure that included pointers. Fixes github issue #3. Reported by
   bagadon.
+* Fixed compilation problems on OSX and OpenBSD. We have tested this on OSX
+  and OpenBSD 5.4. Fixes github issue #6.
 * Distro tarball now includes man pages, tests, and test data
