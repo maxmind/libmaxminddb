@@ -25,6 +25,8 @@ void run_tests(int mode, const char *mode_desc)
         cmp_ok(
             status, "==", MMDB_INVALID_DATA_ERROR,
             "MMDB_get_entry_data_list returns MMDB_INVALID_DATA_ERROR for bad pointer in data section");
+
+        MMDB_free_entry_data_list(entry_data_list);
     }
 
     {
