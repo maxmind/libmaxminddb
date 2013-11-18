@@ -47,7 +47,7 @@ void test_simple_structure(int mode, const char *mode_desc)
 
     {
         MMDB_entry_data_s entry_data;
-        char *lookup_path[] = { "array", "0", NULL };
+        const char *lookup_path[] = { "array", "0", NULL };
         int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         test_array_0_result(status, entry_data, "MMDB_aget_value");
 
@@ -60,7 +60,7 @@ void test_simple_structure(int mode, const char *mode_desc)
 
     {
         MMDB_entry_data_s entry_data;
-        char *lookup_path[] = { "array", "2", NULL };
+        const char *lookup_path[] = { "array", "2", NULL };
         int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         test_array_2_result(status, entry_data, "MMDB_aget_value");
 
@@ -126,7 +126,8 @@ void test_nested_structure(int mode, const char *mode_desc)
 
     {
         MMDB_entry_data_s entry_data;
-        char *lookup_path[] = { "map1", "map2", "array", "0", "map3", "a", NULL };
+        const char *lookup_path[] =
+        { "map1", "map2", "array", "0", "map3", "a", NULL };
         int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         test_complex_map_a_result(status, entry_data, "MMDB_aget_value");
 
@@ -142,7 +143,8 @@ void test_nested_structure(int mode, const char *mode_desc)
 
     {
         MMDB_entry_data_s entry_data;
-        char *lookup_path[] = { "map1", "map2", "array", "0", "map3", "c", NULL };
+        const char *lookup_path[] =
+        { "map1", "map2", "array", "0", "map3", "c", NULL };
         int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         test_complex_map_c_result(status, entry_data, "MMDB_aget_value");
 
@@ -158,7 +160,7 @@ void test_nested_structure(int mode, const char *mode_desc)
 
     {
         MMDB_entry_data_s entry_data;
-        char *lookup_path[] =
+        const char *lookup_path[] =
         { "map1", "map42", "array", "0", "map3", "c", NULL };
         int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         test_no_result(status, entry_data, "MMDB_aget_value",
@@ -179,7 +181,7 @@ void test_nested_structure(int mode, const char *mode_desc)
 
     {
         MMDB_entry_data_s entry_data;
-        char *lookup_path[] =
+        const char *lookup_path[] =
         { "map1", "map2", "array", "9", "map3", "c", NULL };
         int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         test_no_result(status, entry_data, "MMDB_aget_value",

@@ -138,9 +138,9 @@ LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
                           uint16_t netmask, MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
-LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
+LOCAL int lookup_path_in_array(const char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data);
-LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb,
+LOCAL int lookup_path_in_map(const char *path_elem, MMDB_s *mmdb,
                              MMDB_entry_data_s *entry_data);
 LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
 LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
@@ -457,7 +457,7 @@ LOCAL MMDB_s make_fake_metadata_db(MMDB_s *mmdb)
 LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
-    char *path[] = { key, NULL };
+    const char *path[] = { key, NULL };
     MMDB_aget_value(start, &entry_data, path);
     return entry_data.uint16;
 }
@@ -465,7 +465,7 @@ LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
-    char *path[] = { key, NULL };
+    const char *path[] = { key, NULL };
     MMDB_aget_value(start, &entry_data, path);
     return entry_data.uint32;
 }
@@ -473,7 +473,7 @@ LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key)
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
-    char *path[] = { key, NULL };
+    const char *path[] = { key, NULL };
     MMDB_aget_value(start, &entry_data, path);
     return entry_data.uint64;
 }
@@ -481,7 +481,7 @@ LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key)
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
-    char *path[] = { key, NULL };
+    const char *path[] = { key, NULL };
     MMDB_aget_value(start, &entry_data, path);
     return mmdb_strndup((char *)entry_data.utf8_string, entry_data.data_size);
 }
@@ -491,7 +491,7 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 {
     MMDB_entry_data_s entry_data;
 
-    char *path[] = { "languages", NULL };
+    const char *path[] = { "languages", NULL };
     MMDB_aget_value(metadata_start, &entry_data, path);
 
     if (MMDB_DATA_TYPE_ARRAY != entry_data.type) {
@@ -542,7 +542,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 {
     MMDB_entry_data_s entry_data;
 
-    char *path[] = { "description", NULL };
+    const char *path[] = { "description", NULL };
     MMDB_aget_value(metadata_start, &entry_data, path);
 
     if (MMDB_DATA_TYPE_MAP != entry_data.type) {
@@ -891,12 +891,12 @@ int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)
 int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
                     va_list va_path)
 {
-    char **path = NULL;
+    const char **path = NULL;
 
     int i = 0;
-    char *path_elem;
+    const char *path_elem;
     while (NULL != (path_elem = va_arg(va_path, char *))) {
-        path = realloc(path, sizeof(char *) * (i + 1));
+        path = realloc(path, sizeof(const char *) * (i + 1));
         if (NULL == path) {
             return MMDB_OUT_OF_MEMORY_ERROR;
         }
@@ -927,7 +927,7 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
 }
 
 int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
-                    char **path)
+                    const char **path)
 {
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
@@ -948,7 +948,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
         return MMDB_INVALID_LOOKUP_PATH_ERROR;
     }
 
-    char *path_elem;
+    const char *path_elem;
     while (NULL != (path_elem = *(path++))) {
         DEBUG_NL;
         DEBUG_MSGF("path elem = %s", path_elem);
@@ -981,7 +981,7 @@ int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     return MMDB_SUCCESS;
 }
 
-LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
+LOCAL int lookup_path_in_array(const char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data)
 {
     uint32_t size = entry_data->data_size;
@@ -1012,7 +1012,7 @@ LOCAL int lookup_path_in_array(char *path_elem, MMDB_s *mmdb,
     return MMDB_SUCCESS;
 }
 
-LOCAL int lookup_path_in_map(char *path_elem, MMDB_s *mmdb,
+LOCAL int lookup_path_in_map(const char *path_elem, MMDB_s *mmdb,
                              MMDB_entry_data_s *entry_data)
 {
     uint32_t size = entry_data->data_size;
