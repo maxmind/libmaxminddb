@@ -1208,7 +1208,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint64 = get_uintX(&mem[offset], size);
-        DEBUG_MSGF("uint64 value: %lu", entry_data->uint64);
+        DEBUG_MSGF("uint64 value: %" PRIu64, entry_data->uint64);
     } else if (type == MMDB_DATA_TYPE_UINT128) {
         if (size > 16) {
             return MMDB_INVALID_DATA_ERROR;
@@ -1705,7 +1705,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
         break;
     case MMDB_DATA_TYPE_UINT64:
         print_indentation(stream, indent);
-        fprintf(stream, "%lu <uint64>\n", entry_data_list->entry_data.uint64);
+        fprintf(stream, "%" PRIu64 " <uint64>\n", entry_data_list->entry_data.uint64);
         entry_data_list = entry_data_list->next;
         break;
     case MMDB_DATA_TYPE_UINT128:
