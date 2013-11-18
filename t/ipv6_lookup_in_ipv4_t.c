@@ -15,6 +15,9 @@ void run_tests(int mode, const char *mode_desc)
     cmp_ok(
         mmdb_error, "==", MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR,
         "MMDB_lookup_string sets mmdb_error to MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR when we try to look up an IPv6 address in an IPv4-only database");
+
+    MMDB_close(mmdb);
+    free(mmdb);
 }
 
 int main(void)

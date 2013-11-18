@@ -53,6 +53,9 @@ void run_tests(int mode, const char *mode_desc)
     * in the top level map. We are testing that the "country" key's value is
     * handled correctly. The value _should_ be a pointer to another map. */
     test_one_ip(mmdb, filename, mode_desc, "81.2.69.160", "GB");
+
+    MMDB_close(mmdb);
+    free(mmdb);
 }
 
 int main(void)

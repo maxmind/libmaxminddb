@@ -199,6 +199,9 @@ void test_nested_structure(int mode, const char *mode_desc)
         test_no_result(status, entry_data, "MMDB_vget_value",
                        "map1{map42}{array}[9]{map3}{c}");
     }
+
+    MMDB_close(mmdb);
+    free(mmdb);
 }
 
 void run_tests(int mode, const char *mode_desc)

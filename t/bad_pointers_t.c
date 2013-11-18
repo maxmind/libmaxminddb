@@ -38,6 +38,9 @@ void run_tests(int mode, const char *mode_desc)
             mmdb_error, "==", MMDB_CORRUPT_SEARCH_TREE_ERROR,
             "MMDB_lookup_string sets mmdb_error to MMDB_CORRUPT_SEARCH_TREE_ERROR when a search tree record points outside the data section");
     }
+
+    MMDB_close(mmdb);
+    free(mmdb);
 }
 
 int main(void)

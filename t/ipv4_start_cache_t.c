@@ -23,6 +23,9 @@ void run_tests(int mode, const char *mode_desc)
 
     test_one_ip(mmdb, "1.1.1.1", filename, mode_desc);
     test_one_ip(mmdb, "255.255.255.255", filename, mode_desc);
+
+    MMDB_close(mmdb);
+    free(mmdb);
 }
 
 int main(void)
