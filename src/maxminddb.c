@@ -917,9 +917,9 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     int status = MMDB_aget_value(start, entry_data, path);
 
     i = 0;
-    char *elem;
-    while (NULL != (elem = path[i++])) {
-        free(elem);
+    while (NULL != path[i]) {
+        free((void *)path[i]);
+        i++;
     }
     free(path);
 
