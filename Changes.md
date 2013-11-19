@@ -12,4 +12,6 @@
   and OpenBSD 5.4. Fixes github issue #6.
 * Removed some unneeded memory allocations and added const to many variable
   declarations. Based on patches by Timo Teräs. Github issue #8.
+* Added a test that uses threads to check for thread safety issue in the
+  library.
 * Distro tarball now includes man pages, tests, and test data
