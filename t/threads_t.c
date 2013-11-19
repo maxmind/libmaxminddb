@@ -1,11 +1,6 @@
 #include "maxminddb_test_helper.h"
 #include <pthread.h>
 
-/* These globals are gross but it's the easiest way to mix calling
- * for_all_modes() and for_all_record_sizes() */
-static int Current_Mode;
-static const char *Current_Mode_Description;
-
 typedef struct thread_arg {
     int thread_id;
     MMDB_s *mmdb;
