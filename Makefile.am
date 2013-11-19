@@ -19,4 +19,7 @@ man3_MANS = man/man3/*.3
 man/man3/*.3:
 	dev-bin/maybe-fake-man.sh
 
-.PHONY: man/man3/*.3
+release:
+	dev-bin/make-release.sh $(PACKAGE_VERSION)
+
+.PHONY: man/man3/*.3 release
