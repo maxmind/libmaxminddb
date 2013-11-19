@@ -25,5 +25,6 @@
 Makefile
 Makefile.in
 \#*\#
+_site
 aclocal.m4
 stamp-h*
