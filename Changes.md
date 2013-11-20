@@ -1,4 +1,9 @@
-## 0.5.1
+## 0.5.2 - 2013-11-20
+
+* Running "make" from the tarball failed. This is now fixed.
+
+
+## 0.5.1 - 2013-11-20
 
 * Renamed MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA define to
   MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR for consistency. Fixes github
