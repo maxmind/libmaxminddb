@@ -17,7 +17,7 @@ dist-hook:
 man3_MANS = man/man3/*.3
 
 man/man3/*.3:
-	dev-bin/maybe-fake-man.sh
+	if [ ! -f man/man3/libmaxminddb.3 ]; then mkdir -p man/man3 && touch man/man3/libmaxminddb.3; fi
 
 release:
 	dev-bin/make-release.sh $(PACKAGE_VERSION)
