@@ -1,6 +1,6 @@
 ## 0.5.2 - 2013-11-20
 
-* Running "make" from the tarball failed. This is now fixed.
+* Running `make` from the tarball failed. This is now fixed.
 
 
 ## 0.5.1 - 2013-11-20
