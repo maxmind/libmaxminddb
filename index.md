@@ -1,3 +1,7 @@
+---
+layout: default
+title: libmaxminddb - a library for working with MaxMind DB files
+---
 # NAME
 
 libmaxminddb - a library for working with MaxMind DB files
