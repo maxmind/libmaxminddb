@@ -762,6 +762,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
          * previously seen value, but that's more complicated. For now, we can
          * at least check that we don't end up at the top of the tree again. */
         if (0 == value) {
+            DEBUG_MSGF("Node %i %s record has a value of 0",
+                       value, bit_is_true ? "right" : "left");
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
 
@@ -771,6 +773,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
             DEBUG_MSGF("  proceeding to search tree node %i", value);
         }
     }
+
+    DEBUG_MSG(
+        "Reached the end of the address bits without leaving the search tree");
 
     // We should not be able to reach this return. If we do, something very bad happened.
     return MMDB_CORRUPT_SEARCH_TREE_ERROR;
