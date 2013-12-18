@@ -748,7 +748,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
             address[(max_depth0 - current_bit) >> 3]
             & (1U << (~(max_depth0 - current_bit) & 7)) ? 1 : 0;
 
-        DEBUG_MSGF("Looking at bit %i - value is %i", current_bit, bit_is_true);
+        DEBUG_MSGF("Looking at bit %i - bit's value is %i", current_bit,
+                   bit_is_true);
+        DEBUG_MSGF("  current node = %u", value);
 
         record_pointer = &search_tree[value * record_info.record_length];
         if (bit_is_true) {
@@ -762,8 +764,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
          * previously seen value, but that's more complicated. For now, we can
          * at least check that we don't end up at the top of the tree again. */
         if (0 == value) {
-            DEBUG_MSGF("Node %i %s record has a value of 0",
-                       value, bit_is_true ? "right" : "left");
+            DEBUG_MSGF("  %s record has a value of 0",
+                       bit_is_true ? "right" : "left");
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
 
