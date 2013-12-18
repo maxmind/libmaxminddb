@@ -47,6 +47,9 @@ You can clone this repository and build it by running:
     $ ./configure
     $ make check
 
+To install from Git, you will need automake, autoconf, and libtool installed
+in addition to make and a compiler.
+
 # Bug Reports
 
 Please report bugs by filing an issue with our GitHub issue tracker at
