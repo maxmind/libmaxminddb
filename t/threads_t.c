@@ -128,7 +128,8 @@ void run_ipX_tests(MMDB_s *mmdb, const char *pairs[][2], int pairs_rows,
         thread_args[i].mmdb = mmdb;
         thread_args[i].ip_to_lookup = pairs[i][0];
 
-        int error = pthread_create(&threads[i], NULL, run_one_thread, &thread_args[i]);
+        int error = pthread_create(&threads[i], NULL, run_one_thread,
+                                   &thread_args[i]);
         if (error) {
             BAIL_OUT("pthread_create failed");
         }
