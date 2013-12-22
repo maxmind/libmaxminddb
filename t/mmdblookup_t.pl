@@ -11,7 +11,8 @@ EOF
 
 if ($@) {
     print
-        "1..0 # skip all tests skipped - these tests need the Test::More 0.88 and Test::Output modules\n";
+        "1..0 # skip all tests skipped - these tests need the Test::More 0.88, IPC::Run3 and Test::Output modules:\n";
+    print "$@";
     exit 0;
 }
 
