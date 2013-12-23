@@ -1,3 +1,13 @@
+## 0.5.3 - 2013-12-23
+
+* The internal value_for_key_as_uint16 method was returning a uint32_t instead
+  of a uint16_t. Reported by Robert Wells. Fixes GitHub issue #11.
+
+* The ip_version member of the MMDB_metadata_s struct was a uint8_t, even
+  though the docs and spec said it should be a uint16_t. Reported by Robert
+  Wells. Fixes GitHub issue #11.
+
+
 ## 0.5.2 - 2013-11-20
 
 * Running `make` from the tarball failed. This is now fixed.
