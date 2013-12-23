@@ -2,11 +2,9 @@
 
 * The internal value_for_key_as_uint16 method was returning a uint32_t instead
   of a uint16_t. Reported by Robert Wells. GitHub issue #11.
-
 * The ip_version member of the MMDB_metadata_s struct was a uint8_t, even
   though the docs and spec said it should be a uint16_t. Reported by Robert
   Wells. GitHub issue #11.
-
 * The mmdblookup_t.pl test now reports that it needs IPC::Run3 to run (which
   it always did, but it didn't tell you this). Patch by Elan Ruusamäe. GitHub
   issue #10.
