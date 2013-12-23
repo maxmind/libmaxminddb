@@ -120,7 +120,7 @@ LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                                    ssize_t file_size, uint32_t *metadata_size);
 LOCAL int read_metadata(MMDB_s *mmdb);
 LOCAL MMDB_s make_fake_metadata_db(MMDB_s *mmdb);
-LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key);
+LOCAL uint16_t value_for_key_as_uint16(MMDB_entry_s *start, char *key);
 LOCAL uint32_t value_for_key_as_uint32(MMDB_entry_s *start, char *key);
 LOCAL uint64_t value_for_key_as_uint64(MMDB_entry_s *start, char *key);
 LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key);
@@ -454,7 +454,7 @@ LOCAL MMDB_s make_fake_metadata_db(MMDB_s *mmdb)
     return fake_metadata_db;
 }
 
-LOCAL uint32_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
+LOCAL uint16_t value_for_key_as_uint16(MMDB_entry_s *start, char *key)
 {
     MMDB_entry_data_s entry_data;
     const char *path[] = { key, NULL };
