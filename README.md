@@ -27,7 +27,8 @@ To install this code, run the following commands:
     $ ./configure
     $ make
     $ make check
-    $ make install
+    $ sudo make install
+    $ sudo ldconfig
 
 You can skip the `make check` step but it's always good to know that tests are
 passing on your platform.
