@@ -1,4 +1,21 @@
-## 0.5.1
+## 0.5.3 - 2013-12-23
+
+* The internal value_for_key_as_uint16 method was returning a uint32_t instead
+  of a uint16_t. Reported by Robert Wells. GitHub issue #11.
+* The ip_version member of the MMDB_metadata_s struct was a uint8_t, even
+  though the docs and spec said it should be a uint16_t. Reported by Robert
+  Wells. GitHub issue #11.
+* The mmdblookup_t.pl test now reports that it needs IPC::Run3 to run (which
+  it always did, but it didn't tell you this). Patch by Elan Ruusamäe. GitHub
+  issue #10.
+
+
+## 0.5.2 - 2013-11-20
+
+* Running `make` from the tarball failed. This is now fixed.
+
+
+## 0.5.1 - 2013-11-20
 
 * Renamed MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA define to
   MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR for consistency. Fixes github
