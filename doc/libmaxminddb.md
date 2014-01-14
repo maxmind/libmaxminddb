@@ -710,6 +710,21 @@ This function returns the library version as a string, something like "2.0.0".
         exit(exit_code);
     }
 
+# INSTALLATION AND SOURCE
+
+You can download the latest release of libmaxminddb
+[from GitHub](https://github.com/maxmind/libmaxminddb/releases).
+
+[Our GitHub repo](https://github.com/maxmind/libmaxminddb) is publicly
+available. Please fork it!
+
+# BUG REPORTS AND PULL REQUESTS
+
+Please report all issues to
+[our GitHub issue tracker](https://github.com/maxmind/libmaxminddb/issues). We
+welcome bug reports and pull requests. Please note that pull requests are
+greatly preferred over patches.
+
 # AUTHORS
 
 This library was written by Boris Zentner (bzentner@maxmind.com) and Dave
