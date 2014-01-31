@@ -4,13 +4,21 @@
 #include "maxminddb.h"
 #include <errno.h>
 #include <getopt.h>
-#include <libgen.h>
-#include <netdb.h>
+#include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#ifdef _WIN32
+#define snprintf _snprintf
+#undef UNICODE /* Use the non-UTF16 version of the gai_strerror */
+#include <Ws2tcpip.h>
+#else
+#include <libgen.h>
+#include <netdb.h>
 #include <unistd.h>
+#endif
 
 #define LOCAL
 
@@ -152,7 +160,14 @@ LOCAL const char **get_options(int argc, char **argv, char **mmdb_file,
         }
     }
 
+#ifdef _WIN32
+	char *program = alloca(strlen(argv[0]));
+	/* This is a bit whacky, don't try this at home! */
+	_splitpath(argv[0], NULL, NULL, program, NULL);
+	_splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
+#else
     char *program = basename(argv[0]);
+#endif
 
     if (help) {
         usage(program, 0, NULL);

@@ -7,11 +7,17 @@
 #include <config.h>
 #endif
 #include <math.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <string.h>
 #include "maxminddb.h"
 #include "libtap/tap.h"
+
+#ifdef _WIN32
+#include <Winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <netdb.h>
+#endif
 
 #ifndef MMDB_TEST_HELPER_C
 #define MMDB_TEST_HELPER_C (1)
