@@ -1,13 +1,25 @@
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #define _POSIX_C_SOURCE 200112L
 #include <assert.h>
-#include <libgen.h>
-#include <netdb.h>
 #include <stdarg.h>
-#include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
+
 #include "maxminddb.h"
 #include "maxminddb_test_helper.h"
+
+#ifdef _WIN32
+#include <io.h>
+#include <Winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <libgen.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#endif
 
 #define NO_PROTO
 
