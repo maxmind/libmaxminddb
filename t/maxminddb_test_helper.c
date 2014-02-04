@@ -12,12 +12,8 @@
 
 #ifdef _WIN32
 #include <io.h>
-#include <Winsock2.h>
-#include <ws2tcpip.h>
 #else
 #include <libgen.h>
-#include <netdb.h>
-#include <sys/socket.h>
 #include <unistd.h>
 #endif
 
