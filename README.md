@@ -47,6 +47,8 @@ You can clone this repository and build it by running:
     $ ./bootstrap
     $ ./configure
     $ make check
+    $ sudo make install
+    $ sudo ldconfig
 
 To install from Git, you will need automake, autoconf, and libtool installed
 in addition to make and a compiler.
