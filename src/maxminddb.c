@@ -2,14 +2,20 @@
 #include <config.h>
 #endif
 #include "maxminddb.h"
-#include <arpa/inet.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
+
+#ifdef _WIN32
+#include <Windows.h>
+#include <Ws2ipdef.h>
+#else
+#include <arpa/inet.h>
+#include <sys/mman.h>
 #include <unistd.h>
+#endif
 
 #define MMDB_DATA_SECTION_SEPARATOR (16)
 
@@ -270,7 +276,17 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    int fd = open(filename, O_RDONLY);
+	ssize_t size;
+#ifdef _WIN32
+	HANDLE fd = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (fd == INVALID_HANDLE_VALUE) {
+		free_mmdb_struct(mmdb);
+        return MMDB_FILE_OPEN_ERROR;
+	}
+	size = GetFileSize(fd, NULL);
+#else
+	int fd = open(filename, O_RDONLY);
     if (fd < 0) {
         free_mmdb_struct(mmdb);
         return MMDB_FILE_OPEN_ERROR;
@@ -278,20 +294,33 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
 
     struct stat s;
     fstat(fd, &s);
+	size = s.st_size;
+#endif
 
     if ((flags & MMDB_MODE_MASK) == 0) {
         flags |= MMDB_MODE_MMAP;
     }
     mmdb->flags = flags;
-    ssize_t size;
-    mmdb->file_size = size = s.st_size;
+    mmdb->file_size = size;
 
+#ifdef _WIN32
+	HANDLE mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, filename);
+	uint8_t *file_content =
+		(uint8_t *)MapViewOfFile(mmh, FILE_MAP_READ, 0, 0, 0);
+	if (file_content == NULL) {
+		CloseHandle(mmh);
+		CloseHandle(fd);
+        free_mmdb_struct(mmdb);
+        return MMDB_IO_ERROR;
+    }
+#else
     uint8_t *file_content =
         (uint8_t *)mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
     if (MAP_FAILED == file_content) {
         free_mmdb_struct(mmdb);
         return MMDB_IO_ERROR;
     }
+#endif
 
     uint32_t metadata_size = 0;
     const uint8_t *metadata = find_metadata(file_content, size, &metadata_size);
@@ -313,7 +342,13 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
+#ifdef _WIN32
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+	CloseHandle(fd);
+#else
     close(fd);
+#endif
 
     uint32_t search_tree_size = mmdb->metadata.node_count *
                                 mmdb->full_record_byte_size;
@@ -1521,7 +1556,13 @@ LOCAL void free_mmdb_struct(MMDB_s *mmdb)
         free((void *)mmdb->filename);
     }
     if (NULL != mmdb->file_content) {
+#ifdef _WIN32
+		UnmapViewOfFile(mmdb->file_content);
+		WSACleanup(); /* Winsock is only initialized if open was successfull
+					   * so we only have to cleanup then. */
+#else
         munmap((void *)mmdb->file_content, mmdb->file_size);
+#endif
     }
 
     if (NULL != mmdb->metadata.database_type) {

@@ -6,14 +6,21 @@
 #endif
 
 #include <maxminddb_config.h>
-#include <netdb.h>
-#include <netinet/in.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <sys/socket.h>
 #include <sys/types.h>
+
+#ifdef _WIN32
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+typedef ADDRESS_FAMILY sa_family_t;
+#else
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#endif
 
 #define MMDB_DATA_TYPE_EXTENDED (0)
 #define MMDB_DATA_TYPE_POINTER (1)

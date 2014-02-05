@@ -54,12 +54,23 @@ AC_C_RESTRICT
 
 AC_CHECK_HEADERS([arpa/inet.h assert.h fcntl.h inttypes.h libgen.h math.h netdb.h netinet/in.h stdarg.h stdbool.h stdint.h stdio.h stdlib.h string.h sys/mman.h sys/socket.h sys/stat.h sys/time.h sys/types.h unistd.h])
 
-AC_TYPE_OFF_T
-AC_TYPE_SIZE_T
-AC_TYPE_SSIZE_T
-AC_TYPE_UINT8_T
-AC_TYPE_UINT32_T
-AC_TYPE_UINT64_T
+# configure generates an invalid config for MinGW because of the following
+# checks, only run them on non MinGW-Systems, also link against ws2_32. 
+AC_CANONICAL_HOST
+case $host_os in
+  mingw* )
+        LDFLAGS="-lws2_32"
+        ;;
+    *)
+        AC_TYPE_OFF_T
+        AC_TYPE_SIZE_T
+        AC_TYPE_SSIZE_T
+        AC_TYPE_UINT8_T
+        AC_TYPE_UINT32_T
+        AC_TYPE_UINT64_T
+        ;;
+esac
+
 
 # This check is backwards in order to make life easier for people writing
 # extensions in other languages that link to this library. If they want to
