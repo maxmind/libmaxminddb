@@ -54,8 +54,9 @@ AC_C_RESTRICT
 
 AC_CHECK_HEADERS([arpa/inet.h assert.h fcntl.h inttypes.h libgen.h math.h netdb.h netinet/in.h stdarg.h stdbool.h stdint.h stdio.h stdlib.h string.h sys/mman.h sys/socket.h sys/stat.h sys/time.h sys/types.h unistd.h])
 
-# configure generates an invalid config for MinGW because of the following
-# checks, only run them on non MinGW-Systems, also link against ws2_32. 
+# configure generates an invalid config for MinGW because of the type checks
+# so we only run them on non MinGW-Systems. For MinGW we also need to link
+# against ws2_32.
 AC_CANONICAL_HOST
 case $host_os in
         mingw*)
