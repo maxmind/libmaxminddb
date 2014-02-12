@@ -1,3 +1,9 @@
+## 0.5.4
+
+* Added support for compiling in the MinGW environment. Patch by Michael
+  Eisendle.
+
+
 ## 0.5.3 - 2013-12-23
 
 * The internal value_for_key_as_uint16 method was returning a uint32_t instead
