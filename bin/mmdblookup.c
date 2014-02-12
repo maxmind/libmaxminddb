@@ -159,9 +159,9 @@ LOCAL const char **get_options(int argc, char **argv, char **mmdb_file,
     }
 
 #ifdef _WIN32
-	char *program = alloca(strlen(argv[0]));
-	_splitpath(argv[0], NULL, NULL, program, NULL);
-	_splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
+    char *program = alloca(strlen(argv[0]));
+    _splitpath(argv[0], NULL, NULL, program, NULL);
+    _splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
 #else
     char *program = basename(argv[0]);
 #endif

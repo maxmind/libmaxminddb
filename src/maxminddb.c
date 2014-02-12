@@ -276,17 +276,17 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-	ssize_t size;
+    ssize_t size;
 #ifdef _WIN32
-	HANDLE fd = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (fd == INVALID_HANDLE_VALUE) {
-		free_mmdb_struct(mmdb);
+    HANDLE fd = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (fd == INVALID_HANDLE_VALUE) {
+        free_mmdb_struct(mmdb);
         return MMDB_FILE_OPEN_ERROR;
-	}
-	size = GetFileSize(fd, NULL);
+    }
+    size = GetFileSize(fd, NULL);
 #else
-	int fd = open(filename, O_RDONLY);
+    int fd = open(filename, O_RDONLY);
     if (fd < 0) {
         free_mmdb_struct(mmdb);
         return MMDB_FILE_OPEN_ERROR;
@@ -294,7 +294,7 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
 
     struct stat s;
     fstat(fd, &s);
-	size = s.st_size;
+    size = s.st_size;
 #endif
 
     if ((flags & MMDB_MODE_MASK) == 0) {
@@ -304,12 +304,12 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
     mmdb->file_size = size;
 
 #ifdef _WIN32
-	HANDLE mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, filename);
-	uint8_t *file_content =
-		(uint8_t *)MapViewOfFile(mmh, FILE_MAP_READ, 0, 0, 0);
-	if (file_content == NULL) {
-		CloseHandle(mmh);
-		CloseHandle(fd);
+    HANDLE mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, filename);
+    uint8_t *file_content =
+        (uint8_t *)MapViewOfFile(mmh, FILE_MAP_READ, 0, 0, 0);
+    if (file_content == NULL) {
+        CloseHandle(mmh);
+        CloseHandle(fd);
         free_mmdb_struct(mmdb);
         return MMDB_IO_ERROR;
     }
@@ -343,9 +343,9 @@ int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
     }
 
 #ifdef _WIN32
-	WSADATA wsa;
-	WSAStartup(MAKEWORD(2,2), &wsa);
-	CloseHandle(fd);
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
+    CloseHandle(fd);
 #else
     close(fd);
 #endif
@@ -1557,9 +1557,10 @@ LOCAL void free_mmdb_struct(MMDB_s *mmdb)
     }
     if (NULL != mmdb->file_content) {
 #ifdef _WIN32
-		UnmapViewOfFile(mmdb->file_content);
-		WSACleanup(); /* Winsock is only initialized if open was successfull
-					   * so we only have to cleanup then. */
+        UnmapViewOfFile(mmdb->file_content);
+         /* Winsock is only initialized if open was successful so we only have
+          * to cleanup then. */
+        WSACleanup();
 #else
         munmap((void *)mmdb->file_content, mmdb->file_size);
 #endif
