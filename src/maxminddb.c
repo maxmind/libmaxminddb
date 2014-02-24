@@ -571,10 +571,10 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     return MMDB_SUCCESS;
 }
 
-const MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
-                                              const char *const ipstr,
-                                              int *const gai_error,
-                                              int *const mmdb_error)
+MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
+                                        const char *const ipstr,
+                                        int *const gai_error,
+                                        int *const mmdb_error)
 {
     MMDB_lookup_result_s result = {
         .found_entry = false,
@@ -633,7 +633,7 @@ LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
     return 0;
 }
 
-const MMDB_lookup_result_s MMDB_lookup_sockaddr(
+MMDB_lookup_result_s MMDB_lookup_sockaddr(
     MMDB_s *const mmdb,
     const struct sockaddr *const
     sockaddr,
@@ -1547,7 +1547,7 @@ LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
     free(mmdb->metadata.description.descriptions);
 }
 
-const char *const MMDB_lib_version(void)
+const char *MMDB_lib_version(void)
 {
     return PACKAGE_VERSION;
 }
@@ -1744,7 +1744,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
     return hex_string;
 }
 
-const char *const MMDB_strerror(int error_code)
+const char *MMDB_strerror(int error_code)
 {
     switch (error_code) {
     case MMDB_SUCCESS:
