@@ -3,6 +3,10 @@
 * Added support for compiling in the MinGW environment. Patch by Michael
   Eisendle.
 
+* Various documentation improvements.
+
+* Changed the license to the Apache 2.0 license.
+
 
 ## 0.5.3 - 2013-12-23
 
