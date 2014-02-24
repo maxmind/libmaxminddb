@@ -151,7 +151,7 @@ LOCAL int get_ext_type(int raw_ext_type);
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size);
 LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
-                              MMDB_entry_data_list_s *entry_data_list);
+                              MMDB_entry_data_list_s *const entry_data_list);
 LOCAL float get_ieee754_float(const uint8_t *restrict p);
 LOCAL double get_ieee754_double(const uint8_t *restrict p);
 LOCAL uint32_t get_uint32(const uint8_t *p);
@@ -160,7 +160,7 @@ LOCAL uint32_t get_uint16(const uint8_t *p);
 LOCAL uint64_t get_uintX(const uint8_t *p, int length);
 LOCAL int32_t get_sintX(const uint8_t *p, int length);
 LOCAL MMDB_entry_data_list_s *new_entry_data_list(void);
-LOCAL void free_mmdb_struct(MMDB_s *mmdb);
+LOCAL void free_mmdb_struct(MMDB_s *const mmdb);
 LOCAL void free_languages_metadata(MMDB_s *mmdb);
 LOCAL void free_descriptions_metadata(MMDB_s *mmdb);
 LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
@@ -187,7 +187,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
         }                                                         \
     } while (0)
 
-int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
+int MMDB_open(const char *filename, uint32_t flags, MMDB_s *const mmdb)
 {
     mmdb->file_content = NULL;
     mmdb->data_section = NULL;
@@ -571,8 +571,10 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     return MMDB_SUCCESS;
 }
 
-MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *mmdb, const char *ipstr,
-                                        int *gai_error, int *mmdb_error)
+const MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
+                                              const char *const ipstr,
+                                              int *const gai_error,
+                                              int *const mmdb_error)
 {
     MMDB_lookup_result_s result = {
         .found_entry = false,
@@ -631,9 +633,11 @@ LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
     return 0;
 }
 
-MMDB_lookup_result_s MMDB_lookup_sockaddr(MMDB_s *mmdb,
-                                          struct sockaddr *sockaddr,
-                                          int *mmdb_error)
+const MMDB_lookup_result_s MMDB_lookup_sockaddr(
+    MMDB_s *const mmdb,
+    const struct sockaddr *const
+    sockaddr,
+    int *const mmdb_error)
 {
     MMDB_lookup_result_s result = {
         .found_entry = false,
@@ -826,7 +830,8 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
     return value & 0xfffffff;
 }
 
-int MMDB_read_node(MMDB_s *mmdb, uint32_t node_number, MMDB_search_node_s *node)
+int MMDB_read_node(MMDB_s *const mmdb, uint32_t node_number,
+                   MMDB_search_node_s *const node)
 {
     record_info_s record_info = record_info_for_database(mmdb);
     if (0 == record_info.right_record_offset) {
@@ -847,7 +852,9 @@ int MMDB_read_node(MMDB_s *mmdb, uint32_t node_number, MMDB_search_node_s *node)
     return MMDB_SUCCESS;
 }
 
-int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)
+int MMDB_get_value(MMDB_entry_s *const start,
+                   MMDB_entry_data_s *const entry_data,
+                   ...)
 {
     va_list path;
     va_start(path, entry_data);
@@ -856,7 +863,8 @@ int MMDB_get_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...)
     return status;
 }
 
-int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
+int MMDB_vget_value(MMDB_entry_s *const start,
+                    MMDB_entry_data_s *const entry_data,
                     va_list va_path)
 {
     const char **path = NULL;
@@ -894,8 +902,9 @@ int MMDB_vget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
     return status;
 }
 
-int MMDB_aget_value(MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
-                    const char **path)
+int MMDB_aget_value(MMDB_entry_s *const start,
+                    MMDB_entry_data_s *const entry_data,
+                    const char *const *path)
 {
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
@@ -1254,7 +1263,7 @@ LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
 }
 
 int MMDB_get_metadata_as_entry_data_list(
-    MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list)
+    MMDB_s *const mmdb, MMDB_entry_data_list_s **const entry_data_list)
 {
     MMDB_s metadata_db = make_fake_metadata_db(mmdb);
 
@@ -1266,8 +1275,8 @@ int MMDB_get_metadata_as_entry_data_list(
     return MMDB_get_entry_data_list(&metadata_start, entry_data_list);
 }
 
-int MMDB_get_entry_data_list(MMDB_entry_s *start,
-                             MMDB_entry_data_list_s **entry_data_list)
+int MMDB_get_entry_data_list(
+    MMDB_entry_s *start, MMDB_entry_data_list_s **const entry_data_list)
 {
     *entry_data_list = new_entry_data_list();
     if (NULL == entry_data_list) {
@@ -1277,7 +1286,7 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
 }
 
 LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
-                              MMDB_entry_data_list_s *entry_data_list)
+                              MMDB_entry_data_list_s *const entry_data_list)
 {
     CHECKED_DECODE_ONE(mmdb, offset, &entry_data_list->entry_data);
 
@@ -1455,7 +1464,7 @@ LOCAL MMDB_entry_data_list_s *new_entry_data_list(void)
     return calloc(1, sizeof(MMDB_entry_data_list_s));
 }
 
-void MMDB_free_entry_data_list(MMDB_entry_data_list_s *entry_data_list)
+void MMDB_free_entry_data_list(MMDB_entry_data_list_s *const entry_data_list)
 {
     if (entry_data_list == NULL) {
         return;
@@ -1466,12 +1475,12 @@ void MMDB_free_entry_data_list(MMDB_entry_data_list_s *entry_data_list)
     free(entry_data_list);
 }
 
-void MMDB_close(MMDB_s *mmdb)
+void MMDB_close(MMDB_s *const mmdb)
 {
     free_mmdb_struct(mmdb);
 }
 
-LOCAL void free_mmdb_struct(MMDB_s *mmdb)
+LOCAL void free_mmdb_struct(MMDB_s *const mmdb)
 {
     if (!mmdb) {
         return;
@@ -1483,8 +1492,8 @@ LOCAL void free_mmdb_struct(MMDB_s *mmdb)
     if (NULL != mmdb->file_content) {
 #ifdef _WIN32
         UnmapViewOfFile(mmdb->file_content);
-         /* Winsock is only initialized if open was successful so we only have
-          * to cleanup then. */
+        /* Winsock is only initialized if open was successful so we only have
+         * to cleanup then. */
         WSACleanup();
 #else
         munmap((void *)mmdb->file_content, mmdb->file_size);
@@ -1538,13 +1547,13 @@ LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
     free(mmdb->metadata.description.descriptions);
 }
 
-const char *MMDB_lib_version(void)
+const char *const MMDB_lib_version(void)
 {
     return PACKAGE_VERSION;
 }
 
-int MMDB_dump_entry_data_list(FILE *stream,
-                              MMDB_entry_data_list_s *entry_data_list,
+int MMDB_dump_entry_data_list(FILE *const stream,
+                              MMDB_entry_data_list_s *const entry_data_list,
                               int indent)
 {
     int status;
@@ -1735,7 +1744,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
     return hex_string;
 }
 
-const char *MMDB_strerror(int error_code)
+const char *const MMDB_strerror(int error_code)
 {
     switch (error_code) {
     case MMDB_SUCCESS:
