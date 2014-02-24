@@ -1,7 +1,7 @@
 /*
 libtap - Write tests in C
 Copyright 2012 Jake Gelbman <gelbman@gmail.com>
-This file is licensed under the GPLv2
+This file is licensed under the GPLv2 or any later version
 */
 
 #ifndef __TAP_H__
@@ -34,13 +34,13 @@ int     isnt_at_loc     (const char *file, int line, const char *got,
 int     cmp_ok_at_loc   (const char *file, int line, int a, const char *op,
                          int b, const char *fmt, ...);
 int     bail_out        (int ignore, const char *fmt, ...);
-void    planf           (int tests, const char *fmt, ...);
+void    tap_plan        (int tests, const char *fmt, ...);
 int     diag            (const char *fmt, ...);
 int     note            (const char *fmt, ...);
 int     exit_status     (void);
-void    skippy          (int n, const char *fmt, ...);
-void    todof           (int ignore, const char *fmt, ...);
-void    end_todof       (void);
+void    tap_skip        (int n, const char *fmt, ...);
+void    tap_todo        (int ignore, const char *fmt, ...);
+void    tap_end_todo    (void);
 
 #define NO_PLAN          -1
 #define SKIP_ALL         -2
@@ -48,26 +48,26 @@ void    end_todof       (void);
 #define is(...)          is_at_loc(__FILE__, __LINE__, __VA_ARGS__, NULL)
 #define isnt(...)        isnt_at_loc(__FILE__, __LINE__, __VA_ARGS__, NULL)
 #define cmp_ok(...)      cmp_ok_at_loc(__FILE__, __LINE__, __VA_ARGS__, NULL)
-#define plan(...)        planf(__VA_ARGS__, NULL)
+#define plan(...)        tap_plan(__VA_ARGS__, NULL)
 #define done_testing()   return exit_status()
 #define BAIL_OUT(...)    bail_out(0, "" __VA_ARGS__, NULL)
 #define pass(...)        ok(1, "" __VA_ARGS__)
 #define fail(...)        ok(0, "" __VA_ARGS__)
 
-#define skip(test, ...)  do {if (test) {skippy(__VA_ARGS__, NULL); break;}
+#define skip(test, ...)  do {if (test) {tap_skip(__VA_ARGS__, NULL); break;}
 #define end_skip         } while (0)
 
-#define todo(...)        todof(0, "" __VA_ARGS__, NULL)
-#define end_todo         end_todof()
+#define todo(...)        tap_todo(0, "" __VA_ARGS__, NULL)
+#define end_todo         tap_end_todo()
 
 #define dies_ok(...)     dies_ok_common(1, __VA_ARGS__)
 #define lives_ok(...)    dies_ok_common(0, __VA_ARGS__)
 
 #ifdef _WIN32
-#define like(...)        skippy(1, "like is not implemented on Windows")
-#define unlike           like
+#define like(...)        tap_skip(1, "like is not implemented on Windows")
+#define unlike           tap_skip(1, "unlike is not implemented on Windows")
 #define dies_ok_common(...) \
-                         skippy(1, "Death detection is not supported on Windows")
+                         tap_skip(1, "Death detection is not supported on Windows")
 #else
 #define like(...)        like_at_loc(1, __FILE__, __LINE__, __VA_ARGS__, NULL)
 #define unlike(...)      like_at_loc(0, __FILE__, __LINE__, __VA_ARGS__, NULL)
@@ -111,4 +111,3 @@ int tap_test_died (int status);
 #endif
 
 #endif
-

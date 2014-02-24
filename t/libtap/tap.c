@@ -1,7 +1,7 @@
 /*
 libtap - Write tests in C
 Copyright 2012 Jake Gelbman <gelbman@gmail.com>
-This file is licensed under the GPLv2
+This file is licensed under the GPLv2 or any later version
 */
 
 #define _BSD_SOURCE 1
@@ -37,7 +37,7 @@ vstrdupf (const char *fmt, va_list args) {
 }
 
 void
-planf (int tests, const char *fmt, ...) {
+tap_plan (int tests, const char *fmt, ...) {
     expected_tests = tests;
     if (tests == SKIP_ALL) {
         char *why;
@@ -242,7 +242,7 @@ bail_out (int ignore, const char *fmt, ...) {
 }
 
 void
-skippy (int n, const char *fmt, ...) {
+tap_skip (int n, const char *fmt, ...) {
     char *why;
     va_list args;
     va_start(args, fmt);
@@ -256,7 +256,7 @@ skippy (int n, const char *fmt, ...) {
 }
 
 void
-todof (int ignore, const char *fmt, ...) {
+tap_todo (int ignore, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     todo_mesg = vstrdupf(fmt, args);
@@ -264,7 +264,7 @@ todof (int ignore, const char *fmt, ...) {
 }
 
 void
-end_todof () {
+tap_end_todo () {
     free(todo_mesg);
     todo_mesg = NULL;
 }
@@ -328,4 +328,3 @@ like_at_loc (int for_match, const char *file, int line, const char *got,
     return test;
 }
 #endif
-
