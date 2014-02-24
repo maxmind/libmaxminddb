@@ -1,3 +1,6 @@
 [submodule "maxmind-db"]
 	path = maxmind-db
 	url = git://github.com/maxmind/MaxMind-DB.git
+[submodule "t/libtap"]
+	path = t/libtap
+	url = git://github.com/zorgnax/libtap.git
