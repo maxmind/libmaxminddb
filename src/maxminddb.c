@@ -458,9 +458,10 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         return MMDB_INVALID_METADATA_ERROR;
     }
 
-    MMDB_entry_s array_start;
-    array_start.mmdb = metadata_db;
-    array_start.offset = entry_data.offset;
+    MMDB_entry_s array_start = {
+        .mmdb   = metadata_db,
+        .offset = entry_data.offset
+    };
 
     MMDB_entry_data_list_s *member;
     MMDB_get_entry_data_list(&array_start, &member);
@@ -509,9 +510,10 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         return MMDB_INVALID_METADATA_ERROR;
     }
 
-    MMDB_entry_s map_start;
-    map_start.mmdb = metadata_db;
-    map_start.offset = entry_data.offset;
+    MMDB_entry_s map_start = {
+        .mmdb   = metadata_db,
+        .offset = entry_data.offset
+    };
 
     MMDB_entry_data_list_s *member;
     MMDB_get_entry_data_list(&map_start, &member);
