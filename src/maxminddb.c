@@ -187,7 +187,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
         }                                                         \
     } while (0)
 
-int MMDB_open(const char *filename, uint32_t flags, MMDB_s *const mmdb)
+int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 {
     mmdb->file_content = NULL;
     mmdb->data_section = NULL;
