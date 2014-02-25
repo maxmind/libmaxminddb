@@ -174,8 +174,7 @@ typedef struct MMDB_search_node_s {
                                                    int *const mmdb_error);
     extern MMDB_lookup_result_s MMDB_lookup_sockaddr(
                MMDB_s *const mmdb,
-               const struct sockaddr *const
-               sockaddr,
+               const struct sockaddr *const sockaddr,
                int *const mmdb_error);
     extern int MMDB_read_node(MMDB_s *const mmdb, uint32_t node_number,
                               MMDB_search_node_s *const node);

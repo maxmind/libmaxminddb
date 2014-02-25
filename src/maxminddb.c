@@ -637,8 +637,7 @@ LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
 
 MMDB_lookup_result_s MMDB_lookup_sockaddr(
     MMDB_s *const mmdb,
-    const struct sockaddr *const
-    sockaddr,
+    const struct sockaddr *const sockaddr,
     int *const mmdb_error)
 {
     MMDB_lookup_result_s result = {
