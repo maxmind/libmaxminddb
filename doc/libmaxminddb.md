@@ -34,7 +34,7 @@ libmaxminddb - a library for working with MaxMind DB files
     int MMDB_aget_value(
         MMDB_entry_s *const start,
         MMDB_entry_data_s *const entry_data,
-        const char *const *path);
+        const char *const *const path);
 
     int MMDB_get_entry_data_list(
         MMDB_entry_s *start,
@@ -484,7 +484,7 @@ There are three functions for looking up data associated with an IP address.
     int MMDB_aget_value(
         MMDB_entry_s *const start,
         MMDB_entry_data_s *const entry_data,
-        const char *const *path);
+        const char *const *const path);
 
 The three functions allow three slightly different calling styles, but they
 all do the same thing.

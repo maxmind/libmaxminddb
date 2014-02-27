@@ -186,7 +186,7 @@ typedef struct MMDB_search_node_s {
                                va_list va_path);
     extern int MMDB_aget_value(MMDB_entry_s *const start,
                                MMDB_entry_data_s *const entry_data,
-                               const char *const *path);
+                               const char *const *const path);
     extern int MMDB_get_metadata_as_entry_data_list(
                MMDB_s *const mmdb, MMDB_entry_data_list_s **const entry_data_list);
     extern int MMDB_get_entry_data_list(
