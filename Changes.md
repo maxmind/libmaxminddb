@@ -3,6 +3,9 @@
 * Added support for compiling in the MinGW environment. Patch by Michael
   Eisendle.
 
+* Added const declarations to many spots in the public API. None of these
+  should require changes to existing code.
+
 * Various documentation improvements.
 
 * Changed the license to the Apache 2.0 license.

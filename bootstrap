@@ -1,7 +1,9 @@
 #! /bin/sh
 
 # make sure  to use the installed libtool
-rm ltmain.sh
+if [ -f ltmain.sh ]; then
+    rm ltmain.sh
+fi
 autoreconf -fiv
 
 ###################################################

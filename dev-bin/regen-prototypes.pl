@@ -95,8 +95,9 @@ my $c_function_re  = qr/($return_type_re(\w+)$signature_re)(?>\n{)/s;
 my $sp = qr{[ \t]|\n(?![ \t]*\n)};
 
 my $re_type = qr {
-                     (?: \w+ $sp* )+? # words
-                     (?: \*  $sp* )*  # stars
+                     (?: (?: const $sp*)? \w+ $sp* )+? # words
+                     (?: (?: const $sp*)? \*  $sp* )*  # stars
+                     (?: const $sp*)? # optional const
              }x;
 
 my $re_identifier = qr{ \w+ $sp* }x;

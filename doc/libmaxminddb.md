@@ -6,38 +6,53 @@ libmaxminddb - a library for working with MaxMind DB files
 
     #include <maxminddb.h>
 
-    int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb);
-    void MMDB_close(MMDB_s *mmdb);
+    int MMDB_open(
+        const char *filename,
+        uint32_t flags,
+        MMDB_s *const mmdb);
+    void MMDB_close(MMDB_s *const mmdb);
 
     MMDB_lookup_result_s MMDB_lookup_string(
-        MMDB_s *mmdb, const char *ipstr,
-        int *gai_error, int *mmdb_error);
+        MMDB_s *const mmdb,
+        const char *const ipstr,
+        int *const gai_error,
+        int *const mmdb_error);
     MMDB_lookup_result_s MMDB_lookup_sockaddr(
-        MMDB_s *mmdb, struct sockaddr *sockaddr,
-        int *mmdb_error);
-
+        MMDB_s *const mmdb,
+        const struct sockaddr *const
+        sockaddr,
+        int *const mmdb_error);
+               
     int MMDB_get_value(
-        MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...);
-    int MMDB_vget_value(
-        MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
-        va_list path);
+        MMDB_entry_s *const start,
+        MMDB_entry_data_s *const entry_data,
+        ...);
+    int int MMDB_vget_value(
+        MMDB_entry_s *const start,
+        MMDB_entry_data_s *const entry_data,
+        va_list va_path);
     int MMDB_aget_value(
-        MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
-        char **path);
+        MMDB_entry_s *const start,
+        MMDB_entry_data_s *const entry_data,
+        const char *const *path);
 
     int MMDB_get_entry_data_list(
         MMDB_entry_s *start,
-        MMDB_entry_data_list_s **entry_data_list);
+        MMDB_entry_data_list_s **const entry_data_list);
     void MMDB_free_entry_data_list(
-        MMDB_entry_data_list_s *entry_data_list);
+        MMDB_entry_data_list_s *const entry_data_list);
     int MMDB_get_metadata_as_entry_data_list(
-        MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list);
+        MMDB_s *const mmdb,
+        MMDB_entry_data_list_s **const entry_data_list);
     int MMDB_dump_entry_data_list(
-        FILE *stream, MMDB_entry_data_list_s *entry_data_list,
+        FILE *const stream,
+        MMDB_entry_data_list_s *const entry_data_list,
         int indent);
 
     int MMDB_read_node(
-        MMDB_s *mmdb, uint32_t node_number, MMDB_search_node_s *node);
+        MMDB_s *const mmdb,
+        uint32_t node_number,
+        MMDB_search_node_s *const node);
 
     const char *MMDB_lib_version(void);
     const char *MMDB_strerror(int error_code);
@@ -351,7 +366,10 @@ This library provides the following exported functions:
 
 ## `MMDB_open()`
 
-    int MMDB_open(const char *filename, uint32_t flags, MMDB_s *mmdb)
+    int MMDB_open(
+        const char *filename,
+        uint32_t flags,
+        MMDB_s *const mmdb);
 
 This function opens a handle to a MaxMind DB file. Its return value is a
 status code as defined above. Always check this call's return value.
@@ -383,7 +401,7 @@ releases. The current default is `MMDB_MODE_MMAP`.
 
 ## `MMDB_close()`
 
-    void MMDB_close(MMDB_s *mmdb)
+    void MMDB_close(MMDB_s *const mmdb);
 
 This frees any allocated or mmap'd memory that is held from the `MMDB_s`
 structure. *It does not free the memory allocated for the structure itself!*
@@ -393,8 +411,10 @@ freeing it.
 ## `MMDB_lookup_string()`
 
     MMDB_lookup_result_s MMDB_lookup_string(
-        MMDB_s *mmdb, const char *ipstr,
-        int *gai_error, int *mmdb_error);
+        MMDB_s *const mmdb,
+        const char *const ipstr,
+        int *const gai_error,
+        int *const mmdb_error);
 
 This function looks up an IP address that is passed in as a null-terminated
 string. Internally it calls `getaddrinfo()` to resolve the address into a
@@ -430,8 +450,10 @@ If you pass an IPv6 address to a database with only IPv4 data then the
 ## `MMDB_lookup_sockaddr()`
 
     MMDB_lookup_result_s MMDB_lookup_sockaddr(
-        MMDB_s *mmdb, struct sockaddr *sockaddr,
-        int *mmdb_error);
+        MMDB_s *const mmdb,
+        const struct sockaddr *const
+        sockaddr,
+        int *const mmdb_error);
 
 This function looks up an IP address that has already been resolved by
 `getaddrinfo()`.
@@ -452,13 +474,17 @@ the `MMDB_lookup_string()` function.
 There are three functions for looking up data associated with an IP address.
 
     int MMDB_get_value(
-        MMDB_entry_s *start, MMDB_entry_data_s *entry_data, ...);
-    int MMDB_vget_value(
-        MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
-        va_list path);
+        MMDB_entry_s *const start,
+        MMDB_entry_data_s *const entry_data,
+        ...);
+    int int MMDB_vget_value(
+        MMDB_entry_s *const start,
+        MMDB_entry_data_s *const entry_data,
+        va_list va_path);
     int MMDB_aget_value(
-        MMDB_entry_s *start, MMDB_entry_data_s *entry_data,
-        char **path);
+        MMDB_entry_s *const start,
+        MMDB_entry_data_s *const entry_data,
+        const char *const *path);
 
 The three functions allow three slightly different calling styles, but they
 all do the same thing.
@@ -516,7 +542,7 @@ If you want to get all of the entry data at once you can call
 
     int MMDB_get_entry_data_list(
         MMDB_entry_s *start,
-        MMDB_entry_data_list_s **entry_data_list);
+        MMDB_entry_data_list_s **const entry_data_list);
 
 This function allows you to get all of the data for a complex data structure
 at once, rather than looking up each piece using repeated calls to
@@ -575,7 +601,7 @@ The returned list will consist of the following items:
 ## `MMDB_free_entry_data_list()`
 
     void MMDB_free_entry_data_list(
-        MMDB_entry_data_list_s *entry_data_list);
+        MMDB_entry_data_list_s *const entry_data_list);
 
 The `MMDB_get_entry_data_list()` and `MMDB_get_metadata_as_entry_data_list()`
 functions will allocate the linked list structure from the heap. Call this
@@ -584,7 +610,8 @@ function to free the `MMDB_entry_data_list_s` structure.
 ## `MMDB_get_metadata_as_entry_data_list()`
 
     int MMDB_get_metadata_as_entry_data_list(
-        MMDB_s *mmdb, MMDB_entry_data_list_s **entry_data_list);
+        MMDB_s *const mmdb,
+        MMDB_entry_data_list_s **const entry_data_list);
 
 This function allows you to retrieve the database metadata as a linked list of
 `MMDB_entry_data_list_s` structures. This can be a more convenient way to deal
@@ -601,7 +628,8 @@ with the metadata than using the metadata structure directly.
 ## `MMDB_dump_entry_data_list()`
 
     int MMDB_dump_entry_data_list(
-        FILE *stream, MMDB_entry_data_list_s *entry_data_list,
+        FILE *const stream,
+        MMDB_entry_data_list_s *const entry_data_list,
         int indent);
 
 This function takes a linked list of `MMDB_entry_data_list_s` structures and
@@ -624,7 +652,9 @@ used to show data to users in a readable way and for debugging purposes.
 ## `MMDB_read_node()`
 
     int MMDB_read_node(
-        MMDB_s *mmdb, uint32_t node_number, MMDB_search_node_s *node);
+        MMDB_s *const mmdb,
+        uint32_t node_number,
+        MMDB_search_node_s *const node);
 
 This reads a specific node in the search tree. The third argument is a
 reference to an `MMDB_search_node_s` structure that will be populated by this
