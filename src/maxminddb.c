@@ -905,7 +905,7 @@ int MMDB_vget_value(MMDB_entry_s *const start,
 
 int MMDB_aget_value(MMDB_entry_s *const start,
                     MMDB_entry_data_s *const entry_data,
-                    const char *const *path)
+                    const char *const *const path)
 {
     MMDB_s *mmdb = start->mmdb;
     uint32_t offset = start->offset;
@@ -927,7 +927,8 @@ int MMDB_aget_value(MMDB_entry_s *const start,
     }
 
     const char *path_elem;
-    while (NULL != (path_elem = *(path++))) {
+    int i = 0;
+    while (NULL != (path_elem = path[i++])) {
         DEBUG_NL;
         DEBUG_MSGF("path elem = %s", path_elem);
 
