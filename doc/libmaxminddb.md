@@ -7,7 +7,7 @@ libmaxminddb - a library for working with MaxMind DB files
     #include <maxminddb.h>
 
     int MMDB_open(
-        const char *filename,
+        const char *const filename,
         uint32_t flags,
         MMDB_s *const mmdb);
     void MMDB_close(MMDB_s *const mmdb);
@@ -367,7 +367,7 @@ This library provides the following exported functions:
 ## `MMDB_open()`
 
     int MMDB_open(
-        const char *filename,
+        const char *const filename,
         uint32_t flags,
         MMDB_s *const mmdb);
 
