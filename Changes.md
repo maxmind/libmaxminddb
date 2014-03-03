@@ -1,4 +1,4 @@
-## 0.5.4
+## 0.5.4 - 2014-03-03
 
 * Added support for compiling in the MinGW environment. Patch by Michael
   Eisendle.
