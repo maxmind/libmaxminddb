@@ -1,3 +1,10 @@
+## 0.5.5 - 2014-03-11
+
+* The previous tarball failed to compile because it was missing the
+  src/maxminddb-compat-util.h file. Reported by Günter Grodotzki. GitHub issue
+  #18.
+
+
 ## 0.5.4 - 2014-03-03
 
 * Added support for compiling in the MinGW environment. Patch by Michael
