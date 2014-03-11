@@ -1,4 +1,4 @@
-include_HEADERS = include/maxminddb.h
+include_HEADERS = include/maxminddb.h src/maxminddb-compat-util.h
 
 include_execdir = $(exec_prefix)/include
 
