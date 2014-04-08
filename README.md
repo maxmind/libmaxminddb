@@ -54,6 +54,13 @@ You can clone this repository and build it by running:
 To install from Git, you will need automake, autoconf, and libtool installed
 in addition to make and a compiler.
 
+# Installing via Homebrew (on OS X)
+
+If you are on OS X and you have homebrew (see http://brew.sh/) you can install
+libmaxminddb via brew.
+
+    $ brew install libmaxminddb
+
 # Bug Reports
 
 Please report bugs by filing an issue with our GitHub issue tracker at
