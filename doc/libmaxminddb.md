@@ -22,7 +22,7 @@ libmaxminddb - a library for working with MaxMind DB files
         const struct sockaddr *const
         sockaddr,
         int *const mmdb_error);
-               
+
     int MMDB_get_value(
         MMDB_entry_s *const start,
         MMDB_entry_data_s *const entry_data,
@@ -538,6 +538,9 @@ path. The last member of this array must be `NULL`.
 If you want to get all of the entry data at once you can call
 `MMDB_get_entry_data_list()` instead.
 
+For each of the three functions, the return value is the status code as
+defined above.
+
 ## `MMDB_get_entry_data_list()`
 
     int MMDB_get_entry_data_list(
@@ -667,7 +670,7 @@ than the number of nodes in the database, this function will return
 ## `MMDB_lib_version()`
 
     const char *MMDB_lib_version(void)
-    
+
 This function returns the library version as a string, something like "2.0.0".
 
 # EXAMPLE
