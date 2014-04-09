@@ -22,7 +22,7 @@ libmaxminddb - a library for working with MaxMind DB files
         const struct sockaddr *const
         sockaddr,
         int *const mmdb_error);
-               
+
     int MMDB_get_value(
         MMDB_entry_s *const start,
         MMDB_entry_data_s *const entry_data,
@@ -538,6 +538,9 @@ path. The last member of this array must be `NULL`.
 If you want to get all of the entry data at once you can call
 `MMDB_get_entry_data_list()` instead.
 
+For each of the three functions, the return value is a status code as
+defined above.
+
 ## `MMDB_get_entry_data_list()`
 
     int MMDB_get_entry_data_list(
@@ -573,8 +576,8 @@ at once, rather than looking up each piece using repeated calls to
 
     MMDB_free_entry_data_list(first);
 
-It's up to you to interpret the returned data structure. The list is linked in
-a depth-first traversal. Let's use this structure as an example:
+It's up to you to interpret the `entry_data_list` data structure. The list is
+linked in a depth-first traversal. Let's use this structure as an example:
 
     {
         "names": {
@@ -584,7 +587,7 @@ a depth-first traversal. Let's use this structure as an example:
         "cities": [ "Berlin", "Frankfurt" ]
     }
 
-The returned list will consist of the following items:
+The list will consist of the following items:
 
 1. MAP - top level map
 2. UTF8_STRING - "names" key
@@ -597,6 +600,8 @@ The returned list will consist of the following items:
 9. ARRAY - value for "cities" key
 10. UTF8_STRING - array[0]
 11. UTF8_STRING - array[1]
+
+The return value of the function is a status code as defined above.
 
 ## `MMDB_free_entry_data_list()`
 
@@ -625,6 +630,8 @@ with the metadata than using the metadata structure directly.
     ... // do something with the data
     MMDB_free_entry_data_list(first);
 
+The return value of the function is a status code as defined above.
+
 ## `MMDB_dump_entry_data_list()`
 
     int MMDB_dump_entry_data_list(
@@ -649,6 +656,8 @@ The specific output format may change in future releases, so you should not
 rely on the specific formatting produced by this function. It is intended to be
 used to show data to users in a readable way and for debugging purposes.
 
+The return value of the function is a status code as defined above.
+
 ## `MMDB_read_node()`
 
     int MMDB_read_node(
@@ -667,7 +676,7 @@ than the number of nodes in the database, this function will return
 ## `MMDB_lib_version()`
 
     const char *MMDB_lib_version(void)
-    
+
 This function returns the library version as a string, something like "2.0.0".
 
 # EXAMPLE
