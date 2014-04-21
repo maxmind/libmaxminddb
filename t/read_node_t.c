@@ -31,11 +31,11 @@ void run_24_bit_record_tests(int mode, const char *mode_desc)
     free((void *)path);
 
     const uint32_t tests[5][3] = {
-        { 0,   1,   225 },
+        { 0,   1,   242 },
         { 80,  81,  197 },
-        { 96,  97,  225 },
-        { 103, 225, 104 },
-        { 224, 96,  225 }
+        { 96,  97,  242 },
+        { 103, 242, 104 },
+        { 241, 96,  242 }
     };
 
     run_read_node_tests(mmdb, tests, 5, 24);
@@ -52,11 +52,11 @@ void run_28_bit_record_tests(int mode, const char *mode_desc)
     free((void *)path);
 
     const uint32_t tests[5][3] = {
-        { 0,   1,   225 },
+        { 0,   1,   242 },
         { 80,  81,  197 },
-        { 96,  97,  225 },
-        { 103, 225, 104 },
-        { 224, 96,  225 }
+        { 96,  97,  242 },
+        { 103, 242, 104 },
+        { 241, 96,  242 }
     };
 
     run_read_node_tests(mmdb, tests, 5, 28);
@@ -73,11 +73,11 @@ void run_32_bit_record_tests(int mode, const char *mode_desc)
     free((void *)path);
 
     const uint32_t tests[5][3] = {
-        { 0,   1,   225 },
+        { 0,   1,   242 },
         { 80,  81,  197 },
-        { 96,  97,  225 },
-        { 103, 225, 104 },
-        { 224, 96,  225 }
+        { 96,  97,  242 },
+        { 103, 242, 104 },
+        { 241, 96,  242 }
     };
 
     run_read_node_tests(mmdb, tests, 5, 32);
