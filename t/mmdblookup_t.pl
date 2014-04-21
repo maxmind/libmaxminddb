@@ -19,7 +19,7 @@ if ($@) {
 use vars qw( $Bin );
 
 my $mmdblookup    = "$Bin/../bin/mmdblookup";
-my $test_data_dir = "$Bin/../maxmind-db/test-data";
+my $test_data_dir = "$Bin/maxmind-db/test-data";
 
 {
     ok( -x $mmdblookup, 'mmdblookup script is executable' );

@@ -9,7 +9,7 @@ SUBDIRS = \
   bin     \
   t
 
-EXTRA_DIST = doc maxmind-db t
+EXTRA_DIST = doc t
 dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
 	find $(distdir) -name '.git*' | xargs rm -fr

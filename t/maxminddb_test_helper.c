@@ -70,9 +70,9 @@ const char *test_database_path(const char *filename)
 
     char *test_db_dir;
     if (strcmp(basename(cwd), "t") == 0) {
-        test_db_dir = "../maxmind-db/test-data";
-    } else {
         test_db_dir = "./maxmind-db/test-data";
+    } else {
+        test_db_dir = "./t/maxmind-db/test-data";
     }
 
     char *path = malloc(500);
