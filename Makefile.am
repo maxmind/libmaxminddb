@@ -14,6 +14,14 @@ dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
 	find $(distdir) -name '.git*' | xargs rm -fr
 
+safedist: dist
+	tmpdir="$${TMPDIR-/tmp}/safedist-$$$$" \
+	  && mkdir "$$tmpdir" \
+	  && tar -xvf $(distdir).tar.gz --directory "$$tmpdir" \
+	  && $(am__cd) "$$tmpdir/$(distdir)" \
+	  && ./configure \
+	  && make -j 4 check
+
 man3_MANS = man/man3/*.3
 
 man/man3/*.3:
