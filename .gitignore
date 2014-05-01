@@ -16,7 +16,7 @@
 /depcomp
 /include/maxminddb_config.h
 /install-sh
-/libmaxminddb-*.tar.gz
+/libmaxminddb-*
 /libtool
 /ltmain.sh
 /man

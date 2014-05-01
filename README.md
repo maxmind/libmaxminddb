@@ -78,6 +78,10 @@ development easier. These are written in Perl or shell. They are:
 * `valgrind-all.pl` - This runs Valgrind on the tests and `mmdblookup` to
   check for memory leaks.
 
+# Creating a Release Tarball
+
+Use `make safedist` to check the resulting tarball.
+
 # Copyright and License
 
 Licensed under the Apache License, Version 2.0 (the "License");
