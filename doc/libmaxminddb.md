@@ -749,6 +749,11 @@ This function returns the library version as a string, something like "2.0.0".
         exit(exit_code);
     }
 
+# THREAD SAFETY
+
+This library is thread safe when compiled and linked with a thread-safe
+`malloc` and `free` implementation.
+
 # INSTALLATION AND SOURCE
 
 You can download the latest release of libmaxminddb
