@@ -41,6 +41,11 @@ EOF
   fi
 ])dnl AX_CHECK_CFLAGS
 
+# libtool does not work if the path has a space in it.
+if [ test `echo $PWD | grep -c '\s'` != "0"  ]; then
+    AC_MSG_ERROR([libmaxminddb cannot be built in a directory with whitespace in its name.])
+fi
+
 AX_CHECK_CFLAGS([-fms-extensions])
 
 # We will add this back for non-debug builds in the common.mk file
