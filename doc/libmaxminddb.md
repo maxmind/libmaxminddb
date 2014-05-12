@@ -109,7 +109,7 @@ All publicly visible functions, structures, and macros begin with "MMDB_".
 
 # DATA STRUCTURES
 
-All data structures exported by this library's `maxmindb.h` header are
+All data structures exported by this library's `maxminddb.h` header are
 typedef'd in the form `typedef struct foo_s { ... } foo_s` so you can refer to
 them without the `struct` prefix.
 
@@ -748,6 +748,11 @@ This function returns the library version as a string, something like "2.0.0".
         MMDB_close(&mmdb);
         exit(exit_code);
     }
+
+# THREAD SAFETY
+
+This library is thread safe when compiled and linked with a thread-safe
+`malloc` and `free` implementation.
 
 # INSTALLATION AND SOURCE
 
