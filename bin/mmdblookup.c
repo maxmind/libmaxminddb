@@ -10,6 +10,7 @@
 #include <time.h>
 
 #ifdef _WIN32
+#include <malloc.h>
 #define snprintf _snprintf
 #undef UNICODE /* Use the non-UTF16 version of the gai_strerror */
 #else
