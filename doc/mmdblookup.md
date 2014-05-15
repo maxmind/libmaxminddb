@@ -76,7 +76,6 @@ greatly preferred over patches.
 This utility was written by Boris Zentner (bzentner@maxmind.com) and Dave
 Rolsky (drolsky@maxmind.com).
 
-
 # COPYRIGHT AND LICENSE
 
 Copyright 2013-2014 MaxMind, Inc.
