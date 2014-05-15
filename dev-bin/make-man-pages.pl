@@ -18,31 +18,46 @@ sub main {
         or die
         "\n  You must install pandoc in order to generate the man pages.\n\n";
 
-    my $man_dir = "$target/man/man3";
+    _make_man($target, 'libmaxminddb', 3);
+    _make_lib_man_links($target);
+
+    _make_man($target, 'mmdblookup', 1);
+}
+
+sub _make_man {
+    my $target = shift;
+    my $name = shift;
+    my $type = shift;
+
+    my $man_dir = "$target/man/man$type";
     mkpath($man_dir);
 
     my $tempdir = tempdir( CLEANUP => 1 );
 
-    my $markdown = <<'EOF';
-% libmaxminddb(3)
+    my $markdown = <<"EOF";
+% $name($type)
 
 EOF
-    $markdown .=read_file("$Bin/../doc/libmaxminddb.md");
+    $markdown .=read_file("$Bin/../doc/$name.md");
 
-    my $tempfile = "$tempdir/libmaxminddb.3.md";
+    my $tempfile = "$tempdir/$name.$type.md";
     write_file( $tempfile, $markdown );
 
-    my $man3_file = "$man_dir/libmaxminddb.3";
-    system( qw( pandoc -s -t man ), $tempfile, '-o', $man3_file );
+    my $man_file = "$man_dir/$name.$type";
+    system( qw( pandoc -s -t man ), $tempfile, '-o', $man_file );
+
+    _fix_indentation($man_file);
+}
+
+sub _make_lib_man_links {
+    my $target = shift;
 
     my $header = read_file("$Bin/../include/maxminddb.h");
     for my $proto ( $header =~ /^ +extern.+?(\w+)\(/gsm ) {
-        open my $fh, '>', "$man_dir/$proto.3";
+        open my $fh, '>', "$target/man/man3/$proto.3";
         print {$fh} ".so man3/libmaxminddb.3\n";
         close $fh;
     }
-
-    _fix_indentation($man3_file);
 }
 
 # AFAICT there's no way to control the indentation depth for code blocks with
