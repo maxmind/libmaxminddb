@@ -25,25 +25,25 @@ sub main {
 }
 
 sub _make_man {
-    my $target = shift;
-    my $name   = shift;
-    my $type   = shift;
+    my $target  = shift;
+    my $name    = shift;
+    my $section = shift;
 
-    my $man_dir = "$target/man/man$type";
+    my $man_dir = "$target/man/man$section";
     mkpath($man_dir);
 
     my $tempdir = tempdir( CLEANUP => 1 );
 
     my $markdown = <<"EOF";
-% $name($type)
+% $name($section)
 
 EOF
     $markdown .= read_file("$Bin/../doc/$name.md");
 
-    my $tempfile = "$tempdir/$name.$type.md";
+    my $tempfile = "$tempdir/$name.$section.md";
     write_file( $tempfile, $markdown );
 
-    my $man_file = "$man_dir/$name.$type";
+    my $man_file = "$man_dir/$name.$section";
     system( qw( pandoc -s -t man ), $tempfile, '-o', $man_file );
 
     _fix_indentation($man_file);
