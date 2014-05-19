@@ -1,3 +1,4 @@
+
 include_HEADERS = include/maxminddb.h src/maxminddb-compat-util.h
 
 include_execdir = $(exec_prefix)/include
@@ -22,7 +23,12 @@ safedist: dist
 	  && ./configure \
 	  && make -j 4 check
 
+man1_MANS = man/man1/*.1
+
 man3_MANS = man/man3/*.3
+
+man/man1/*.1:
+	if [ ! -f man/man1/mmdblookup.1 ]; then mkdir -p man/man1 && touch man/man1/mmdblookup.1; fi
 
 man/man3/*.3:
 	if [ ! -f man/man3/libmaxminddb.3 ]; then mkdir -p man/man3 && touch man/man3/libmaxminddb.3; fi
@@ -30,4 +36,4 @@ man/man3/*.3:
 release:
 	dev-bin/make-release.sh $(PACKAGE_VERSION)
 
-.PHONY: man/man3/*.3 release
+.PHONY: man/man1/*.1 man/man3/*.3 release
