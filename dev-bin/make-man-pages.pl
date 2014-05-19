@@ -18,16 +18,16 @@ sub main {
         or die
         "\n  You must install pandoc in order to generate the man pages.\n\n";
 
-    _make_man($target, 'libmaxminddb', 3);
+    _make_man( $target, 'libmaxminddb', 3 );
     _make_lib_man_links($target);
 
-    _make_man($target, 'mmdblookup', 1);
+    _make_man( $target, 'mmdblookup', 1 );
 }
 
 sub _make_man {
     my $target = shift;
-    my $name = shift;
-    my $type = shift;
+    my $name   = shift;
+    my $type   = shift;
 
     my $man_dir = "$target/man/man$type";
     mkpath($man_dir);
@@ -38,7 +38,7 @@ sub _make_man {
 % $name($type)
 
 EOF
-    $markdown .=read_file("$Bin/../doc/$name.md");
+    $markdown .= read_file("$Bin/../doc/$name.md");
 
     my $tempfile = "$tempdir/$name.$type.md";
     write_file( $tempfile, $markdown );
