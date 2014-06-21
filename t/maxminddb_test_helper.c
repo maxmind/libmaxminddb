@@ -168,8 +168,8 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
     MMDB_lookup_result_s result;
     if (gai_error == 0) {
         result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, &mmdb_error);
+        freeaddrinfo(addresses);
     }
-    freeaddrinfo(addresses);
 
     test_lookup_errors(gai_error, mmdb_error, "MMDB_lookup_sockaddr", ip, file,
                        mode_desc);
