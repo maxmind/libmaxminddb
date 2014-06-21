@@ -618,7 +618,7 @@ LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
 
     if (NULL != strchr(ipstr, ':')) {
         hints.ai_flags = AI_NUMERICHOST;
-#ifdef AI_V4MAPPED
+#if defined AI_V4MAPPED && !defined __FreeBSD__
         hints.ai_flags |= AI_V4MAPPED;
 #endif
         hints.ai_family = AF_INET6;
