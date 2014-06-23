@@ -20,8 +20,11 @@
     <div class="span7">
 
       <ul class="nav nav-tabs">
-        <li class="active">
+        <li{% if page.url == "/index.html" %} class="active"{% endif %}>
           <a href="index.html">libmaxminddb</a>
+        </li>
+        <li{% if page.url == "/mmdblookup.html" %} class="active"{% endif %}>
+          <a href="mmdblookup.html">mmdblookup</a>
         </li>
         <li>
           <a href="doc/{{ page.version }}/">API</a>
