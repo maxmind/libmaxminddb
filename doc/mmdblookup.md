@@ -17,22 +17,28 @@ path to only show part of that data.
 
 For example, given a JSON structure like this:
 
-    {
-        "names": {
-            "en": "Germany",
-            "de": "Deutschland"
-        },
-        "cities": [ "Berlin", "Frankfurt" ]
-    }
+```js
+{
+    "names": {
+        "en": "Germany",
+        "de": "Deutschland"
+    },
+    "cities": [ "Berlin", "Frankfurt" ]
+}
+```
 
 You could look up just the English name by calling mmdblookup with a lookup
 path of:
 
-    mmdblookup --file ... --ip ... names en
+```bash
+mmdblookup --file ... --ip ... names en
+```
 
 Or you could look up the second city in the list with:
 
-    mmdblookup --file ... --ip ... cities 1
+```bash
+mmdblookup --file ... --ip ... cities 1
+```
 
 Array numbering begins with zero (0).
 
