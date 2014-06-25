@@ -153,7 +153,7 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
 
     if (ip[0] == ':') {
         hints.ai_flags = ai_flags;
-#ifdef AI_V4MAPPED
+#if defined AI_V4MAPPED && !defined __FreeBSD__
         hints.ai_flags |= AI_V4MAPPED;
 #endif
         hints.ai_family = AF_INET6;
@@ -169,7 +169,9 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
     if (gai_error == 0) {
         result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, &mmdb_error);
     }
-    freeaddrinfo(addresses);
+    if ( addresses != NULL ) {
+        freeaddrinfo(addresses);
+    }
 
     test_lookup_errors(gai_error, mmdb_error, "MMDB_lookup_sockaddr", ip, file,
                        mode_desc);
