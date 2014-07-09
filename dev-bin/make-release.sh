@@ -33,6 +33,7 @@ cat <<EOF > $INDEX
 ---
 layout: default
 title: libmaxminddb - a library for working with MaxMind DB files
+version: $TAG
 ---
 EOF
 
@@ -43,6 +44,7 @@ cat <<EOF > $MMDBLOOKUP
 ---
 layout: default
 title: mmdblookup - a utility to look up an IP address in a MaxMind DB file
+version: $TAG
 ---
 EOF
 
