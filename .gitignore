@@ -6,6 +6,7 @@
 */.libs
 *~
 .\#*
+.gh-pages
 /INSTALL
 /autom4te.cache
 /bin/country_lookup
