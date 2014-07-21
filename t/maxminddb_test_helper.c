@@ -149,7 +149,7 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
     struct addrinfo hints = {
         .ai_socktype = SOCK_STREAM
     };
-    struct addrinfo *addresses;
+    struct addrinfo *addresses = NULL;
 
     if (ip[0] == ':') {
         hints.ai_flags = ai_flags;
