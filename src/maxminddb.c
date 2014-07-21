@@ -1533,15 +1533,16 @@ LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
         if (NULL != mmdb->metadata.description.descriptions[i]) {
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->language) {
-                free((char *)mmdb->metadata.description.descriptions[i]
-                     ->
-                     language);
+                free(
+                    (char *)mmdb->metadata.description.descriptions[i]->
+                    language);
             }
 
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->description) {
-                free((char *)mmdb->metadata.description.
-                     descriptions[i]->description);
+                free(
+                    (char *)mmdb->metadata.description.descriptions[i]->
+                    description);
             }
             free(mmdb->metadata.description.descriptions[i]);
         }
