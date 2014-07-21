@@ -169,7 +169,7 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
     if (gai_error == 0) {
         result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, &mmdb_error);
     }
-    if ( addresses != NULL ) {
+    if (addresses != NULL) {
         freeaddrinfo(addresses);
     }
 
