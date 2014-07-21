@@ -250,6 +250,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     uint32_t metadata_size = 0;
     const uint8_t *metadata = find_metadata(file_content, size, &metadata_size);
     if (NULL == metadata) {
+        free_mmdb_struct(mmdb);
         return MMDB_INVALID_METADATA_ERROR;
     }
 
