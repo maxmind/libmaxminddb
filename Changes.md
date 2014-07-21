@@ -4,6 +4,21 @@
   which did not contain any MMDB metadata. Reported by Federico
   G. Schwindt. GitHub issue #36.
 
+* Fixed an error that occurred when passing AI_V4MAPPED to `getaddrinfo()` on
+  FreeBSD. Apparently this macro is defined but doesn't work the way we
+  expected it to on that platform.
+
+* Made sure to call `freeaddrinfo()` when a call to `getaddrinfo()` fails but
+  still allocated memory.
+
+* Fixed a segfault in the tests that occurred on FreeBSD if we passed a NULL
+  value to `freeaddrinfo()`.
+
+* Added a missing step to the README.md file for installing from our GitHub
+  repository. Patch by Yasith Fernando.
+
+* Added instructions for installing via Homebrew. Patch by Yasith Fernando.
+
 
 ## 0.5.5 - 2014-03-11
 

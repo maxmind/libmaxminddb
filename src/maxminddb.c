@@ -588,10 +588,13 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
         }
     };
 
-    struct addrinfo *addresses;
+    struct addrinfo *addresses = NULL;
     *gai_error = resolve_any_address(ipstr, &addresses);
 
     if (*gai_error) {
+        if (NULL != addresses) {
+            freeaddrinfo(addresses);
+        }
         return result;
     }
 
