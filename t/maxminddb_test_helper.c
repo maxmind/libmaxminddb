@@ -76,7 +76,7 @@ const char *test_database_path(const char *filename)
     }
 
     char *path = malloc(500);
-    assert(path != NULL);
+    assert(NULL != path);
 
     snprintf(path, 500, "%s/%s", test_db_dir, filename);
 
@@ -169,7 +169,7 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
     if (gai_error == 0) {
         result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, &mmdb_error);
     }
-    if (addresses != NULL) {
+    if (NULL != addresses) {
         freeaddrinfo(addresses);
     }
 
