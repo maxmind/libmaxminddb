@@ -1,3 +1,10 @@
+## 0.5.6
+
+* There was a leak in the `MMDB_open()` sub when it was called against a file
+  which did not contain any MMDB metadata. Reported by Federico
+  G. Schwindt. GitHub issue #36.
+
+
 ## 0.5.5 - 2014-03-11
 
 * The previous tarball failed to compile because it was missing the

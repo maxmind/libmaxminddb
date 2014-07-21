@@ -250,6 +250,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     uint32_t metadata_size = 0;
     const uint8_t *metadata = find_metadata(file_content, size, &metadata_size);
     if (NULL == metadata) {
+        free_mmdb_struct(mmdb);
         return MMDB_INVALID_METADATA_ERROR;
     }
 
@@ -1532,15 +1533,16 @@ LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
         if (NULL != mmdb->metadata.description.descriptions[i]) {
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->language) {
-                free((char *)mmdb->metadata.description.descriptions[i]
-                     ->
-                     language);
+                free(
+                    (char *)mmdb->metadata.description.descriptions[i]->
+                    language);
             }
 
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->description) {
-                free((char *)mmdb->metadata.description.
-                     descriptions[i]->description);
+                free(
+                    (char *)mmdb->metadata.description.descriptions[i]->
+                    description);
             }
             free(mmdb->metadata.description.descriptions[i]);
         }
