@@ -12,6 +12,7 @@
 /bin/country_lookup
 /bin/mmdbdump
 /bin/mmdblookup
+/compile
 /config.*
 /configure
 /depcomp
