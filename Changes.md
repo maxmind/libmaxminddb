@@ -1,4 +1,4 @@
-## 0.5.6
+## 0.5.6 - 2014-07-21
 
 * There was a leak in the `MMDB_open()` sub when it was called against a file
   which did not contain any MMDB metadata. Reported by Federico
