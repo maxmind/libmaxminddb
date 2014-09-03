@@ -1,3 +1,7 @@
+## 1.0.1 - 2014-09-03
+
+* Added missing LICENSE and NOTICE files to distribution. No code changes.
+
 ## 1.0.0 - 2014-09-02
 
 * Bumped version to 1.0.0. No code changes.
