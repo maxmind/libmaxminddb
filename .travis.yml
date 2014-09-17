@@ -19,3 +19,17 @@ notifications:
       - dev@maxmind.com
     on_success: change
     on_failure: always
+
+env:
+  global:
+   - secure: "a2pXNVW/lGrMdJTal+pzH0J5N69RdBErwe2dHU2xDnOeNcDYmiSxmU4Fw52KPYXFzdlR9GuEyZtHtesRQthSHpylcIvfJJCih7EvwbNQ5pfplpT5ri2PKPFWB11ebr6vG23Ucgc5lrqHdgIgv+QtqVmW1IDf0hq62itMpu4MwcQ="
+
+addons:
+  coverity_scan:
+    project:
+      name: "maxmind/libmaxminddb"
+      description: "Build submitted via Travis CI"
+    notification_email: dev@maxmind.com
+    build_command_prepend: "./configure; make clean"
+    build_command:   "make -j 4"
+    branch_pattern: .*coverity.*
