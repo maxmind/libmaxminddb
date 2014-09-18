@@ -187,6 +187,8 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
         }                                                         \
     } while (0)
 
+#define FREE_AND_SET_NULL(p) { free((void *)(p)); (p) = NULL; }
+
 int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 {
     mmdb->file_content = NULL;
@@ -1499,7 +1501,7 @@ LOCAL void free_mmdb_struct(MMDB_s *const mmdb)
     }
 
     if (NULL != mmdb->filename) {
-        free((void *)mmdb->filename);
+        FREE_AND_SET_NULL(mmdb->filename);
     }
     if (NULL != mmdb->file_content) {
 #ifdef _WIN32
@@ -1513,7 +1515,7 @@ LOCAL void free_mmdb_struct(MMDB_s *const mmdb)
     }
 
     if (NULL != mmdb->metadata.database_type) {
-        free((void *)mmdb->metadata.database_type);
+        FREE_AND_SET_NULL(mmdb->metadata.database_type);
     }
 
     free_languages_metadata(mmdb);
@@ -1527,9 +1529,9 @@ LOCAL void free_languages_metadata(MMDB_s *mmdb)
     }
 
     for (size_t i = 0; i < mmdb->metadata.languages.count; i++) {
-        free((char *)mmdb->metadata.languages.names[i]);
+        FREE_AND_SET_NULL(mmdb->metadata.languages.names[i]);
     }
-    free(mmdb->metadata.languages.names);
+    FREE_AND_SET_NULL(mmdb->metadata.languages.names);
 }
 
 LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
@@ -1542,22 +1544,20 @@ LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
         if (NULL != mmdb->metadata.description.descriptions[i]) {
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->language) {
-                free(
-                    (char *)mmdb->metadata.description.descriptions[i]->
-                    language);
+                FREE_AND_SET_NULL(
+                    mmdb->metadata.description.descriptions[i]->language);
             }
 
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->description) {
-                free(
-                    (char *)mmdb->metadata.description.descriptions[i]->
-                    description);
+                FREE_AND_SET_NULL(
+                    mmdb->metadata.description.descriptions[i]->description);
             }
-            free(mmdb->metadata.description.descriptions[i]);
+            FREE_AND_SET_NULL(mmdb->metadata.description.descriptions[i]);
         }
     }
 
-    free(mmdb->metadata.description.descriptions);
+    FREE_AND_SET_NULL(mmdb->metadata.description.descriptions);
 }
 
 const char *MMDB_lib_version(void)
