@@ -187,6 +187,11 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
         }                                                         \
     } while (0)
 
+/* free the object pointed by p, and set p to NULL. p must have lvalue,
+ * and should not have side-effect.
+ */
+#define C_FREE(p) { free((void*)(p)); (p) = NULL; }
+
 int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 {
     mmdb->file_content = NULL;
@@ -1493,7 +1498,7 @@ LOCAL void free_mmdb_struct(MMDB_s *const mmdb)
     }
 
     if (NULL != mmdb->filename) {
-        free((void *)mmdb->filename);
+        C_FREE(mmdb->filename);
     }
     if (NULL != mmdb->file_content) {
 #ifdef _WIN32
@@ -1507,7 +1512,7 @@ LOCAL void free_mmdb_struct(MMDB_s *const mmdb)
     }
 
     if (NULL != mmdb->metadata.database_type) {
-        free((void *)mmdb->metadata.database_type);
+        C_FREE(mmdb->metadata.database_type);
     }
 
     free_languages_metadata(mmdb);
@@ -1521,9 +1526,9 @@ LOCAL void free_languages_metadata(MMDB_s *mmdb)
     }
 
     for (size_t i = 0; i < mmdb->metadata.languages.count; i++) {
-        free((char *)mmdb->metadata.languages.names[i]);
+        C_FREE(mmdb->metadata.languages.names[i]);
     }
-    free(mmdb->metadata.languages.names);
+    C_FREE(mmdb->metadata.languages.names);
 }
 
 LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
@@ -1536,22 +1541,18 @@ LOCAL void free_descriptions_metadata(MMDB_s *mmdb)
         if (NULL != mmdb->metadata.description.descriptions[i]) {
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->language) {
-                free(
-                    (char *)mmdb->metadata.description.descriptions[i]->
-                    language);
+                C_FREE(mmdb->metadata.description.descriptions[i]->language);
             }
 
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->description) {
-                free(
-                    (char *)mmdb->metadata.description.descriptions[i]->
-                    description);
+                C_FREE(mmdb->metadata.description.descriptions[i]->description);
             }
-            free(mmdb->metadata.description.descriptions[i]);
+            C_FREE(mmdb->metadata.description.descriptions[i]);
         }
     }
 
-    free(mmdb->metadata.description.descriptions);
+    C_FREE(mmdb->metadata.description.descriptions);
 }
 
 const char *MMDB_lib_version(void)
