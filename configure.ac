@@ -98,6 +98,7 @@ AC_FUNC_MMAP
 
 AC_SEARCH_LIBS([fabs], [m])
 AC_SEARCH_LIBS([fabsf], [m])
+AC_SEARCH_LIBS([getaddrinfo], [socket])
 
 AC_ARG_ENABLE(
         [debug],
