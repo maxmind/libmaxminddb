@@ -387,6 +387,8 @@ LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr)
 
 LOCAL void random_ipv4(char *ip)
 {
+    // rand() is perfectly fine for this use case
+    // coverity[dont_call]
     int ip_int = rand();
     uint8_t *bytes = (uint8_t *)&ip_int;
 
