@@ -218,7 +218,9 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     }
 
     struct stat s;
-    fstat(fd, &s);
+    if ( 0 != fstat(fd, &s) ) {
+        return MMDB_FILE_OPEN_ERROR;
+    }
     size = s.st_size;
 #endif
 
@@ -232,15 +234,16 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     HANDLE mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, filename);
     uint8_t *file_content =
         (uint8_t *)MapViewOfFile(mmh, FILE_MAP_READ, 0, 0, 0);
+    CloseHandle(fd);
     if (file_content == NULL) {
         CloseHandle(mmh);
-        CloseHandle(fd);
         free_mmdb_struct(mmdb);
         return MMDB_IO_ERROR;
     }
 #else
     uint8_t *file_content =
         (uint8_t *)mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+    close(fd);
     if (MAP_FAILED == file_content) {
         free_mmdb_struct(mmdb);
         return MMDB_IO_ERROR;
@@ -267,14 +270,6 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
         free_mmdb_struct(mmdb);
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
-
-#ifdef _WIN32
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2, 2), &wsa);
-    CloseHandle(fd);
-#else
-    close(fd);
-#endif
 
     uint32_t search_tree_size = mmdb->metadata.node_count *
                                 mmdb->full_record_byte_size;
@@ -884,6 +879,7 @@ int MMDB_vget_value(MMDB_entry_s *const start,
 
         path[i] = mmdb_strdup(path_elem);
         if (NULL == path[i]) {
+            free(path);
             return MMDB_OUT_OF_MEMORY_ERROR;
         }
         i++;
@@ -1285,7 +1281,7 @@ int MMDB_get_entry_data_list(
     MMDB_entry_s *start, MMDB_entry_data_list_s **const entry_data_list)
 {
     *entry_data_list = new_entry_data_list();
-    if (NULL == entry_data_list) {
+    if (NULL == *entry_data_list) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
     return get_entry_data_list(start->mmdb, start->offset, *entry_data_list);

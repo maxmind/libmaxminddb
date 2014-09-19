@@ -165,7 +165,7 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
     int gai_error = getaddrinfo(ip, NULL, &hints, &addresses);
 
     int mmdb_error = 0;
-    MMDB_lookup_result_s result;
+    MMDB_lookup_result_s result = { .found_entry = false };
     if (gai_error == 0) {
         result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, &mmdb_error);
     }
