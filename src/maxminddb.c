@@ -219,6 +219,11 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 
     struct stat s;
     if ( 0 != fstat(fd, &s) ) {
+#ifdef _WIN32
+        CloseHandle(fd);
+#else
+        close(fd);
+#endif
         return MMDB_FILE_OPEN_ERROR;
     }
     size = s.st_size;
