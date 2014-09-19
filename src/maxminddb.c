@@ -276,6 +276,11 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
+#ifdef _WIN32
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
+
     uint32_t search_tree_size = mmdb->metadata.node_count *
                                 mmdb->full_record_byte_size;
 
