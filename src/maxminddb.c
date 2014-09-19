@@ -218,7 +218,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     }
 
     struct stat s;
-    if ( 0 != fstat(fd, &s) ) {
+    if (fstat(fd, &s) ) {
 #ifdef _WIN32
         CloseHandle(fd);
 #else
