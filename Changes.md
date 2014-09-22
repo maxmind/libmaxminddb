@@ -1,5 +1,6 @@
-* Fixed a number of small issues found by Coverity.
+## 1.0.2 - 2014-09-22
 
+* Fixed a number of small issues found by Coverity.
 * When freeing the MMDB struct in `MMDB_close()` we make sure to set the
   pointers to NULL after freeing the memory they point to. This makes it safe
   to call `MMDB_close` more than once on the same `MMDB_s` struct
@@ -7,9 +8,11 @@
   could cause the code to free memory that belonged to something else in the
   process. Patch by Shuxin Yang. GitHub PR #41.
 
+
 ## 1.0.1 - 2014-09-03
 
 * Added missing LICENSE and NOTICE files to distribution. No code changes.
+
 
 ## 1.0.0 - 2014-09-02
 
