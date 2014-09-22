@@ -1,3 +1,5 @@
+* Fixed a number of small issues found by Coverity.
+
 ## 1.0.1 - 2014-09-03
 
 * Added missing LICENSE and NOTICE files to distribution. No code changes.
