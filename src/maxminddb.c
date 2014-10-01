@@ -238,7 +238,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     mmdb->file_size = size;
 
 #ifdef _WIN32
-    HANDLE mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, filename);
+    HANDLE mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, 0, filename);
     uint8_t *file_content =
         (uint8_t *)MapViewOfFile(mmh, FILE_MAP_READ, 0, 0, 0);
     CloseHandle(fd);
