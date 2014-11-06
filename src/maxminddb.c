@@ -212,6 +212,11 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
         return MMDB_FILE_OPEN_ERROR;
     }
     size = GetFileSize(fd, NULL);
+    if (size == INVALID_FILE_SIZE) {
+        free_mmdb_struct(mmdb);
+        CloseHandle(fd);
+        return MMDB_FILE_OPEN_ERROR;
+    }
 #else
     int fd = open(filename, O_RDONLY);
     if (fd < 0) {
@@ -221,11 +226,8 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 
     struct stat s;
     if (fstat(fd, &s) ) {
-#ifdef _WIN32
-        CloseHandle(fd);
-#else
+        free_mmdb_struct(mmdb);
         close(fd);
-#endif
         return MMDB_FILE_OPEN_ERROR;
     }
     size = s.st_size;
