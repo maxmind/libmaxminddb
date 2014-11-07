@@ -493,7 +493,6 @@ the `MMDB_lookup_string()` function.
 int mmdb_error;
 MMDB_lookup_result_s result =
     MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
-if (0 != gai_error) { ... }
 if (MMDB_SUCCESS != mmdb_error) { ... }
 
 if (result.found_entry) { ... }
