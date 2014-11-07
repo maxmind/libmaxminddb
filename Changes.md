@@ -2,6 +2,7 @@
 
 * A memory and file handle leak on Win32 was fixed when getting the database
   size fails. Patch by Federico G. Schwindt. GitHub PR #49.
+* Documentation fix. Federico G. Schwindt. GitHub PR #50.
 
 
 ## 1.0.2 - 2014-09-22
