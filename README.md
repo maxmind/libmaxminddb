@@ -36,7 +36,18 @@ passing on your platform.
 The `configure` script takes the standard options to set where files are
 installed such as `--prefix`, etc. See `./configure --help` for details.
 
+If after installing, you receive an error that `libmaxminddb.so.0` is missing
+you may need to add the `lib` directory in your `prefix` to your library path.
+On most Linux distributions when using the default prefix (`/usr/local`), you
+can do this by running the following commands:
+
+    $ sudo sh -c "echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf"
+    $ ldconfig
+
 # Installing from the Git Repository
+
+To install from Git, you will need automake, autoconf, and libtool installed
+in addition to make and a compiler.
 
 Our public git repository is hosted on GitHub at
 https://github.com/maxmind/libmaxminddb
@@ -44,15 +55,9 @@ https://github.com/maxmind/libmaxminddb
 You can clone this repository and build it by running:
 
     $ git clone --recursive https://github.com/maxmind/libmaxminddb
-    $ cd libmaxminddb
-    $ ./bootstrap
-    $ ./configure
-    $ make check
-    $ sudo make install
-    $ sudo ldconfig
 
-To install from Git, you will need automake, autoconf, and libtool installed
-in addition to make and a compiler.
+After cloning, run `./bootstrap` from the `libmaxminddb directory and then
+follow the instructions for installing from a tarball as described above.
 
 # Installing via Homebrew (on OS X)
 
