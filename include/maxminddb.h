@@ -15,7 +15,18 @@
 #ifdef _WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+/* libmaxminddb package version from configure */
+#define PACKAGE_VERSION "1.0.2"
+
 typedef ADDRESS_FAMILY sa_family_t;
+
+#if defined(_MSC_VER)
+/* MSVC doesn't define signed size_t, copy it from configure */
+#define ssize_t int
+
+/* MSVC doesn't support restricted pointers */
+#define restrict
+#endif
 #else
 #include <netdb.h>
 #include <netinet/in.h>
