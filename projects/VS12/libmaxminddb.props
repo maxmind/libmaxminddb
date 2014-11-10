@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <IntDir>$(Configuration)\obj\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MMDB_UINT128_IS_BYTE_ARRAY=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WarningLevel>Level3</WarningLevel>
+      <ExceptionHandling>Async</ExceptionHandling>
+    </ClCompile>
+    <PreBuildEvent>
+      <Command>if NOT EXIST (..\..\include\maxminddb_config.h) (
+copy ..\..\include\maxminddb_config.h.in ..\..\include\maxminddb_config.h
+)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
