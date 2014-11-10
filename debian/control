@@ -1,0 +1,85 @@
+Source: libmaxminddb
+Section: net
+Priority: optional
+Maintainer: Faidon Liambotis <paravoid@debian.org>
+Build-Depends: debhelper (>= 9), dh-autoreconf,
+ perl,
+ libipc-run3-perl,
+ libtest-output-perl,
+# for dev-bin/make-man-pages.pl
+ pandoc,
+ libipc-system-simple-perl,
+ libfile-slurp-perl,
+ libfile-which-perl
+Standards-Version: 3.9.6
+Homepage: http://maxmind.github.io/libmaxminddb/
+Vcs-Git: git://anonscm.debian.org/collab-maint/libmaxminddb.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/libmaxminddb.git;a=summary
+
+Package: libmaxminddb0
+Section: libs
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: mmdb-bin
+Description: IP geolocation database library
+ The libmaxminddb library provides a C library for reading MaxMind DB files,
+ including the GeoIP2 databases from MaxMind. This is a custom binary format
+ designed to facilitate fast lookups of IP addresses while allowing for great
+ flexibility in the type of data associated with an address.
+ .
+ The MaxMind DB format is an open format. The spec is available at
+ http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
+ Commons Attribution-ShareAlike 3.0 Unported License.
+
+Package: libmaxminddb-dbg
+Section: debug
+Priority: extra
+Architecture: any
+Multi-Arch: same
+Depends: libmaxminddb0 (= ${binary:Version}), ${misc:Depends}
+Description: IP geolocation database library (debugging symbols)
+ The libmaxminddb library provides a C library for reading MaxMind DB files,
+ including the GeoIP2 databases from MaxMind. This is a custom binary format
+ designed to facilitate fast lookups of IP addresses while allowing for great
+ flexibility in the type of data associated with an address.
+ .
+ The MaxMind DB format is an open format. The spec is available at
+ http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
+ Commons Attribution-ShareAlike 3.0 Unported License.
+ .
+ This package contains the debugging symbols for the libmaxminddb library.
+
+Package: libmaxminddb-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libmaxminddb0 (= ${binary:Version}), ${misc:Depends}
+Description: IP geolocation database library (development headers)
+ The libmaxminddb library provides a C library for reading MaxMind DB files,
+ including the GeoIP2 databases from MaxMind. This is a custom binary format
+ designed to facilitate fast lookups of IP addresses while allowing for great
+ flexibility in the type of data associated with an address.
+ .
+ The MaxMind DB format is an open format. The spec is available at
+ http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
+ Commons Attribution-ShareAlike 3.0 Unported License.
+ .
+ This package contains the development files for the libmaxminddb library.
+
+Package: mmdb-bin
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: IP geolocation lookup command-line tool
+ The libmaxminddb library provides a C library for reading MaxMind DB files,
+ including the GeoIP2 databases from MaxMind. This is a custom binary format
+ designed to facilitate fast lookups of IP addresses while allowing for great
+ flexibility in the type of data associated with an address.
+ .
+ The MaxMind DB format is an open format. The spec is available at
+ http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
+ Commons Attribution-ShareAlike 3.0 Unported License.
+ .
+ This package contains the command line utilities to resolve IPs using the
+ libmaxminddb library. 

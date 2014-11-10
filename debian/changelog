@@ -1,0 +1,5 @@
+libmaxminddb (1.0.2-1) unstable; urgency=low
+
+  * Initial release. (Closes: #741199)
+
+ -- Faidon Liambotis <paravoid@debian.org>  Mon, 10 Nov 2014 16:52:17 +0200

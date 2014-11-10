@@ -1,0 +1,16 @@
+libmaxminddb.so.0 libmaxminddb0 #MINVER#
+* Build-Depends-Package: libmaxminddb-dev
+ MMDB_aget_value@Base 1.0.2
+ MMDB_close@Base 1.0.2
+ MMDB_dump_entry_data_list@Base 1.0.2
+ MMDB_free_entry_data_list@Base 1.0.2
+ MMDB_get_entry_data_list@Base 1.0.2
+ MMDB_get_metadata_as_entry_data_list@Base 1.0.2
+ MMDB_get_value@Base 1.0.2
+ MMDB_lib_version@Base 1.0.2
+ MMDB_lookup_sockaddr@Base 1.0.2
+ MMDB_lookup_string@Base 1.0.2
+ MMDB_open@Base 1.0.2
+ MMDB_read_node@Base 1.0.2
+ MMDB_strerror@Base 1.0.2
+ MMDB_vget_value@Base 1.0.2

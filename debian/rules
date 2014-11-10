@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	DEBUG += --enable-debug
+endif
+
+%:
+	dh $@  --with autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(DEBUG)
+
+override_dh_auto_build:
+	# build manpages (needs pandoc); these are included in tarballs
+	dev-bin/make-man-pages.pl
+	dh_auto_build
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf man/
+
+override_dh_strip:
+	dh_strip --dbg-package=libmaxminddb-dbg
+
+override_dh_installchangelogs:
+	dh_installchangelogs Changes.md

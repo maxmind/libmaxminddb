@@ -1,0 +1,3 @@
+version=3
+
+https://github.com/maxmind/libmaxminddb/releases/ download/.+/libmaxminddb-(\d\.\d+\.\d+).tar.gz
