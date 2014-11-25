@@ -50,11 +50,11 @@ typedef ADDRESS_FAMILY sa_family_t;
 #define MMDB_DATA_TYPE_BOOLEAN (14)
 #define MMDB_DATA_TYPE_FLOAT (15)
 
-/* GEOIPDB flags */
+/* flags for open */
 #define MMDB_MODE_MMAP (1)
 #define MMDB_MODE_MASK (7)
 
-/* GEOIPDB err codes */
+/* error codes */
 #define MMDB_SUCCESS (0)
 #define MMDB_FILE_OPEN_ERROR (1)
 #define MMDB_CORRUPT_SEARCH_TREE_ERROR (2)
