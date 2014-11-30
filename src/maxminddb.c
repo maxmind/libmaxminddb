@@ -10,8 +10,8 @@
 #include <sys/stat.h>
 
 #ifdef _WIN32
-#include <Windows.h>
-#include <Ws2ipdef.h>
+#include <windows.h>
+#include <ws2ipdef.h>
 #else
 #include <arpa/inet.h>
 #include <sys/mman.h>
