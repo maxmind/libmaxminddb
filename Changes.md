@@ -5,6 +5,8 @@
 * Documentation fix. Federico G. Schwindt. GitHub PR #50.
 * Added Visual Studio build files and fixed incorrect CreateFileMappingA
   usage. Patch by Andre. GitHub #52.
+* The includes for the Windows header files were made lowercase in order to
+  match the actual file names on case-sensitive file systems. GitHub PR #57.
 
 
 ## 1.0.2 - 2014-09-22
