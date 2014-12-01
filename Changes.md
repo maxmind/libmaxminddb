@@ -7,6 +7,9 @@
   usage. Patch by Andre. GitHub #52.
 * The includes for the Windows header files were made lowercase in order to
   match the actual file names on case-sensitive file systems. GitHub PR #57.
+* Removed `realloc()` calls that caused warnings on Windows and generally
+  cleaned up memory allocation in `MMDB_vget_value()`. See relevant discussion
+  in GitHub #52.
 
 
 ## 1.0.2 - 2014-09-22
