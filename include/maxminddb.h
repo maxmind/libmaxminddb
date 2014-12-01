@@ -13,8 +13,8 @@
 #include <sys/types.h>
 
 #ifdef _WIN32
-#include <WinSock2.h>
-#include <WS2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 /* libmaxminddb package version from configure */
 #define PACKAGE_VERSION "1.0.2"
 
