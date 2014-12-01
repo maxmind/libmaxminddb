@@ -138,6 +138,7 @@ LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
                           uint16_t netmask, MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
+LOCAL int path_length(va_list va_path);
 LOCAL int lookup_path_in_array(const char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data);
 LOCAL int lookup_path_in_map(const char *path_elem, MMDB_s *mmdb,
@@ -881,40 +882,42 @@ int MMDB_vget_value(MMDB_entry_s *const start,
                     MMDB_entry_data_s *const entry_data,
                     va_list va_path)
 {
-    const char **path = NULL;
-
-    int i = 0;
+    int length = path_length(va_path);
     const char *path_elem;
-    while (NULL != (path_elem = va_arg(va_path, char *))) {
-        path = realloc(path, sizeof(const char *) * (i + 1));
-        if (NULL == path) {
-            return MMDB_OUT_OF_MEMORY_ERROR;
-        }
+    int i = 0;
 
-        path[i] = mmdb_strdup(path_elem);
-        if (NULL == path[i]) {
-            free(path);
-            return MMDB_OUT_OF_MEMORY_ERROR;
-        }
-        i++;
-    }
-
-    path = realloc(path, sizeof(char *) * (i + 1));
+    const char **path = malloc((length + 1) * sizeof(const char *));
     if (NULL == path) {
         return MMDB_OUT_OF_MEMORY_ERROR;
+    }
+
+    while (NULL != (path_elem = va_arg(va_path, char *))) {
+        path[i] = path_elem;
+        i++;
     }
     path[i] = NULL;
 
     int status = MMDB_aget_value(start, entry_data, path);
 
-    i = 0;
-    while (NULL != path[i]) {
-        free((void *)path[i]);
-        i++;
-    }
-    free(path);
+    free((char **)path);
 
     return status;
+}
+
+LOCAL int path_length(va_list va_path)
+{
+    int i = 0;
+    const char *ignore;
+    va_list path_copy;
+    va_copy(path_copy, va_path);
+
+    while (NULL != (ignore = va_arg(path_copy, char *))) {
+        i++;
+    }
+
+    va_end(path_copy);
+
+    return i;
 }
 
 int MMDB_aget_value(MMDB_entry_s *const start,

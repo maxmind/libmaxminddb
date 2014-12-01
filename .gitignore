@@ -23,7 +23,10 @@
 /ltmain.sh
 /man
 /missing
+/t/*.log
+/t/*.trs
 /t/*_t
+/test-driver
 Makefile
 Makefile.in
 \#*\#

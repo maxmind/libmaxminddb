@@ -8,6 +8,7 @@ AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
 
 LT_INIT
 AM_INIT_AUTOMAKE(foreign m4_esyscmd([case `automake --version | head -n 1` in
+                                     *1.14*) echo subdir-objects;;
                                      *1.11*);;
                                      *) echo serial-tests;;
                                      esac]))
