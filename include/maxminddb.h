@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef MAXMINDDB_H
 #define MAXMINDDB_H
 
@@ -213,3 +217,7 @@ typedef struct MMDB_search_node_s {
     /* *INDENT-ON* */
 
 #endif                          /* MAXMINDDB_H */
+
+#ifdef __cplusplus
+}
+#endif

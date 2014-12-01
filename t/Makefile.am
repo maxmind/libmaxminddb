@@ -13,6 +13,6 @@ check_PROGRAMS = \
 
 threads_t_CFLAGS = $(CFLAGS) -pthread
 
-TESTS = $(check_PROGRAMS) mmdblookup_t.pl
+TESTS = $(check_PROGRAMS) compile_c++_t.pl mmdblookup_t.pl
 
 LDADD = libmmdbtest.la
