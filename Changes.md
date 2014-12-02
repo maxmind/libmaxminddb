@@ -10,6 +10,8 @@
 * Removed `realloc()` calls that caused warnings on Windows and generally
   cleaned up memory allocation in `MMDB_vget_value()`. See relevant discussion
   in GitHub #52.
+* Added an `extern "C" { ... }` wrapper to maxminddb.h when compiling with a
+  C++ compiler. GitHub #55.
 
 
 ## 1.0.2 - 2014-09-22
