@@ -1,4 +1,4 @@
-## 1.0.3 - 2014-XX-XX
+## 1.0.3 - 2014-12-02
 
 * A memory and file handle leak on Win32 was fixed when getting the database
   size fails. Patch by Federico G. Schwindt. GitHub PR #49.
