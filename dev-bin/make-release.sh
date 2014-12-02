@@ -25,7 +25,9 @@ perl -MFile::Slurp=edit_file -e \
     "edit_file { s/\Q$old_version/$TAG/g } \$_ for qw( configure.ac include/maxminddb.h )"
 
 git add configure.ac include/maxminddb.h
+set +e
 git commit -m "Bumped version to $TAG"
+set -e
 
 if [ ! -d .gh-pages ]; then
     echo "Checking out gh-pages in .gh-pages"
