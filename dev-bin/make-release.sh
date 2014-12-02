@@ -81,5 +81,5 @@ fi
 
 cd ..
 
-git tag -a $TAG
+git tag -a -m "Release for $TAG" $TAG
 git push --follow-tags
