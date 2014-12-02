@@ -78,4 +78,4 @@ git push
 cd ..
 
 git tag -a $TAG
-git push --tags
+git push --follow-tags
