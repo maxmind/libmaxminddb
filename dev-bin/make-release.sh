@@ -13,6 +13,21 @@ if [ -n "$(git status --porcelain)" ]; then
     exit 1
 fi
 
+old_version=$(perl -MFile::Slurp=read_file <<EOF
+use v5.16;
+my \$conf = read_file(q{configure.ac});
+\$conf =~ /AC_INIT.+\[(\d+\.\d+\.\d+)\]/;
+say \$1;
+EOF
+)
+
+set -x
+perl -MFile::Slurp=edit_file -e \
+    "edit_file { s/\Q$old_version/$TAG/g } \$_ for qw( configure.ac include/maxminddb.h )"
+
+git add configure.ac include/maxminddb.h
+git commit -m "Bumped version to $TAG"
+
 if [ ! -d .gh-pages ]; then
     echo "Checking out gh-pages in .gh-pages"
     git clone -b gh-pages git@github.com:maxmind/libmaxminddb.git .gh-pages
