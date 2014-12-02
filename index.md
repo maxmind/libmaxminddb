@@ -1,7 +1,7 @@
 ---
 layout: default
 title: libmaxminddb - a library for working with MaxMind DB files
-version: 1.0.2
+version: 1.0.3
 ---
 # NAME
 
@@ -498,7 +498,6 @@ the `MMDB_lookup_string()` function.
 int mmdb_error;
 MMDB_lookup_result_s result =
     MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
-if (0 != gai_error) { ... }
 if (MMDB_SUCCESS != mmdb_error) { ... }
 
 if (result.found_entry) { ... }
