@@ -24,10 +24,10 @@ EOF
 perl -MFile::Slurp=edit_file -e \
     "edit_file { s/\Q$old_version/$TAG/g } \$_ for qw( configure.ac include/maxminddb.h )"
 
-git add configure.ac include/maxminddb.h
-set +e
-git commit -m "Bumped version to $TAG"
-set -e
+if [ -n "$(git status --porcelain)" ]; then
+    git add configure.ac include/maxminddb.h
+    git commit -m "Bumped version to $TAG"
+fi
 
 if [ ! -d .gh-pages ]; then
     echo "Checking out gh-pages in .gh-pages"
@@ -66,16 +66,18 @@ EOF
 
 cat ../doc/mmdblookup.md >> $MMDBLOOKUP
 
-git commit -m "Updated for $TAG" -a
+if [ -n "$(git status --porcelain)" ]; then
+    git commit -m "Updated for $TAG" -a
 
-read -p "Push to origin? (y/n) " SHOULD_PUSH
+    read -p "Push to origin? (y/n) " SHOULD_PUSH
 
-if [ "$SHOULD_PUSH" != "y" ]; then
-    echo "Aborting"
-    exit 1
+    if [ "$SHOULD_PUSH" != "y" ]; then
+        echo "Aborting"
+        exit 1
+    fi
+
+    git push
 fi
-
-git push
 
 cd ..
 
