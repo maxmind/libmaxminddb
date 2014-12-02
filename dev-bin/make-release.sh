@@ -21,7 +21,6 @@ say \$1;
 EOF
 )
 
-set -x
 perl -MFile::Slurp=edit_file -e \
     "edit_file { s/\Q$old_version/$TAG/g } \$_ for qw( configure.ac include/maxminddb.h )"
 
