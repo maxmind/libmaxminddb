@@ -2,8 +2,22 @@ install:
   - git submodule update --init --recursive
 
 test_script:
-  - forfiles /p .\projects\VS12\Debug\ /m *.exe /c "cmd /c cd ..\..\.. && @PATH || set failed=1"
-  - if %failed%==1 exit 1
+  #EXES
+  - .\projects\VS12\Debug\test_bad_pointers.exe
+  - .\projects\VS12\Debug\test_basic_lookup.exe
+  - .\projects\VS12\Debug\test_data_entry_list.exe
+  - .\projects\VS12\Debug\test_data_types.exe
+  - .\projects\VS12\Debug\test_dump.exe
+  - .\projects\VS12\Debug\test_get_value_pointer_bug.exe
+  - .\projects\VS12\Debug\test_get_value.exe
+  - .\projects\VS12\Debug\test_ipv4_start_cache.exe
+  - .\projects\VS12\Debug\test_ipv6_lookup_in_ipv4.exe
+  - .\projects\VS12\Debug\test_metadata.exe
+  - .\projects\VS12\Debug\test_no_map_get_value.exe
+  - .\projects\VS12\Debug\test_read_node.exe
+  - .\projects\VS12\Debug\test_threads.exe
+  - .\projects\VS12\Debug\test_version.exe
+  #ENDEXES
 
 notifications:
   - provider: HipChat

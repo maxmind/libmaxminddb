@@ -17,10 +17,13 @@ sub main {
 
     my $template = read_file("$Bin/../projects/test.vcxproj.template");
 
+    my @names;
     for my $file ( $rule->all("$Bin/../t/") ) {
         my ($name) = $file =~ /(\w*)_t.c$/;
 
         next unless $name;
+
+        push @names, $name;
 
         next if $name eq 'threads';
         my $project = $template;
@@ -32,6 +35,19 @@ sub main {
 
         write_file( "$Bin/../projects/VS12-tests/$name.vcxproj", $project );
     }
+
+    _modify_yml(@names);
+}
+
+sub _modify_yml {
+    my @names = @_;
+
+    my $exe_block = join "\n", map { "  - .\\projects\\VS12\\Debug\\test_${_}.exe"} @names;
+
+    my $file = "$Bin/../appveyor.yml";
+    my $config = read_file($file);
+    $config =~ s/(#EXES).*?(#ENDEXES)/$1\n$exe_block\n  $2/s;
+    write_file($file, $config);
 }
 
 main();
