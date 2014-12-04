@@ -1,3 +1,7 @@
+* Visual Studio build files were added for unit tests and some compatibility
+  issues with the tests were fixed.
+
+
 ## 1.0.3 - 2014-12-02
 
 * A memory and file handle leak on Win32 was fixed when getting the database
