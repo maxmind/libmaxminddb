@@ -23,6 +23,7 @@ void test_one_ip(MMDB_s *mmdb, const char *filename, const char *mode_desc,
     MMDB_entry_data_s entry_data =
         data_ok(&result, MMDB_DATA_TYPE_UTF8_STRING, "country{iso_code}",
                 "country", "iso_code", NULL);
+	ok(0, "test that fails");
 
     if (ok(entry_data.has_data, "found data for country{iso_code}")) {
         char *string = strndup(entry_data.utf8_string, entry_data.data_size);

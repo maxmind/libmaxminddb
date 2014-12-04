@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmaxminddb", "libmaxminddb.vcxproj", "{82953BDA-2960-4ADA-A6D5-92E65CCB4A3D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_bad_pointers", "..\VS12-tests\bad_pointers.vcxproj", "{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_basic_lookup", "..\VS12-tests\basic_lookup.vcxproj", "{8E11C512-7B63-11E4-AE98-6B41E8A9DDB2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_data_entry_list", "..\VS12-tests\data_entry_list.vcxproj", "{8E11C882-7B63-11E4-AE98-6B41E8A9DDB2}"
@@ -31,9 +29,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_no_map_get_value", "..
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_read_node", "..\VS12-tests\read_node.vcxproj", "{8E11E68C-7B63-11E4-AE98-6B41E8A9DDB2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit-tests-shared", "..\VS12-tests\shared.vcxproj", "{A8F568F6-5507-4EC2-A834-F2C0A3C635A5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_maxminddb_test_helper", "..\VS12-tests\shared.vcxproj", "{A8F568F6-5507-4EC2-A834-F2C0A3C635A5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_version", "..\VS12-tests\version.vcxproj", "{8E11ED26-7B63-11E4-AE98-6B41E8A9DDB2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_bad_pointers", "..\VS12-tests\bad_pointers.vcxproj", "{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,12 +51,6 @@ Global
 		{82953BDA-2960-4ADA-A6D5-92E65CCB4A3D}.Release|Win32.Build.0 = Release|Win32
 		{82953BDA-2960-4ADA-A6D5-92E65CCB4A3D}.Release|x64.ActiveCfg = Release|x64
 		{82953BDA-2960-4ADA-A6D5-92E65CCB4A3D}.Release|x64.Build.0 = Release|x64
-		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|Win32.Build.0 = Debug|Win32
-		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|x64.ActiveCfg = Debug|Win32
-		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Release|Win32.ActiveCfg = Release|Win32
-		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Release|Win32.Build.0 = Release|Win32
-		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Release|x64.ActiveCfg = Release|Win32
 		{8E11C512-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{8E11C512-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|Win32.Build.0 = Debug|Win32
 		{8E11C512-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|x64.ActiveCfg = Debug|Win32
@@ -141,6 +135,12 @@ Global
 		{8E11ED26-7B63-11E4-AE98-6B41E8A9DDB2}.Release|Win32.ActiveCfg = Release|Win32
 		{8E11ED26-7B63-11E4-AE98-6B41E8A9DDB2}.Release|Win32.Build.0 = Release|Win32
 		{8E11ED26-7B63-11E4-AE98-6B41E8A9DDB2}.Release|x64.ActiveCfg = Release|Win32
+		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|Win32.Build.0 = Debug|Win32
+		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Debug|x64.ActiveCfg = Debug|Win32
+		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Release|Win32.ActiveCfg = Release|Win32
+		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Release|Win32.Build.0 = Release|Win32
+		{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

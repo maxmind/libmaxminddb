@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{36BE9A66-7BDF-11E4-8DFB-6C11E8A9DDB2}</ProjectGuid>
+    <ProjectGuid>{8E11E33A-7B63-11E4-AE98-6B41E8A9DDB2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>no_map_get_value</RootNamespace>
     <ProjectName>test_no_map_get_value</ProjectName>
@@ -54,7 +54,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>MMDB_UINT128_IS_BYTE_ARRAY=1;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\include;$(SolutionDir)\..\..\t\libtap</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
