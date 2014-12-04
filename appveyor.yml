@@ -1,5 +1,8 @@
 install:
- - git submodule update --init --recursive
+  - git submodule update --init --recursive
+
+test_script:
+  - forfiles /p .\projects\VS12\Debug\ /m *.exe /c "cmd /c cd ..\..\.. && @PATH"
 
 notifications:
   - provider: HipChat
