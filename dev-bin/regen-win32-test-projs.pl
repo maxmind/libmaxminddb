@@ -42,12 +42,13 @@ sub main {
 sub _modify_yml {
     my @names = @_;
 
-    my $exe_block = join "\n", map { "  - .\\projects\\VS12\\Debug\\test_${_}.exe"} @names;
+    my $exe_block = join "\n",
+        map { "  - .\\projects\\VS12\\Debug\\test_${_}.exe" } @names;
 
-    my $file = "$Bin/../appveyor.yml";
+    my $file   = "$Bin/../appveyor.yml";
     my $config = read_file($file);
     $config =~ s/(#EXES).*?(#ENDEXES)/$1\n$exe_block\n  $2/s;
-    write_file($file, $config);
+    write_file( $file, $config );
 }
 
 main();
