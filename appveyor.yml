@@ -2,7 +2,8 @@ install:
   - git submodule update --init --recursive
 
 test_script:
-  - forfiles /p .\projects\VS12\Debug\ /m *.exe /c "cmd /c cd ..\..\.. && @PATH"
+  - forfiles /p .\projects\VS12\Debug\ /m *.exe /c "cmd /c cd ..\..\.. && @PATH || set failed=1"
+  - if %failed%==1 exit 1
 
 notifications:
   - provider: HipChat
