@@ -93,6 +93,11 @@
     </Link>
     <PreBuildEvent />
     <Lib />
+    <PreBuildEvent>
+      <Command>if NOT EXIST (..\..\include\maxminddb_config.h) (
+copy maxminddb_config.h ..\..\include\maxminddb_config.h
+)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
