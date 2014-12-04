@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8E11D2AA-7B63-11E4-AE98-6B41E8A9DDB2}</ProjectGuid>
+    <ProjectGuid>{36BE89A4-7BDF-11E4-8DFB-6C11E8A9DDB2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>get_value_pointer_bug</RootNamespace>
     <ProjectName>test_get_value_pointer_bug</ProjectName>

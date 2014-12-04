@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8E11DFC0-7B63-11E4-AE98-6B41E8A9DDB2}</ProjectGuid>
+    <ProjectGuid>{36BE9728-7BDF-11E4-8DFB-6C11E8A9DDB2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>metadata</RootNamespace>
     <ProjectName>test_metadata</ProjectName>

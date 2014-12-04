@@ -22,10 +22,10 @@ sub main {
         my ($name) = $file =~ /(\w*)_t.c$/;
 
         next unless $name;
+        next if $name eq 'threads';
 
         push @names, $name;
 
-        next if $name eq 'threads';
         my $project = $template;
 
         $project =~ s/%TESTNAME%/$name/g;

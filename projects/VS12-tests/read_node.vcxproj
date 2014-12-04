@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8E11E68C-7B63-11E4-AE98-6B41E8A9DDB2}</ProjectGuid>
+    <ProjectGuid>{36BE9D90-7BDF-11E4-8DFB-6C11E8A9DDB2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>read_node</RootNamespace>
     <ProjectName>test_read_node</ProjectName>

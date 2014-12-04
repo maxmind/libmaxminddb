@@ -15,7 +15,6 @@ test_script:
   - .\projects\VS12\Debug\test_metadata.exe
   - .\projects\VS12\Debug\test_no_map_get_value.exe
   - .\projects\VS12\Debug\test_read_node.exe
-  - .\projects\VS12\Debug\test_threads.exe
   - .\projects\VS12\Debug\test_version.exe
   #ENDEXES
 
