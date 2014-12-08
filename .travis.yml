@@ -5,6 +5,7 @@ compiler:
   - gcc
 
 before_script:
+  - cpanm IPC::Run3
   - ./bootstrap
   - CFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter" ./configure
   - make
