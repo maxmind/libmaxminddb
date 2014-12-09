@@ -42,7 +42,7 @@ close $fh or die $!;
 my $exe = "$tempdir/open";
 
 my $include_dir = abs_path("$Bin/../include");
-my $lib_dir = abs_path("$Bin/../src");
+my $lib_dir = abs_path("$Bin/../src/.libs");
 
 my $cxx = $ENV{CXX} || 'c++';
 _test_cmd(
@@ -52,6 +52,8 @@ _test_cmd(
     0,
     'compile C++ program which links against libmaxminddb',
 );
+
+$ENV{LD_LIBRARY_PATH} = $lib_dir;
 
 _test_cmd(
     [$exe],
