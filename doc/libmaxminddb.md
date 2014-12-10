@@ -462,7 +462,7 @@ these indicates an error then the returned structure is meaningless.
 
 If no error occurred you still need to make sure that the `found_entry` member
 in the returned result is true. If it's not, this means that the IP address
-does have an entry in the database.
+does not have an entry in the database.
 
 This function will work with IPv4 addresses even when the database contains
 data for both IPv4 and IPv6 addresses. The IPv4 address will be looked up as
