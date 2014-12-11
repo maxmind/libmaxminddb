@@ -558,7 +558,8 @@ if (entry_data.has_data) { ... }
 If we wanted to find the first city the lookup path would be `"cities",
 "0"`. If you don't provide a lookup path at all, you'll get the entry which
 corresponds to the top level map. The lookup path must always end with `NULL`,
-regardless of which function you call.
+regardless of which function you call - and it's important to note that returned
+strings are *not* null-terminated.
 
 The `MMDB_get_value` function takes a variable number of arguments. All of the
 arguments after the `MMDB_entry_data_s *` structure pointer are the lookup
