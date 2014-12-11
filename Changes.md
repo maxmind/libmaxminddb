@@ -7,6 +7,7 @@
   `MMDB_INVALID_LOOKUP_PATH_ERROR` error will be returned.
 * Visual Studio build files were added for unit tests and some compatibility
   issues with the tests were fixed.
+* A test failure in `t/compile_c++_t.pl` on new installs was fixed.
 
 
 ## 1.0.3 - 2014-12-02
