@@ -3,6 +3,7 @@
 #endif
 #include "maxminddb.h"
 #include "maxminddb-compat-util.h"
+#include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -981,13 +982,18 @@ LOCAL int lookup_path_in_array(const char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data)
 {
     uint32_t size = entry_data->data_size;
-    int array_index = strtol(path_elem, NULL, 10);
-    if (array_index < 0) {
+    char *first_invalid;
+
+    int saved_errno = errno;
+    errno = 0;
+    int array_index = strtol(path_elem, &first_invalid, 10);
+    if (array_index < 0 || ERANGE == errno) {
+        errno = saved_errno;
         return MMDB_INVALID_LOOKUP_PATH_ERROR;
     }
+    errno = saved_errno;
 
-    if ((uint32_t)array_index >= size) {
-        memset(entry_data, 0, sizeof(MMDB_entry_data_s));
+    if (*first_invalid || (uint32_t)array_index >= size) {
         return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
     }
 
