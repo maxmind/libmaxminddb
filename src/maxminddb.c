@@ -994,7 +994,6 @@ LOCAL int lookup_path_in_array(const char *path_elem, MMDB_s *mmdb,
     errno = saved_errno;
 
     if (*first_invalid || (uint32_t)array_index >= size) {
-        memset(entry_data, 0, sizeof(MMDB_entry_data_s));
         return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
     }
 
