@@ -71,6 +71,33 @@ void test_simple_structure(int mode, const char *mode_desc)
         test_array_2_result(status, entry_data, "MMDB_vget_value");
     }
 
+
+    {
+        MMDB_entry_data_s entry_data;
+        int status = MMDB_get_value(&result.entry, &entry_data, "array", "zero",
+                                    NULL);
+        cmp_ok(status, "==", MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
+               "MMDB_get_value() returns error on non-integer array index");
+    }
+
+    {
+        MMDB_entry_data_s entry_data;
+        int status = MMDB_get_value(&result.entry, &entry_data, "array", "-1",
+                                    NULL);
+        cmp_ok(status, "==", MMDB_INVALID_LOOKUP_PATH_ERROR,
+               "MMDB_get_value() returns error on negative integer");
+    }
+
+    {
+        MMDB_entry_data_s entry_data;
+        int status =
+            MMDB_get_value(&result.entry, &entry_data, "array",
+                           "18446744073709551616",
+                           NULL);
+        cmp_ok(status, "==", MMDB_INVALID_LOOKUP_PATH_ERROR,
+               "MMDB_get_value() returns error on integer larger than LONG_MAX");
+    }
+
     MMDB_close(mmdb);
     free(mmdb);
 }

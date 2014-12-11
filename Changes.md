@@ -1,3 +1,10 @@
+* If you used a non-integer string as an array index when doing a lookup with
+  `MMDB_get_value`, `MMDB_vget_value`, or `MMDB_aget_value`, the first element
+  of the array would be returned rather than an error. A
+  `MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR` error will now be returned.
+* If a number larger than `LONG_MAX` was used in the same functions,
+  `LONG_MAX` would have been used in the lookup. Now a
+  `MMDB_INVALID_LOOKUP_PATH_ERROR` error will be returned.
 * Visual Studio build files were added for unit tests and some compatibility
   issues with the tests were fixed.
 
