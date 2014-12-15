@@ -6,8 +6,7 @@ compiler:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq cpanminus
-  - sudo cpanm IPC::Run3
+  - sudo apt-get install -qq libipc-run3-perl
 
 before_script:
   - ./bootstrap
