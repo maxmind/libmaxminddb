@@ -8,7 +8,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>..\..\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>MMDB_UINT128_IS_BYTE_ARRAY=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WarningLevel>Level3</WarningLevel>
       <ExceptionHandling>false</ExceptionHandling>
@@ -20,7 +20,7 @@
     </ClCompile>
     <PreBuildEvent>
       <Command>if NOT EXIST (..\..\include\maxminddb_config.h) (
-copy ..\..\include\maxminddb_config.h.in ..\..\include\maxminddb_config.h
+copy maxminddb_config.h ..\..\include\maxminddb_config.h
 )</Command>
     </PreBuildEvent>
     <Lib>
