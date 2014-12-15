@@ -246,6 +246,8 @@ The `pointer` member of the union should never be populated in any data
 returned by the API. Pointers should always be resolved internally.
 
 The `data_size` member is only relevant for `utf8_string` and `bytes` data.
+`utf8_string` is not null terminated and `data_size` _must_ be used to
+determine its length.
 
 The `type` member can be compared to one of the `MMDB_DTYPE_*` macros.
 
