@@ -531,8 +531,10 @@ will be populated with the data that is being looked up, if any is found. If
 nothing is found, then the `has_data` member of this structure will be false.
 If `has_data` is true then you can look at the `data_type` member.
 
-The final parameter is a lookup path. This allow you to navigate a complex
-data structure. For example, given this example:
+The final parameter is a lookup path. The path consists of a set of strings
+representing either map keys (e.g, "city") or array indexes (e.g., "0", "1")
+to use in the lookup. This allow you to navigate a complex data structure. For
+example, given this example:
 
 ```js
 {
@@ -564,7 +566,7 @@ regardless of which function you call.
 
 The `MMDB_get_value` function takes a variable number of arguments. All of the
 arguments after the `MMDB_entry_data_s *` structure pointer are the lookup
-path.
+path. The last argument must be `NULL`.
 
 The `MMDB_vget_value` function accepts a `va_list` as the lookup path. The
 last element retrieved by `va_arg()` must be `NULL`.
