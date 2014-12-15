@@ -15,7 +15,7 @@ See http://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
 
 This library is licensed under the Apache License, Version 2.
 
-# Installing from a Tarball
+# Building and installing from a Tarball
 
 This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
 on other compilers that supports C99, POSIX 2011.11, and the `-fms-extensions
@@ -44,7 +44,7 @@ can do this by running the following commands:
     $ sudo sh -c "echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf"
     $ ldconfig
 
-# Installing from the Git Repository
+# Building from the Git Repository
 
 To install from Git, you will need automake, autoconf, and libtool installed
 in addition to make and a compiler.
@@ -58,6 +58,12 @@ You can clone this repository and build it by running:
 
 After cloning, run `./bootstrap` from the `libmaxminddb directory and then
 follow the instructions for installing from a tarball as described above.
+
+# Building with Visual Studio 2013+
+
+We provide a Visual Studio solution in `projects\VS12`. This can be used to
+build both the the library and the tests. Please see the `README.md` file in
+the same directory for more information.
 
 # Installing via Homebrew (on OS X)
 
