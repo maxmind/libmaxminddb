@@ -17,6 +17,9 @@ override_dh_auto_build:
 
 override_dh_auto_clean:
 	dh_auto_clean
+	rm -f Makefile.in aclocal.m4 bin/Makefile.in compile config.guess \
+	   config.h.in config.sub configure depcomp install-sh ltmain.sh \
+	    missing src/Makefile.in t/Makefile.in test-driver
 	rm -rf man/
 
 override_dh_strip:
