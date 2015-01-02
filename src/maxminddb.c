@@ -3,6 +3,7 @@
 #endif
 #include "maxminddb.h"
 #include "maxminddb-compat-util.h"
+#include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -10,8 +11,8 @@
 #include <sys/stat.h>
 
 #ifdef _WIN32
-#include <Windows.h>
-#include <Ws2ipdef.h>
+#include <windows.h>
+#include <ws2ipdef.h>
 #else
 #include <arpa/inet.h>
 #include <sys/mman.h>
@@ -138,6 +139,7 @@ LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
                           uint16_t netmask, MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
+LOCAL int path_length(va_list va_path);
 LOCAL int lookup_path_in_array(const char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data);
 LOCAL int lookup_path_in_map(const char *path_elem, MMDB_s *mmdb,
@@ -212,6 +214,11 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
         return MMDB_FILE_OPEN_ERROR;
     }
     size = GetFileSize(fd, NULL);
+    if (size == INVALID_FILE_SIZE) {
+        free_mmdb_struct(mmdb);
+        CloseHandle(fd);
+        return MMDB_FILE_OPEN_ERROR;
+    }
 #else
     int fd = open(filename, O_RDONLY);
     if (fd < 0) {
@@ -221,11 +228,8 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 
     struct stat s;
     if (fstat(fd, &s) ) {
-#ifdef _WIN32
-        CloseHandle(fd);
-#else
+        free_mmdb_struct(mmdb);
         close(fd);
-#endif
         return MMDB_FILE_OPEN_ERROR;
     }
     size = s.st_size;
@@ -238,7 +242,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     mmdb->file_size = size;
 
 #ifdef _WIN32
-    HANDLE mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, filename);
+    HANDLE mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, NULL);
     uint8_t *file_content =
         (uint8_t *)MapViewOfFile(mmh, FILE_MAP_READ, 0, 0, 0);
     CloseHandle(fd);
@@ -879,40 +883,42 @@ int MMDB_vget_value(MMDB_entry_s *const start,
                     MMDB_entry_data_s *const entry_data,
                     va_list va_path)
 {
-    const char **path = NULL;
-
-    int i = 0;
+    int length = path_length(va_path);
     const char *path_elem;
-    while (NULL != (path_elem = va_arg(va_path, char *))) {
-        path = realloc(path, sizeof(const char *) * (i + 1));
-        if (NULL == path) {
-            return MMDB_OUT_OF_MEMORY_ERROR;
-        }
+    int i = 0;
 
-        path[i] = mmdb_strdup(path_elem);
-        if (NULL == path[i]) {
-            free(path);
-            return MMDB_OUT_OF_MEMORY_ERROR;
-        }
-        i++;
-    }
-
-    path = realloc(path, sizeof(char *) * (i + 1));
+    const char **path = malloc((length + 1) * sizeof(const char *));
     if (NULL == path) {
         return MMDB_OUT_OF_MEMORY_ERROR;
+    }
+
+    while (NULL != (path_elem = va_arg(va_path, char *))) {
+        path[i] = path_elem;
+        i++;
     }
     path[i] = NULL;
 
     int status = MMDB_aget_value(start, entry_data, path);
 
-    i = 0;
-    while (NULL != path[i]) {
-        free((void *)path[i]);
-        i++;
-    }
-    free(path);
+    free((char **)path);
 
     return status;
+}
+
+LOCAL int path_length(va_list va_path)
+{
+    int i = 0;
+    const char *ignore;
+    va_list path_copy;
+    va_copy(path_copy, va_path);
+
+    while (NULL != (ignore = va_arg(path_copy, char *))) {
+        i++;
+    }
+
+    va_end(path_copy);
+
+    return i;
 }
 
 int MMDB_aget_value(MMDB_entry_s *const start,
@@ -976,13 +982,18 @@ LOCAL int lookup_path_in_array(const char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data)
 {
     uint32_t size = entry_data->data_size;
-    int array_index = strtol(path_elem, NULL, 10);
-    if (array_index < 0) {
+    char *first_invalid;
+
+    int saved_errno = errno;
+    errno = 0;
+    int array_index = strtol(path_elem, &first_invalid, 10);
+    if (array_index < 0 || ERANGE == errno) {
+        errno = saved_errno;
         return MMDB_INVALID_LOOKUP_PATH_ERROR;
     }
+    errno = saved_errno;
 
-    if ((uint32_t)array_index >= size) {
-        memset(entry_data, 0, sizeof(MMDB_entry_data_s));
+    if (*first_invalid || (uint32_t)array_index >= size) {
         return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
     }
 

@@ -1,0 +1,25 @@
+install:
+  - git submodule update --init --recursive
+
+test_script:
+  #EXES
+  - .\projects\VS12\Debug\test_bad_pointers.exe
+  - .\projects\VS12\Debug\test_basic_lookup.exe
+  - .\projects\VS12\Debug\test_data_entry_list.exe
+  - .\projects\VS12\Debug\test_data_types.exe
+  - .\projects\VS12\Debug\test_dump.exe
+  - .\projects\VS12\Debug\test_get_value_pointer_bug.exe
+  - .\projects\VS12\Debug\test_get_value.exe
+  - .\projects\VS12\Debug\test_ipv4_start_cache.exe
+  - .\projects\VS12\Debug\test_ipv6_lookup_in_ipv4.exe
+  - .\projects\VS12\Debug\test_metadata.exe
+  - .\projects\VS12\Debug\test_no_map_get_value.exe
+  - .\projects\VS12\Debug\test_read_node.exe
+  - .\projects\VS12\Debug\test_version.exe
+  #ENDEXES
+
+notifications:
+  - provider: HipChat
+    auth_token:
+      secure: NtKXu/kGk8Td4YqCH95camAcNQtB3rMll+5DALAmbDY=
+    room: dev

@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef MAXMINDDB_H
 #define MAXMINDDB_H
 
@@ -13,9 +17,20 @@
 #include <sys/types.h>
 
 #ifdef _WIN32
-#include <WinSock2.h>
-#include <WS2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+/* libmaxminddb package version from configure */
+#define PACKAGE_VERSION "1.0.4"
+
 typedef ADDRESS_FAMILY sa_family_t;
+
+#if defined(_MSC_VER)
+/* MSVC doesn't define signed size_t, copy it from configure */
+#define ssize_t int
+
+/* MSVC doesn't support restricted pointers */
+#define restrict
+#endif
 #else
 #include <netdb.h>
 #include <netinet/in.h>
@@ -39,11 +54,11 @@ typedef ADDRESS_FAMILY sa_family_t;
 #define MMDB_DATA_TYPE_BOOLEAN (14)
 #define MMDB_DATA_TYPE_FLOAT (15)
 
-/* GEOIPDB flags */
+/* flags for open */
 #define MMDB_MODE_MMAP (1)
 #define MMDB_MODE_MASK (7)
 
-/* GEOIPDB err codes */
+/* error codes */
 #define MMDB_SUCCESS (0)
 #define MMDB_FILE_OPEN_ERROR (1)
 #define MMDB_CORRUPT_SEARCH_TREE_ERROR (2)
@@ -202,3 +217,7 @@ typedef struct MMDB_search_node_s {
     /* *INDENT-ON* */
 
 #endif                          /* MAXMINDDB_H */
+
+#ifdef __cplusplus
+}
+#endif

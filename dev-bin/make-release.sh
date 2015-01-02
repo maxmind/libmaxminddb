@@ -13,6 +13,22 @@ if [ -n "$(git status --porcelain)" ]; then
     exit 1
 fi
 
+old_version=$(perl -MFile::Slurp=read_file <<EOF
+use v5.16;
+my \$conf = read_file(q{configure.ac});
+\$conf =~ /AC_INIT.+\[(\d+\.\d+\.\d+)\]/;
+say \$1;
+EOF
+)
+
+perl -MFile::Slurp=edit_file -e \
+    "edit_file { s/\Q$old_version/$TAG/g } \$_ for qw( configure.ac include/maxminddb.h )"
+
+if [ -n "$(git status --porcelain)" ]; then
+    git add configure.ac include/maxminddb.h
+    git commit -m "Bumped version to $TAG"
+fi
+
 if [ ! -d .gh-pages ]; then
     echo "Checking out gh-pages in .gh-pages"
     git clone -b gh-pages git@github.com:maxmind/libmaxminddb.git .gh-pages
@@ -50,18 +66,20 @@ EOF
 
 cat ../doc/mmdblookup.md >> $MMDBLOOKUP
 
-git commit -m "Updated for $TAG" -a
+if [ -n "$(git status --porcelain)" ]; then
+    git commit -m "Updated for $TAG" -a
 
-read -p "Push to origin? (y/n) " SHOULD_PUSH
+    read -p "Push to origin? (y/n) " SHOULD_PUSH
 
-if [ "$SHOULD_PUSH" != "y" ]; then
-    echo "Aborting"
-    exit 1
+    if [ "$SHOULD_PUSH" != "y" ]; then
+        echo "Aborting"
+        exit 1
+    fi
+
+    git push
 fi
-
-git push
 
 cd ..
 
-git tag -a $TAG
-git push --tags
+git tag -a -m "Release for $TAG" $TAG
+git push --follow-tags

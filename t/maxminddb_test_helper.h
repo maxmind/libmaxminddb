@@ -15,8 +15,17 @@
 #ifdef _WIN32
 #include <Winsock2.h>
 #include <ws2tcpip.h>
+
+#define R_OK 4
+
 #else
 #include <netdb.h>
+#endif
+
+#if (_MSC_VER && _MSC_VER < 1900)
+/* _snprintf has security issues, but I don't think it is worth
+   worrying about for the unit tests. */
+#define snprintf _snprintf
 #endif
 
 #ifndef MMDB_TEST_HELPER_C
@@ -25,7 +34,7 @@
 #ifdef __GNUC__
 #  define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
 #else
-#  define UNUSED(x) UNUSED_ ## x
+#  define UNUSED
 #endif
 
 #define MAX_DESCRIPTION_LENGTH 500

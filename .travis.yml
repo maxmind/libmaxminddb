@@ -4,6 +4,10 @@ compiler:
   - clang
   - gcc
 
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libipc-run3-perl
+
 before_script:
   - ./bootstrap
   - CFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter" ./configure
@@ -11,6 +15,7 @@ before_script:
   - git submodule update --init --recursive
 
 script:
+  - export VERBOSE=1
   - make check
 
 notifications:
