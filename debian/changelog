@@ -1,3 +1,9 @@
+libmaxminddb (1.0.4-0+maxmind1~utopic) utopic; urgency=medium
+
+  * First MaxMind release.
+
+ -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Fri, 02 Jan 2015 14:36:01 -0800
+
 libmaxminddb (1.0.2-1) unstable; urgency=low
 
   * Initial release. (Closes: #741199)
