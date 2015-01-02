@@ -1,7 +1,7 @@
 ---
 layout: default
 title: libmaxminddb - a library for working with MaxMind DB files
-version: 1.0.3
+version: 1.0.4
 ---
 # NAME
 
@@ -251,6 +251,8 @@ The `pointer` member of the union should never be populated in any data
 returned by the API. Pointers should always be resolved internally.
 
 The `data_size` member is only relevant for `utf8_string` and `bytes` data.
+`utf8_string` is not null terminated and `data_size` _must_ be used to
+determine its length.
 
 The `type` member can be compared to one of the `MMDB_DTYPE_*` macros.
 
@@ -362,7 +364,7 @@ status codes are:
   The database is probably damaged or was generated incorrectly.
 * `MMDB_INVALID_LOOKUP_PATH_ERROR` - The lookup path passed to
   `MMDB_get_value`, `MMDB_vget_value`, or `MMDB_aget_value` contains an array
-  offset that is not a non-negative integer.
+  offset that is negative integer or an integer larger than LONG_MAX.
 * `MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR` - The lookup path passed to
   `MMDB_get_value`,`MMDB_vget_value`, or `MMDB_aget_value` does not match the
   data structure for the entry. There are number of reasons this can
@@ -467,7 +469,7 @@ these indicates an error then the returned structure is meaningless.
 
 If no error occurred you still need to make sure that the `found_entry` member
 in the returned result is true. If it's not, this means that the IP address
-does have an entry in the database.
+does not have an entry in the database.
 
 This function will work with IPv4 addresses even when the database contains
 data for both IPv4 and IPv6 addresses. The IPv4 address will be looked up as
@@ -534,8 +536,10 @@ will be populated with the data that is being looked up, if any is found. If
 nothing is found, then the `has_data` member of this structure will be false.
 If `has_data` is true then you can look at the `data_type` member.
 
-The final parameter is a lookup path. This allow you to navigate a complex
-data structure. For example, given this example:
+The final parameter is a lookup path. The path consists of a set of strings
+representing either map keys (e.g, "city") or array indexes (e.g., "0", "1")
+to use in the lookup. This allow you to navigate a complex data structure. For
+example, given this example:
 
 ```js
 {
@@ -567,7 +571,7 @@ regardless of which function you call.
 
 The `MMDB_get_value` function takes a variable number of arguments. All of the
 arguments after the `MMDB_entry_data_s *` structure pointer are the lookup
-path.
+path. The last argument must be `NULL`.
 
 The `MMDB_vget_value` function accepts a `va_list` as the lookup path. The
 last element retrieved by `va_arg()` must be `NULL`.
