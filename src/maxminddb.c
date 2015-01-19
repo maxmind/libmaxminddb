@@ -314,7 +314,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
  cleanup:;
     int saved_errno = errno;
 #ifdef _WIN32
-    if (INVALID_HANDLE_VALUE != mmh) {
+    if (INVALID_HANDLE_VALUE != fd) {
         CloseHandle(fd);
     }
     if (MMDB_SUCCESS != status && INVALID_HANDLE_VALUE != mmh) {
