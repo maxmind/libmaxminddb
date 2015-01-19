@@ -1,3 +1,14 @@
+* Previously, when there was an error in `MMDB_open`, `errno` would generally
+  be overwritten during cleanup, preventing a useful value from being returned
+  to the caller. This was changed so that the `errno` value from the function
+  call that caused the error is restored before returning to the caller. In
+  particular, this is important for `MMDB_IO_ERROR` errors as checking
+  `errno` is often the only way to determine what actually failed.
+* If `mmap` fails due to running out of memory space, an
+  `MMDB_OUT_OF_MEMORY_ERROR` is now returned from `MMDB_open` rather than an
+  `MMDB_IO_ERROR`.
+
+
 ## 1.0.4 - 2014-01-02
 
 * If you used a non-integer string as an array index when doing a lookup with
