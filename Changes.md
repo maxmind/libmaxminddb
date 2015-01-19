@@ -1,4 +1,4 @@
-* Previously when there was an error in `MMDB_open`, `errno` would generally
+* Previously, when there was an error in `MMDB_open`, `errno` would generally
   be overwritten during cleanup, preventing a useful value from being returned
   to the caller. This was changed so that the `errno` value from the function
   call that caused the error is restored before returning to the caller. In
