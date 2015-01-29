@@ -216,6 +216,12 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     if (MMDB_SUCCESS != (status = map_file(mmdb)) ) {
         goto cleanup;
     }
+
+#ifdef _WIN32
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
+
     uint32_t metadata_size = 0;
     const uint8_t *metadata = find_metadata(mmdb->file_content, mmdb->file_size,
                                             &metadata_size);
@@ -236,11 +242,6 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
         status = MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
         goto cleanup;
     }
-
-#ifdef _WIN32
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2, 2), &wsa);
-#endif
 
     uint32_t search_tree_size = mmdb->metadata.node_count *
                                 mmdb->full_record_byte_size;
@@ -317,7 +318,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     if (INVALID_HANDLE_VALUE != fd) {
         CloseHandle(fd);
     }
-    if (MMDB_SUCCESS != status && INVALID_HANDLE_VALUE != mmh) {
+    if (INVALID_HANDLE_VALUE != mmh) {
         CloseHandle(mmh);
     }
 #else
