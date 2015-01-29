@@ -7,6 +7,8 @@
 * If `mmap` fails due to running out of memory space, an
   `MMDB_OUT_OF_MEMORY_ERROR` is now returned from `MMDB_open` rather than an
   `MMDB_IO_ERROR`.
+* On Windows, the `CreateFileMappingA` handle was not properly closed if
+  openning the database succeeded. Fixed by Bly Hostetler. GitHub #75 & #76.
 
 
 ## 1.0.4 - 2014-01-02
