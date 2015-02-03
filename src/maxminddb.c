@@ -281,6 +281,10 @@ LOCAL int map_file(MMDB_s *const mmdb)
         goto cleanup;
     }
     mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, NULL);
+    if (mmh == NULL) {  /* Microsoft documentation for CreateFileMapping indicates this returns NULL not INVALID_HANDLE_VALUE on error */
+        status = MMDB_IO_ERROR;
+        goto cleanup;
+    }
     uint8_t *file_content =
         (uint8_t *)MapViewOfFile(mmh, FILE_MAP_READ, 0, 0, 0);
     if (file_content == NULL) {
@@ -318,7 +322,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     if (INVALID_HANDLE_VALUE != fd) {
         CloseHandle(fd);
     }
-    if (INVALID_HANDLE_VALUE != mmh) {
+    if (INVALID_HANDLE_VALUE != mmh && NULL != mmh) {
         CloseHandle(mmh);
     }
 #else
