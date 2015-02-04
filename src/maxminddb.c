@@ -267,7 +267,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     int status = MMDB_SUCCESS;
 #ifdef _WIN32
     HANDLE fd = INVALID_HANDLE_VALUE;
-    HANDLE mmh = INVALID_HANDLE_VALUE;
+    HANDLE mmh = NULL;
 
     fd = CreateFileA(mmdb->filename, GENERIC_READ, FILE_SHARE_READ, NULL,
                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -322,7 +322,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     if (INVALID_HANDLE_VALUE != fd) {
         CloseHandle(fd);
     }
-    if (INVALID_HANDLE_VALUE != mmh && NULL != mmh) {
+    if (NULL != mmh) {
         CloseHandle(mmh);
     }
 #else
