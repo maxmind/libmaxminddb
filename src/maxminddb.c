@@ -267,7 +267,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     int status = MMDB_SUCCESS;
 #ifdef _WIN32
     HANDLE fd = INVALID_HANDLE_VALUE;
-    HANDLE mmh = INVALID_HANDLE_VALUE;
+    HANDLE mmh = NULL;
 
     fd = CreateFileA(mmdb->filename, GENERIC_READ, FILE_SHARE_READ, NULL,
                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -281,6 +281,10 @@ LOCAL int map_file(MMDB_s *const mmdb)
         goto cleanup;
     }
     mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, NULL);
+    if (NULL == mmh) {  /* Microsoft documentation for CreateFileMapping indicates this returns NULL not INVALID_HANDLE_VALUE on error */
+        status = MMDB_IO_ERROR;
+        goto cleanup;
+    }
     uint8_t *file_content =
         (uint8_t *)MapViewOfFile(mmh, FILE_MAP_READ, 0, 0, 0);
     if (file_content == NULL) {
@@ -318,7 +322,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     if (INVALID_HANDLE_VALUE != fd) {
         CloseHandle(fd);
     }
-    if (INVALID_HANDLE_VALUE != mmh) {
+    if (NULL != mmh) {
         CloseHandle(mmh);
     }
 #else
