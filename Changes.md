@@ -9,6 +9,8 @@
   `MMDB_IO_ERROR`.
 * On Windows, the `CreateFileMappingA` handle was not properly closed if
   opening the database succeeded. Fixed by Bly Hostetler. GitHub #75 & #76.
+* On Windows, we were not checking the return value of `CreateFileMappingA()`
+  properly for errors. Fixed by Bly Hotetler. GitHub #78.
 
 
 ## 1.0.4 - 2014-01-02
