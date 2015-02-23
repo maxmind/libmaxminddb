@@ -194,6 +194,8 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
 
 #define FREE_AND_SET_NULL(p) { free((void *)(p)); (p) = NULL; }
 
+LOCAL const char* memory_filename = "[memory]";
+
 LOCAL int internal_open(MMDB_s *const mmdb)
 {
     int status = MMDB_SUCCESS;
@@ -251,7 +253,6 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     int status = MMDB_SUCCESS;
     init_mmdb(mmdb);
 
-    mmdb->file_mapping = true;
     mmdb->filename = mmdb_strdup(filename);
     if (NULL == mmdb->filename) {
         status = MMDB_OUT_OF_MEMORY_ERROR;
@@ -288,8 +289,7 @@ int MMDB_open_memory(const uint8_t* data, ssize_t size, MMDB_s *const mmdb)
 {
     init_mmdb(mmdb);
 
-    mmdb->file_mapping = false;
-    mmdb->filename = 0;
+    mmdb->filename = memory_filename;
     mmdb->flags = 0;
 
     mmdb->file_size = size;
@@ -1582,18 +1582,22 @@ LOCAL void free_mmdb_struct(MMDB_s *const mmdb)
         return;
     }
 
-    if (NULL != mmdb->filename) {
-        FREE_AND_SET_NULL(mmdb->filename);
-    }
-    if (NULL != mmdb->file_content && mmdb->file_mapping) {
+    if (mmdb->filename == memory_filename) {
+        /* Database is opened from memory. */
+    } else {
+        if (NULL != mmdb->filename) {
+            FREE_AND_SET_NULL(mmdb->filename);
+        }
+        if (NULL != mmdb->file_content) {
 #ifdef _WIN32
-        UnmapViewOfFile(mmdb->file_content);
-        /* Winsock is only initialized if open was successful so we only have
-         * to cleanup then. */
-        WSACleanup();
+            UnmapViewOfFile(mmdb->file_content);
+            /* Winsock is only initialized if open was successful so we only have
+             * to cleanup then. */
+            WSACleanup();
 #else
-        munmap((void *)mmdb->file_content, mmdb->file_size);
+            munmap((void *)mmdb->file_content, mmdb->file_size);
 #endif
+        }
     }
 
     if (NULL != mmdb->metadata.database_type) {

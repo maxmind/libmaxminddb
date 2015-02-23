@@ -161,7 +161,6 @@ typedef struct MMDB_ipv4_start_node_s {
 } MMDB_ipv4_start_node_s;
 
 typedef struct MMDB_s {
-    bool file_mapping;
     uint32_t flags;
     const char *filename;
     ssize_t file_size;
