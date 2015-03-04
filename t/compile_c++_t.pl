@@ -53,7 +53,8 @@ _test_cmd(
     'compile C++ program which links against libmaxminddb',
 );
 
-$ENV{LD_LIBRARY_PATH} = $lib_dir;
+# DYLD_LIBRARY_PATH is for Mac OS X
+$ENV{LD_LIBRARY_PATH} = $ENV{DYLD_LIBRARY_PATH} = $lib_dir;
 
 _test_cmd(
     [$exe],
