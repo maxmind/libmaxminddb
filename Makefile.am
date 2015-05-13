@@ -10,7 +10,7 @@ SUBDIRS = \
   bin     \
   t
 
-EXTRA_DIST = doc t Changes.md LICENSE NOTICE README.md
+EXTRA_DIST = doc t Changes.md LICENSE NOTICE README.md projects/VS12 projects/VS12-tests
 dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
 	find $(distdir) -name '.git*' | xargs rm -fr

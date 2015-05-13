@@ -15,7 +15,7 @@ See http://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
 
 This library is licensed under the Apache License, Version 2.
 
-# Installing from a Tarball
+# Building and installing from a Tarball
 
 This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
 on other compilers that supports C99, POSIX 2011.11, and the `-fms-extensions
@@ -36,7 +36,18 @@ passing on your platform.
 The `configure` script takes the standard options to set where files are
 installed such as `--prefix`, etc. See `./configure --help` for details.
 
-# Installing from the Git Repository
+If after installing, you receive an error that `libmaxminddb.so.0` is missing
+you may need to add the `lib` directory in your `prefix` to your library path.
+On most Linux distributions when using the default prefix (`/usr/local`), you
+can do this by running the following commands:
+
+    $ sudo sh -c "echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf"
+    $ ldconfig
+
+# Building from the Git Repository
+
+To install from Git, you will need automake, autoconf, and libtool installed
+in addition to make and a compiler.
 
 Our public git repository is hosted on GitHub at
 https://github.com/maxmind/libmaxminddb
@@ -44,15 +55,15 @@ https://github.com/maxmind/libmaxminddb
 You can clone this repository and build it by running:
 
     $ git clone --recursive https://github.com/maxmind/libmaxminddb
-    $ cd libmaxminddb
-    $ ./bootstrap
-    $ ./configure
-    $ make check
-    $ sudo make install
-    $ sudo ldconfig
 
-To install from Git, you will need automake, autoconf, and libtool installed
-in addition to make and a compiler.
+After cloning, run `./bootstrap` from the `libmaxminddb directory and then
+follow the instructions for installing from a tarball as described above.
+
+# Building with Visual Studio 2013+
+
+We provide a Visual Studio solution in `projects\VS12`. This can be used to
+build both the the library and the tests. Please see the `README.md` file in
+the same directory for more information.
 
 # Installing via Homebrew (on OS X)
 

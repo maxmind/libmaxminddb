@@ -1,3 +1,36 @@
+## 1.0.4 - 2014-01-02
+
+* If you used a non-integer string as an array index when doing a lookup with
+  `MMDB_get_value`, `MMDB_vget_value`, or `MMDB_aget_value`, the first element
+  of the array would be returned rather than an error. A
+  `MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR` error will now be returned.
+  GitHub #61.
+* If a number larger than `LONG_MAX` was used in the same functions,
+  `LONG_MAX` would have been used in the lookup. Now a
+  `MMDB_INVALID_LOOKUP_PATH_ERROR` error will be returned.
+* Visual Studio build files were added for unit tests and some compatibility
+  issues with the tests were fixed.
+* Visual Studio project was updated to use property pages. Patch by Andre.
+  GitHub #69.
+* A test failure in `t/compile_c++_t.pl` on new installs was fixed.
+
+
+## 1.0.3 - 2014-12-02
+
+* A memory and file handle leak on Win32 was fixed when getting the database
+  size fails. Patch by Federico G. Schwindt. GitHub PR #49.
+* Documentation fix. Federico G. Schwindt. GitHub PR #50.
+* Added Visual Studio build files and fixed incorrect CreateFileMappingA
+  usage. Patch by Andre. GitHub #52.
+* The includes for the Windows header files were made lowercase in order to
+  match the actual file names on case-sensitive file systems. GitHub PR #57.
+* Removed `realloc()` calls that caused warnings on Windows and generally
+  cleaned up memory allocation in `MMDB_vget_value()`. See relevant discussion
+  in GitHub #52.
+* Added an `extern "C" { ... }` wrapper to maxminddb.h when compiling with a
+  C++ compiler. GitHub #55.
+
+
 ## 1.0.2 - 2014-09-22
 
 * Fixed a number of small issues found by Coverity.

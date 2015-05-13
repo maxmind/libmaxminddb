@@ -3,9 +3,10 @@
 use strict;
 use warnings;
 
+use FindBin qw( $Bin );
+
 eval <<'EOF';
 use Test::More 0.88;
-use FindBin qw( $Bin );
 use IPC::Run3 qw( run3 );
 EOF
 
@@ -15,8 +16,6 @@ if ($@) {
     print "$@";
     exit 0;
 }
-
-use vars qw( $Bin );
 
 my $mmdblookup    = "$Bin/../bin/mmdblookup";
 my $test_data_dir = "$Bin/maxmind-db/test-data";
