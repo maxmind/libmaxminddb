@@ -621,7 +621,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         }
     }
 
-cleanup:
+ cleanup:
     MMDB_free_entry_data_list(first_member);
 
     return MMDB_SUCCESS;
