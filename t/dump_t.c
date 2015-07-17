@@ -16,6 +16,9 @@ void run_tests(int mode, const char *mode_desc)
     MMDB_entry_data_list_s *entry_data_list;
     int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
 
+    ok(MMDB_SUCCESS == status,
+       "MMDB_get_entry_data_list is successful");
+
     char *dump_output;
     size_t dump_size;
     FILE *stream = open_memstream(&dump_output, &dump_size);
