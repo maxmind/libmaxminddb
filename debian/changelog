@@ -1,3 +1,10 @@
+libmaxminddb (1.0.4-2) unstable; urgency=medium
+
+  * Switch libmaxminddb-dev to multiarch include paths, due to
+    architecture-dependent header files. (Closes: #788878)
+
+ -- Faidon Liambotis <paravoid@debian.org>  Sun, 19 Jul 2015 02:22:02 +0300
+
 libmaxminddb (1.0.4-1) unstable; urgency=medium
 
   * Initial release. (Closes: #741199)

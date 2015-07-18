@@ -8,7 +8,9 @@ endif
 	dh $@  --with autoreconf
 
 override_dh_auto_configure:
-	dh_auto_configure -- $(DEBUG)
+	dh_auto_configure -- \
+		--includedir="\$${prefix}/include/$(DEB_HOST_MULTIARCH)" \
+		$(DEBUG)
 
 override_dh_auto_build:
 	# build manpages (needs pandoc); these are included in tarballs
