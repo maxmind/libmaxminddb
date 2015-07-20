@@ -3,6 +3,7 @@
 #endif
 #include "maxminddb.h"
 #include "maxminddb-compat-util.h"
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -343,7 +344,7 @@ LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                        file_size;
 
     uint8_t *search_area = (uint8_t *)(file_content + (file_size - max_size));
-    uint8_t *tmp = search_area;
+    uint8_t *tmp;
     do {
         tmp = mmdb_memmem(search_area, max_size,
                           METADATA_MARKER, strlen(METADATA_MARKER));
@@ -569,6 +570,11 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
     uint32_t map_size = member->entry_data.data_size;
     mmdb->metadata.description.count = 0;
+    if (0 == map_size) {
+        mmdb->metadata.description.descriptions = NULL;
+        goto cleanup;
+    }
+
     mmdb->metadata.description.descriptions =
         malloc(map_size * sizeof(MMDB_description_s *));
     if (NULL == mmdb->metadata.description.descriptions) {
@@ -615,6 +621,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         }
     }
 
+ cleanup:
     MMDB_free_entry_data_list(first_member);
 
     return MMDB_SUCCESS;
@@ -816,6 +823,8 @@ LOCAL record_info_s record_info_for_database(MMDB_s *mmdb)
         record_info.left_record_getter = &get_uint32;
         record_info.right_record_getter = &get_uint32;
         record_info.right_record_offset = 4;
+    } else {
+        assert(false);
     }
 
     return record_info;

@@ -11,6 +11,7 @@
   opening the database succeeded. Fixed by Bly Hostetler. GitHub #75 & #76.
 * On Windows, we were not checking the return value of `CreateFileMappingA()`
   properly for errors. Fixed by Bly Hotetler. GitHub #78.
+* Several warnings from Clang's scan-build were fixed. GitHub #86.
 
 
 ## 1.0.4 - 2014-01-02
