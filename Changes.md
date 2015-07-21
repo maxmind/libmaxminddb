@@ -1,8 +1,28 @@
-## 1.0.4 - 2014-01-02
+## 1.1.0 - 2015-07-21
+
+* Previously, when there was an error in `MMDB_open()`, `errno` would
+  generally be overwritten during cleanup, preventing a useful value from
+  being returned to the caller. This was changed so that the `errno` value
+  from the function call that caused the error is restored before returning to
+  the caller. In particular, this is important for `MMDB_IO_ERROR` errors as
+  checking `errno` is often the only way to determine what actually failed.
+* If `mmap()` fails due to running out of memory space, an
+  `MMDB_OUT_OF_MEMORY_ERROR` is now returned from `MMDB_open` rather than an
+  `MMDB_IO_ERROR`.
+* On Windows, the `CreateFileMappingA()` handle was not properly closed if
+  opening the database succeeded. Fixed by Bly Hostetler. GitHub #75 & #76.
+* On Windows, we were not checking the return value of `CreateFileMappingA()`
+  properly for errors. Fixed by Bly Hotetler. GitHub #78.
+* Several warnings from Clang's scan-build were fixed. GitHub #86.
+* All headers are now installed in `$(includedir)`. GitHub #89.
+* We no longer install `maxminddb-compat-util.h`. This header was intended for
+  internal use only.
+
+## 1.0.4 - 2015-01-02
 
 * If you used a non-integer string as an array index when doing a lookup with
-  `MMDB_get_value`, `MMDB_vget_value`, or `MMDB_aget_value`, the first element
-  of the array would be returned rather than an error. A
+  `MMDB_get_value()`, `MMDB_vget_value()`, or `MMDB_aget_value()`, the first
+  element of the array would be returned rather than an error. A
   `MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR` error will now be returned.
   GitHub #61.
 * If a number larger than `LONG_MAX` was used in the same functions,

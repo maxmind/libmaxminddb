@@ -1,9 +1,7 @@
 
-include_HEADERS = include/maxminddb.h src/maxminddb-compat-util.h
+include_HEADERS = include/maxminddb.h
 
-include_execdir = $(exec_prefix)/include
-
-nodist_include_exec_HEADERS = include/maxminddb_config.h
+nodist_include_HEADERS = include/maxminddb_config.h
 
 SUBDIRS = \
   src     \
@@ -32,8 +30,5 @@ man/man1/*.1:
 
 man/man3/*.3:
 	if [ ! -f man/man3/libmaxminddb.3 ]; then mkdir -p man/man3 && touch man/man3/libmaxminddb.3; fi
-
-release:
-	dev-bin/make-release.sh $(PACKAGE_VERSION)
 
 .PHONY: man/man1/*.1 man/man3/*.3 release

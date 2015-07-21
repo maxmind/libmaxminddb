@@ -1,12 +1,16 @@
 #!/bin/sh
 set -e
 
-TAG=$1
-
-if [ -z $TAG ]; then
-    echo "Please specify a tag"
-    exit 1
-fi
+TAG=$(perl -MFile::Slurp::Tiny=read_file -MDateTime <<EOF
+use v5.16;
+my \$today = DateTime->now->ymd;
+my \$log = read_file(q{Changes.md});
+\$log =~ /^\#\# (\d+\.\d+\.\d+(?:-\w+)?) - (\d{4}-\d{2}-\d{2})\n/;
+die "Release time is not today! Release: \$2 Today: \$today"
+    unless \$today eq \$2;
+say \$1;
+EOF
+)
 
 if [ -n "$(git status --porcelain)" ]; then
     echo ". is not clean." >&2
@@ -81,5 +85,5 @@ fi
 
 cd ..
 
-git tag -a -m "Release for $TAG" $TAG
+git tag -a -m "Release for $TAG" "$TAG"
 git push --follow-tags
