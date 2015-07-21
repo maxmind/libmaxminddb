@@ -1,7 +1,7 @@
 ---
 layout: default
 title: mmdblookup - a utility to look up an IP address in a MaxMind DB file
-version: 1.0.4
+version: 1.1.0
 ---
 # NAME
 
