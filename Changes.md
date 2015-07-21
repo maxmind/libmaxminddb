@@ -1,3 +1,5 @@
+## 1.1.0 - 2015-07-21
+
 * Previously, when there was an error in `MMDB_open()`, `errno` would
   generally be overwritten during cleanup, preventing a useful value from
   being returned to the caller. This was changed so that the `errno` value
@@ -12,11 +14,11 @@
 * On Windows, we were not checking the return value of `CreateFileMappingA()`
   properly for errors. Fixed by Bly Hotetler. GitHub #78.
 * Several warnings from Clang's scan-build were fixed. GitHub #86.
-* All headers are now installed in `$(includedir)`.
+* All headers are now installed in `$(includedir)`. GitHub #89.
 * We no longer install `maxminddb-compat-util.h`. This header was intended for
   internal use only.
 
-## 1.0.4 - 2014-01-02
+## 1.0.4 - 2015-01-02
 
 * If you used a non-integer string as an array index when doing a lookup with
   `MMDB_get_value()`, `MMDB_vget_value()`, or `MMDB_aget_value()`, the first
