@@ -12,7 +12,9 @@
 * On Windows, we were not checking the return value of `CreateFileMappingA()`
   properly for errors. Fixed by Bly Hotetler. GitHub #78.
 * Several warnings from Clang's scan-build were fixed. GitHub #86.
-
+* All headers are now installed in `$(includedir)`.
+* We no longer install `maxminddb-compat-util.h`. This header was intended for
+  internal use only.
 
 ## 1.0.4 - 2014-01-02
 

@@ -1,9 +1,7 @@
 
-include_HEADERS = include/maxminddb.h src/maxminddb-compat-util.h
+include_HEADERS = include/maxminddb.h
 
-include_execdir = $(exec_prefix)/include
-
-nodist_include_exec_HEADERS = include/maxminddb_config.h
+nodist_include_HEADERS = include/maxminddb_config.h
 
 SUBDIRS = \
   src     \
