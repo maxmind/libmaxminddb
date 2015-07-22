@@ -1,3 +1,7 @@
+## 1.1.1 - 2015-07-22
+
+* Added `maxminddb-compat-util.h` as a source file to dist.
+
 ## 1.1.0 - 2015-07-21
 
 * Previously, when there was an error in `MMDB_open()`, `errno` would
