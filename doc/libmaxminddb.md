@@ -28,7 +28,7 @@ int MMDB_get_value(
     MMDB_entry_s *const start,
     MMDB_entry_data_s *const entry_data,
     ...);
-int int MMDB_vget_value(
+int MMDB_vget_value(
     MMDB_entry_s *const start,
     MMDB_entry_data_s *const entry_data,
     va_list va_path);
@@ -509,7 +509,7 @@ int MMDB_get_value(
     MMDB_entry_s *const start,
     MMDB_entry_data_s *const entry_data,
     ...);
-int int MMDB_vget_value(
+int MMDB_vget_value(
     MMDB_entry_s *const start,
     MMDB_entry_data_s *const entry_data,
     va_list va_path);
