@@ -23,6 +23,7 @@
 /ltmain.sh
 /man
 /missing
+/src/libmaxminddb.pc
 /t/*.log
 /t/*.trs
 /t/*_t
