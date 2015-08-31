@@ -1,3 +1,9 @@
+## 1.1.2
+
+* Added pkg-config support. If your system supports it, then running `make
+  install` now installs a `libmaxminddb.pc` file for pkgconfig. Implemented by
+  Jan Vcelak.
+
 ## 1.1.1 - 2015-07-22
 
 * Added `maxminddb-compat-util.h` as a source file to dist.
