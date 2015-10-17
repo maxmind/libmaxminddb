@@ -262,16 +262,15 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     return status;
 }
 
+#ifdef _WIN32
+
 LOCAL int map_file(MMDB_s *const mmdb)
 {
     ssize_t size;
     int status = MMDB_SUCCESS;
-#ifdef _WIN32
-    HANDLE fd = INVALID_HANDLE_VALUE;
     HANDLE mmh = NULL;
-
-    fd = CreateFileA(mmdb->filename, GENERIC_READ, FILE_SHARE_READ, NULL,
-                     OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE fd = CreateFileA(mmdb->filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fd == INVALID_HANDLE_VALUE) {
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
@@ -282,7 +281,9 @@ LOCAL int map_file(MMDB_s *const mmdb)
         goto cleanup;
     }
     mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, NULL);
-    if (NULL == mmh) {  /* Microsoft documentation for CreateFileMapping indicates this returns NULL not INVALID_HANDLE_VALUE on error */
+    /* Microsoft documentation for CreateFileMapping indicates this returns
+        NULL not INVALID_HANDLE_VALUE on error */
+    if (NULL == mmh) {
         status = MMDB_IO_ERROR;
         goto cleanup;
     }
@@ -292,7 +293,30 @@ LOCAL int map_file(MMDB_s *const mmdb)
         status = MMDB_IO_ERROR;
         goto cleanup;
     }
+
+    mmdb->file_size = size;
+    mmdb->file_content = file_content;
+
+ cleanup:;
+    int saved_errno = errno;
+    if (INVALID_HANDLE_VALUE != fd) {
+        CloseHandle(fd);
+    }
+    if (NULL != mmh) {
+        CloseHandle(mmh);
+    }
+    errno = saved_errno;
+
+    return status;
+}
+
 #else
+
+LOCAL int map_file(MMDB_s *const mmdb)
+{
+    ssize_t size;
+    int status = MMDB_SUCCESS;
+
     int fd = open(mmdb->filename, O_RDONLY);
     struct stat s;
     if (fd < 0 || fstat(fd, &s)) {
@@ -312,29 +336,21 @@ LOCAL int map_file(MMDB_s *const mmdb)
         }
         goto cleanup;
     }
-#endif
 
     mmdb->file_size = size;
     mmdb->file_content = file_content;
 
  cleanup:;
     int saved_errno = errno;
-#ifdef _WIN32
-    if (INVALID_HANDLE_VALUE != fd) {
-        CloseHandle(fd);
-    }
-    if (NULL != mmh) {
-        CloseHandle(mmh);
-    }
-#else
     if (fd >= 0) {
         close(fd);
     }
-#endif
     errno = saved_errno;
 
     return status;
 }
+
+#endif
 
 LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                                    ssize_t file_size, uint32_t *metadata_size)
