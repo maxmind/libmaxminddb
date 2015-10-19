@@ -7,6 +7,7 @@ use FindBin qw( $Bin );
 
 use File::Basename qw( basename dirname );
 use File::Slurp qw( read_file write_file );
+use List::MoreUtils qw( uniq );
 
 sub main {
     _regen_prototypes(
@@ -78,7 +79,7 @@ sub _regen_prototypes {
         $h_code =~ s{\n *(/\* \*INDENT)}{\n    $1}g;
     }
 
-    my $internal_prototypes = join q{},
+    my $internal_prototypes = join q{}, uniq
         map { $_->{prototype} . ";\n" } grep { !$_->{external} } @prototypes;
     $c_code
         =~ s/__PROTOTYPES__/$indent_off\n$prototypes_start\n$internal_prototypes$prototypes_end\n$indent_on\n/;
