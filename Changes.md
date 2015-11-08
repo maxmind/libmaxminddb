@@ -3,6 +3,8 @@
 * Added pkg-config support. If your system supports it, then running `make
   install` now installs a `libmaxminddb.pc` file for pkgconfig. Implemented by
   Jan Vcelak.
+* Several segmentation faults found with afl-fuzz were fixed. These were
+  caused by missing bounds checking and missing verification of data type.
 
 ## 1.1.1 - 2015-07-22
 

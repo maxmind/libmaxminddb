@@ -136,7 +136,7 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       sa_family_t address_family,
                                       MMDB_lookup_result_s *result);
 LOCAL record_info_s record_info_for_database(MMDB_s *mmdb);
-LOCAL MMDB_ipv4_start_node_s find_ipv4_start_node(MMDB_s *mmdb);
+LOCAL int find_ipv4_start_node(MMDB_s *mmdb);
 LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
                           uint16_t netmask, MMDB_lookup_result_s *result);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
@@ -248,6 +248,10 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
                                 mmdb->full_record_byte_size;
 
     mmdb->data_section = mmdb->file_content + search_tree_size;
+    if (search_tree_size > mmdb->file_size) {
+        status = MMDB_INVALID_METADATA_ERROR;
+        goto cleanup;
+    }
     mmdb->data_section_size = mmdb->file_size - search_tree_size;
     mmdb->metadata_section = metadata;
     mmdb->ipv4_start_node.node_value = 0;
@@ -507,6 +511,9 @@ LOCAL char *value_for_key_as_string(MMDB_entry_s *start, char *key)
     MMDB_entry_data_s entry_data;
     const char *path[] = { key, NULL };
     MMDB_aget_value(start, &entry_data, path);
+    if (MMDB_DATA_TYPE_UTF8_STRING != entry_data.type) {
+        return NULL;
+    }
     return mmdb_strndup((char *)entry_data.utf8_string, entry_data.data_size);
 }
 
@@ -568,7 +575,10 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     MMDB_entry_data_s entry_data;
 
     const char *path[] = { "description", NULL };
-    MMDB_aget_value(metadata_start, &entry_data, path);
+    int status = MMDB_aget_value(metadata_start, &entry_data, path);
+    if (MMDB_SUCCESS != status) {
+        return status;
+    }
 
     if (MMDB_DATA_TYPE_MAP != entry_data.type) {
         return MMDB_INVALID_METADATA_ERROR;
@@ -580,7 +590,10 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     };
 
     MMDB_entry_data_list_s *member;
-    MMDB_get_entry_data_list(&map_start, &member);
+    status = MMDB_get_entry_data_list(&map_start, &member);
+    if (MMDB_SUCCESS != status) {
+        return status;
+    }
 
     MMDB_entry_data_list_s *first_member = member;
 
@@ -594,14 +607,16 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     mmdb->metadata.description.descriptions =
         malloc(map_size * sizeof(MMDB_description_s *));
     if (NULL == mmdb->metadata.description.descriptions) {
-        return MMDB_OUT_OF_MEMORY_ERROR;
+        status = MMDB_OUT_OF_MEMORY_ERROR;
+        goto cleanup;
     }
 
     for (uint32_t i = 0; i < map_size; i++) {
         mmdb->metadata.description.descriptions[i] =
             malloc(sizeof(MMDB_description_s));
         if (NULL == mmdb->metadata.description.descriptions[i]) {
-            return MMDB_OUT_OF_MEMORY_ERROR;
+            status = MMDB_OUT_OF_MEMORY_ERROR;
+            goto cleanup;
         }
 
         mmdb->metadata.description.count = i + 1;
@@ -611,7 +626,8 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         member = member->next;
 
         if (MMDB_DATA_TYPE_UTF8_STRING != member->entry_data.type) {
-            return MMDB_INVALID_METADATA_ERROR;
+            status = MMDB_INVALID_METADATA_ERROR;
+            goto cleanup;
         }
 
         mmdb->metadata.description.descriptions[i]->language =
@@ -619,13 +635,15 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                          member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.description.descriptions[i]->language) {
-            return MMDB_OUT_OF_MEMORY_ERROR;
+            status = MMDB_OUT_OF_MEMORY_ERROR;
+            goto cleanup;
         }
 
         member = member->next;
 
         if (MMDB_DATA_TYPE_UTF8_STRING != member->entry_data.type) {
-            return MMDB_INVALID_METADATA_ERROR;
+            status = MMDB_INVALID_METADATA_ERROR;
+            goto cleanup;
         }
 
         mmdb->metadata.description.descriptions[i]->description =
@@ -633,14 +651,15 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                          member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.description.descriptions[i]->description) {
-            return MMDB_OUT_OF_MEMORY_ERROR;
+            status = MMDB_OUT_OF_MEMORY_ERROR;
+            goto cleanup;
         }
     }
 
  cleanup:
     MMDB_free_entry_data_list(first_member);
 
-    return MMDB_SUCCESS;
+    return status;
 }
 
 MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
@@ -765,17 +784,23 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     uint16_t start_bit = max_depth0;
 
     if (mmdb->metadata.ip_version == 6 && address_family == AF_INET) {
-        MMDB_ipv4_start_node_s ipv4_start_node = find_ipv4_start_node(mmdb);
+        int mmdb_error = find_ipv4_start_node(mmdb);
+        if (MMDB_SUCCESS != mmdb_error) {
+            return mmdb_error;
+        }
         DEBUG_MSGF("IPv4 start node is %u (netmask %u)",
-                   ipv4_start_node.node_value, ipv4_start_node.netmask);
+                   mmdb->ipv4_start_node.node_value,
+                   mmdb->ipv4_start_node.netmask);
         /* We have an IPv6 database with no IPv4 data */
-        if (ipv4_start_node.node_value >= node_count) {
-            return populate_result(mmdb, node_count, ipv4_start_node.node_value,
-                                   ipv4_start_node.netmask, result);
+        if (mmdb->ipv4_start_node.node_value >= node_count) {
+            return populate_result(mmdb, node_count,
+                                   mmdb->ipv4_start_node.node_value,
+                                   mmdb->ipv4_start_node.netmask,
+                                   result);
         }
 
-        value = ipv4_start_node.node_value;
-        start_bit -= ipv4_start_node.netmask;
+        value = mmdb->ipv4_start_node.node_value;
+        start_bit -= mmdb->ipv4_start_node.netmask;
     }
 
     const uint8_t *search_tree = mmdb->file_content;
@@ -790,6 +815,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         DEBUG_MSGF("  current node = %u", value);
 
         record_pointer = &search_tree[value * record_info.record_length];
+        if (record_pointer + record_info.record_length > mmdb->data_section) {
+            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+        }
         if (bit_is_true) {
             record_pointer += record_info.right_record_offset;
             value = record_info.right_record_getter(record_pointer);
@@ -846,13 +874,13 @@ LOCAL record_info_s record_info_for_database(MMDB_s *mmdb)
     return record_info;
 }
 
-LOCAL MMDB_ipv4_start_node_s find_ipv4_start_node(MMDB_s *mmdb)
+LOCAL int find_ipv4_start_node(MMDB_s *mmdb)
 {
     /* In a pathological case of a database with a single node search tree,
      * this check will be true even after we've found the IPv4 start node, but
      * that doesn't seem worth trying to fix. */
     if (mmdb->ipv4_start_node.node_value != 0) {
-        return mmdb->ipv4_start_node;
+        return MMDB_SUCCESS;
     }
 
     record_info_s record_info = record_info_for_database(mmdb);
@@ -863,6 +891,9 @@ LOCAL MMDB_ipv4_start_node_s find_ipv4_start_node(MMDB_s *mmdb)
     uint32_t netmask;
     for (netmask = 0; netmask < 96; netmask++) {
         record_pointer = &search_tree[node_value * record_info.record_length];
+        if (record_pointer + record_info.record_length > mmdb->data_section) {
+            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+        }
         node_value = record_info.left_record_getter(record_pointer);
         /* This can happen if there's no IPv4 data _or_ if there is a subnet
          * with data that contains the entire IPv4 range (like ::/64) */
@@ -874,7 +905,7 @@ LOCAL MMDB_ipv4_start_node_s find_ipv4_start_node(MMDB_s *mmdb)
     mmdb->ipv4_start_node.node_value = node_value;
     mmdb->ipv4_start_node.netmask = netmask;
 
-    return mmdb->ipv4_start_node;
+    return MMDB_SUCCESS;
 }
 
 LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
@@ -1245,6 +1276,12 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         entry_data->offset_to_next = offset;
         DEBUG_MSGF("boolean value: %s", entry_data->boolean ? "true" : "false");
         return MMDB_SUCCESS;
+    }
+
+    // check that the data doesn't extend past the end of the memory
+    // buffer
+    if (offset + size > mmdb->data_section_size) {
+        return MMDB_INVALID_DATA_ERROR;
     }
 
     if (type == MMDB_DATA_TYPE_UINT16) {
@@ -1660,6 +1697,11 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
             for (entry_data_list = entry_data_list->next;
                  size && entry_data_list; size--) {
 
+                if (MMDB_DATA_TYPE_UTF8_STRING !=
+                    entry_data_list->entry_data.type) {
+                    *status = MMDB_INVALID_DATA_ERROR;
+                    return NULL;
+                }
                 char *key =
                     mmdb_strndup(
                         (char *)entry_data_list->entry_data.utf8_string,
