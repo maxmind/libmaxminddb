@@ -21,6 +21,7 @@
 #endif
 
 #define MMDB_DATA_SECTION_SEPARATOR (16)
+#define MAXIMUM_DATA_STRUCTURE_DEPTH (512)
 
 #ifdef MMDB_DEBUG
 #define LOCAL
@@ -1176,14 +1177,20 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
 {
     CHECKED_DECODE_ONE(mmdb, offset, entry_data);
     if (entry_data->type == MMDB_DATA_TYPE_POINTER) {
+        uint32_t next = entry_data->offset_to_next;
+        CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
+        /* Pointers to pointers are illegal under the spec */
+        if (entry_data->type == MMDB_DATA_TYPE_POINTER) {
+            DEBUG_MSG("pointer points to another pointer");
+            return MMDB_INVALID_DATA_ERROR;
+        }
+
         /* The pointer could point to any part of the data section but the
          * next entry for this particular offset may be the one after the
          * pointer, not the one after whatever the pointer points to. This
          * depends on whether the pointer points to something that is a simple
          * value or a compound value. For a compound value, the next one is
          * the one after the pointer result, not the one after the pointer. */
-        uint32_t next = entry_data->offset_to_next;
-        CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
         if (entry_data->type != MMDB_DATA_TYPE_MAP
             && entry_data->type != MMDB_DATA_TYPE_ARRAY) {
 
@@ -1416,11 +1423,14 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
         {
             uint32_t next_offset = entry_data_list->entry_data.offset_to_next;
             uint32_t last_offset;
-            while (entry_data_list->entry_data.type ==
-                   MMDB_DATA_TYPE_POINTER) {
-                CHECKED_DECODE_ONE(mmdb, last_offset =
-                                       entry_data_list->entry_data.pointer,
-                                   &entry_data_list->entry_data);
+            CHECKED_DECODE_ONE(mmdb, last_offset =
+                                   entry_data_list->entry_data.pointer,
+                               &entry_data_list->entry_data);
+
+            /* Pointers to pointers are illegal under the spec */
+            if (entry_data_list->entry_data.type == MMDB_DATA_TYPE_POINTER) {
+                DEBUG_MSG("pointer points to another pointer");
+                return MMDB_INVALID_DATA_ERROR;
             }
 
             if (entry_data_list->entry_data.type == MMDB_DATA_TYPE_ARRAY
