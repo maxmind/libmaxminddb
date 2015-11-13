@@ -58,7 +58,7 @@ You can clone this repository and build it by running:
 
     $ git clone --recursive https://github.com/maxmind/libmaxminddb
 
-After cloning, run `./bootstrap` from the `libmaxminddb directory and then
+After cloning, run `./bootstrap` from the `libmaxminddb` directory and then
 follow the instructions for installing from a tarball as described above.
 
 ## On Windows via Visual Studio 2013+

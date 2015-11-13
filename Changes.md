@@ -5,10 +5,16 @@
   Jan Vcelak.
 * Several segmentation faults found with afl-fuzz were fixed. These were
   caused by missing bounds checking and missing verification of data type.
+* `MMDB_get_entry_data_list` will now fail on data structures with a depth
+  greater than 512 and data structures that are cyclic. This should not
+  affect any known MaxMind DB in production. All databases produced by
+  MaxMind have a depth of less than five.
+
 
 ## 1.1.1 - 2015-07-22
 
 * Added `maxminddb-compat-util.h` as a source file to dist.
+
 
 ## 1.1.0 - 2015-07-21
 
@@ -29,6 +35,7 @@
 * All headers are now installed in `$(includedir)`. GitHub #89.
 * We no longer install `maxminddb-compat-util.h`. This header was intended for
   internal use only.
+
 
 ## 1.0.4 - 2015-01-02
 

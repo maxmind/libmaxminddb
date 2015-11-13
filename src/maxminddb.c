@@ -160,7 +160,8 @@ LOCAL int get_ext_type(int raw_ext_type);
 LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size);
 LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
-                              MMDB_entry_data_list_s *const entry_data_list);
+                              MMDB_entry_data_list_s *const entry_data_list,
+                              int depth);
 LOCAL float get_ieee754_float(const uint8_t *restrict p);
 LOCAL double get_ieee754_double(const uint8_t *restrict p);
 LOCAL uint32_t get_uint32(const uint8_t *p);
@@ -1469,12 +1470,18 @@ int MMDB_get_entry_data_list(
     if (NULL == *entry_data_list) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
-    return get_entry_data_list(start->mmdb, start->offset, *entry_data_list);
+    return get_entry_data_list(start->mmdb, start->offset, *entry_data_list, 0);
 }
 
 LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
-                              MMDB_entry_data_list_s *const entry_data_list)
+                              MMDB_entry_data_list_s *const entry_data_list,
+                              int depth)
 {
+    if (depth >= MAXIMUM_DATA_STRUCTURE_DEPTH) {
+        DEBUG_MSG("reached the maximum data structure depth");
+        return MMDB_INVALID_DATA_ERROR;
+    }
+    depth++;
     CHECKED_DECODE_ONE(mmdb, offset, &entry_data_list->entry_data);
 
     switch (entry_data_list->entry_data.type) {
@@ -1496,7 +1503,8 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                 || entry_data_list->entry_data.type == MMDB_DATA_TYPE_MAP) {
 
                 int status =
-                    get_entry_data_list(mmdb, last_offset, entry_data_list);
+                    get_entry_data_list(mmdb, last_offset, entry_data_list,
+                                        depth);
                 if (MMDB_SUCCESS != status) {
                     return status;
                 }
@@ -1517,7 +1525,8 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                 }
 
                 int status =
-                    get_entry_data_list(mmdb, array_offset, entry_data_list_to);
+                    get_entry_data_list(mmdb, array_offset, entry_data_list_to,
+                                        depth);
                 if (MMDB_SUCCESS != status) {
                     return status;
                 }
@@ -1545,7 +1554,8 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                 }
 
                 int status =
-                    get_entry_data_list(mmdb, offset, entry_data_list_to);
+                    get_entry_data_list(mmdb, offset, entry_data_list_to,
+                                        depth);
                 if (MMDB_SUCCESS != status) {
                     return status;
                 }
@@ -1562,7 +1572,8 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb, uint32_t offset,
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
-                status = get_entry_data_list(mmdb, offset, entry_data_list_to);
+                status = get_entry_data_list(mmdb, offset, entry_data_list_to,
+                                             depth);
                 if (MMDB_SUCCESS != status) {
                     return status;
                 }
