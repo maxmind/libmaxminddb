@@ -2,9 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([libmaxminddb], [1.1.0], [support@maxmind.com])
+AC_INIT([libmaxminddb], [1.1.2], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
 AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
+
+PKG_PROG_PKG_CONFIG
+m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], [AC_SUBST([pkgconfigdir], [${libdir}/pkgconfig])])
+AC_CONFIG_FILES([src/libmaxminddb.pc])
 
 LT_INIT
 AM_INIT_AUTOMAKE(foreign m4_esyscmd([case `automake --version | head -n 1` in
