@@ -519,6 +519,9 @@ LOCAL int value_for_key_as_uint16(MMDB_entry_s *start, char *key,
         return status;
     }
     if (MMDB_DATA_TYPE_UINT16 != entry_data.type) {
+        DEBUG_MSGF("expect uint16 for %s but received %s", key,
+                   type_num_to_name(
+                       entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = entry_data.uint16;
@@ -535,6 +538,9 @@ LOCAL int value_for_key_as_uint32(MMDB_entry_s *start, char *key,
         return status;
     }
     if (MMDB_DATA_TYPE_UINT32 != entry_data.type) {
+        DEBUG_MSGF("expect uint32 for %s but received %s", key,
+                   type_num_to_name(
+                       entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = entry_data.uint32;
@@ -551,6 +557,9 @@ LOCAL int value_for_key_as_uint64(MMDB_entry_s *start, char *key,
         return status;
     }
     if (MMDB_DATA_TYPE_UINT64 != entry_data.type) {
+        DEBUG_MSGF("expect uint64 for %s but received %s", key,
+                   type_num_to_name(
+                       entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = entry_data.uint64;
@@ -567,6 +576,9 @@ LOCAL int value_for_key_as_string(MMDB_entry_s *start, char *key,
         return status;
     }
     if (MMDB_DATA_TYPE_UTF8_STRING != entry_data.type) {
+        DEBUG_MSGF("expect string for %s but received %s", key,
+                   type_num_to_name(
+                       entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = mmdb_strndup((char *)entry_data.utf8_string, entry_data.data_size);
