@@ -1,3 +1,9 @@
+libmaxminddb (1.1.2-0+maxmind1~wily) wily; urgency=medium
+
+  * New upstream version.
+
+ -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Mon, 16 Nov 2015 09:48:57 -0800
+
 libmaxminddb (1.1.0-0+maxmind1~utopic) utopic; urgency=medium
 
   * New upstream version.
