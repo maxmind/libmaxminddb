@@ -20,7 +20,7 @@ extern "C" {
 #include <winsock2.h>
 #include <ws2tcpip.h>
 /* libmaxminddb package version from configure */
-#define PACKAGE_VERSION "1.1.1"
+#define PACKAGE_VERSION "1.1.2"
 
 typedef ADDRESS_FAMILY sa_family_t;
 
