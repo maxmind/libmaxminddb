@@ -11,7 +11,7 @@ Build-Depends: debhelper (>= 9), dh-autoreconf,
  libipc-system-simple-perl,
  libfile-slurp-perl,
  libfile-which-perl
-Standards-Version: 3.9.6
+Standards-Version: 3.9.6.1
 Homepage: http://maxmind.github.io/libmaxminddb/
 Vcs-Git: git://anonscm.debian.org/collab-maint/libmaxminddb.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/libmaxminddb.git;a=summary

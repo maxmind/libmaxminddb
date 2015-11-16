@@ -4,14 +4,15 @@ libmaxminddb (1.1.0-0+maxmind1~utopic) utopic; urgency=medium
 
  -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Tue, 21 Jul 2015 15:13:31 -0700
 
-libmaxminddb (1.0.4-0+maxmind1~utopic) utopic; urgency=medium
+libmaxminddb (1.0.4-2) unstable; urgency=medium
 
-  * First MaxMind release.
+  * Switch libmaxminddb-dev to multiarch include paths, due to
+    architecture-dependent header files. (Closes: #788878)
 
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Fri, 02 Jan 2015 14:36:01 -0800
+ -- Faidon Liambotis <paravoid@debian.org>  Sun, 19 Jul 2015 02:22:02 +0300
 
-libmaxminddb (1.0.2-1) unstable; urgency=low
+libmaxminddb (1.0.4-1) unstable; urgency=medium
 
   * Initial release. (Closes: #741199)
 
- -- Faidon Liambotis <paravoid@debian.org>  Mon, 10 Nov 2014 16:52:17 +0200
+ -- Faidon Liambotis <paravoid@debian.org>  Tue, 12 May 2015 19:30:28 +0300
