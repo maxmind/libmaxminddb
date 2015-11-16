@@ -1,4 +1,4 @@
-## 1.1.2
+## 1.1.2 - 2015-11-16
 
 * Added pkg-config support. If your system supports it, then running `make
   install` now installs a `libmaxminddb.pc` file for pkgconfig. Implemented by
