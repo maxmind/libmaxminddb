@@ -2,7 +2,7 @@
 
 * IMPORTANT: This release includes a number of important security fixes. Among
   these fixes is improved validation of the database metadata. Unfortunately,
-  MaxMind GeoIP2 and GeoLite2 databases created earlier than January 28, 2014,
+  MaxMind GeoIP2 and GeoLite2 databases created earlier than January 28, 2014
   had an invalid data type for the `record_size` in the metadata. Previously
   these databases worked on little endian machines with libmaxminddb but did
   not work on big endian machines. Due to increased safety checks when reading
