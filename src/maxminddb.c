@@ -597,6 +597,9 @@ LOCAL int value_for_key_as_string(MMDB_entry_s *start, char *key,
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = mmdb_strndup((char *)entry_data.utf8_string, entry_data.data_size);
+    if (NULL == *value) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
     return MMDB_SUCCESS;
 }
 
