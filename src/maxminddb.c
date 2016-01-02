@@ -335,6 +335,10 @@ LOCAL int map_file(MMDB_s *const mmdb)
     }
 
     size = s.st_size;
+    if (size < 0 || size != s.st_size) {
+            status = MMDB_OUT_OF_MEMORY_ERROR;
+            goto cleanup;
+    }
 
     uint8_t *file_content =
         (uint8_t *)mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
