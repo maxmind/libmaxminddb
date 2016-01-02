@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -620,6 +621,9 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     MMDB_entry_data_list_s *first_member = member;
 
     uint32_t array_size = member->entry_data.data_size;
+    if (array_size > SIZE_MAX / sizeof(char *)) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
     mmdb->metadata.languages.count = 0;
     mmdb->metadata.languages.names = malloc(array_size * sizeof(char *));
     if (NULL == mmdb->metadata.languages.names) {
@@ -684,6 +688,9 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         goto cleanup;
     }
 
+    if (map_size > SIZE_MAX / sizeof(MMDB_description_s *)) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
     mmdb->metadata.description.descriptions =
         malloc(map_size * sizeof(MMDB_description_s *));
     if (NULL == mmdb->metadata.description.descriptions) {
@@ -1057,6 +1064,9 @@ int MMDB_vget_value(MMDB_entry_s *const start,
     const char *path_elem;
     int i = 0;
 
+    if (length > SIZE_MAX / sizeof(const char *) - 1) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
     const char **path = malloc((length + 1) * sizeof(const char *));
     if (NULL == path) {
         return MMDB_OUT_OF_MEMORY_ERROR;
@@ -1958,11 +1968,17 @@ LOCAL void print_indentation(FILE *stream, int i)
 
 LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
 {
-    char *hex_string = malloc((size * 2) + 1);
-    char *hex_pointer = hex_string;
+    char *hex_string;
+    if (size > SIZE_MAX / 2 - 1) {
+        return (char *)MMDB_strerror(MMDB_INVALID_METADATA_ERROR);
+    }
+    hex_string = malloc((size * 2) + 1);
+    if (NULL == hex_string) {
+        return (char *)MMDB_strerror(MMDB_OUT_OF_MEMORY_ERROR);
+    }
 
     for (uint32_t i = 0; i < size; i++) {
-        sprintf(hex_pointer + (2 * i), "%02X", bytes[i]);
+        sprintf(hex_string + (2 * i), "%02X", bytes[i]);
     }
 
     return hex_string;
