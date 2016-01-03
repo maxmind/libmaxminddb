@@ -3,6 +3,13 @@
 * Added several additional checks to make sure that we don't attempt to read
   past the end of the databases's data section. Implemented by Tobias
   Stoeckmann. GitHub #103.
+  
+* When searching for the database metadata, there was a bug that caused the
+  code to think it had found valid metadata when none existed. In addition,
+  this could lead to an attempt to read past the end of the database
+  entirely. Finally, if there are multiple metadata markers in the database,
+  we treat the final one as the start of the metdata, instead of the first.
+  Implemented by Tobias Stoeckmann. GitHub #102.
 
 
 ## 1.1.2 - 2015-11-16

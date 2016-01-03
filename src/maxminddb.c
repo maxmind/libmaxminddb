@@ -365,26 +365,37 @@ LOCAL int map_file(MMDB_s *const mmdb)
 LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                                    ssize_t file_size, uint32_t *metadata_size)
 {
+    const ssize_t marker_len = sizeof(METADATA_MARKER) - 1;
     ssize_t max_size = file_size >
                        METADATA_BLOCK_MAX_SIZE ? METADATA_BLOCK_MAX_SIZE :
                        file_size;
 
     uint8_t *search_area = (uint8_t *)(file_content + (file_size - max_size));
+    uint8_t *start = search_area;
     uint8_t *tmp;
     do {
         tmp = mmdb_memmem(search_area, max_size,
-                          METADATA_MARKER, strlen(METADATA_MARKER));
+                          METADATA_MARKER, marker_len);
 
         if (NULL != tmp) {
             max_size -= tmp - search_area;
             search_area = tmp;
+
+            /* Continue searching just after the marker we just read, in case
+             * there are multiple markers in the same file. This would be odd
+             * but is certainly not impossible. */
+            max_size -= marker_len;
+            search_area += marker_len;
         }
-    } while (NULL != tmp && tmp != search_area);
+    } while (NULL != tmp);
 
-    const uint8_t *metadata_start = search_area + strlen(METADATA_MARKER);
-    *metadata_size = file_size - (search_area - file_content);
+    if (search_area == start) {
+        return NULL;
+    }
 
-    return metadata_start;
+    *metadata_size = max_size;
+
+    return search_area;
 }
 
 LOCAL int read_metadata(MMDB_s *mmdb)
