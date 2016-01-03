@@ -1,3 +1,10 @@
+## 1.1.3
+
+* Added several additional checks to make sure that we don't attempt to read
+  past the end of the databases's data section. Implemented by Tobias
+  Stoeckmann. GitHub #103.
+
+
 ## 1.1.2 - 2015-11-16
 
 * IMPORTANT: This release includes a number of important security fixes. Among

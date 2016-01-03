@@ -1290,7 +1290,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
 {
     const uint8_t *mem = mmdb->data_section;
 
-    if (offset > mmdb->data_section_size) {
+    if (offset + 1 > mmdb->data_section_size) {
         return MMDB_INVALID_DATA_ERROR;
     }
 
@@ -1307,6 +1307,9 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     DEBUG_MSGF("Type: %i (%s)", type, type_num_to_name(type));
 
     if (type == MMDB_DATA_TYPE_EXTENDED) {
+        if (offset + 1 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         type = get_ext_type(mem[offset++]);
         DEBUG_MSGF("Extended type: %i (%s)", type, type_num_to_name(type));
     }
@@ -1317,6 +1320,9 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         int psize = (ctrl >> 3) & 3;
         DEBUG_MSGF("Pointer size: %i", psize);
 
+        if (offset + psize + 1 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         entry_data->pointer = get_ptr_from(ctrl, &mem[offset], psize);
         DEBUG_MSGF("Pointer to: %i", entry_data->pointer);
 
@@ -1328,13 +1334,22 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     uint32_t size = ctrl & 31;
     switch (size) {
     case 29:
+        if (offset + 1 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         size = 29 + mem[offset++];
         break;
     case 30:
+        if (offset + 2 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         size = 285 + get_uint16(&mem[offset]);
         offset += 2;
         break;
     case 31:
+        if (offset + 3 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         size = 65821 + get_uint24(&mem[offset]);
         offset += 3;
     default:
