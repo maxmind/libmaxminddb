@@ -34,7 +34,7 @@
   install` now installs a `libmaxminddb.pc` file for pkgconfig. Implemented by
   Jan Vcelak.
 * Several segmentation faults found with afl-fuzz were fixed. These were
-  caused by missing bounds checking and missing verification of data type.
+  caused by missing bounds checking and missing data type verification checks.
 * `MMDB_get_entry_data_list` will now fail on data structures with a depth
   greater than 512 and data structures that are cyclic. This should not
   affect any known MaxMind DB in production. All databases produced by
