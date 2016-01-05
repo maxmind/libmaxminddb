@@ -267,7 +267,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
                                 mmdb->full_record_byte_size;
 
     mmdb->data_section = mmdb->file_content + search_tree_size;
-    if (search_tree_size > mmdb->file_size) {
+    if (search_tree_size > (uint32_t)mmdb->file_size) {
         status = MMDB_INVALID_METADATA_ERROR;
         goto cleanup;
     }
@@ -1970,8 +1970,9 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
 #if MMDB_UINT128_IS_BYTE_ARRAY
         char *hex_string =
             bytes_to_hex((uint8_t *)entry_data_list->entry_data.uint128, 16);
-        if (NULL == bytes) {
-            return MMDB_OUT_OF_MEMORY_ERROR;
+        if (NULL == hex_string) {
+            *status = MMDB_OUT_OF_MEMORY_ERROR;
+            return NULL;
         }
         fprintf(stream, "0x%s <uint128>\n", hex_string);
         free(hex_string);
