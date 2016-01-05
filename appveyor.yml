@@ -19,7 +19,10 @@ test_script:
   #ENDEXES
 
 notifications:
-  - provider: HipChat
-    auth_token:
-      secure: NtKXu/kGk8Td4YqCH95camAcNQtB3rMll+5DALAmbDY=
-    room: dev
+  - provider: Email
+    to:
+      - dev-ci@maxmind.com
+    subject: 'AppVeyor build {{status}}'
+    on_build_success: false
+    on_build_failure: true
+    on_build_status_changed: true
