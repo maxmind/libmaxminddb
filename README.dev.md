@@ -23,6 +23,11 @@ updating the Homebrew recipe for this library.
 
 ## PPA
 
+In order to upload a PPA, you have to create a launchpad.net account and
+register a GPG key with that account. You also need to be added to the MaxMind
+team. Ask in the dev channel for someone to add you. See
+https://help.launchpad.net/Packaging/PPA for more details.
+
 Current PPA process (should be added to release script):
 
 1. git co ubuntu-ppa
