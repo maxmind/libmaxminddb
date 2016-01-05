@@ -8,7 +8,7 @@ addons:
     project:
       name: "maxmind/libmaxminddb"
       description: "Build submitted via Travis CI"
-    notification_email: dev@maxmind.com
+    notification_email: dev-ci@maxmind.com
     build_command_prepend: "./configure; make clean"
     build_command:   "make -j 4"
     branch_pattern: .*coverity.*
@@ -31,7 +31,7 @@ script:
 notifications:
   email:
     recipients:
-      - dev@maxmind.com
+      - dev-ci@maxmind.com
     on_success: change
     on_failure: always
 

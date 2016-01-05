@@ -1,10 +1,40 @@
+## 1.1.3 - 2016-01-05
+
+* Added several additional checks to make sure that we don't attempt to read
+  past the end of the databases's data section. Implemented by Tobias
+  Stoeckmann. GitHub #103.
+* When searching for the database metadata, there was a bug that caused the
+  code to think it had found valid metadata when none existed. In addition,
+  this could lead to an attempt to read past the end of the database
+  entirely. Finally, if there are multiple metadata markers in the database,
+  we treat the final one as the start of the metdata, instead of the first.
+  Implemented by Tobias Stoeckmann. GitHub #102.
+* Don't attempt to mmap a file that is too large to be mmapped on the
+  system. Implemented by Tobias Stoeckmann. GitHub #101.
+* Added a missing out of memory check when reading a file's
+  metadata. Implemented by Tobias Stoeckmann. GitHub #101.
+* Added several additional checks to make sure that we never attempt to
+  `malloc` more than `SIZE_MAX` memory, which would lead to integer
+  overflow. This could only happen with pathological databases. Implemented by
+  Tobias Stoeckmann. GitHub #101.
+
+
 ## 1.1.2 - 2015-11-16
 
+* IMPORTANT: This release includes a number of important security fixes. Among
+  these fixes is improved validation of the database metadata. Unfortunately,
+  MaxMind GeoIP2 and GeoLite2 databases created earlier than January 28, 2014
+  had an invalid data type for the `record_size` in the metadata. Previously
+  these databases worked on little endian machines with libmaxminddb but did
+  not work on big endian machines. Due to increased safety checks when reading
+  the file, these databases will no longer work on any platform. If you are
+  using one of these databases, we recommend that you upgrade to the latest
+  GeoLite2 or GeoIP2 database
 * Added pkg-config support. If your system supports it, then running `make
   install` now installs a `libmaxminddb.pc` file for pkgconfig. Implemented by
   Jan Vcelak.
 * Several segmentation faults found with afl-fuzz were fixed. These were
-  caused by missing bounds checking and missing verification of data type.
+  caused by missing bounds checking and missing data type verification checks.
 * `MMDB_get_entry_data_list` will now fail on data structures with a depth
   greater than 512 and data structures that are cyclic. This should not
   affect any known MaxMind DB in production. All databases produced by

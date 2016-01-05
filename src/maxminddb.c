@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -104,6 +105,18 @@ DEBUG_FUNC char *type_num_to_name(uint8_t num)
         return "unknown type";
     }
 }
+#endif
+
+/* None of the values we check on the lhs are bigger than uint32_t, so on
+ * platforms where SIZE_MAX is a 64-bit integer, this would be a no-op, and it
+ * makes the compiler complain if we do the check anyway. */
+#if SIZE_MAX == UINT32_MAX
+#define MAYBE_CHECK_SIZE_OVERFLOW(lhs, rhs, error) \
+    if ((lhs) > (rhs)) {                           \
+        return error;                              \
+    }
+#else
+#define MAYBE_CHECK_SIZE_OVERFLOW(...)
 #endif
 
 typedef struct record_info_s {
@@ -254,7 +267,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
                                 mmdb->full_record_byte_size;
 
     mmdb->data_section = mmdb->file_content + search_tree_size;
-    if (search_tree_size > mmdb->file_size) {
+    if (search_tree_size > (uint32_t)mmdb->file_size) {
         status = MMDB_INVALID_METADATA_ERROR;
         goto cleanup;
     }
@@ -335,6 +348,10 @@ LOCAL int map_file(MMDB_s *const mmdb)
     }
 
     size = s.st_size;
+    if (size < 0 || size != s.st_size) {
+        status = MMDB_OUT_OF_MEMORY_ERROR;
+        goto cleanup;
+    }
 
     uint8_t *file_content =
         (uint8_t *)mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
@@ -365,26 +382,37 @@ LOCAL int map_file(MMDB_s *const mmdb)
 LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                                    ssize_t file_size, uint32_t *metadata_size)
 {
+    const ssize_t marker_len = sizeof(METADATA_MARKER) - 1;
     ssize_t max_size = file_size >
                        METADATA_BLOCK_MAX_SIZE ? METADATA_BLOCK_MAX_SIZE :
                        file_size;
 
     uint8_t *search_area = (uint8_t *)(file_content + (file_size - max_size));
+    uint8_t *start = search_area;
     uint8_t *tmp;
     do {
         tmp = mmdb_memmem(search_area, max_size,
-                          METADATA_MARKER, strlen(METADATA_MARKER));
+                          METADATA_MARKER, marker_len);
 
         if (NULL != tmp) {
             max_size -= tmp - search_area;
             search_area = tmp;
+
+            /* Continue searching just after the marker we just read, in case
+             * there are multiple markers in the same file. This would be odd
+             * but is certainly not impossible. */
+            max_size -= marker_len;
+            search_area += marker_len;
         }
-    } while (NULL != tmp && tmp != search_area);
+    } while (NULL != tmp);
 
-    const uint8_t *metadata_start = search_area + strlen(METADATA_MARKER);
-    *metadata_size = file_size - (search_area - file_content);
+    if (search_area == start) {
+        return NULL;
+    }
 
-    return metadata_start;
+    *metadata_size = max_size;
+
+    return search_area;
 }
 
 LOCAL int read_metadata(MMDB_s *mmdb)
@@ -519,6 +547,9 @@ LOCAL int value_for_key_as_uint16(MMDB_entry_s *start, char *key,
         return status;
     }
     if (MMDB_DATA_TYPE_UINT16 != entry_data.type) {
+        DEBUG_MSGF("expect uint16 for %s but received %s", key,
+                   type_num_to_name(
+                       entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = entry_data.uint16;
@@ -535,6 +566,9 @@ LOCAL int value_for_key_as_uint32(MMDB_entry_s *start, char *key,
         return status;
     }
     if (MMDB_DATA_TYPE_UINT32 != entry_data.type) {
+        DEBUG_MSGF("expect uint32 for %s but received %s", key,
+                   type_num_to_name(
+                       entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = entry_data.uint32;
@@ -551,6 +585,9 @@ LOCAL int value_for_key_as_uint64(MMDB_entry_s *start, char *key,
         return status;
     }
     if (MMDB_DATA_TYPE_UINT64 != entry_data.type) {
+        DEBUG_MSGF("expect uint64 for %s but received %s", key,
+                   type_num_to_name(
+                       entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = entry_data.uint64;
@@ -567,9 +604,15 @@ LOCAL int value_for_key_as_string(MMDB_entry_s *start, char *key,
         return status;
     }
     if (MMDB_DATA_TYPE_UTF8_STRING != entry_data.type) {
+        DEBUG_MSGF("expect string for %s but received %s", key,
+                   type_num_to_name(
+                       entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
     *value = mmdb_strndup((char *)entry_data.utf8_string, entry_data.data_size);
+    if (NULL == *value) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
     return MMDB_SUCCESS;
 }
 
@@ -601,6 +644,9 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
     MMDB_entry_data_list_s *first_member = member;
 
     uint32_t array_size = member->entry_data.data_size;
+    MAYBE_CHECK_SIZE_OVERFLOW(array_size, SIZE_MAX / sizeof(char *),
+                              MMDB_INVALID_METADATA_ERROR);
+
     mmdb->metadata.languages.count = 0;
     mmdb->metadata.languages.names = malloc(array_size * sizeof(char *));
     if (NULL == mmdb->metadata.languages.names) {
@@ -664,6 +710,8 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         mmdb->metadata.description.descriptions = NULL;
         goto cleanup;
     }
+    MAYBE_CHECK_SIZE_OVERFLOW(map_size, SIZE_MAX / sizeof(MMDB_description_s *),
+                              MMDB_INVALID_METADATA_ERROR);
 
     mmdb->metadata.description.descriptions =
         malloc(map_size * sizeof(MMDB_description_s *));
@@ -1038,6 +1086,9 @@ int MMDB_vget_value(MMDB_entry_s *const start,
     const char *path_elem;
     int i = 0;
 
+    MAYBE_CHECK_SIZE_OVERFLOW(length, SIZE_MAX / sizeof(const char *) - 1,
+                              MMDB_INVALID_METADATA_ERROR);
+
     const char **path = malloc((length + 1) * sizeof(const char *));
     if (NULL == path) {
         return MMDB_OUT_OF_MEMORY_ERROR;
@@ -1278,7 +1329,7 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
 {
     const uint8_t *mem = mmdb->data_section;
 
-    if (offset > mmdb->data_section_size) {
+    if (offset + 1 > mmdb->data_section_size) {
         return MMDB_INVALID_DATA_ERROR;
     }
 
@@ -1295,6 +1346,9 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     DEBUG_MSGF("Type: %i (%s)", type, type_num_to_name(type));
 
     if (type == MMDB_DATA_TYPE_EXTENDED) {
+        if (offset + 1 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         type = get_ext_type(mem[offset++]);
         DEBUG_MSGF("Extended type: %i (%s)", type, type_num_to_name(type));
     }
@@ -1305,6 +1359,9 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         int psize = (ctrl >> 3) & 3;
         DEBUG_MSGF("Pointer size: %i", psize);
 
+        if (offset + psize + 1 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         entry_data->pointer = get_ptr_from(ctrl, &mem[offset], psize);
         DEBUG_MSGF("Pointer to: %i", entry_data->pointer);
 
@@ -1316,13 +1373,22 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     uint32_t size = ctrl & 31;
     switch (size) {
     case 29:
+        if (offset + 1 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         size = 29 + mem[offset++];
         break;
     case 30:
+        if (offset + 2 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         size = 285 + get_uint16(&mem[offset]);
         offset += 2;
         break;
     case 31:
+        if (offset + 3 > mmdb->data_section_size) {
+            return MMDB_INVALID_DATA_ERROR;
+        }
         size = 65821 + get_uint24(&mem[offset]);
         offset += 3;
     default:
@@ -1904,6 +1970,10 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
 #if MMDB_UINT128_IS_BYTE_ARRAY
         char *hex_string =
             bytes_to_hex((uint8_t *)entry_data_list->entry_data.uint128, 16);
+        if (NULL == hex_string) {
+            *status = MMDB_OUT_OF_MEMORY_ERROR;
+            return NULL;
+        }
         fprintf(stream, "0x%s <uint128>\n", hex_string);
         free(hex_string);
 #else
@@ -1939,11 +2009,16 @@ LOCAL void print_indentation(FILE *stream, int i)
 
 LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
 {
-    char *hex_string = malloc((size * 2) + 1);
-    char *hex_pointer = hex_string;
+    char *hex_string;
+    MAYBE_CHECK_SIZE_OVERFLOW(size, SIZE_MAX / 2 - 1, NULL);
+
+    hex_string = malloc((size * 2) + 1);
+    if (NULL == hex_string) {
+        return NULL;
+    }
 
     for (uint32_t i = 0; i < size; i++) {
-        sprintf(hex_pointer + (2 * i), "%02X", bytes[i]);
+        sprintf(hex_string + (2 * i), "%02X", bytes[i]);
     }
 
     return hex_string;
