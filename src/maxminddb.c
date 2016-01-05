@@ -1971,7 +1971,8 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
         char *hex_string =
             bytes_to_hex((uint8_t *)entry_data_list->entry_data.uint128, 16);
         if (NULL == bytes) {
-            return MMDB_OUT_OF_MEMORY_ERROR;
+            *status = MMDB_OUT_OF_MEMORY_ERROR;
+            return NULL;
         }
         fprintf(stream, "0x%s <uint128>\n", hex_string);
         free(hex_string);
