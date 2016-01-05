@@ -267,7 +267,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
                                 mmdb->full_record_byte_size;
 
     mmdb->data_section = mmdb->file_content + search_tree_size;
-    if (search_tree_size > mmdb->file_size) {
+    if (search_tree_size > (uint32_t)mmdb->file_size) {
         status = MMDB_INVALID_METADATA_ERROR;
         goto cleanup;
     }
