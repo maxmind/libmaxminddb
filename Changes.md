@@ -1,4 +1,4 @@
-## 1.1.3
+## 1.1.3 - 2016-01-05
 
 * Added several additional checks to make sure that we don't attempt to read
   past the end of the databases's data section. Implemented by Tobias
