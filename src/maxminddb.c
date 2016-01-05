@@ -1970,7 +1970,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
 #if MMDB_UINT128_IS_BYTE_ARRAY
         char *hex_string =
             bytes_to_hex((uint8_t *)entry_data_list->entry_data.uint128, 16);
-        if (NULL == bytes) {
+        if (NULL == hex_string) {
             *status = MMDB_OUT_OF_MEMORY_ERROR;
             return NULL;
         }
