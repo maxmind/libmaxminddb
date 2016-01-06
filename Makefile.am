@@ -13,7 +13,7 @@ dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
 	find $(distdir) -name '.git*' | xargs rm -fr
 
-safedist: dist
+safedist: clean dist
 	tmpdir="$${TMPDIR-/tmp}/safedist-$$$$" \
 	  && mkdir "$$tmpdir" \
 	  && tar -xvf $(distdir).tar.gz --directory "$$tmpdir" \
