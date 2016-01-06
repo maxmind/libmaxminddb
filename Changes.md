@@ -1,6 +1,6 @@
 ## 1.1.4 - 2016-01-06
 
-* Packaging fixed. The 1.1.3 tarball release contained a lot of extra junk in
+* Packaging fixes. The 1.1.3 tarball release contained a lot of extra junk in
   the t/ directory.
 
 
