@@ -15,7 +15,8 @@ updating the Homebrew recipe for this library.
 
 * Go to https://github.com/maxmind/libmaxminddb/releases
 * GitHub will already have a release for the tag you just created.
-* Click "Edit" next to the tag.
+* Click on the new tag new.
+* Click on "Edit tag".
 * Give the release a title summarizing the changes.
 * Paste in the changes from the `Changes.md` file as the body.
 * Attach the release tarball you just created.
