@@ -18,7 +18,9 @@ language: c
 compiler:
   - clang
   - gcc
-
+env:
+  global:
+    - secure: a2pXNVW/lGrMdJTal+pzH0J5N69RdBErwe2dHU2xDnOeNcDYmiSxmU4Fw52KPYXFzdlR9GuEyZtHtesRQthSHpylcIvfJJCih7EvwbNQ5pfplpT5ri2PKPFWB11ebr6vG23Ucgc5lrqHdgIgv+QtqVmW1IDf0hq62itMpu4MwcQ=
 before_script:
   - ./bootstrap
   - CFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter" ./configure
@@ -30,11 +32,10 @@ script:
 
 notifications:
   email:
+    on_failure: always
+    on_success: change
     recipients:
       - dev-ci@maxmind.com
-    on_success: change
-    on_failure: always
-
-env:
-  global:
-   - secure: "a2pXNVW/lGrMdJTal+pzH0J5N69RdBErwe2dHU2xDnOeNcDYmiSxmU4Fw52KPYXFzdlR9GuEyZtHtesRQthSHpylcIvfJJCih7EvwbNQ5pfplpT5ri2PKPFWB11ebr6vG23Ucgc5lrqHdgIgv+QtqVmW1IDf0hq62itMpu4MwcQ="
+  slack:
+    rooms:
+      secure: "CoXYwhwOA8xi4EM84Eo04hfzhZVAwYVWpa7uEvJmwzcTJHSjoz/EJTMhihgW+zOYMQTDlIho/XIkg+Hh4MurZm9OKMLHbqmeQXN0melf3uscLklKLM1fHssZd1HPsP5ALb+tTHe3m+QuSh+2fHGotfMr8QxVkdrVUJUaEsbOfcQ=\n"
