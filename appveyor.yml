@@ -1,8 +1,7 @@
+---
 install:
   - git submodule update --init --recursive
-
 test_script:
-  #EXES
   - .\projects\VS12\Debug\test_bad_pointers.exe
   - .\projects\VS12\Debug\test_basic_lookup.exe
   - .\projects\VS12\Debug\test_data_entry_list.exe
@@ -16,13 +15,18 @@ test_script:
   - .\projects\VS12\Debug\test_no_map_get_value.exe
   - .\projects\VS12\Debug\test_read_node.exe
   - .\projects\VS12\Debug\test_version.exe
-  #ENDEXES
-
 notifications:
-  - provider: Email
-    to:
-      - dev-ci@maxmind.com
-    subject: 'AppVeyor build {{status}}'
-    on_build_success: false
+  - auth_token:
+      secure: X+ymndzchVeC2LYsehzOt6CXEE+3wWDMYHJuOnFXIOHm8ByI2sHXCWRYQaDeSQs+iawQR9QvuRla/BSmtZBfow==
+    channel: ci
     on_build_failure: true
     on_build_status_changed: true
+    on_build_success: false
+    provider: Slack
+  - on_build_failure: true
+    on_build_status_changed: true
+    on_build_success: false
+    provider: Email
+    subject: 'AppVeyor build {{status}}'
+    to:
+      - dev-ci@maxmind.com
