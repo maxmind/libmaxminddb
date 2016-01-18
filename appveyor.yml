@@ -17,7 +17,7 @@ test_script:
   - .\projects\VS12\Debug\test_version.exe
 notifications:
   - auth_token:
-      secure: X+ymndzchVeC2LYsehzOt6CXEE+3wWDMYHJuOnFXIOHm8ByI2sHXCWRYQaDeSQs+iawQR9QvuRla/BSmtZBfow==
+      secure: X+ymndzchVeC2LYsehzOt/GEMFfZJeTENeAU9lwNwTuCxBXFJNkuwZLd9joAtHgykHQoYqmEv/nH64+MA6nTlw==
     channel: ci
     on_build_failure: true
     on_build_status_changed: true
