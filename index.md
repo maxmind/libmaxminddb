@@ -204,7 +204,7 @@ The `entry` member is used to look up the data associated with the IP address.
 
 The `netmask` member tells you what subnet the IP address belongs to in this
 database. For example, if you look up the address `1.1.1.1` in an IPv4 database
-and the returned `netmask` is 16, then the address is part of the `1.1.1.0/16`
+and the returned `netmask` is 16, then the address is part of the `1.1.0.0/16`
 subnet.
 
 ## `MMDB_result_s`
