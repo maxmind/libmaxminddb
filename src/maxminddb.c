@@ -812,20 +812,13 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
 LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
 {
     struct addrinfo hints = {
+        .ai_family = AF_UNSPEC,
+        .ai_flags = AI_NUMERICHOST,
+        // We set ai_socktype so that we only get one result back
         .ai_socktype = SOCK_STREAM
     };
-    int gai_status;
 
-    if (NULL != strchr(ipstr, ':')) {
-        hints.ai_flags = AI_NUMERICHOST;
-#if defined AI_V4MAPPED && !defined __FreeBSD__
-        hints.ai_flags |= AI_V4MAPPED;
-#endif
-        hints.ai_family = AF_INET6;
-    } else {
-        hints.ai_flags = AI_NUMERICHOST;
-        hints.ai_family = AF_INET;
-    }
+    int gai_status;
 
     gai_status = getaddrinfo(ipstr, NULL, &hints, addresses);
     if (gai_status) {

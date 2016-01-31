@@ -1,3 +1,6 @@
+* When resolving an address, this library now relies on `getaddrinfo` to
+  determine the address family rather than trying to guess it itself.
+
 ## 1.1.4 - 2016-01-06
 
 * Packaging fixes. The 1.1.3 tarball release contained a lot of extra junk in
