@@ -788,20 +788,10 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
     struct addrinfo *addresses = NULL;
     *gai_error = resolve_any_address(ipstr, &addresses);
 
-    if (*gai_error) {
-        goto cleanup;
+    if (!*gai_error) {
+        result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
     }
 
-    if (mmdb->metadata.ip_version == 4
-        && addresses->ai_addr->sa_family == AF_INET6) {
-
-        *mmdb_error = MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR;
-        goto cleanup;
-    }
-
-    result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
-
- cleanup:
     if (NULL != addresses) {
         freeaddrinfo(addresses);
     }
@@ -812,22 +802,13 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
 LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
 {
     struct addrinfo hints = {
+        .ai_family = AF_UNSPEC,
+        .ai_flags = AI_NUMERICHOST,
+        // We set ai_socktype so that we only get one result back
         .ai_socktype = SOCK_STREAM
     };
-    int gai_status;
 
-    if (NULL != strchr(ipstr, ':')) {
-        hints.ai_flags = AI_NUMERICHOST;
-#if defined AI_V4MAPPED && !defined __FreeBSD__
-        hints.ai_flags |= AI_V4MAPPED;
-#endif
-        hints.ai_family = AF_INET6;
-    } else {
-        hints.ai_flags = AI_NUMERICHOST;
-        hints.ai_family = AF_INET;
-    }
-
-    gai_status = getaddrinfo(ipstr, NULL, &hints, addresses);
+    int gai_status = getaddrinfo(ipstr, NULL, &hints, addresses);
     if (gai_status) {
         return gai_status;
     }
@@ -852,6 +833,7 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(
     uint8_t mapped_address[16], *address;
     if (mmdb->metadata.ip_version == 4) {
         if (sockaddr->sa_family == AF_INET6) {
+            *mmdb_error = MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR;
             return result;
         }
         address = (uint8_t *)&((struct sockaddr_in *)sockaddr)->sin_addr.s_addr;
