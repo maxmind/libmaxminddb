@@ -788,20 +788,10 @@ MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
     struct addrinfo *addresses = NULL;
     *gai_error = resolve_any_address(ipstr, &addresses);
 
-    if (*gai_error) {
-        goto cleanup;
+    if (!*gai_error) {
+        result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
     }
 
-    if (mmdb->metadata.ip_version == 4
-        && addresses->ai_addr->sa_family == AF_INET6) {
-
-        *mmdb_error = MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR;
-        goto cleanup;
-    }
-
-    result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
-
- cleanup:
     if (NULL != addresses) {
         freeaddrinfo(addresses);
     }
@@ -818,9 +808,7 @@ LOCAL int resolve_any_address(const char *ipstr, struct addrinfo **addresses)
         .ai_socktype = SOCK_STREAM
     };
 
-    int gai_status;
-
-    gai_status = getaddrinfo(ipstr, NULL, &hints, addresses);
+    int gai_status = getaddrinfo(ipstr, NULL, &hints, addresses);
     if (gai_status) {
         return gai_status;
     }
@@ -845,6 +833,7 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(
     uint8_t mapped_address[16], *address;
     if (mmdb->metadata.ip_version == 4) {
         if (sockaddr->sa_family == AF_INET6) {
+            *mmdb_error = MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR;
             return result;
         }
         address = (uint8_t *)&((struct sockaddr_in *)sockaddr)->sin_addr.s_addr;

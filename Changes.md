@@ -1,3 +1,7 @@
+* `MMDB_lookup_sockaddr` will set `mmdb_error` to
+  `MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR` if an IPv6 `sockaddr` is looked up
+  in an IPv4-only database. Previously only `MMDB_lookup_string` would set
+  this error code.
 * When resolving an address, this library now relies on `getaddrinfo` to
   determine the address family rather than trying to guess it itself.
 
