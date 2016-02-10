@@ -1,7 +1,7 @@
 Source: libmaxminddb
 Section: net
 Priority: optional
-Maintainer: Faidon Liambotis <paravoid@debian.org>
+Maintainer: Gregory J. Oschwald <goschwald@maxmind.com>
 Build-Depends: debhelper (>= 9), dh-autoreconf,
  perl,
  libipc-run3-perl,
@@ -13,8 +13,8 @@ Build-Depends: debhelper (>= 9), dh-autoreconf,
  libfile-which-perl
 Standards-Version: 3.9.6.1
 Homepage: http://maxmind.github.io/libmaxminddb/
-Vcs-Git: git://anonscm.debian.org/collab-maint/libmaxminddb.git
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/libmaxminddb.git;a=summary
+Vcs-Git: git://github.com/maxmind/libmaxminddb.git
+Vcs-Browser: https://github.com/maxmind/libmaxminddb/
 
 Package: libmaxminddb0
 Section: libs
@@ -82,4 +82,4 @@ Description: IP geolocation lookup command-line tool
  Commons Attribution-ShareAlike 3.0 Unported License.
  .
  This package contains the command line utilities to resolve IPs using the
- libmaxminddb library. 
+ libmaxminddb library.
