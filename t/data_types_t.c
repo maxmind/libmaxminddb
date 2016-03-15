@@ -424,11 +424,6 @@ void run_tests(int mode, const char *mode_desc)
             "got a result entry struct for IP address in the database - %s - %s - %s",
             ip, filename, mode_desc);
 
-        cmp_ok(
-            result.entry.offset, ">", 0,
-            "result.entry.offset > 0 for address in the database - %s - %s - %s",
-            ip, filename, mode_desc);
-
         test_all_data_types_as_zero(&result, ip, filename, mode_desc);
     }
 
