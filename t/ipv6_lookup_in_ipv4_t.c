@@ -18,7 +18,7 @@ void run_tests(int mode, const char *mode_desc)
 
     struct addrinfo hints = {
         .ai_family = AF_INET6,
-        .ai_flags = AI_NUMERICHOST
+        .ai_flags  = AI_NUMERICHOST
     };
 
     struct addrinfo *addresses;
