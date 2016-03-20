@@ -2,10 +2,10 @@
 
 Here's what you do:
 
-## Update the package version in configure.ac
+## Add the new release to Changes.md
 
-This is specified as the second argument to `AC_INIT`. This should be
-something like 0.5.4 or 1.0.1.
+Add the version number and release date for the new release to the top of
+`Changes.md`. Follow the format of existing releases in that file.
 
 ## Run `make release` to create the git tag
 
