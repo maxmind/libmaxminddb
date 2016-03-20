@@ -1,3 +1,5 @@
+## 1.1.5 - 2016-03-20
+
 * Previously, reading a database with a pointer in the metadata would cause an
   `MMDB_INVALID_METADATA_ERROR` to be returned. This was due to an invalid
   offset being used when calculating the pointer. The `data_section` and
