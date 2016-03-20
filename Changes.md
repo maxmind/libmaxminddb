@@ -1,3 +1,26 @@
+## 1.1.5 - 2016-03-20
+
+* Previously, reading a database with a pointer in the metadata would cause an
+  `MMDB_INVALID_METADATA_ERROR` to be returned. This was due to an invalid
+  offset being used when calculating the pointer. The `data_section` and
+  `metadata_section` fields now both point to the beginning of the data
+  section. Previously, `data_section` pointed to the beginning of the data
+  separator. This will not affect anyone using only documented fields from
+  `MMDB_s`.
+* `MMDB_lookup_sockaddr` will set `mmdb_error` to
+  `MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR` if an IPv6 `sockaddr` is looked up
+  in an IPv4-only database. Previously only `MMDB_lookup_string` would set
+  this error code.
+* When resolving an address, this library now relies on `getaddrinfo` to
+  determine the address family rather than trying to guess it itself.
+
+
+## 1.1.4 - 2016-01-06
+
+* Packaging fixes. The 1.1.3 tarball release contained a lot of extra junk in
+  the t/ directory.
+
+
 ## 1.1.3 - 2016-01-05
 
 * Added several additional checks to make sure that we don't attempt to read

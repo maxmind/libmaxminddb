@@ -1,40 +1,37 @@
+---
 sudo: false
-
 addons:
   apt:
     packages:
       - libipc-run3-perl
   coverity_scan:
     project:
-      name: "maxmind/libmaxminddb"
-      description: "Build submitted via Travis CI"
+      description: Build submitted via Travis CI
+      name: maxmind/libmaxminddb
     notification_email: dev-ci@maxmind.com
-    build_command_prepend: "./configure; make clean"
-    build_command:   "make -j 4"
+    build_command_prepend: ./configure; make clean
+    build_command: make -j 4
     branch_pattern: .*coverity.*
-
 language: c
-
 compiler:
   - clang
   - gcc
-
+env:
+  global:
+    - secure: a2pXNVW/lGrMdJTal+pzH0J5N69RdBErwe2dHU2xDnOeNcDYmiSxmU4Fw52KPYXFzdlR9GuEyZtHtesRQthSHpylcIvfJJCih7EvwbNQ5pfplpT5ri2PKPFWB11ebr6vG23Ucgc5lrqHdgIgv+QtqVmW1IDf0hq62itMpu4MwcQ=
 before_script:
   - ./bootstrap
   - CFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter" ./configure
   - make
-
 script:
   - export VERBOSE=1
   - make check
-
 notifications:
   email:
+    on_failure: always
+    on_success: change
     recipients:
       - dev-ci@maxmind.com
-    on_success: change
-    on_failure: always
-
-env:
-  global:
-   - secure: "a2pXNVW/lGrMdJTal+pzH0J5N69RdBErwe2dHU2xDnOeNcDYmiSxmU4Fw52KPYXFzdlR9GuEyZtHtesRQthSHpylcIvfJJCih7EvwbNQ5pfplpT5ri2PKPFWB11ebr6vG23Ucgc5lrqHdgIgv+QtqVmW1IDf0hq62itMpu4MwcQ="
+  slack:
+    rooms:
+      secure: "CoXYwhwOA8xi4EM84Eo04hfzhZVAwYVWpa7uEvJmwzcTJHSjoz/EJTMhihgW+zOYMQTDlIho/XIkg+Hh4MurZm9OKMLHbqmeQXN0melf3uscLklKLM1fHssZd1HPsP5ALb+tTHe3m+QuSh+2fHGotfMr8QxVkdrVUJUaEsbOfcQ=\n"

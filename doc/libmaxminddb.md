@@ -199,7 +199,7 @@ The `entry` member is used to look up the data associated with the IP address.
 
 The `netmask` member tells you what subnet the IP address belongs to in this
 database. For example, if you look up the address `1.1.1.1` in an IPv4 database
-and the returned `netmask` is 16, then the address is part of the `1.1.1.0/16`
+and the returned `netmask` is 16, then the address is part of the `1.1.0.0/16`
 subnet.
 
 ## `MMDB_result_s`
@@ -365,7 +365,7 @@ status codes are:
   data structure for the entry. There are number of reasons this can
   happen. The lookup path could include a key not in a map. The lookup path
   could include an array index larger than an array. It can also happen when
-  the path expect to find a map or array where none exist.
+  the path expects to find a map or array where none exist.
 
 All status codes should be treated as `int` values.
 
@@ -480,8 +480,7 @@ If you pass an IPv6 address to a database with only IPv4 data then the
 ```c
 MMDB_lookup_result_s MMDB_lookup_sockaddr(
     MMDB_s *const mmdb,
-    const struct sockaddr *const
-    sockaddr,
+    const struct sockaddr *const sockaddr,
     int *const mmdb_error);
 ```
 

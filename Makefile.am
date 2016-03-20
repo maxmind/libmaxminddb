@@ -13,7 +13,7 @@ dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
 	find $(distdir) -name '.git*' | xargs rm -fr
 
-safedist: dist
+safedist: clean dist
 	tmpdir="$${TMPDIR-/tmp}/safedist-$$$$" \
 	  && mkdir "$$tmpdir" \
 	  && tar -xvf $(distdir).tar.gz --directory "$$tmpdir" \
@@ -30,5 +30,8 @@ man/man1/*.1:
 
 man/man3/*.3:
 	if [ ! -f man/man3/libmaxminddb.3 ]; then mkdir -p man/man3 && touch man/man3/libmaxminddb.3; fi
+
+release:
+	dev-bin/make-release.sh
 
 .PHONY: man/man1/*.1 man/man3/*.3 release
