@@ -1,3 +1,12 @@
+## 1.2.0 - 2016-03-XX
+
+* Four additional fields were added to the end of the `MMDB_search_node_s`
+  struct returned by `MMDB_read_node`. These fields allow the user to iterate
+  through the search tree without making undocumented assumptions about how
+  this library works internally and without knowing the specific details of
+  the database format. GitHub #110.
+
+
 ## 1.1.5 - 2016-03-20
 
 * Previously, reading a database with a pointer in the metadata would cause an

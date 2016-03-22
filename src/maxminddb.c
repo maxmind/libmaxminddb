@@ -155,10 +155,13 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result);
 LOCAL record_info_s record_info_for_database(MMDB_s *mmdb);
 LOCAL int find_ipv4_start_node(MMDB_s *mmdb);
-LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
-                          uint16_t netmask, MMDB_lookup_result_s *result);
+LOCAL int maybe_populate_result(MMDB_s *mmdb, uint32_t record,
+                                uint16_t netmask, MMDB_lookup_result_s *result);
+LOCAL uint8_t record_type(MMDB_s *const mmdb, uint64_t record);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
+LOCAL uint32_t data_section_offset_for_record(MMDB_s *const mmdb,
+                                              uint64_t record);
 LOCAL int path_length(va_list va_path);
 LOCAL int lookup_path_in_array(const char *path_elem, MMDB_s *mmdb,
                                MMDB_entry_data_s *entry_data);
@@ -880,7 +883,6 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
     DEBUG_NL;
     DEBUG_MSG("Looking for address in search tree");
 
-    uint32_t node_count = mmdb->metadata.node_count;
     uint32_t value = 0;
     uint16_t max_depth0 = mmdb->depth - 1;
     uint16_t start_bit = max_depth0;
@@ -893,12 +895,18 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
         DEBUG_MSGF("IPv4 start node is %u (netmask %u)",
                    mmdb->ipv4_start_node.node_value,
                    mmdb->ipv4_start_node.netmask);
+
+        uint8_t type = maybe_populate_result(mmdb,
+                                             mmdb->ipv4_start_node.node_value,
+                                             mmdb->ipv4_start_node.netmask,
+                                             result);
+        if (MMDB_RECORD_TYPE_INVALID == type) {
+            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+        }
+
         /* We have an IPv6 database with no IPv4 data */
-        if (mmdb->ipv4_start_node.node_value >= node_count) {
-            return populate_result(mmdb, node_count,
-                                   mmdb->ipv4_start_node.node_value,
-                                   mmdb->ipv4_start_node.netmask,
-                                   result);
+        if (MMDB_RECORD_TYPE_SEARCH_NODE != type) {
+            return MMDB_SUCCESS;
         }
 
         value = mmdb->ipv4_start_node.node_value;
@@ -927,20 +935,16 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
             value = record_info.left_record_getter(record_pointer);
         }
 
-        /* Ideally we'd check to make sure that a record never points to a
-         * previously seen value, but that's more complicated. For now, we can
-         * at least check that we don't end up at the top of the tree again. */
-        if (0 == value) {
-            DEBUG_MSGF("  %s record has a value of 0",
-                       bit_is_true ? "right" : "left");
+        uint8_t type = maybe_populate_result(mmdb, value, current_bit, result);
+        if (MMDB_RECORD_TYPE_INVALID == type) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
 
-        if (value >= node_count) {
-            return populate_result(mmdb, node_count, value, current_bit, result);
-        } else {
-            DEBUG_MSGF("  proceeding to search tree node %i", value);
+        if (MMDB_RECORD_TYPE_SEARCH_NODE != type) {
+            return MMDB_SUCCESS;
         }
+
+        DEBUG_MSGF("  proceeding to search tree node %i", value);
     }
 
     DEBUG_MSG(
@@ -1010,22 +1014,53 @@ LOCAL int find_ipv4_start_node(MMDB_s *mmdb)
     return MMDB_SUCCESS;
 }
 
-LOCAL int populate_result(MMDB_s *mmdb, uint32_t node_count, uint32_t value,
-                          uint16_t netmask, MMDB_lookup_result_s *result)
+LOCAL int maybe_populate_result(MMDB_s *mmdb, uint32_t record,
+                                uint16_t netmask, MMDB_lookup_result_s *result)
 {
-    // This is the offset from the end of the search tree
-    uint32_t offset = value - node_count;
-    DEBUG_MSGF("  data section offset is %i (record value = %i)", offset, value);
+    uint8_t type = record_type(mmdb, record);
 
-    if (offset > mmdb->data_section_size) {
-        return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+    if (MMDB_RECORD_TYPE_SEARCH_NODE == type ||
+        MMDB_RECORD_TYPE_INVALID == type) {
+        return type;
     }
 
     result->netmask = mmdb->depth - netmask;
-    // This is the offset from the beginning of the data section
-    result->entry.offset = offset - MMDB_DATA_SECTION_SEPARATOR;
-    result->found_entry = offset > 0 ? true : false;
-    return MMDB_SUCCESS;
+
+    result->entry.offset = data_section_offset_for_record(mmdb, record);
+
+    // type is either MMDB_RECORD_TYPE_DATA or MMDB_RECORD_TYPE_EMPTY
+    // at this point
+    result->found_entry = MMDB_RECORD_TYPE_DATA == type;
+
+    return type;
+}
+
+LOCAL uint8_t record_type(MMDB_s *const mmdb, uint64_t record)
+{
+    uint32_t node_count = mmdb->metadata.node_count;
+
+    /* Ideally we'd check to make sure that a record never points to a
+     * previously seen value, but that's more complicated. For now, we can
+     * at least check that we don't end up at the top of the tree again. */
+    if (record == 0) {
+        DEBUG_MSG("record has a value of 0");
+        return MMDB_RECORD_TYPE_INVALID;
+    }
+
+    if (record < node_count) {
+        return MMDB_RECORD_TYPE_SEARCH_NODE;
+    }
+
+    if (record == node_count) {
+        return MMDB_RECORD_TYPE_EMPTY;
+    }
+
+    if (record - node_count < mmdb->data_section_size) {
+        return MMDB_RECORD_TYPE_DATA;
+    }
+
+    DEBUG_MSG("record has a value that points outside of the database");
+    return MMDB_RECORD_TYPE_INVALID;
 }
 
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record)
@@ -1059,7 +1094,28 @@ int MMDB_read_node(MMDB_s *const mmdb, uint32_t node_number,
     record_pointer += record_info.right_record_offset;
     node->right_record = record_info.right_record_getter(record_pointer);
 
+    node->left_record_type = record_type(mmdb, node->left_record);
+    node->right_record_type = record_type(mmdb, node->right_record);
+
+    // Note that offset will be invalid if the record type is not
+    // MMDB_RECORD_TYPE_DATA, but that's ok. Any use of the record entry
+    // for other data types is a programming error.
+    node->left_record_entry = (struct MMDB_entry_s) {
+        .mmdb = mmdb,
+        .offset = data_section_offset_for_record(mmdb, node->left_record),
+    };
+    node->right_record_entry = (struct MMDB_entry_s) {
+        .mmdb = mmdb,
+        .offset = data_section_offset_for_record(mmdb, node->right_record),
+    };
+
     return MMDB_SUCCESS;
+}
+
+LOCAL uint32_t data_section_offset_for_record(MMDB_s *const mmdb,
+                                              uint64_t record)
+{
+    return record - mmdb->metadata.node_count - MMDB_DATA_SECTION_SEPARATOR;
 }
 
 int MMDB_get_value(MMDB_entry_s *const start,
