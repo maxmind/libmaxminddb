@@ -332,8 +332,27 @@ tree as opposed to looking up a specific IP address.
 typedef struct MMDB_search_node_s {
     uint64_t left_record;
     uint64_t right_record;
+    uint8_t left_record_type;
+    uint8_t right_record_type;
+    MMDB_entry_s left_record_entry;
+    MMDB_entry_s right_record_entry;
 } MMDB_search_node_s;
 ```
+
+The two record types will take one of the following values:
+
+* `MMDB_RECORD_TYPE_SEARCH_NODE` - The record points to the next search node.
+* `MMDB_RECORD_TYPE_EMPTY` - The record is a placeholder that indicates there
+  is no data for the IP address. The search should end here.
+* `MMDB_RECORD_TYPE_DATA` - The record is for data in the data section of the
+  database. Use the entry for the record when looking up the data for the
+  record.
+* `MMDB_RECORD_TYPE_INVALID` - The record is invalid. Either an invalid node
+  was looked up or the database is corrupt.
+
+The `MMDB_entry_s` for the record is only valid if the type is
+`MMDB_RECORD_TYPE_DATA`. Attempts to use an entry for other record types will
+result in an error or invalid data.
 
 # STATUS CODES
 
