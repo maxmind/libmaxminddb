@@ -29,7 +29,11 @@ register a GPG key with that account. You also need to be added to the MaxMind
 team. Ask in the dev channel for someone to add you. See
 https://help.launchpad.net/Packaging/PPA for more details.
 
-Current PPA process (should be added to release script):
+The PPA release script is at `dev-bin/ppa-release.sh`. Running it should
+guide you though the release, although it may require some changes to run on
+configurations different than Greg's machine.
+
+Pre-script PPA release process:
 
 1. git co ubuntu-ppa
 2. git merge `<TAG>`
