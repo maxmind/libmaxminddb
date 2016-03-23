@@ -1,4 +1,4 @@
-## 1.2.0 - 2016-03-XX
+## 1.2.0 - 2016-03-23
 
 * Four additional fields were added to the end of the `MMDB_search_node_s`
   struct returned by `MMDB_read_node`. These fields allow the user to iterate
