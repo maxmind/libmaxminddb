@@ -1,6 +1,21 @@
 #include "maxminddb_test_helper.h"
 
-void run_read_node_tests(MMDB_s *mmdb, const uint32_t tests[][3],
+void test_entry_data(MMDB_s *mmdb, MMDB_entry_s *entry, uint32_t node_number,
+                     char * node_record)
+{
+    MMDB_entry_data_s entry_data;
+    int status =
+        MMDB_get_value(entry, &entry_data, "ip",
+                       NULL);
+    cmp_ok(status, "==", MMDB_SUCCESS,
+           "successful data lookup for node");
+    cmp_ok(
+        entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
+        "returned entry type is UTF8_STRING for %s record of node %i",
+        node_record, node_number);
+}
+
+void run_read_node_tests(MMDB_s *mmdb, const uint32_t tests[][5],
                          int test_count,
                          uint8_t record_size)
 {
@@ -12,9 +27,25 @@ void run_read_node_tests(MMDB_s *mmdb, const uint32_t tests[][3],
             cmp_ok(node.left_record, "==", tests[i][1],
                    "left record for node %i is %i - %i bit DB",
                    node_number, tests[i][1], record_size);
-            cmp_ok(node.right_record, "==", tests[i][2],
-                   "left record for node %i is %i - %i bit DB",
-                   node_number, tests[i][2], record_size);
+            cmp_ok(node.left_record_type, "==", tests[i][2],
+                   "left record type for node %i is %i", node_number,
+                   tests[i][2]);
+            if (node.left_record_type == MMDB_RECORD_TYPE_DATA) {
+                test_entry_data(mmdb, &node.left_record_entry, node_number,
+                                "left");
+            }
+
+            cmp_ok(node.right_record, "==", tests[i][3],
+                   "right record for node %i is %i - %i bit DB",
+                   node_number, tests[i][3], record_size);
+            cmp_ok(node.right_record_type, "==", tests[i][4],
+                   "right record type for node %i is %i", node_number,
+                   tests[i][4]);
+
+            if (node.right_record_type == MMDB_RECORD_TYPE_DATA) {
+                test_entry_data(mmdb, &node.right_record_entry, node_number,
+                                "right");
+            }
         } else {
             diag("call to MMDB_read_node for node %i failed - %i bit DB",
                  node_number,
@@ -30,15 +61,23 @@ void run_24_bit_record_tests(int mode, const char *mode_desc)
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
     free((void *)path);
 
-    const uint32_t tests[5][3] = {
-        { 0,   1,   242 },
-        { 80,  81,  197 },
-        { 96,  97,  242 },
-        { 103, 242, 104 },
-        { 241, 96,  242 }
+    const uint32_t tests[7][5] = {
+        { 0,   1,   MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY },
+        { 80,  81,  MMDB_RECORD_TYPE_SEARCH_NODE, 197,
+          MMDB_RECORD_TYPE_SEARCH_NODE, },
+        { 96,  97,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY, },
+        { 103, 242, MMDB_RECORD_TYPE_EMPTY,       104,
+          MMDB_RECORD_TYPE_SEARCH_NODE, },
+        { 127, 242, MMDB_RECORD_TYPE_EMPTY,       315,
+          MMDB_RECORD_TYPE_DATA, },
+        { 132, 329, MMDB_RECORD_TYPE_DATA,       242,
+          MMDB_RECORD_TYPE_EMPTY, },
+        { 241, 96,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY, }
     };
-
-    run_read_node_tests(mmdb, tests, 5, 24);
+    run_read_node_tests(mmdb, tests, 7, 24);
 
     MMDB_close(mmdb);
     free(mmdb);
@@ -51,15 +90,23 @@ void run_28_bit_record_tests(int mode, const char *mode_desc)
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
     free((void *)path);
 
-    const uint32_t tests[5][3] = {
-        { 0,   1,   242 },
-        { 80,  81,  197 },
-        { 96,  97,  242 },
-        { 103, 242, 104 },
-        { 241, 96,  242 }
+    const uint32_t tests[7][5] = {
+        { 0,   1,   MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY },
+        { 80,  81,  MMDB_RECORD_TYPE_SEARCH_NODE, 197,
+          MMDB_RECORD_TYPE_SEARCH_NODE, },
+        { 96,  97,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY, },
+        { 103, 242, MMDB_RECORD_TYPE_EMPTY,       104,
+          MMDB_RECORD_TYPE_SEARCH_NODE, },
+        { 127, 242, MMDB_RECORD_TYPE_EMPTY,       315,
+          MMDB_RECORD_TYPE_DATA, },
+        { 132, 329, MMDB_RECORD_TYPE_DATA,       242,
+          MMDB_RECORD_TYPE_EMPTY, },
+        { 241, 96,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY, }
     };
-
-    run_read_node_tests(mmdb, tests, 5, 28);
+    run_read_node_tests(mmdb, tests, 7, 28);
 
     MMDB_close(mmdb);
     free(mmdb);
@@ -72,15 +119,24 @@ void run_32_bit_record_tests(int mode, const char *mode_desc)
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
     free((void *)path);
 
-    const uint32_t tests[5][3] = {
-        { 0,   1,   242 },
-        { 80,  81,  197 },
-        { 96,  97,  242 },
-        { 103, 242, 104 },
-        { 241, 96,  242 }
+    const uint32_t tests[7][5] = {
+        { 0,   1,   MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY },
+        { 80,  81,  MMDB_RECORD_TYPE_SEARCH_NODE, 197,
+          MMDB_RECORD_TYPE_SEARCH_NODE, },
+        { 96,  97,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY, },
+        { 103, 242, MMDB_RECORD_TYPE_EMPTY,       104,
+          MMDB_RECORD_TYPE_SEARCH_NODE, },
+        { 127, 242, MMDB_RECORD_TYPE_EMPTY,       315,
+          MMDB_RECORD_TYPE_DATA, },
+        { 132, 329, MMDB_RECORD_TYPE_DATA,       242,
+          MMDB_RECORD_TYPE_EMPTY, },
+        { 241, 96,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
+          MMDB_RECORD_TYPE_EMPTY, }
     };
 
-    run_read_node_tests(mmdb, tests, 5, 32);
+    run_read_node_tests(mmdb, tests, 7, 32);
 
     MMDB_close(mmdb);
     free(mmdb);

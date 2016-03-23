@@ -20,7 +20,7 @@ extern "C" {
 #include <winsock2.h>
 #include <ws2tcpip.h>
 /* libmaxminddb package version from configure */
-#define PACKAGE_VERSION "1.1.5"
+#define PACKAGE_VERSION "1.2.0"
 
 typedef ADDRESS_FAMILY sa_family_t;
 
@@ -53,6 +53,11 @@ typedef ADDRESS_FAMILY sa_family_t;
 #define MMDB_DATA_TYPE_END_MARKER (13)
 #define MMDB_DATA_TYPE_BOOLEAN (14)
 #define MMDB_DATA_TYPE_FLOAT (15)
+
+#define MMDB_RECORD_TYPE_SEARCH_NODE (0)
+#define MMDB_RECORD_TYPE_EMPTY (1)
+#define MMDB_RECORD_TYPE_DATA (2)
+#define MMDB_RECORD_TYPE_INVALID (3)
 
 /* flags for open */
 #define MMDB_MODE_MMAP (1)
@@ -178,6 +183,10 @@ typedef struct MMDB_s {
 typedef struct MMDB_search_node_s {
     uint64_t left_record;
     uint64_t right_record;
+    uint8_t left_record_type;
+    uint8_t right_record_type;
+    MMDB_entry_s left_record_entry;
+    MMDB_entry_s right_record_entry;
 } MMDB_search_node_s;
 
     /* *INDENT-OFF* */
