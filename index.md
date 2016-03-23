@@ -1,7 +1,7 @@
 ---
 layout: default
 title: libmaxminddb - a library for working with MaxMind DB files
-version: 1.1.4
+version: 1.2.0
 ---
 # NAME
 
@@ -337,8 +337,27 @@ tree as opposed to looking up a specific IP address.
 typedef struct MMDB_search_node_s {
     uint64_t left_record;
     uint64_t right_record;
+    uint8_t left_record_type;
+    uint8_t right_record_type;
+    MMDB_entry_s left_record_entry;
+    MMDB_entry_s right_record_entry;
 } MMDB_search_node_s;
 ```
+
+The two record types will take one of the following values:
+
+* `MMDB_RECORD_TYPE_SEARCH_NODE` - The record points to the next search node.
+* `MMDB_RECORD_TYPE_EMPTY` - The record is a placeholder that indicates there
+  is no data for the IP address. The search should end here.
+* `MMDB_RECORD_TYPE_DATA` - The record is for data in the data section of the
+  database. Use the entry for the record when looking up the data for the
+  record.
+* `MMDB_RECORD_TYPE_INVALID` - The record is invalid. Either an invalid node
+  was looked up or the database is corrupt.
+
+The `MMDB_entry_s` for the record is only valid if the type is
+`MMDB_RECORD_TYPE_DATA`. Attempts to use an entry for other record types will
+result in an error or invalid data.
 
 # STATUS CODES
 
@@ -370,7 +389,7 @@ status codes are:
   data structure for the entry. There are number of reasons this can
   happen. The lookup path could include a key not in a map. The lookup path
   could include an array index larger than an array. It can also happen when
-  the path expect to find a map or array where none exist.
+  the path expects to find a map or array where none exist.
 
 All status codes should be treated as `int` values.
 
@@ -485,8 +504,7 @@ If you pass an IPv6 address to a database with only IPv4 data then the
 ```c
 MMDB_lookup_result_s MMDB_lookup_sockaddr(
     MMDB_s *const mmdb,
-    const struct sockaddr *const
-    sockaddr,
+    const struct sockaddr *const sockaddr,
     int *const mmdb_error);
 ```
 
