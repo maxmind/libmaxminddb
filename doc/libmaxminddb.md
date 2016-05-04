@@ -758,15 +758,22 @@ This function returns the library version as a string, something like "2.0.0".
 
 ```c
 #include <maxminddb.h>
+#include <stdio.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
+//Specify the location of *.mmdb file.
+static const char* file_name = "GeoLite2-City.mmdb";
 
 int main(int argc, char **argv)
 {
     MMDB_s mmdb;
-    int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
+    int status = MMDB_open(file_name, MMDB_MODE_MMAP, &mmdb);
 
     if (MMDB_SUCCESS != status) {
         fprintf(stderr, "\n  Can't open %s - %s\n",
-                fname, MMDB_strerror(status));
+                file_name, MMDB_strerror(status));
 
         if (MMDB_IO_ERROR == status) {
             fprintf(stderr, "    IO error: %s\n", strerror(errno));
@@ -775,8 +782,10 @@ int main(int argc, char **argv)
     }
 
     int gai_error, mmdb_error;
+    //Specify a ip address which you are going to search.
+    const char* ipstr = "22.22.2.1";
     MMDB_lookup_result_s result =
-        MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
+        MMDB_lookup_string(&mmdb, ipstr, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
         fprintf(stderr,
@@ -815,7 +824,7 @@ int main(int argc, char **argv)
         fprintf(
             stderr,
             "\n  No entry for this IP address (%s) was found\n\n",
-            ip_address);
+            ipstr);
         exit_code = 5;
     }
 
