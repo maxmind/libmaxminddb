@@ -757,16 +757,22 @@ This function returns the library version as a string, something like "2.0.0".
 # EXAMPLE
 
 ```c
+#include <errno.h>
 #include <maxminddb.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char **argv)
 {
+    char *filename = argv[1];
+    char *ip_address = argv[2];
+
     MMDB_s mmdb;
-    int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
+    int status = MMDB_open(filename, MMDB_MODE_MMAP, &mmdb);
 
     if (MMDB_SUCCESS != status) {
         fprintf(stderr, "\n  Can't open %s - %s\n",
-                fname, MMDB_strerror(status));
+                filename, MMDB_strerror(status));
 
         if (MMDB_IO_ERROR == status) {
             fprintf(stderr, "    IO error: %s\n", strerror(errno));
@@ -776,12 +782,12 @@ int main(int argc, char **argv)
 
     int gai_error, mmdb_error;
     MMDB_lookup_result_s result =
-        MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
+        MMDB_lookup_string(&mmdb, ip_address, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
         fprintf(stderr,
                 "\n  Error from getaddrinfo for %s - %s\n\n",
-                ipstr, gai_strerror(gai_error));
+                ip_address, gai_strerror(gai_error));
         exit(2);
     }
 
