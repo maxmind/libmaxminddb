@@ -16,8 +16,8 @@ test_script:
   - .\projects\VS12\Debug\test_read_node.exe
   - .\projects\VS12\Debug\test_version.exe
 notifications:
-  - auth_token:
-      secure: X+ymndzchVeC2LYsehzOt/GEMFfZJeTENeAU9lwNwTuCxBXFJNkuwZLd9joAtHgykHQoYqmEv/nH64+MA6nTlw==
+  - incoming_webhook:
+      secure: 8FZP/RE3nS77Yi5UWOB/DQKCRSJxh/BYrLjVPEAkBG6mRojCz3r2mnla4O/5GwzDr7V6XCpxCP0xo1buCcZRIzRN0ZUWJ5hzEQqW5u7R+vM=
     channel: ci
     on_build_failure: true
     on_build_status_changed: true
