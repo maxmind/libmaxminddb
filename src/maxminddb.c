@@ -1744,7 +1744,9 @@ LOCAL float get_ieee754_float(const uint8_t *restrict p)
 {
     volatile float f;
     uint8_t *q = (void *)&f;
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+/* Windows builds don't use autoconf but we can assume they're all
+ * little-endian. */
+#if MMDB_LITTLE_ENDIAN || _WIN32
     q[3] = p[0];
     q[2] = p[1];
     q[1] = p[2];
@@ -1759,7 +1761,7 @@ LOCAL double get_ieee754_double(const uint8_t *restrict p)
 {
     volatile double d;
     uint8_t *q = (void *)&d;
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if MMDB_LITTLE_ENDIAN || _WIN32
     q[7] = p[0];
     q[6] = p[1];
     q[5] = p[2];

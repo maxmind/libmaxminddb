@@ -1,3 +1,10 @@
+## 1.2.1 - ?
+
+* Use autoconf to check the system's endianness rather than trying to do this
+  with compiler-defined macros like `__BYTE_ORDER__`. Apparently this didn't
+  work properly on a Sparc system. GitHub #120.
+
+
 ## 1.2.0 - 2016-03-23
 
 * Four additional fields were added to the end of the `MMDB_search_node_s`
