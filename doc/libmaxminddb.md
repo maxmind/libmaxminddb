@@ -202,6 +202,11 @@ database. For example, if you look up the address `1.1.1.1` in an IPv4 database
 and the returned `netmask` is 16, then the address is part of the `1.1.0.0/16`
 subnet.
 
+If the database is an IPv6 database, the returned netmask is always an IPv6
+prefix length (from 0-128), even if that database *also* contains IPv4
+networks. If you look up an IPv4 address and would like to turn the netmask
+into an IPv4 netmask value, you can simply subtract `96` from the value.
+
 ## `MMDB_result_s`
 
 You don't really need to dig around in this structure. You'll get this from a
