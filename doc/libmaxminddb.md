@@ -746,6 +746,12 @@ The return value is a status code. If you pass a `node_number` that is greater
 than the number of nodes in the database, this function will return
 `MMDB_INVALID_NODE_NUMBER_ERROR`, otherwise it will return `MMDB_SUCCESS`.
 
+The first node in the search tree is always node 0. If you wanted to iterate
+over the whole search tree, you would start by reading node 0 and then
+following the the records that make up this node, based on the type of each
+record. If the type is `MMDB_RECORD_TYPE_SEARCH_NODE` then the record contains
+an integer for the next node to look up.
+
 ## `MMDB_lib_version()`
 
 ```c
