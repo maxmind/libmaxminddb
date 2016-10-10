@@ -475,7 +475,7 @@ the database. If you have already resolved an address you can call
 ```c
 int gai_error, mmdb_error;
 MMDB_lookup_result_s result =
-    MMDB_lookup_string(mmdb, "1.2.3.4", &gai_error, &mmdb_error);
+    MMDB_lookup_string(&mmdb, "1.2.3.4", &gai_error, &mmdb_error);
 if (0 != gai_error) { ... }
 if (MMDB_SUCCESS != mmdb_error) { ... }
 
@@ -517,7 +517,7 @@ the `MMDB_lookup_string()` function.
 ```c
 int mmdb_error;
 MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
+    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
 if (MMDB_SUCCESS != mmdb_error) { ... }
 
 if (result.found_entry) { ... }
@@ -573,7 +573,7 @@ We could look up the English name with this code:
 
 ```c
 MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
+    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
 MMDB_entry_data_s entry_data;
 int status =
     MMDB_get_value(&result.entry, &entry_data,
@@ -617,7 +617,7 @@ at once, rather than looking up each piece using repeated calls to
 
 ```c
 MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
+    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
 MMDB_entry_data_list_s *entry_data_list, *first;
 int status =
     MMDB_get_entry_data_list(&result.entry, &entry_data_list);
@@ -697,7 +697,7 @@ with the metadata than using the metadata structure directly.
 ```c
     MMDB_entry_data_list_s *entry_data_list, *first;
     int status =
-        MMDB_get_metadata_as_entry_data_list(mmdb, &entry_data_list);
+        MMDB_get_metadata_as_entry_data_list(&mmdb, &entry_data_list);
     if (MMDB_SUCCESS != status) { ... }
     first = entry_data_list;
     ... // do something with the data

@@ -9,7 +9,7 @@ extern "C" {
 #define _POSIX_C_SOURCE 200112L
 #endif
 
-#include <maxminddb_config.h>
+#include "maxminddb_config.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
