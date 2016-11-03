@@ -122,7 +122,8 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc)
         return NULL;
     }
 
-    is_ok = ok(NULL != mmdb, "returned mmdb struct is not null for %s - %s",
+    is_ok = ok(mmdb->file_size > 0,
+               "mmdb struct has been set for %s - %s",
                db_file, mode_desc);
 
     if (!is_ok) {
@@ -220,8 +221,8 @@ MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result, uint32_t expect_type,
     if (cmp_ok(status, "==", MMDB_SUCCESS,
                "no error from call to MMDB_vget_value - %s", description)) {
 
-        if (!ok(data.type == expect_type, "got the expected data type - %s",
-                description)) {
+        if (!cmp_ok(data.type, "==", expect_type,
+                    "got the expected data type - %s", description)) {
 
             diag("  data type value is %i but expected %i", data.type,
                  expect_type);

@@ -72,7 +72,7 @@ void run_24_bit_record_tests(int mode, const char *mode_desc)
           MMDB_RECORD_TYPE_SEARCH_NODE, },
         { 127, 242, MMDB_RECORD_TYPE_EMPTY,       315,
           MMDB_RECORD_TYPE_DATA, },
-        { 132, 329, MMDB_RECORD_TYPE_DATA,       242,
+        { 132, 329, MMDB_RECORD_TYPE_DATA,        242,
           MMDB_RECORD_TYPE_EMPTY, },
         { 241, 96,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
           MMDB_RECORD_TYPE_EMPTY, }
@@ -101,7 +101,7 @@ void run_28_bit_record_tests(int mode, const char *mode_desc)
           MMDB_RECORD_TYPE_SEARCH_NODE, },
         { 127, 242, MMDB_RECORD_TYPE_EMPTY,       315,
           MMDB_RECORD_TYPE_DATA, },
-        { 132, 329, MMDB_RECORD_TYPE_DATA,       242,
+        { 132, 329, MMDB_RECORD_TYPE_DATA,        242,
           MMDB_RECORD_TYPE_EMPTY, },
         { 241, 96,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
           MMDB_RECORD_TYPE_EMPTY, }
@@ -130,7 +130,7 @@ void run_32_bit_record_tests(int mode, const char *mode_desc)
           MMDB_RECORD_TYPE_SEARCH_NODE, },
         { 127, 242, MMDB_RECORD_TYPE_EMPTY,       315,
           MMDB_RECORD_TYPE_DATA, },
-        { 132, 329, MMDB_RECORD_TYPE_DATA,       242,
+        { 132, 329, MMDB_RECORD_TYPE_DATA,        242,
           MMDB_RECORD_TYPE_EMPTY, },
         { 241, 96,  MMDB_RECORD_TYPE_SEARCH_NODE, 242,
           MMDB_RECORD_TYPE_EMPTY, }

@@ -13,8 +13,8 @@ void test_metadata(MMDB_s *mmdb, const char *mode_desc)
     // 2013-07-01T00:00:00Z
     uint64_t expect_epoch = 1372636800;
     int is_ok =
-        ok(mmdb->metadata.build_epoch >= expect_epoch, "build_epoch > %lli",
-           expect_epoch);
+        cmp_ok(mmdb->metadata.build_epoch, ">=", expect_epoch,
+               "build_epoch > %lli", expect_epoch);
     if (!is_ok) {
         diag("  epoch is %lli", mmdb->metadata.build_epoch);
     }

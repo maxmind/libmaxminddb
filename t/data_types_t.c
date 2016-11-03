@@ -69,7 +69,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_entry_data_s data =
             data_ok(result, MMDB_DATA_TYPE_UINT32, description, "uint32", NULL);
         uint32_t expect = 1 << 28;
-        ok(data.uint32 == expect, "uint32 field is 2**28");
+        cmp_ok(data.uint32, "==", expect, "uint32 field is 2**28");
     }
 
     {
@@ -91,7 +91,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
             data_ok(result, MMDB_DATA_TYPE_UINT64, description, "uint64", NULL);
         uint64_t expect = 1;
         expect <<= 60;
-        ok(data.uint64 == expect, "uint64 field is 2**60");
+        cmp_ok(data.uint64, "==", expect, "uint64 field is 2**60");
     }
 
     {
@@ -108,7 +108,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
 #else
         mmdb_uint128_t expect = 1;
         expect <<= 120;
-        ok(data.uint128 == expect, "uint128 field is 2**120");
+        cmp_ok(data.uint128, "==", expect, "uint128 field is 2**120");
 #endif
     }
 
@@ -269,7 +269,7 @@ void test_all_data_types_as_zero(MMDB_lookup_result_s *result, const char *ip,
         MMDB_entry_data_s data =
             data_ok(result, MMDB_DATA_TYPE_UINT32, description, "uint32", NULL);
         uint32_t expect = 0;
-        ok(data.uint32 == expect, "uint32 field is 0");
+        cmp_ok(data.uint32, "==", expect, "uint32 field is 0");
     }
 
     {
@@ -290,7 +290,7 @@ void test_all_data_types_as_zero(MMDB_lookup_result_s *result, const char *ip,
         MMDB_entry_data_s data =
             data_ok(result, MMDB_DATA_TYPE_UINT64, description, "uint64", NULL);
         uint64_t expect = 0;
-        ok(data.uint64 == expect, "uint64 field is 0");
+        cmp_ok(data.uint64, "==", expect, "uint64 field is 0");
     }
 
     {
@@ -306,7 +306,7 @@ void test_all_data_types_as_zero(MMDB_lookup_result_s *result, const char *ip,
         ok(memcmp(data.uint128, expect, 16) == 0, "uint128 field is 0");
 #else
         mmdb_uint128_t expect = 0;
-        ok(data.uint128 == expect, "uint128 field is 0");
+        cmp_ok(data.uint128, "==", expect, "uint128 field is 0");
 #endif
     }
 
