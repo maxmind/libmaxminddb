@@ -155,8 +155,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result);
 LOCAL record_info_s record_info_for_database(MMDB_s *mmdb);
 LOCAL int find_ipv4_start_node(MMDB_s *mmdb);
-LOCAL int maybe_populate_result(MMDB_s *mmdb, uint32_t record,
-                                uint16_t netmask, MMDB_lookup_result_s *result);
+LOCAL uint8_t maybe_populate_result(MMDB_s *mmdb, uint32_t record,
+                                    uint16_t netmask,
+                                    MMDB_lookup_result_s *result);
 LOCAL uint8_t record_type(MMDB_s *const mmdb, uint64_t record);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
@@ -896,10 +897,10 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                    mmdb->ipv4_start_node.node_value,
                    mmdb->ipv4_start_node.netmask);
 
-        int type = maybe_populate_result(mmdb,
-                                         mmdb->ipv4_start_node.node_value,
-                                         mmdb->ipv4_start_node.netmask,
-                                         result);
+        uint8_t type = maybe_populate_result(mmdb,
+                                             mmdb->ipv4_start_node.node_value,
+                                             mmdb->ipv4_start_node.netmask,
+                                             result);
         if (MMDB_RECORD_TYPE_INVALID == type) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
@@ -935,7 +936,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
             value = record_info.left_record_getter(record_pointer);
         }
 
-        int type = maybe_populate_result(mmdb, value, (uint16_t)current_bit, result);
+        uint8_t type = maybe_populate_result(mmdb, value, (uint16_t)current_bit,
+                                             result);
         if (MMDB_RECORD_TYPE_INVALID == type) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
@@ -1014,8 +1016,9 @@ LOCAL int find_ipv4_start_node(MMDB_s *mmdb)
     return MMDB_SUCCESS;
 }
 
-LOCAL int maybe_populate_result(MMDB_s *mmdb, uint32_t record,
-                                uint16_t netmask, MMDB_lookup_result_s *result)
+LOCAL uint8_t maybe_populate_result(MMDB_s *mmdb, uint32_t record,
+                                    uint16_t netmask,
+                                    MMDB_lookup_result_s *result)
 {
     uint8_t type = record_type(mmdb, record);
 
@@ -1115,7 +1118,8 @@ int MMDB_read_node(MMDB_s *const mmdb, uint32_t node_number,
 LOCAL uint32_t data_section_offset_for_record(MMDB_s *const mmdb,
                                               uint64_t record)
 {
-    return (uint32_t)record - mmdb->metadata.node_count - MMDB_DATA_SECTION_SEPARATOR;
+    return (uint32_t)record - mmdb->metadata.node_count -
+           MMDB_DATA_SECTION_SEPARATOR;
 }
 
 int MMDB_get_value(MMDB_entry_s *const start,
