@@ -21,7 +21,7 @@ env:
     - secure: a2pXNVW/lGrMdJTal+pzH0J5N69RdBErwe2dHU2xDnOeNcDYmiSxmU4Fw52KPYXFzdlR9GuEyZtHtesRQthSHpylcIvfJJCih7EvwbNQ5pfplpT5ri2PKPFWB11ebr6vG23Ucgc5lrqHdgIgv+QtqVmW1IDf0hq62itMpu4MwcQ=
 before_script:
   - ./bootstrap
-  - CFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter" ./configure
+  - CFLAGS="-std=c99 -D_BSD_SOURCE -Wall -Wextra -Werror -Wno-unused-parameter" ./configure
   - make
 script:
   - export VERBOSE=1
