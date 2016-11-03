@@ -26,7 +26,7 @@ typedef ADDRESS_FAMILY sa_family_t;
 
 #if defined(_MSC_VER)
 /* MSVC doesn't define signed size_t, copy it from configure */
-#define ssize_t int
+#define ssize_t SSIZE_T
 
 /* MSVC doesn't support restricted pointers */
 #define restrict
