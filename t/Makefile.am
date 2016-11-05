@@ -1,9 +1,11 @@
 include $(top_srcdir)/common.mk
 
+SUBDIRS=libtap
+
 AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
 
 noinst_LTLIBRARIES = libmmdbtest.la
-libmmdbtest_la_SOURCES = maxminddb_test_helper.c libtap/tap.c
+libmmdbtest_la_SOURCES = maxminddb_test_helper.c
 
 check_PROGRAMS = \
 	bad_pointers_t basic_lookup_t data_entry_list_t data_types_t \
@@ -15,4 +17,4 @@ threads_t_CFLAGS = $(CFLAGS) -pthread
 
 TESTS = $(check_PROGRAMS) compile_c++_t.pl mmdblookup_t.pl
 
-LDADD = libmmdbtest.la
+LDADD = libmmdbtest.la libtap/libtap.a
