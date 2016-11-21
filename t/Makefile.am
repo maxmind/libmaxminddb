@@ -1,6 +1,9 @@
 include $(top_srcdir)/common.mk
 
-SUBDIRS=libtap
+all-local:
+		cd libtap && $(MAKE) $(AM_MAKEFLAGS) all
+clean-local:
+		cd libtap && $(MAKE) $(AM_MAKEFLAGS) clean
 
 AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
 
