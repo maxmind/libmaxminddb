@@ -5,8 +5,12 @@ nodist_include_HEADERS = include/maxminddb_config.h
 
 SUBDIRS = \
   src     \
-  bin     \
+  bin
+
+if TESTS
+SUBDIRS += \
   t
+endif
 
 EXTRA_DIST = doc t Changes.md LICENSE NOTICE README.md projects/VS12 projects/VS12-tests
 dist-hook:
