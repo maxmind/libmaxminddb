@@ -72,7 +72,7 @@ the same directory for more information.
 MaxMind provides a PPA for recent version of Ubuntu. To add the PPA to your
 APT sources, run:
 
-    $ sudo add-apt-repository ppa:maxmind/ppa
+    $ sudo apt-add-repository ppa:maxmind/ppa
 
 Then install the packages by running:
 
