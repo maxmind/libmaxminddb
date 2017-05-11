@@ -54,7 +54,8 @@ void test_simple_structure(int mode, const char *mode_desc)
         status = MMDB_get_value(&result.entry, &entry_data, "array", "0", NULL);
         test_array_0_result(status, entry_data, "MMDB_get_value");
 
-        status = call_vget_value(&result.entry, &entry_data, "array", "0", NULL);
+        status =
+            call_vget_value(&result.entry, &entry_data, "array", "0", NULL);
         test_array_0_result(status, entry_data, "MMDB_vget_value");
     }
 
@@ -67,7 +68,8 @@ void test_simple_structure(int mode, const char *mode_desc)
         status = MMDB_get_value(&result.entry, &entry_data, "array", "2", NULL);
         test_array_2_result(status, entry_data, "MMDB_get_value");
 
-        status = call_vget_value(&result.entry, &entry_data, "array", "2", NULL);
+        status =
+            call_vget_value(&result.entry, &entry_data, "array", "2", NULL);
         test_array_2_result(status, entry_data, "MMDB_vget_value");
     }
 
@@ -159,7 +161,8 @@ void test_nested_structure(int mode, const char *mode_desc)
         test_complex_map_a_result(status, entry_data, "MMDB_aget_value");
 
         status = MMDB_get_value(&result.entry, &entry_data,
-                                "map1", "map2", "array", "0", "map3", "a", NULL);
+                                "map1", "map2", "array", "0", "map3", "a",
+                                NULL);
         test_complex_map_a_result(status, entry_data, "MMDB_get_value");
 
         status = call_vget_value(&result.entry, &entry_data,
@@ -176,7 +179,8 @@ void test_nested_structure(int mode, const char *mode_desc)
         test_complex_map_c_result(status, entry_data, "MMDB_aget_value");
 
         status = MMDB_get_value(&result.entry, &entry_data,
-                                "map1", "map2", "array", "0", "map3", "c", NULL);
+                                "map1", "map2", "array", "0", "map3", "c",
+                                NULL);
         test_complex_map_c_result(status, entry_data, "MMDB_get_value");
 
         status = call_vget_value(&result.entry, &entry_data,

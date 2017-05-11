@@ -5,6 +5,10 @@
   work properly on a Sparc system. GitHub #120.
 * Several compiler warnings on Visual C++ were fixed. Pull request by Marcel
   Raad. GitHub #130.
+* Fix segmentation faults found in `MMDB_open()` using afl-fuzz. This
+  occurred on corrupt databases that had a data pointer large enough to
+  cause an integer overflow when doing bound checking. Reported by Ryan
+  Whitworth. GitHub #140.
 
 
 ## 1.2.0 - 2016-03-23
