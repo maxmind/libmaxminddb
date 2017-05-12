@@ -1,12 +1,10 @@
+// This test currently does not work on Windows as nftw is
+// not available.
 #define _XOPEN_SOURCE 500
 #include <ftw.h>
 
-#ifdef _WIN32
-#include <io.h>
-#else
 #include <libgen.h>
 #include <unistd.h>
-#endif
 
 #include "maxminddb_test_helper.h"
 
