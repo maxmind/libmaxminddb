@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8E11D930-7B63-11E4-AE98-6B41E8A9DDB2}</ProjectGuid>
+    <ProjectGuid>{B198466A-376C-11E7-A95B-48C58C130AD6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ipv4_start_cache</RootNamespace>
     <ProjectName>test_ipv4_start_cache</ProjectName>

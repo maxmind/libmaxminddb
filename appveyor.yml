@@ -11,6 +11,7 @@ test_script:
   - .\projects\VS12\Debug\test_get_value.exe
   - .\projects\VS12\Debug\test_ipv4_start_cache.exe
   - .\projects\VS12\Debug\test_ipv6_lookup_in_ipv4.exe
+  - .\projects\VS12\Debug\test_metadata_pointers.exe
   - .\projects\VS12\Debug\test_metadata.exe
   - .\projects\VS12\Debug\test_no_map_get_value.exe
   - .\projects\VS12\Debug\test_read_node.exe

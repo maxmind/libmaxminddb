@@ -1,5 +1,5 @@
 /* Some test files may require something newer */
-#ifndef _GNU_SOURCE
+#if !defined(_GNU_SOURCE) && !defined(_POSIX_C_SOURCE)
 #define _POSIX_C_SOURCE 200112L
 #endif
 

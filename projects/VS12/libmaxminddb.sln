@@ -35,6 +35,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_version", "..\VS12-tes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_bad_pointers", "..\VS12-tests\bad_pointers.vcxproj", "{8E11BAF4-7B63-11E4-AE98-6B41E8A9DDB2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_metadata_pointers", "..\VS12-tests\metadata_pointers.vcxproj", "{8E11CBD4-7B63-11E4-AE98-6B41E8A9DDB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32

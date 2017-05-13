@@ -283,6 +283,16 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     }
     mmdb->data_section_size = (uint32_t)mmdb->file_size - search_tree_size -
                               MMDB_DATA_SECTION_SEPARATOR;
+
+    // Although it is likely not possible to construct a database with valid
+    // valid metadata, as parsed above, and a data_section_size less than 3,
+    // we do this check as later we assume it is at least three when doing
+    // bound checks.
+    if (mmdb->data_section_size < 3) {
+        status = MMDB_INVALID_DATA_ERROR;
+        goto cleanup;
+    }
+
     mmdb->metadata_section = metadata;
     mmdb->ipv4_start_node.node_value = 0;
     mmdb->ipv4_start_node.netmask = 0;
@@ -1384,7 +1394,10 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
 {
     const uint8_t *mem = mmdb->data_section;
 
-    if (offset + 1 > mmdb->data_section_size) {
+    // We subtract rather than add as it possible that offset + 1
+    // could overflow for a corrupt database while an underflow
+    // from data_section_size - 1 should not be possible.
+    if (offset > mmdb->data_section_size - 1) {
         DEBUG_MSGF("Offset (%d) past data section (%d)", offset,
                    mmdb->data_section_size);
         return MMDB_INVALID_DATA_ERROR;
@@ -1403,7 +1416,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     DEBUG_MSGF("Type: %i (%s)", type, type_num_to_name(type));
 
     if (type == MMDB_DATA_TYPE_EXTENDED) {
-        if (offset + 1 > mmdb->data_section_size) {
+        // Subtracting 1 to avoid possible overflow on offset + 1
+        if (offset > mmdb->data_section_size - 1) {
             DEBUG_MSGF("Extended type offset (%d) past data section (%d)",
                        offset,
                        mmdb->data_section_size);
@@ -1416,10 +1430,13 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     entry_data->type = type;
 
     if (type == MMDB_DATA_TYPE_POINTER) {
-        int psize = ((ctrl >> 3) & 3) + 1;
+        uint8_t psize = ((ctrl >> 3) & 3) + 1;
         DEBUG_MSGF("Pointer size: %i", psize);
 
-        if (offset + psize > mmdb->data_section_size) {
+        // We check that the offset does not extend past the end of the
+        // database and that the subtraction of psize did not underflow.
+        if (offset > mmdb->data_section_size - psize ||
+            mmdb->data_section_size < psize) {
             DEBUG_MSGF("Pointer offset (%d) past data section (%d)", offset +
                        psize,
                        mmdb->data_section_size);
@@ -1436,7 +1453,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     uint32_t size = ctrl & 31;
     switch (size) {
     case 29:
-        if (offset + 1 > mmdb->data_section_size) {
+        // We subtract when checking offset to avoid possible overflow
+        if (offset > mmdb->data_section_size - 1) {
             DEBUG_MSGF("String end (%d, case 29) past data section (%d)",
                        offset,
                        mmdb->data_section_size);
@@ -1445,7 +1463,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         size = 29 + mem[offset++];
         break;
     case 30:
-        if (offset + 2 > mmdb->data_section_size) {
+        // We subtract when checking offset to avoid possible overflow
+        if (offset > mmdb->data_section_size - 2) {
             DEBUG_MSGF("String end (%d, case 30) past data section (%d)",
                        offset,
                        mmdb->data_section_size);
@@ -1455,7 +1474,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         offset += 2;
         break;
     case 31:
-        if (offset + 3 > mmdb->data_section_size) {
+        // We subtract when checking offset to avoid possible overflow
+        if (offset > mmdb->data_section_size - 3) {
             DEBUG_MSGF("String end (%d, case 31) past data section (%d)",
                        offset,
                        mmdb->data_section_size);
@@ -1483,9 +1503,10 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         return MMDB_SUCCESS;
     }
 
-    // check that the data doesn't extend past the end of the memory
-    // buffer
-    if (offset + size > mmdb->data_section_size) {
+    // Check that the data doesn't extend past the end of the memory
+    // buffer and that the calculation in doing this did not underflow.
+    if (offset > mmdb->data_section_size - size ||
+        mmdb->data_section_size < size) {
         DEBUG_MSGF("Data end (%d) past data section (%d)", offset + size,
                    mmdb->data_section_size);
         return MMDB_INVALID_DATA_ERROR;
