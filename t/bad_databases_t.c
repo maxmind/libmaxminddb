@@ -30,7 +30,10 @@ int test_read(const char *path, const struct stat *UNUSED(
     }
 
     int gai_error, mmdb_error;
-    MMDB_lookup_string(mmdb, "ip", &gai_error, &mmdb_error);
+    MMDB_lookup_string(mmdb, "1.1.1.1", &gai_error, &mmdb_error);
+    if (gai_error != 0) {
+        BAIL_OUT("could not parse IP address");
+    }
 
     cmp_ok(mmdb_error, "!=", MMDB_SUCCESS, "opening %s returned an error",
            path);
