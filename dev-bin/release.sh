@@ -51,6 +51,7 @@ fi
 ./configure
 make
 make check
+make clean
 make dist
 
 if [ ! -d .gh-pages ]; then
