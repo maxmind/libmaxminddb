@@ -1,4 +1,4 @@
-## 1.2.1 - ?
+## 1.2.1 - 2017-05-15
 
 * Use autoconf to check the system's endianness rather than trying to do this
   with compiler-defined macros like `__BYTE_ORDER__`. Apparently this didn't
@@ -9,6 +9,8 @@
   occurred on corrupt databases that had a data pointer large enough to
   cause an integer overflow when doing bound checking. Reported by Ryan
   Whitworth. GitHub #140.
+* Add --disable-tests option to `configure`. Pull request by Fabrice
+  Fontaine. GitHub #136.
 
 
 ## 1.2.0 - 2016-03-23
