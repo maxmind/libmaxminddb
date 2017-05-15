@@ -119,6 +119,12 @@ AC_ARG_ENABLE(
         esac],[debug=false])
 AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
+AC_ARG_ENABLE([tests],
+        AS_HELP_STRING([--enable-tests], [Compilation of tests code]),
+        [enable_tests=${enableval}],
+        [enable_tests=yes])
+AM_CONDITIONAL([TESTS], [test "${enable_tests}" = "yes"])
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile
                  bin/Makefile
