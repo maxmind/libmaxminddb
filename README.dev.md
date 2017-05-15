@@ -7,20 +7,8 @@ updating the Homebrew recipe for this library.
 
 * Update `Changes.md` to include specify the new version, today's date, and
   list relevant changes.
-* Run `./dev-bin/make-release.sh` to update various files in the distro, our
-  GitHub pages, creates and pushes a tag, etc.
-* Run `make safedist` in the checkout directory to create a tarball.
-
-## GitHub
-
-* Go to https://github.com/maxmind/libmaxminddb/releases
-* GitHub will already have a release for the tag you just created.
-* Click on the new tag new.
-* Click on "Edit tag".
-* Give the release a title summarizing the changes.
-* Paste in the changes from the `Changes.md` file as the body.
-* Attach the release tarball you just created.
-* Click "Update release"
+* Run `./dev-bin/release.sh` to update various files in the distro, our
+  GitHub pages, and creates a GitHub release with the tarball.
 
 ## PPA
 

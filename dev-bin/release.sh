@@ -52,7 +52,7 @@ fi
 make
 make check
 make clean
-make dist
+make safedist
 
 if [ ! -d .gh-pages ]; then
     echo "Checking out gh-pages in .gh-pages"
