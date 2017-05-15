@@ -1,7 +1,7 @@
 ---
 layout: default
 title: libmaxminddb - a library for working with MaxMind DB files
-version: 1.2.0
+version: 1.2.1
 ---
 # NAME
 
@@ -206,6 +206,11 @@ The `netmask` member tells you what subnet the IP address belongs to in this
 database. For example, if you look up the address `1.1.1.1` in an IPv4 database
 and the returned `netmask` is 16, then the address is part of the `1.1.0.0/16`
 subnet.
+
+If the database is an IPv6 database, the returned netmask is always an IPv6
+prefix length (from 0-128), even if that database *also* contains IPv4
+networks. If you look up an IPv4 address and would like to turn the netmask
+into an IPv4 netmask value, you can simply subtract `96` from the value.
 
 ## `MMDB_result_s`
 
@@ -475,7 +480,7 @@ the database. If you have already resolved an address you can call
 ```c
 int gai_error, mmdb_error;
 MMDB_lookup_result_s result =
-    MMDB_lookup_string(mmdb, "1.2.3.4", &gai_error, &mmdb_error);
+    MMDB_lookup_string(&mmdb, "1.2.3.4", &gai_error, &mmdb_error);
 if (0 != gai_error) { ... }
 if (MMDB_SUCCESS != mmdb_error) { ... }
 
@@ -517,7 +522,7 @@ the `MMDB_lookup_string()` function.
 ```c
 int mmdb_error;
 MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
+    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
 if (MMDB_SUCCESS != mmdb_error) { ... }
 
 if (result.found_entry) { ... }
@@ -573,7 +578,7 @@ We could look up the English name with this code:
 
 ```c
 MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
+    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
 MMDB_entry_data_s entry_data;
 int status =
     MMDB_get_value(&result.entry, &entry_data,
@@ -617,7 +622,7 @@ at once, rather than looking up each piece using repeated calls to
 
 ```c
 MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(mmdb, address->ai_addr, &mmdb_error);
+    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
 MMDB_entry_data_list_s *entry_data_list, *first;
 int status =
     MMDB_get_entry_data_list(&result.entry, &entry_data_list);
@@ -697,7 +702,7 @@ with the metadata than using the metadata structure directly.
 ```c
     MMDB_entry_data_list_s *entry_data_list, *first;
     int status =
-        MMDB_get_metadata_as_entry_data_list(mmdb, &entry_data_list);
+        MMDB_get_metadata_as_entry_data_list(&mmdb, &entry_data_list);
     if (MMDB_SUCCESS != status) { ... }
     first = entry_data_list;
     ... // do something with the data
@@ -751,6 +756,12 @@ The return value is a status code. If you pass a `node_number` that is greater
 than the number of nodes in the database, this function will return
 `MMDB_INVALID_NODE_NUMBER_ERROR`, otherwise it will return `MMDB_SUCCESS`.
 
+The first node in the search tree is always node 0. If you wanted to iterate
+over the whole search tree, you would start by reading node 0 and then
+following the the records that make up this node, based on the type of each
+record. If the type is `MMDB_RECORD_TYPE_SEARCH_NODE` then the record contains
+an integer for the next node to look up.
+
 ## `MMDB_lib_version()`
 
 ```c
@@ -762,16 +773,22 @@ This function returns the library version as a string, something like "2.0.0".
 # EXAMPLE
 
 ```c
+#include <errno.h>
 #include <maxminddb.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char **argv)
 {
+    char *filename = argv[1];
+    char *ip_address = argv[2];
+
     MMDB_s mmdb;
-    int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
+    int status = MMDB_open(filename, MMDB_MODE_MMAP, &mmdb);
 
     if (MMDB_SUCCESS != status) {
         fprintf(stderr, "\n  Can't open %s - %s\n",
-                fname, MMDB_strerror(status));
+                filename, MMDB_strerror(status));
 
         if (MMDB_IO_ERROR == status) {
             fprintf(stderr, "    IO error: %s\n", strerror(errno));
@@ -781,12 +798,12 @@ int main(int argc, char **argv)
 
     int gai_error, mmdb_error;
     MMDB_lookup_result_s result =
-        MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
+        MMDB_lookup_string(&mmdb, ip_address, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
         fprintf(stderr,
                 "\n  Error from getaddrinfo for %s - %s\n\n",
-                ipstr, gai_strerror(gai_error));
+                ip_address, gai_strerror(gai_error));
         exit(2);
     }
 
