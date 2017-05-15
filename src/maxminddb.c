@@ -155,8 +155,9 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
                                       MMDB_lookup_result_s *result);
 LOCAL record_info_s record_info_for_database(MMDB_s *mmdb);
 LOCAL int find_ipv4_start_node(MMDB_s *mmdb);
-LOCAL int maybe_populate_result(MMDB_s *mmdb, uint32_t record,
-                                uint16_t netmask, MMDB_lookup_result_s *result);
+LOCAL uint8_t maybe_populate_result(MMDB_s *mmdb, uint32_t record,
+                                    uint16_t netmask,
+                                    MMDB_lookup_result_s *result);
 LOCAL uint8_t record_type(MMDB_s *const mmdb, uint64_t record);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
@@ -280,8 +281,18 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
         status = MMDB_INVALID_METADATA_ERROR;
         goto cleanup;
     }
-    mmdb->data_section_size = mmdb->file_size - search_tree_size -
+    mmdb->data_section_size = (uint32_t)mmdb->file_size - search_tree_size -
                               MMDB_DATA_SECTION_SEPARATOR;
+
+    // Although it is likely not possible to construct a database with valid
+    // valid metadata, as parsed above, and a data_section_size less than 3,
+    // we do this check as later we assume it is at least three when doing
+    // bound checks.
+    if (mmdb->data_section_size < 3) {
+        status = MMDB_INVALID_DATA_ERROR;
+        goto cleanup;
+    }
+
     mmdb->metadata_section = metadata;
     mmdb->ipv4_start_node.node_value = 0;
     mmdb->ipv4_start_node.netmask = 0;
@@ -299,7 +310,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 
 LOCAL int map_file(MMDB_s *const mmdb)
 {
-    ssize_t size;
+    DWORD size;
     int status = MMDB_SUCCESS;
     HANDLE mmh = NULL;
     HANDLE fd = CreateFileA(mmdb->filename, GENERIC_READ, FILE_SHARE_READ, NULL,
@@ -420,7 +431,7 @@ LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
         return NULL;
     }
 
-    *metadata_size = max_size;
+    *metadata_size = (uint32_t)max_size;
 
     return search_area;
 }
@@ -935,7 +946,8 @@ LOCAL int find_address_in_search_tree(MMDB_s *mmdb, uint8_t *address,
             value = record_info.left_record_getter(record_pointer);
         }
 
-        uint8_t type = maybe_populate_result(mmdb, value, current_bit, result);
+        uint8_t type = maybe_populate_result(mmdb, value, (uint16_t)current_bit,
+                                             result);
         if (MMDB_RECORD_TYPE_INVALID == type) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
@@ -994,7 +1006,7 @@ LOCAL int find_ipv4_start_node(MMDB_s *mmdb)
     const uint8_t *search_tree = mmdb->file_content;
     uint32_t node_value = 0;
     const uint8_t *record_pointer;
-    uint32_t netmask;
+    uint16_t netmask;
     for (netmask = 0; netmask < 96; netmask++) {
         record_pointer = &search_tree[node_value * record_info.record_length];
         if (record_pointer + record_info.record_length > mmdb->data_section) {
@@ -1014,8 +1026,9 @@ LOCAL int find_ipv4_start_node(MMDB_s *mmdb)
     return MMDB_SUCCESS;
 }
 
-LOCAL int maybe_populate_result(MMDB_s *mmdb, uint32_t record,
-                                uint16_t netmask, MMDB_lookup_result_s *result)
+LOCAL uint8_t maybe_populate_result(MMDB_s *mmdb, uint32_t record,
+                                    uint16_t netmask,
+                                    MMDB_lookup_result_s *result)
 {
     uint8_t type = record_type(mmdb, record);
 
@@ -1115,7 +1128,8 @@ int MMDB_read_node(MMDB_s *const mmdb, uint32_t node_number,
 LOCAL uint32_t data_section_offset_for_record(MMDB_s *const mmdb,
                                               uint64_t record)
 {
-    return record - mmdb->metadata.node_count - MMDB_DATA_SECTION_SEPARATOR;
+    return (uint32_t)record - mmdb->metadata.node_count -
+           MMDB_DATA_SECTION_SEPARATOR;
 }
 
 int MMDB_get_value(MMDB_entry_s *const start,
@@ -1380,7 +1394,10 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
 {
     const uint8_t *mem = mmdb->data_section;
 
-    if (offset + 1 > mmdb->data_section_size) {
+    // We subtract rather than add as it possible that offset + 1
+    // could overflow for a corrupt database while an underflow
+    // from data_section_size - 1 should not be possible.
+    if (offset > mmdb->data_section_size - 1) {
         DEBUG_MSGF("Offset (%d) past data section (%d)", offset,
                    mmdb->data_section_size);
         return MMDB_INVALID_DATA_ERROR;
@@ -1399,7 +1416,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     DEBUG_MSGF("Type: %i (%s)", type, type_num_to_name(type));
 
     if (type == MMDB_DATA_TYPE_EXTENDED) {
-        if (offset + 1 > mmdb->data_section_size) {
+        // Subtracting 1 to avoid possible overflow on offset + 1
+        if (offset > mmdb->data_section_size - 1) {
             DEBUG_MSGF("Extended type offset (%d) past data section (%d)",
                        offset,
                        mmdb->data_section_size);
@@ -1412,10 +1430,13 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     entry_data->type = type;
 
     if (type == MMDB_DATA_TYPE_POINTER) {
-        int psize = ((ctrl >> 3) & 3) + 1;
+        uint8_t psize = ((ctrl >> 3) & 3) + 1;
         DEBUG_MSGF("Pointer size: %i", psize);
 
-        if (offset + psize > mmdb->data_section_size) {
+        // We check that the offset does not extend past the end of the
+        // database and that the subtraction of psize did not underflow.
+        if (offset > mmdb->data_section_size - psize ||
+            mmdb->data_section_size < psize) {
             DEBUG_MSGF("Pointer offset (%d) past data section (%d)", offset +
                        psize,
                        mmdb->data_section_size);
@@ -1432,7 +1453,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
     uint32_t size = ctrl & 31;
     switch (size) {
     case 29:
-        if (offset + 1 > mmdb->data_section_size) {
+        // We subtract when checking offset to avoid possible overflow
+        if (offset > mmdb->data_section_size - 1) {
             DEBUG_MSGF("String end (%d, case 29) past data section (%d)",
                        offset,
                        mmdb->data_section_size);
@@ -1441,7 +1463,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         size = 29 + mem[offset++];
         break;
     case 30:
-        if (offset + 2 > mmdb->data_section_size) {
+        // We subtract when checking offset to avoid possible overflow
+        if (offset > mmdb->data_section_size - 2) {
             DEBUG_MSGF("String end (%d, case 30) past data section (%d)",
                        offset,
                        mmdb->data_section_size);
@@ -1451,7 +1474,8 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         offset += 2;
         break;
     case 31:
-        if (offset + 3 > mmdb->data_section_size) {
+        // We subtract when checking offset to avoid possible overflow
+        if (offset > mmdb->data_section_size - 3) {
             DEBUG_MSGF("String end (%d, case 31) past data section (%d)",
                        offset,
                        mmdb->data_section_size);
@@ -1479,9 +1503,10 @@ LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
         return MMDB_SUCCESS;
     }
 
-    // check that the data doesn't extend past the end of the memory
-    // buffer
-    if (offset + size > mmdb->data_section_size) {
+    // Check that the data doesn't extend past the end of the memory
+    // buffer and that the calculation in doing this did not underflow.
+    if (offset > mmdb->data_section_size - size ||
+        mmdb->data_section_size < size) {
         DEBUG_MSGF("Data end (%d) past data section (%d)", offset + size,
                    mmdb->data_section_size);
         return MMDB_INVALID_DATA_ERROR;
@@ -1744,7 +1769,9 @@ LOCAL float get_ieee754_float(const uint8_t *restrict p)
 {
     volatile float f;
     uint8_t *q = (void *)&f;
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+/* Windows builds don't use autoconf but we can assume they're all
+ * little-endian. */
+#if MMDB_LITTLE_ENDIAN || _WIN32
     q[3] = p[0];
     q[2] = p[1];
     q[1] = p[2];
@@ -1759,7 +1786,7 @@ LOCAL double get_ieee754_double(const uint8_t *restrict p)
 {
     volatile double d;
     uint8_t *q = (void *)&d;
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if MMDB_LITTLE_ENDIAN || _WIN32
     q[7] = p[0];
     q[6] = p[1];
     q[5] = p[2];

@@ -202,7 +202,7 @@ MMDB_entry_data_list_s *test_uint128_value(MMDB_entry_data_list_s
 #else
     mmdb_uint128_t expect = 1;
     expect <<= 120;
-    ok(value->entry_data.uint128 == expect, "uint128 field is 2**120");
+    cmp_ok(value->entry_data.uint128, "==", expect, "uint128 field is 2**120");
 #endif
 
     return entry_data_list;
@@ -229,7 +229,7 @@ MMDB_entry_data_list_s *test_uint32_value(MMDB_entry_data_list_s
     cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
            "'uint32' key's value is an uint32");
     uint32_t expect = 1 << 28;
-    ok(value->entry_data.uint32 == expect, "uint32 field is 100");
+    cmp_ok(value->entry_data.uint32, "==", expect, "uint32 field is 100");
 
     return entry_data_list;
 }
@@ -243,7 +243,7 @@ MMDB_entry_data_list_s *test_uint64_value(MMDB_entry_data_list_s
            "'uint64' key's value is an uint64");
     uint64_t expect = 1;
     expect <<= 60;
-    ok(value->entry_data.uint64 == expect, "uint64 field is 2**60");
+    cmp_ok(value->entry_data.uint64, "==", expect, "uint64 field is 2**60");
 
     return entry_data_list;
 }

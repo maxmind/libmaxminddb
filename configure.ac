@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([libmaxminddb], [1.2.0], [support@maxmind.com])
+AC_INIT([libmaxminddb], [1.2.1], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
 AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
 
@@ -98,6 +98,10 @@ AC_CHECK_FUNC(
         [open_memstream],
         [AC_DEFINE([HAVE_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
 
+AC_C_BIGENDIAN(
+        [AC_DEFINE([MMDB_LITTLE_ENDIAN], [0], [System is big-endian])],
+        [AC_DEFINE([MMDB_LITTLE_ENDIAN], [1], [System is little-endian])])
+
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
 
@@ -114,6 +118,12 @@ AC_ARG_ENABLE(
           *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
         esac],[debug=false])
 AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
+
+AC_ARG_ENABLE([tests],
+        AS_HELP_STRING([--enable-tests], [Compilation of tests code]),
+        [enable_tests=${enableval}],
+        [enable_tests=yes])
+AM_CONDITIONAL([TESTS], [test "${enable_tests}" = "yes"])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
