@@ -229,8 +229,8 @@ LOCAL void dump_meta(MMDB_s *mmdb)
                             "    Languages:     ";
 
     char date[40];
-    strftime(date, 40, "%F %T UTC",
-             gmtime((const time_t *)&mmdb->metadata.build_epoch));
+    const time_t epoch = (const time_t)mmdb->metadata.build_epoch;
+    strftime(date, 40, "%F %T UTC", gmtime(&epoch));
 
     fprintf(stdout, meta_dump,
             mmdb->metadata.node_count,
