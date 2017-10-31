@@ -34,7 +34,7 @@ my @cmds = (
 for my $cmd (@cmds) {
     my $output;
     run3(
-        [ qw( valgrind --leak-check=full -- ), @{$cmd} ],
+        [ qw( valgrind -v --leak-check=full --show-leak-kinds=all -- ), @{$cmd} ],
         \undef,
         \$output,
         \$output,
