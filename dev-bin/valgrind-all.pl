@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+# Note to run this you will probably want to build with ./configure
+# --disable-shared. You don't want to valgrind the libtool script.
+
 use strict;
 use warnings;
 
