@@ -15,7 +15,7 @@ my @tests = glob "$top_dir/t/.libs/lt-*_t";
 
 my @mmdblookup = (
     "$top_dir/bin/mmdblookup",
-    '--file', "$top_dir/maxmind-db/test-data/MaxMind-DB-test-decoder.mmdb",
+    '--file', "$top_dir/t/maxmind-db/test-data/MaxMind-DB-test-decoder.mmdb",
     '--ip',
 );
 
