@@ -25,9 +25,11 @@
 /man
 /missing
 /src/libmaxminddb.pc
+/src/test-data-pool
 /t/*.log
 /t/*.trs
 /t/*_t
+/t/*-t
 /test-driver
 Makefile
 Makefile.in
