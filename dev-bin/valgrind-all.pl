@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+# Note to run this you will probably want to build with ./configure
+# --disable-shared. You don't want to valgrind the libtool script.
+
 use strict;
 use warnings;
 
@@ -15,7 +18,7 @@ my @tests = glob "$top_dir/t/.libs/lt-*_t";
 
 my @mmdblookup = (
     "$top_dir/bin/mmdblookup",
-    '--file', "$top_dir/maxmind-db/test-data/MaxMind-DB-test-decoder.mmdb",
+    '--file', "$top_dir/t/maxmind-db/test-data/MaxMind-DB-test-decoder.mmdb",
     '--ip',
 );
 
@@ -31,7 +34,7 @@ my @cmds = (
 for my $cmd (@cmds) {
     my $output;
     run3(
-        [ qw( valgrind --leak-check=full -- ), @{$cmd} ],
+        [ qw( valgrind -v --leak-check=full --show-leak-kinds=all -- ), @{$cmd} ],
         \undef,
         \$output,
         \$output,
