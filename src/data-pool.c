@@ -122,7 +122,7 @@ MMDB_entry_data_list_s *data_pool_to_list(MMDB_data_pool_s *const pool)
         cur->next = pool->data + i + 1;
     }
 
-    MMDB_entry_data_list_s *const last = pool->data + pool->used_size;
+    MMDB_entry_data_list_s *const last = pool->data + pool->used_size - 1;
     last->next = NULL;
 
     return pool->data;
