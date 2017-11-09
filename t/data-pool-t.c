@@ -162,4 +162,53 @@ static void test_data_pool_to_list(void)
 
         data_pool_destroy(pool);
     }
+
+    {
+        size_t const initial_size = 1;
+        MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+        ok(pool != NULL, "created pool");
+
+        MMDB_entry_data_list_s *const list_empty = data_pool_to_list(pool);
+        ok(list_empty == NULL, "no list when no entries");
+
+        MMDB_entry_data_list_s *const entry = data_pool_get(pool);
+        ok(entry != NULL, "got an entry");
+
+        MMDB_entry_data_list_s *const list_one_element =
+            data_pool_to_list(pool);
+        ok(list_one_element != NULL, "got a list");
+        ok(list_one_element == entry,
+           "list's first element is the first we retrieved");
+        ok(list_one_element->next == NULL, "list ends with this element");
+
+        data_pool_destroy(pool);
+    }
+
+    {
+        size_t const initial_size = 2;
+        MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+        ok(pool != NULL, "created pool");
+
+        MMDB_entry_data_list_s *const list_empty = data_pool_to_list(pool);
+        ok(list_empty == NULL, "no list when no entries");
+
+        MMDB_entry_data_list_s *const entry1 = data_pool_get(pool);
+        ok(entry1 != NULL, "got an entry");
+        MMDB_entry_data_list_s *const entry2 = data_pool_get(pool);
+        ok(entry2 != NULL, "got an entry");
+        ok(entry1 != entry2, "second entry is different from the first");
+
+        MMDB_entry_data_list_s *const list_element1 =
+            data_pool_to_list(pool);
+        ok(list_element1 != NULL, "got a list");
+        ok(list_element1 == entry1,
+           "list's first element is the first we retrieved");
+
+        MMDB_entry_data_list_s *const list_element2 = list_element1->next;
+        ok(list_element2 == entry2,
+           "second element is the second we retrieved");
+        ok(list_element2->next == NULL, "list ends with this element");
+
+        data_pool_destroy(pool);
+    }
 }
