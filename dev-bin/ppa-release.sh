@@ -4,7 +4,7 @@ set -e
 set -x
 set -u
 
-DISTS=( wily trusty precise )
+DISTS=( zesty xenial trusty precise )
 
 VERSION=$(perl -MFile::Slurp::Tiny=read_file -MDateTime <<EOF
 use v5.16;
@@ -44,6 +44,8 @@ fi
 dput ppa:maxmind/ppa ../*source.changes
 
 popd
+
+dch -v "$VERSION-0+maxmind1" -D "${DISTS[1]}" -u low "New upstream release."
 
 git add debian/changelog
 git commit -m "Update debian/changelog for $VERSION"

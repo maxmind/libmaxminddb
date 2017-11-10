@@ -47,6 +47,13 @@ if [ -n "$(git status --porcelain)" ]; then
     git commit -m "Bumped version to $version"
 fi
 
+./bootstrap
+./configure
+make
+make check
+make clean
+make safedist
+
 if [ ! -d .gh-pages ]; then
     echo "Checking out gh-pages in .gh-pages"
     git clone -b gh-pages git@github.com:maxmind/libmaxminddb.git .gh-pages

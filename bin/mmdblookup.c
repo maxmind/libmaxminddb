@@ -58,9 +58,10 @@ int main(int argc, char **argv)
     if (0 == iterations) {
         exit(lookup_and_print(&mmdb, ip_address, lookup_path,
                               lookup_path_length));
-    } else {
-        exit(benchmark(&mmdb, iterations));
     }
+
+    free(lookup_path);
+    exit(benchmark(&mmdb, iterations));
 }
 
 LOCAL void usage(char *program, int exit_code, const char *error)
@@ -229,8 +230,8 @@ LOCAL void dump_meta(MMDB_s *mmdb)
                             "    Languages:     ";
 
     char date[40];
-    strftime(date, 40, "%F %T UTC",
-             gmtime((const time_t *)&mmdb->metadata.build_epoch));
+    const time_t epoch = (const time_t)mmdb->metadata.build_epoch;
+    strftime(date, 40, "%F %T UTC", gmtime(&epoch));
 
     fprintf(stdout, meta_dump,
             mmdb->metadata.node_count,

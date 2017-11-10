@@ -20,9 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\maxminddb.c" />
+    <ClCompile Include="..\..\src\data-pool.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\maxminddb.h" />
+    <ClInclude Include="..\..\src\data-pool.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README" />

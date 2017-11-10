@@ -14,9 +14,15 @@
     <ClCompile Include="..\..\src\maxminddb.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\data-pool.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\maxminddb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\data-pool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

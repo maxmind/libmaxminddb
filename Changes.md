@@ -1,3 +1,12 @@
+## 1.3.0 - 2017-11-10
+
+* Perform fewer memory allocations in `MMDB_get_entry_data_list()`. This
+  significantly improves its performance. GitHub #147.
+* Fix `mmdblookup`'s build epoch reporting on some systems. Big endian
+  systems with a 32-bit `time_t` no longer show a database build date of
+  1970-01-01 00:00:00. Pull request by Rainer Jung. GitHub #143.
+
+
 ## 1.2.1 - 2017-05-15
 
 * Use autoconf to check the system's endianness rather than trying to do this
