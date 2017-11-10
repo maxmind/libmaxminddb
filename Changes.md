@@ -1,3 +1,5 @@
+## 1.3.0 - 2017-11-10
+
 * Perform fewer memory allocations in `MMDB_get_entry_data_list()`. This
   significantly improves its performance. GitHub #147.
 * Fix `mmdblookup`'s build epoch reporting on some systems. Big endian
