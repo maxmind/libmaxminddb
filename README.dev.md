@@ -23,7 +23,7 @@ configurations different than Greg's machine.
 
 ## Homebrew
 
-* Go to https://github.com/Homebrew/homebrew/blob/master/Library/Formula/libmaxminddb.rb
+* Go to https://github.com/Homebrew/homebrew-core/edit/master/Formula/libmaxminddb.rb
 * Edit the file to update the url and sha256. You can get the sha256 for the
   tarball with the `sha256sum` command line utility.
 * Make a commit with the summary `libmaxminddb <VERSION>`
