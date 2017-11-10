@@ -27,11 +27,11 @@ pushd "$SRCDIR"
 git merge "$VERSION"
 
 for dist in "${DISTS[@]}"; do
-    git clean -xfd
-    git reset HEAD --hard
-
     dch -v "$VERSION-0+maxmind1~$dist" -D "$dist" -u low "New upstream release."
     gbp buildpackage -S --git-ignore-new
+
+    git clean -xfd
+    git reset HEAD --hard
 done
 
 read -e -p "Release to PPA? (y/n)" SHOULD_RELEASE
@@ -41,11 +41,12 @@ if [ "$SHOULD_RELEASE" != "y" ]; then
     exit 1
 fi
 
+# Upload to launchpad
 dput ppa:maxmind/ppa ../*source.changes
 
-popd
+# Make the changelog up to date in git
 
-dch -v "$VERSION-0+maxmind1" -D "${DISTS[1]}" -u low "New upstream release."
+dch -v "$VERSION-0+maxmind1" -D "${DISTS[0]}" -u low "New upstream release."
 
 git add debian/changelog
 git commit -m "Update debian/changelog for $VERSION"
