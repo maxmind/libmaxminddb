@@ -4,7 +4,7 @@ set -e
 set -x
 set -u
 
-DISTS=( zesty xenial trusty precise )
+DISTS=( artful zesty xenial trusty precise )
 
 VERSION=$(perl -MFile::Slurp::Tiny=read_file -MDateTime <<EOF
 use v5.16;
