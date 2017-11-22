@@ -182,7 +182,7 @@ LOCAL uint32_t get_ptr_from(uint8_t ctrl, uint8_t const *const ptr,
                             int ptr_size);
 LOCAL int get_entry_data_list(MMDB_s *mmdb,
                               uint32_t offset,
-                              MMDB_entry_data_list_s *const entry_data_list,
+                              size_t const index,
                               MMDB_data_pool_s *const pool,
                               int depth);
 LOCAL float get_ieee754_float(const uint8_t *restrict p);
@@ -1644,13 +1644,13 @@ int MMDB_get_entry_data_list(
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    MMDB_entry_data_list_s *const list = data_pool_get(pool);
-    if (!list) {
+    size_t index = 0;
+    if (data_pool_alloc(pool, &index) != 0) {
         data_pool_destroy(pool);
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    int const status = get_entry_data_list(start->mmdb, start->offset, list,
+    int const status = get_entry_data_list(start->mmdb, start->offset, index,
                                            pool, 0);
 
     *entry_data_list = data_pool_to_list(pool);
@@ -1669,7 +1669,7 @@ int MMDB_get_entry_data_list(
 
 LOCAL int get_entry_data_list(MMDB_s *mmdb,
                               uint32_t offset,
-                              MMDB_entry_data_list_s *const entry_data_list,
+                              size_t const index,
                               MMDB_data_pool_s *const pool,
                               int depth)
 {
@@ -1678,6 +1678,17 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb,
         return MMDB_INVALID_DATA_ERROR;
     }
     depth++;
+
+    // Note it is important to never re-use memory pointing into the pool after
+    // it may have changed in size. This is because the memory location may
+    // move when it grows. In practice this means that if we ever call
+    // data_pool_alloc() or this function recursively, all MMDB_entry_data_list
+    // pointers should be considered invalid, and you should look them up again
+    // by their index.
+    MMDB_entry_data_list_s *entry_data_list = data_pool_lookup(pool, index);
+    if (!entry_data_list) {
+        return MMDB_INVALID_DATA_ERROR;
+    }
     CHECKED_DECODE_ONE(mmdb, offset, &entry_data_list->entry_data);
 
     switch (entry_data_list->entry_data.type) {
@@ -1698,13 +1709,17 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb,
             if (entry_data_list->entry_data.type == MMDB_DATA_TYPE_ARRAY
                 || entry_data_list->entry_data.type == MMDB_DATA_TYPE_MAP) {
 
-                int status =
-                    get_entry_data_list(mmdb, last_offset, entry_data_list,
-                                        pool, depth);
+                int status = get_entry_data_list(mmdb, last_offset, index, pool,
+                                                 depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on pointer failed.");
                     return status;
                 }
+            }
+
+            entry_data_list = data_pool_lookup(pool, index);
+            if (!entry_data_list) {
+                return MMDB_INVALID_DATA_ERROR;
             }
             entry_data_list->entry_data.offset_to_next = next_offset;
         }
@@ -1714,24 +1729,31 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb,
             uint32_t array_size = entry_data_list->entry_data.data_size;
             uint32_t array_offset = entry_data_list->entry_data.offset_to_next;
             while (array_size-- > 0) {
-                MMDB_entry_data_list_s *entry_data_list_to =
-                    data_pool_get(pool);
-                if (NULL == entry_data_list_to) {
+                size_t index2 = 0;
+                if (data_pool_alloc(pool, &index2) != 0) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
-                int status =
-                    get_entry_data_list(mmdb, array_offset, entry_data_list_to,
-                                        pool, depth);
+                int status = get_entry_data_list(mmdb, array_offset, index2,
+                                                 pool, depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on array element failed.");
                     return status;
                 }
 
+                MMDB_entry_data_list_s *entry_data_list_to
+                    = data_pool_lookup(pool, index2);
+                if (!entry_data_list_to) {
+                    return MMDB_INVALID_DATA_ERROR;
+                }
                 array_offset = entry_data_list_to->entry_data.offset_to_next;
             }
-            entry_data_list->entry_data.offset_to_next = array_offset;
 
+            entry_data_list = data_pool_lookup(pool, index);
+            if (!entry_data_list) {
+                return MMDB_INVALID_DATA_ERROR;
+            }
+            entry_data_list->entry_data.offset_to_next = array_offset;
         }
         break;
     case MMDB_DATA_TYPE_MAP:
@@ -1740,35 +1762,46 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb,
 
             offset = entry_data_list->entry_data.offset_to_next;
             while (size-- > 0) {
-                MMDB_entry_data_list_s *entry_data_list_to =
-                    data_pool_get(pool);
-                if (NULL == entry_data_list_to) {
+                size_t index2 = 0;
+                if (data_pool_alloc(pool, &index2) != 0) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
-                int status =
-                    get_entry_data_list(mmdb, offset, entry_data_list_to, pool,
-                                        depth);
+                int status = get_entry_data_list(mmdb, offset, index2, pool,
+                                                 depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on map key failed.");
                     return status;
                 }
 
+                MMDB_entry_data_list_s *entry_data_list_to
+                    = data_pool_lookup(pool, index2);
+                if (!entry_data_list_to) {
+                    return MMDB_INVALID_DATA_ERROR;
+                }
                 offset = entry_data_list_to->entry_data.offset_to_next;
 
-                entry_data_list_to = data_pool_get(pool);
-                if (NULL == entry_data_list_to) {
+                size_t index3 = 0;
+                if (data_pool_alloc(pool, &index3) != 0) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
-                status = get_entry_data_list(mmdb, offset, entry_data_list_to,
-                                             pool, depth);
+                status = get_entry_data_list(mmdb, offset, index3, pool, depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on map element failed.");
                     return status;
                 }
 
+                entry_data_list_to = data_pool_lookup(pool, index3);
+                if (!entry_data_list_to) {
+                    return MMDB_INVALID_DATA_ERROR;
+                }
                 offset = entry_data_list_to->entry_data.offset_to_next;
+            }
+
+            entry_data_list = data_pool_lookup(pool, index);
+            if (!entry_data_list) {
+                return MMDB_INVALID_DATA_ERROR;
             }
             entry_data_list->entry_data.offset_to_next = offset;
         }
