@@ -2,6 +2,8 @@
 
 # Note to run this you will probably want to build with ./configure
 # --disable-shared. You don't want to valgrind the libtool script.
+#
+# Also make sure you compile the tests first (`make check').
 
 use strict;
 use warnings;
@@ -14,7 +16,9 @@ my $top_dir = "$Bin/..";
 
 my $output;
 
-my @tests = glob "$top_dir/t/.libs/lt-*_t";
+my @tests;
+push @tests, glob "$top_dir/t/*_t";
+push @tests, glob "$top_dir/t/*-t";
 
 my @mmdblookup = (
     "$top_dir/bin/mmdblookup",
