@@ -1,3 +1,5 @@
+## 1.3.1 - 2017-11-24
+
 * Fix build problems related to `rpl_malloc()`. Pull request by Rainer
   Gerhards. GitHub #152.
 * Fix a race to set and read data in a field on the `MMDB_s` struct
