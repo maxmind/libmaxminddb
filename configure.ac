@@ -102,7 +102,6 @@ AC_C_BIGENDIAN(
         [AC_DEFINE([MMDB_LITTLE_ENDIAN], [0], [System is big-endian])],
         [AC_DEFINE([MMDB_LITTLE_ENDIAN], [1], [System is little-endian])])
 
-AC_FUNC_MALLOC
 AC_FUNC_MMAP
 
 AC_SEARCH_LIBS([fabs], [m])
