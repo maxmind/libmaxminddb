@@ -246,7 +246,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     }
     mmdb->flags = flags;
 
-    if (MMDB_SUCCESS != (status = map_file(mmdb)) ) {
+    if (MMDB_SUCCESS != (status = map_file(mmdb))) {
         goto cleanup;
     }
 
@@ -1771,12 +1771,12 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb,
 
             offset = entry_data_list->entry_data.offset_to_next;
             while (size-- > 0) {
-                size_t index2 = 0;
-                if (data_pool_alloc(pool, &index2) != 0) {
+                size_t key_index = 0;
+                if (data_pool_alloc(pool, &key_index) != 0) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
-                int status = get_entry_data_list(mmdb, offset, index2, pool,
+                int status = get_entry_data_list(mmdb, offset, key_index, pool,
                                                  depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on map key failed.");
@@ -1784,24 +1784,25 @@ LOCAL int get_entry_data_list(MMDB_s *mmdb,
                 }
 
                 MMDB_entry_data_list_s *entry_data_list_to
-                    = data_pool_lookup(pool, index2);
+                    = data_pool_lookup(pool, key_index);
                 if (!entry_data_list_to) {
                     return MMDB_INVALID_DATA_ERROR;
                 }
                 offset = entry_data_list_to->entry_data.offset_to_next;
 
-                size_t index3 = 0;
-                if (data_pool_alloc(pool, &index3) != 0) {
+                size_t value_index = 0;
+                if (data_pool_alloc(pool, &value_index) != 0) {
                     return MMDB_OUT_OF_MEMORY_ERROR;
                 }
 
-                status = get_entry_data_list(mmdb, offset, index3, pool, depth);
+                status = get_entry_data_list(mmdb, offset, value_index, pool,
+                                             depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on map element failed.");
                     return status;
                 }
 
-                entry_data_list_to = data_pool_lookup(pool, index3);
+                entry_data_list_to = data_pool_lookup(pool, value_index);
                 if (!entry_data_list_to) {
                     return MMDB_INVALID_DATA_ERROR;
                 }
