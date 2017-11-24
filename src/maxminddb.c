@@ -302,6 +302,15 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     mmdb->ipv4_start_node.node_value = 0;
     mmdb->ipv4_start_node.netmask = 0;
 
+    // We do this immediately as otherwise there is a race to set
+    // ipv4_start_node.node_value and ipv4_start_node.netmask.
+    if (mmdb->metadata.ip_version == 6) {
+        status = find_ipv4_start_node(mmdb);
+        if (status != MMDB_SUCCESS) {
+            goto cleanup;
+        }
+    }
+
  cleanup:
     if (MMDB_SUCCESS != status) {
         int saved_errno = errno;
