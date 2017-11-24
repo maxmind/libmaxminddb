@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([libmaxminddb], [1.3.0], [support@maxmind.com])
+AC_INIT([libmaxminddb], [1.3.1], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
 AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
 
@@ -102,7 +102,6 @@ AC_C_BIGENDIAN(
         [AC_DEFINE([MMDB_LITTLE_ENDIAN], [0], [System is big-endian])],
         [AC_DEFINE([MMDB_LITTLE_ENDIAN], [1], [System is little-endian])])
 
-AC_FUNC_MALLOC
 AC_FUNC_MMAP
 
 AC_SEARCH_LIBS([fabs], [m])

@@ -4,11 +4,14 @@ We release by uploading the tarball to GitHub, uploading Ubuntu PPAs, and by
 updating the Homebrew recipe for this library.
 
 ## Creating the release tarball
+You may want to refer to the section about prerequisites.
 
+* Check whether there are any open issues to fix while you're doing this.
 * Update `Changes.md` to include specify the new version, today's date, and
-  list relevant changes.
+  list relevant changes. Commit this.
 * Run `./dev-bin/release.sh` to update various files in the distro, our
   GitHub pages, and creates a GitHub release with the tarball.
+* Check the release looks good on both GitHub and launchpad.net.
 
 ## PPA
 
@@ -21,26 +24,46 @@ The PPA release script is at `dev-bin/ppa-release.sh`. Running it should
 guide you though the release, although it may require some changes to run on
 configurations different than Greg's machine.
 
-Pre-script PPA release process:
+Check whether any new Ubuntu versions need to be listed in this script
+before running it.
 
-1. git co ubuntu-ppa
-2. git merge `<TAG>`
-3. dch -i
-  * Add new entry for wily (or whatever the most recent Ubuntu release
-    is. Follow existing PPA versioning style.
-4. git commit to add the debian changelog
-5. gbp buildpackage -S
-6. dput ppa:maxmind/ppa ../libmaxminddb_`<TAG>`-`<DEB VERSION>`_source.changes
-7. git push
-
-If 5 was successful, modify debian/changelog and repeat 5 & 6 for trusty and
-precise. Note that you can skip step #4 for subsequent uploads by adding
-`--git-ignore-new` when you call `gbp`.
+You should run it from `master`.
 
 ## Homebrew
 
-* Go to https://github.com/Homebrew/homebrew/blob/master/Library/Formula/libmaxminddb.rb
+* Go to https://github.com/Homebrew/homebrew-core/edit/master/Formula/libmaxminddb.rb
 * Edit the file to update the url and sha256. You can get the sha256 for the
   tarball with the `sha256sum` command line utility.
 * Make a commit with the summary `libmaxminddb <VERSION>`
 * Submit a PR with the changes you just made.
+
+# Prerequisites for releasing
+
+* Required packages (Ubuntu Artful): vim git-core dput build-essential
+  autoconf automake libtool git-buildpackage libfile-slurp-perl pandoc
+  dirmngr libfile-slurp-tiny-perl libdatetime-perl debhelper dh-autoreconf
+  libipc-run3-perl libtest-output-perl devscripts
+* Install [hub](https://github.com/github/hub/releases). (Using `./install`
+  from the tarball is fine)
+* GitHub ssh key (e.g. in `~/.ssh/id_rsa`)
+* Git config (e.g. `~/.gitconfig`)
+* Import your GPG secret key (or create one if you don't have a suitable
+  one)
+  * `gpg --import /path/to/key`
+  * `gpg --edit-key KEYID` and trust it ultimately
+  * Ensure it shows with `gpg --list-secret-keys`
+* You need to be invited to the launchpad.net MaxMind organization on your
+  launchpad.net account.
+* You need your GPG key listed on your launchpad.net account
+  * You can add it in the web interface. It wants the output of
+    `gpg --fingerprint`.
+  * Part of the instructions involve having your key published on the
+    Ubuntu keyserver:
+    `gpg --keyserver keyserver.ubuntu.com --send-keys KEYID`
+  * You'll get an email with an encrypted payload that you need to decrypt
+    and follow the link to confirm it.
+* Ensure `dch` knows your name and email. Refer to its man page for how to
+  tell it this. One way is to set the `DEBFULLNAME` and `DEBEMAIL`
+  environment variables. These should match your GPG key's name and email
+  exactly. This is what gets used in the Debian changelog as well as
+  defines what GPG key to use.

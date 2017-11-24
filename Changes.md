@@ -1,3 +1,14 @@
+## 1.3.1 - 2017-11-24
+
+* Fix build problems related to `rpl_malloc()`. Pull request by Rainer
+  Gerhards. GitHub #152.
+* Fix a race to set and read data in a field on the `MMDB_s` struct
+  (`ipv4_start_node`). GitHub #153.
+* Fix cases of invalid memory access when using
+  `MMDB_get_entry_data_list()`. This was introduced in 1.3.0 and occurred
+  when performing large lookups. GitHub #153.
+
+
 ## 1.3.0 - 2017-11-10
 
 * Perform fewer memory allocations in `MMDB_get_entry_data_list()`. This

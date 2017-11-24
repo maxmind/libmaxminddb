@@ -63,36 +63,40 @@ void data_pool_destroy(MMDB_data_pool_s *const pool)
     free(pool);
 }
 
-// Retrieve a new struct from the pool. Doing this may cause the pool's size to
+// Claim a new struct from the pool. Doing this may cause the pool's size to
 // grow.
-MMDB_entry_data_list_s *data_pool_get(MMDB_data_pool_s *const pool)
+//
+// The new struct will be accessible at the index via data_pool_lookup().
+//
+// We return 0 if there is no error, and non-zero if there is.
+int data_pool_alloc(MMDB_data_pool_s *const pool, size_t *const index)
 {
     if (!pool || !pool->data) {
-        return NULL;
+        return -1;
     }
 
     if (pool->used_size < pool->size) {
-        MMDB_entry_data_list_s *const list = pool->data + pool->used_size;
+        *index = pool->used_size;
         pool->used_size++;
-        return list;
+        return 0;
     }
 
     // Grow.
 
     if (!can_multiply(SIZE_MAX, pool->size, 2)) {
-        return NULL;
+        return -1;
     }
     size_t const new_size = pool->size * 2;
 
     if (!can_multiply(pool->max_bytes, new_size,
                       sizeof(MMDB_entry_data_list_s))) {
-        return NULL;
+        return -1;
     }
     size_t const new_size_bytes = sizeof(MMDB_entry_data_list_s) * new_size;
 
     MMDB_entry_data_list_s *new_data = realloc(pool->data, new_size_bytes);
     if (!new_data) {
-        return NULL;
+        return -1;
     }
     pool->data = new_data;
 
@@ -105,9 +109,28 @@ MMDB_entry_data_list_s *data_pool_get(MMDB_data_pool_s *const pool)
 
     // Use the new space.
 
-    MMDB_entry_data_list_s *const list = pool->data + pool->used_size;
+    *index = pool->used_size;
     pool->used_size++;
-    return list;
+    return 0;
+}
+
+// Retrieve an entry by index in the array-like pool. This does not allocate an
+// entry.
+MMDB_entry_data_list_s *data_pool_lookup(
+    MMDB_data_pool_s const *const pool,
+    size_t const i
+    )
+{
+    if (!pool) {
+        return NULL;
+    }
+
+    if (i >= pool->used_size) {
+        return NULL;
+    }
+
+    MMDB_entry_data_list_s *const l = pool->data + i;
+    return l;
 }
 
 // Turn the structs in the array-like pool into a linked list.
