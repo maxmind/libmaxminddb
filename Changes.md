@@ -1,3 +1,10 @@
+* Fix a race to set and read data in a field on the `MMDB_s` struct
+  (`ipv4_start_node`).
+* Fix cases of invalid memory access when using
+  `MMDB_get_entry_data_list()`. This was introduced in 1.3.0 and occurred
+  when performing large lookups.
+
+
 ## 1.3.0 - 2017-11-10
 
 * Perform fewer memory allocations in `MMDB_get_entry_data_list()`. This

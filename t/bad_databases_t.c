@@ -26,6 +26,7 @@ int test_read(const char *path, const struct stat *UNUSED(
 
     if (status != MMDB_SUCCESS) {
         ok(1, "received error when opening %s", path);
+        free(mmdb);
         return 0;
     }
 

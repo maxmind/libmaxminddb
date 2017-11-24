@@ -37,7 +37,11 @@ typedef struct MMDB_data_pool_s {
 
 MMDB_data_pool_s *data_pool_new(size_t const);
 void data_pool_destroy(MMDB_data_pool_s *const);
-MMDB_entry_data_list_s *data_pool_get(MMDB_data_pool_s *const);
+int data_pool_alloc(MMDB_data_pool_s *const, size_t *const);
+MMDB_entry_data_list_s *data_pool_lookup(
+    MMDB_data_pool_s const *const,
+    size_t const
+    );
 MMDB_entry_data_list_s *data_pool_to_list(MMDB_data_pool_s *const);
 
 #endif

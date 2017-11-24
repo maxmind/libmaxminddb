@@ -1,10 +1,11 @@
 #include <data-pool.h>
+#include <inttypes.h>
 #include "libtap/tap.h"
 #include "maxminddb_test_helper.h"
 
 static void test_data_pool_new(void);
 static void test_data_pool_destroy(void);
-static void test_data_pool_get(void);
+static void test_data_pool_alloc(void);
 static void test_data_pool_to_list(void);
 
 int main(void)
@@ -12,7 +13,7 @@ int main(void)
     plan(NO_PLAN);
     test_data_pool_new();
     test_data_pool_destroy();
-    test_data_pool_get();
+    test_data_pool_alloc();
     test_data_pool_to_list();
     done_testing();
 }
@@ -53,26 +54,62 @@ static void test_data_pool_destroy(void)
     }
 }
 
-static void test_data_pool_get(void)
+static void test_data_pool_alloc(void)
 {
     {
         MMDB_data_pool_s *const pool = data_pool_new(1);
         ok(pool != NULL, "created pool");
 
-        MMDB_entry_data_list_s *const entry1 = data_pool_get(pool);
+        for (size_t i = 0; i < 5; i++) {
+            ok(
+                data_pool_lookup(pool, 0) == NULL,
+                "looking up entry %zu should fail",
+                i
+                );
+        }
+
+        size_t index1 = 0;
+        ok(data_pool_alloc(pool, &index1) == 0, "allocated first entry");
+        ok(index1 == 0, "first index is 0");
+        MMDB_entry_data_list_s *const entry1 = data_pool_lookup(pool, index1);
         ok(entry1 != NULL, "got an entry");
+        // Arbitrary so that we can recognize it
+        entry1->entry_data.offset = 123;
         cmp_ok(pool->size, "==", 1, "pool size is still 1");
         cmp_ok(pool->used_size, "==", 1,
                "pool used size is 1 after taking one");
         cmp_ok(pool->num_allocs, "==", 1, "no new allocs yet");
 
-        MMDB_entry_data_list_s *const entry2 = data_pool_get(pool);
+        for (size_t i = 1; i < 5; i++) {
+            ok(
+                data_pool_lookup(pool, i) == NULL,
+                "looking up entry %zu should fail",
+                i
+                );
+        }
+
+        size_t index2 = 0;
+        ok(data_pool_alloc(pool, &index2) == 0, "allocated second entry");
+        ok(index2 == 1, "second index is 1");
+        MMDB_entry_data_list_s *const entry2 = data_pool_lookup(pool, index2);
         ok(entry2 != NULL, "got another entry");
         ok(entry1 != entry2, "second entry is different from first entry");
         cmp_ok(pool->size, "==", 2, "pool size is now 2");
         cmp_ok(pool->used_size, "==", 2,
                "pool used size is 2 after taking another");
         cmp_ok(pool->num_allocs, "==", 2, "a new alloc happened");
+
+        MMDB_entry_data_list_s *const entry1_again = data_pool_lookup(pool,
+                                                                      index1);
+        ok(entry1_again != NULL, "found entry 1 again");
+        ok(entry1_again->entry_data.offset == 123, "entry 1 has same offset");
+        for (size_t i = 2; i < 5; i++) {
+            ok(
+                data_pool_lookup(pool, i) == NULL,
+                "looking up entry %zu should fail",
+                i
+                );
+        }
 
         data_pool_destroy(pool);
     }
@@ -83,21 +120,43 @@ static void test_data_pool_get(void)
         ok(pool != NULL, "created pool");
 
         for (size_t i = 0; i < initial_size; i++) {
-            MMDB_entry_data_list_s *const entry = data_pool_get(pool);
+            size_t index = 0;
+            ok(data_pool_alloc(pool, &index) == 0, "allocated entry");
+            MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
             ok(entry != NULL, "got an entry");
+            // Give each a unique number so we can check it after reallocating
+            entry->entry_data.offset = (uint32_t)i;
         }
 
         cmp_ok(pool->size, "==", initial_size, "pool size is the initial size");
         cmp_ok(pool->used_size, "==", 10, "used size is as expected");
         cmp_ok(pool->num_allocs, "==", 1, "no new allocs happened");
 
-        MMDB_entry_data_list_s *const entry = data_pool_get(pool);
+        size_t index = 0;
+        ok(data_pool_alloc(pool, &index) == 0, "allocated entry");
+        MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
         ok(entry != NULL, "got an entry");
+        entry->entry_data.offset = (uint32_t)initial_size;
 
         cmp_ok(pool->size, "==", initial_size * 2,
                "pool size is the initial size*2");
         cmp_ok(pool->used_size, "==", 11, "used size is as expected");
         cmp_ok(pool->num_allocs, "==", 2, "new alloc happened");
+
+        for (size_t i = 0; i < initial_size + 1; i++) {
+            MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, i);
+            ok(entry != NULL, "got entry %zu", i);
+            ok(
+                entry->entry_data.offset == (uint32_t)i,
+                "found offset %" PRIu32 ", should have %zu",
+                entry->entry_data.offset,
+                i
+                );
+        }
+        for (size_t i = initial_size + 1; i < initial_size + 1 + 5; i++) {
+            MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, i);
+            ok(entry == NULL, "did not get entry %zu", i);
+        }
 
         data_pool_destroy(pool);
     }
@@ -110,7 +169,9 @@ static void test_data_pool_get(void)
         pool->max_bytes = 16 * 2 * sizeof(MMDB_entry_data_list_s);
 
         for (size_t i = 0; i < initial_size * 2; i++) {
-            MMDB_entry_data_list_s *const entry = data_pool_get(pool);
+            size_t index = 0;
+            ok(data_pool_alloc(pool, &index) == 0, "allocated entry");
+            MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
             ok(entry != NULL, "got entry %zu", i);
         }
 
@@ -118,8 +179,11 @@ static void test_data_pool_get(void)
         cmp_ok(pool->used_size, "==", 32, "pool is using 32");
         cmp_ok(pool->num_allocs, "==", 2, "2 allocs");
 
-        MMDB_entry_data_list_s *const entry = data_pool_get(pool);
-        ok(entry == NULL, "did not get an entry, hit max");
+        size_t index = 0;
+        ok(
+            data_pool_alloc(pool, &index) != 0,
+            "did not get an entry, hit max"
+            );
 
         data_pool_destroy(pool);
     }
@@ -135,7 +199,9 @@ static void test_data_pool_to_list(void)
         MMDB_entry_data_list_s *const list_empty = data_pool_to_list(pool);
         ok(list_empty == NULL, "no list when no entries");
 
-        MMDB_entry_data_list_s *const entry = data_pool_get(pool);
+        size_t index = 0;
+        ok(data_pool_alloc(pool, &index) == 0, "allocated an entry");
+        MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
         ok(entry != NULL, "got an entry");
 
         MMDB_entry_data_list_s *const list_one_element =
@@ -145,7 +211,9 @@ static void test_data_pool_to_list(void)
            "list's first element is the first we retrieved");
         ok(list_one_element->next == NULL, "list is one element in size");
 
-        MMDB_entry_data_list_s *const entry2 = data_pool_get(pool);
+        size_t index2 = 0;
+        ok(data_pool_alloc(pool, &index2) == 0, "allocated another entry");
+        MMDB_entry_data_list_s *const entry2 = data_pool_lookup(pool, index2);
         ok(entry2 != NULL, "got another entry");
 
         MMDB_entry_data_list_s *const list_two_elements =
@@ -171,7 +239,9 @@ static void test_data_pool_to_list(void)
         MMDB_entry_data_list_s *const list_empty = data_pool_to_list(pool);
         ok(list_empty == NULL, "no list when no entries");
 
-        MMDB_entry_data_list_s *const entry = data_pool_get(pool);
+        size_t index = 0;
+        ok(data_pool_alloc(pool, &index) == 0, "allocated an entry");
+        MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
         ok(entry != NULL, "got an entry");
 
         MMDB_entry_data_list_s *const list_one_element =
@@ -192,9 +262,14 @@ static void test_data_pool_to_list(void)
         MMDB_entry_data_list_s *const list_empty = data_pool_to_list(pool);
         ok(list_empty == NULL, "no list when no entries");
 
-        MMDB_entry_data_list_s *const entry1 = data_pool_get(pool);
+        size_t index1 = 0;
+        ok(data_pool_alloc(pool, &index1) == 0, "allocated an entry");
+        MMDB_entry_data_list_s *const entry1 = data_pool_lookup(pool, index1);
         ok(entry1 != NULL, "got an entry");
-        MMDB_entry_data_list_s *const entry2 = data_pool_get(pool);
+
+        size_t index2 = 0;
+        ok(data_pool_alloc(pool, &index2) == 0, "allocated an entry");
+        MMDB_entry_data_list_s *const entry2 = data_pool_lookup(pool, index2);
         ok(entry2 != NULL, "got an entry");
         ok(entry1 != entry2, "second entry is different from the first");
 

@@ -1,5 +1,7 @@
 #include "maxminddb_test_helper.h"
 
+static void test_big_lookup(void);
+
 /* These globals are gross but it's the easiest way to mix calling
  * for_all_modes() and for_all_record_sizes() */
 static int Current_Mode;
@@ -164,9 +166,42 @@ void all_record_sizes(int mode, const char *description)
     }
 }
 
+static void test_big_lookup(void)
+{
+    const char *const db_filename = "GeoIP2-Precision-Enterprise-Test.mmdb";
+    const char *const db_path = test_database_path(db_filename);
+    ok(db_path != NULL, "got database path");
+
+    MMDB_s * const mmdb = open_ok(db_path, MMDB_MODE_MMAP, "mmap mode");
+    ok(mmdb != NULL, "opened MMDB");
+    free((char *)db_path);
+
+    int gai_err = 0, mmdb_err = 0;
+    const char *const ip_address = "81.2.69.160";
+    MMDB_lookup_result_s result = MMDB_lookup_string(mmdb, ip_address, &gai_err,
+                                                     &mmdb_err);
+    ok(gai_err == 0, "no getaddrinfo error");
+    ok(mmdb_err == MMDB_SUCCESS, "no error from maxminddb library");
+    ok(result.found_entry, "found IP");
+
+    MMDB_entry_data_list_s *entry_data_list = NULL;
+    ok(
+        MMDB_get_entry_data_list(&result.entry,
+                                 &entry_data_list) == MMDB_SUCCESS,
+        "successfully looked up entry data list"
+        );
+    ok(entry_data_list != NULL, "got an entry_data_list");
+
+    MMDB_free_entry_data_list(entry_data_list);
+
+    MMDB_close(mmdb);
+    free(mmdb);
+}
+
 int main(void)
 {
     plan(NO_PLAN);
     for_all_modes(&all_record_sizes);
+    test_big_lookup();
     done_testing();
 }
