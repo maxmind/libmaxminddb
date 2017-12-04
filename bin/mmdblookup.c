@@ -164,14 +164,21 @@ LOCAL const char **get_options(
             { "verbose",   no_argument,       0, 'v' },
             { "version",   no_argument,       0, 'n' },
             { "benchmark", required_argument, 0, 'b' },
+#ifndef _WIN32
             { "threads",   required_argument, 0, 't' },
+#endif
             { "help",      no_argument,       0, 'h' },
             { "?",         no_argument,       0, 1   },
             { 0,           0,                 0, 0   }
         };
 
         int opt_index;
-        int opt_char = getopt_long(argc, argv, "f:i:b:t:vnh?", options,
+#ifdef _WIN32
+        char const * const optstring = "f:i:b:vnh?";
+#else
+        char const * const optstring = "f:i:b:t:vnh?";
+#endif
+        int opt_char = getopt_long(argc, argv, optstring, options,
                                    &opt_index);
 
         if (-1 == opt_char) {
