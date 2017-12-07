@@ -1,12 +1,20 @@
+#include <assert.h>
 #include <data-pool.h>
 #include <inttypes.h>
 #include "libtap/tap.h"
+#include <math.h>
 #include "maxminddb_test_helper.h"
 
 static void test_data_pool_new(void);
 static void test_data_pool_destroy(void);
 static void test_data_pool_alloc(void);
 static void test_data_pool_to_list(void);
+static bool create_and_destroy_pool(size_t const,
+                                    size_t const);
+static bool create_and_check_list(size_t const,
+                                  size_t const);
+static void check_block_count(MMDB_entry_data_list_s const *const,
+                              size_t const);
 
 int main(void)
 {
@@ -34,23 +42,20 @@ static void test_data_pool_new(void)
         MMDB_data_pool_s *const pool = data_pool_new(512);
         ok(pool != NULL, "size 512 is valid");
         cmp_ok(pool->size, "==", 512, "size is 512");
-        cmp_ok(pool->used_size, "==", 0, "used size is 0");
-        cmp_ok(pool->num_allocs, "==", 1, "num allocs is 1");
-        data_pool_destroy(pool);
+        cmp_ok(pool->used, "==", 0, "used size is 0");
+        data_pool_destroy(pool, false);
     }
 }
 
 static void test_data_pool_destroy(void)
 {
     {
-        data_pool_destroy(NULL);
+        data_pool_destroy(NULL, false);
     }
 
     {
         MMDB_data_pool_s *const pool = data_pool_new(512);
-        free(pool->data);
-        pool->data = NULL;
-        data_pool_destroy(pool);
+        data_pool_destroy(pool, false);
     }
 }
 
@@ -59,59 +64,27 @@ static void test_data_pool_alloc(void)
     {
         MMDB_data_pool_s *const pool = data_pool_new(1);
         ok(pool != NULL, "created pool");
+        cmp_ok(pool->used, "==", 0, "used size starts at 0");
 
-        for (size_t i = 0; i < 5; i++) {
-            ok(
-                data_pool_lookup(pool, 0) == NULL,
-                "looking up entry %zu should fail",
-                i
-                );
-        }
+        MMDB_entry_data_list_s *const entry1 = data_pool_alloc(pool);
+        ok(entry1 != NULL, "allocated first entry");
+        // Arbitrary so that we can recognize it.
+        entry1->entry_data.offset = (uint32_t)123;
 
-        size_t index1 = 0;
-        ok(data_pool_alloc(pool, &index1) == 0, "allocated first entry");
-        ok(index1 == 0, "first index is 0");
-        MMDB_entry_data_list_s *const entry1 = data_pool_lookup(pool, index1);
-        ok(entry1 != NULL, "got an entry");
-        // Arbitrary so that we can recognize it
-        entry1->entry_data.offset = 123;
-        cmp_ok(pool->size, "==", 1, "pool size is still 1");
-        cmp_ok(pool->used_size, "==", 1,
-               "pool used size is 1 after taking one");
-        cmp_ok(pool->num_allocs, "==", 1, "no new allocs yet");
+        cmp_ok(pool->size, "==", 1, "size is still 1");
+        cmp_ok(pool->used, "==", 1, "used size is 1 after taking one");
 
-        for (size_t i = 1; i < 5; i++) {
-            ok(
-                data_pool_lookup(pool, i) == NULL,
-                "looking up entry %zu should fail",
-                i
-                );
-        }
-
-        size_t index2 = 0;
-        ok(data_pool_alloc(pool, &index2) == 0, "allocated second entry");
-        ok(index2 == 1, "second index is 1");
-        MMDB_entry_data_list_s *const entry2 = data_pool_lookup(pool, index2);
+        MMDB_entry_data_list_s *const entry2 = data_pool_alloc(pool);
         ok(entry2 != NULL, "got another entry");
         ok(entry1 != entry2, "second entry is different from first entry");
-        cmp_ok(pool->size, "==", 2, "pool size is now 2");
-        cmp_ok(pool->used_size, "==", 2,
-               "pool used size is 2 after taking another");
-        cmp_ok(pool->num_allocs, "==", 2, "a new alloc happened");
 
-        MMDB_entry_data_list_s *const entry1_again = data_pool_lookup(pool,
-                                                                      index1);
-        ok(entry1_again != NULL, "found entry 1 again");
-        ok(entry1_again->entry_data.offset == 123, "entry 1 has same offset");
-        for (size_t i = 2; i < 5; i++) {
-            ok(
-                data_pool_lookup(pool, i) == NULL,
-                "looking up entry %zu should fail",
-                i
-                );
-        }
+        cmp_ok(pool->size, "==", 2, "size is 2 (new block)");
+        cmp_ok(pool->used, "==", 1, "used size is 1 in current block");
 
-        data_pool_destroy(pool);
+        ok(entry1->entry_data.offset == 123,
+           "accessing the original entry's memory is ok");
+
+        data_pool_destroy(pool, false);
     }
 
     {
@@ -119,73 +92,59 @@ static void test_data_pool_alloc(void)
         MMDB_data_pool_s *const pool = data_pool_new(initial_size);
         ok(pool != NULL, "created pool");
 
+        MMDB_entry_data_list_s *entry1 = NULL;
         for (size_t i = 0; i < initial_size; i++) {
-            size_t index = 0;
-            ok(data_pool_alloc(pool, &index) == 0, "allocated entry");
-            MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
+            MMDB_entry_data_list_s *const entry = data_pool_alloc(pool);
             ok(entry != NULL, "got an entry");
-            // Give each a unique number so we can check it after reallocating
+            // Give each a unique number so we can check it.
             entry->entry_data.offset = (uint32_t)i;
+            if (i == 0) {
+                entry1 = entry;
+            }
         }
 
-        cmp_ok(pool->size, "==", initial_size, "pool size is the initial size");
-        cmp_ok(pool->used_size, "==", 10, "used size is as expected");
-        cmp_ok(pool->num_allocs, "==", 1, "no new allocs happened");
+        cmp_ok(pool->size, "==", initial_size, "size is the initial size");
+        cmp_ok(pool->used, "==", initial_size, "used size is as expected");
 
-        size_t index = 0;
-        ok(data_pool_alloc(pool, &index) == 0, "allocated entry");
-        MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
+        MMDB_entry_data_list_s *const entry = data_pool_alloc(pool);
         ok(entry != NULL, "got an entry");
         entry->entry_data.offset = (uint32_t)initial_size;
 
         cmp_ok(pool->size, "==", initial_size * 2,
-               "pool size is the initial size*2");
-        cmp_ok(pool->used_size, "==", 11, "used size is as expected");
-        cmp_ok(pool->num_allocs, "==", 2, "new alloc happened");
+               "size is the initial size*2");
+        cmp_ok(pool->used, "==", 1, "used size is as expected");
 
+        MMDB_entry_data_list_s *const list = entry1;
+
+        MMDB_entry_data_list_s *element = list;
         for (size_t i = 0; i < initial_size + 1; i++) {
-            MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, i);
-            ok(entry != NULL, "got entry %zu", i);
             ok(
-                entry->entry_data.offset == (uint32_t)i,
+                element->entry_data.offset == (uint32_t)i,
                 "found offset %" PRIu32 ", should have %zu",
-                entry->entry_data.offset,
+                element->entry_data.offset,
                 i
                 );
-        }
-        for (size_t i = initial_size + 1; i < initial_size + 1 + 5; i++) {
-            MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, i);
-            ok(entry == NULL, "did not get entry %zu", i);
+            element = element->next;
         }
 
-        data_pool_destroy(pool);
-    }
+        ok(entry1->entry_data.offset == (uint32_t)0,
+           "accessing entry1's original memory is ok after growing the pool");
 
-    {
-        size_t const initial_size = 16;
-        MMDB_data_pool_s *const pool = data_pool_new(initial_size);
-        ok(pool != NULL, "created pool");
+        data_pool_destroy(pool, true);
 
-        pool->max_bytes = 16 * 2 * sizeof(MMDB_entry_data_list_s);
-
-        for (size_t i = 0; i < initial_size * 2; i++) {
-            size_t index = 0;
-            ok(data_pool_alloc(pool, &index) == 0, "allocated entry");
-            MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
-            ok(entry != NULL, "got entry %zu", i);
+        element = list;
+        for (size_t i = 0; i < initial_size + 1; i++) {
+            ok(
+                element->entry_data.offset == (uint32_t)i,
+                "found offset %" PRIu32 ", should have %zu,"
+                " after freeing the pool but keeping the list",
+                element->entry_data.offset,
+                i
+                );
+            element = element->next;
         }
 
-        cmp_ok(pool->size, "==", 32, "pool is now size 32");
-        cmp_ok(pool->used_size, "==", 32, "pool is using 32");
-        cmp_ok(pool->num_allocs, "==", 2, "2 allocs");
-
-        size_t index = 0;
-        ok(
-            data_pool_alloc(pool, &index) != 0,
-            "did not get an entry, hit max"
-            );
-
-        data_pool_destroy(pool);
+        data_pool_list_destroy(list);
     }
 }
 
@@ -196,30 +155,21 @@ static void test_data_pool_to_list(void)
         MMDB_data_pool_s *const pool = data_pool_new(initial_size);
         ok(pool != NULL, "created pool");
 
-        MMDB_entry_data_list_s *const list_empty = data_pool_to_list(pool);
-        ok(list_empty == NULL, "no list when no entries");
+        MMDB_entry_data_list_s *const entry1 = data_pool_alloc(pool);
+        ok(entry1 != NULL, "got an entry");
 
-        size_t index = 0;
-        ok(data_pool_alloc(pool, &index) == 0, "allocated an entry");
-        MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
-        ok(entry != NULL, "got an entry");
-
-        MMDB_entry_data_list_s *const list_one_element =
-            data_pool_to_list(pool);
+        MMDB_entry_data_list_s *const list_one_element = entry1;
         ok(list_one_element != NULL, "got a list");
-        ok(list_one_element == entry,
+        ok(list_one_element == entry1,
            "list's first element is the first we retrieved");
         ok(list_one_element->next == NULL, "list is one element in size");
 
-        size_t index2 = 0;
-        ok(data_pool_alloc(pool, &index2) == 0, "allocated another entry");
-        MMDB_entry_data_list_s *const entry2 = data_pool_lookup(pool, index2);
+        MMDB_entry_data_list_s *const entry2 = data_pool_alloc(pool);
         ok(entry2 != NULL, "got another entry");
 
-        MMDB_entry_data_list_s *const list_two_elements =
-            data_pool_to_list(pool);
+        MMDB_entry_data_list_s *const list_two_elements = entry1;
         ok(list_two_elements != NULL, "got a list");
-        ok(list_two_elements == entry,
+        ok(list_two_elements == entry1,
            "list's first element is the first we retrieved");
         ok(list_two_elements->next != NULL, "list has a second element");
 
@@ -228,7 +178,7 @@ static void test_data_pool_to_list(void)
            "second item in list is second we retrieved");
         ok(second_element->next == NULL, "list ends with the second element");
 
-        data_pool_destroy(pool);
+        data_pool_destroy(pool, false);
     }
 
     {
@@ -236,22 +186,16 @@ static void test_data_pool_to_list(void)
         MMDB_data_pool_s *const pool = data_pool_new(initial_size);
         ok(pool != NULL, "created pool");
 
-        MMDB_entry_data_list_s *const list_empty = data_pool_to_list(pool);
-        ok(list_empty == NULL, "no list when no entries");
+        MMDB_entry_data_list_s *const entry1 = data_pool_alloc(pool);
+        ok(entry1 != NULL, "got an entry");
 
-        size_t index = 0;
-        ok(data_pool_alloc(pool, &index) == 0, "allocated an entry");
-        MMDB_entry_data_list_s *const entry = data_pool_lookup(pool, index);
-        ok(entry != NULL, "got an entry");
-
-        MMDB_entry_data_list_s *const list_one_element =
-            data_pool_to_list(pool);
+        MMDB_entry_data_list_s *const list_one_element = entry1;
         ok(list_one_element != NULL, "got a list");
-        ok(list_one_element == entry,
+        ok(list_one_element == entry1,
            "list's first element is the first we retrieved");
         ok(list_one_element->next == NULL, "list ends with this element");
 
-        data_pool_destroy(pool);
+        data_pool_destroy(pool, false);
     }
 
     {
@@ -259,22 +203,14 @@ static void test_data_pool_to_list(void)
         MMDB_data_pool_s *const pool = data_pool_new(initial_size);
         ok(pool != NULL, "created pool");
 
-        MMDB_entry_data_list_s *const list_empty = data_pool_to_list(pool);
-        ok(list_empty == NULL, "no list when no entries");
-
-        size_t index1 = 0;
-        ok(data_pool_alloc(pool, &index1) == 0, "allocated an entry");
-        MMDB_entry_data_list_s *const entry1 = data_pool_lookup(pool, index1);
+        MMDB_entry_data_list_s *const entry1 = data_pool_alloc(pool);
         ok(entry1 != NULL, "got an entry");
 
-        size_t index2 = 0;
-        ok(data_pool_alloc(pool, &index2) == 0, "allocated an entry");
-        MMDB_entry_data_list_s *const entry2 = data_pool_lookup(pool, index2);
+        MMDB_entry_data_list_s *const entry2 = data_pool_alloc(pool);
         ok(entry2 != NULL, "got an entry");
         ok(entry1 != entry2, "second entry is different from the first");
 
-        MMDB_entry_data_list_s *const list_element1 =
-            data_pool_to_list(pool);
+        MMDB_entry_data_list_s *const list_element1 = entry1;
         ok(list_element1 != NULL, "got a list");
         ok(list_element1 == entry1,
            "list's first element is the first we retrieved");
@@ -284,6 +220,196 @@ static void test_data_pool_to_list(void)
            "second element is the second we retrieved");
         ok(list_element2->next == NULL, "list ends with this element");
 
-        data_pool_destroy(pool);
+        data_pool_destroy(pool, false);
     }
+
+    {
+        diag("starting test: fill one block save for one spot");
+        ok(
+            create_and_check_list(3, 2),
+            "fill one block save for one spot"
+            );
+    }
+
+    {
+        diag("starting test: fill one block");
+        ok(
+            create_and_check_list(3, 3),
+            "fill one block"
+            );
+    }
+
+    {
+        diag("starting test: fill one block and use one spot in the next block");
+        ok(
+            create_and_check_list(3, 3 + 1),
+            "fill one block and use one spot in the next block"
+            );
+    }
+
+    {
+        diag("starting test: fill two blocks save for one spot");
+        ok(
+            create_and_check_list(3, 3 + 3 * 2 - 1),
+            "fill two blocks save for one spot"
+            );
+    }
+
+    {
+        diag("starting test: fill two blocks");
+        ok(
+            create_and_check_list(3, 3 + 3 * 2),
+            "fill two blocks"
+            );
+    }
+
+    {
+        diag("starting test: fill two blocks and use one spot in the next");
+        ok(
+            create_and_check_list(3, 3 + 3 * 2 + 1),
+            "fill two blocks and use one spot in the next"
+            );
+    }
+
+    {
+        diag("starting test: fill three blocks save for one spot");
+        ok(
+            create_and_check_list(3, 3 + 3 * 2 + 3 * 2 * 2 - 1),
+            "fill three blocks save for one spot"
+            );
+    }
+
+    {
+        diag("starting test: fill three blocks");
+        ok(
+            create_and_check_list(3, 3 + 3 * 2 + 3 * 2 * 2),
+            "fill three blocks"
+            );
+    }
+
+    // It would be nice to have a larger number of these, but it's expensive to
+    // run many. We currently hardcode what this will be anyway, so varying
+    // this is not very interesting.
+    size_t const initial_sizes[] = { 1, 2, 32, 64, 128, 256 };
+
+    size_t const max_element_count = 4096;
+
+    for (size_t i = 0; i < sizeof(initial_sizes) / sizeof(initial_sizes[0]);
+         i++) {
+        size_t const initial_size = initial_sizes[i];
+
+        for (size_t element_count = 0; element_count < max_element_count;
+             element_count++) {
+            assert(create_and_destroy_pool(initial_size, element_count));
+            assert(create_and_check_list(initial_size, element_count));
+        }
+    }
+}
+
+// Use assert() rather than libtap as libtap is significantly slower and we run
+// this frequently.
+//
+// This is to test us passing false to data_pool_destroy() with varying sizes.
+static bool create_and_destroy_pool(size_t const initial_size,
+                                    size_t const element_count)
+{
+    MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+    assert(pool != NULL);
+
+    for (size_t i = 0; i < element_count; i++) {
+        MMDB_entry_data_list_s *const entry = data_pool_alloc(pool);
+        assert(entry != NULL);
+    }
+
+    data_pool_destroy(pool, false);
+
+    return true;
+}
+
+// Use assert() rather than libtap as libtap is significantly slower and we run
+// this frequently.
+static bool create_and_check_list(size_t const initial_size,
+                                  size_t const element_count)
+{
+    MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+    assert(pool != NULL);
+
+    assert(pool->used == 0);
+
+    // Hold on to the pointers as we initially see them so that we can check
+    // they are still valid after building the list.
+    MMDB_entry_data_list_s **const entry_array
+        = calloc(element_count, sizeof(MMDB_entry_data_list_s *));
+    assert(entry_array != NULL);
+
+    MMDB_entry_data_list_s *entry1 = NULL;
+    for (size_t i = 0; i < element_count; i++) {
+        MMDB_entry_data_list_s *const entry = data_pool_alloc(pool);
+        assert(entry != NULL);
+
+        if (i == 0) {
+            entry1 = entry;
+        }
+
+        entry->entry_data.offset = (uint32_t)i;
+
+        entry_array[i] = entry;
+    }
+
+    MMDB_entry_data_list_s *const list = entry1;
+
+    if (element_count == 0) {
+        assert(list == NULL);
+        data_pool_destroy(pool, false);
+        free(entry_array);
+        return true;
+    }
+
+    assert(list != NULL);
+
+    data_pool_destroy(pool, true);
+
+    MMDB_entry_data_list_s *element = list;
+    for (size_t i = 0; i < element_count; i++) {
+        assert(element->entry_data.offset == (uint32_t)i);
+
+        assert(element == entry_array[i]);
+
+        element = element->next;
+    }
+    assert(element == NULL);
+
+    check_block_count(list, initial_size);
+
+    assert(data_pool_list_destroy(list));
+
+    free(entry_array);
+    return true;
+}
+
+// Use assert() rather than libtap as libtap is significantly slower and we run
+// this frequently.
+static void check_block_count(MMDB_entry_data_list_s const *const list,
+                              size_t const initial_size)
+{
+    size_t got_block_count = 0;
+    size_t got_element_count = 0;
+
+    MMDB_entry_data_list_s const *element = list;
+    while (element) {
+        got_element_count++;
+
+        if (element->head) {
+            got_block_count++;
+        }
+
+        element = element->next;
+    }
+
+    // Because <number of elements> = <initial size> * 2^(number of blocks)
+    double const a = ceil((double)got_element_count / (double)initial_size);
+    double const b = log2(a);
+    size_t const expected_block_count = ((size_t)b) + 1;
+
+    assert(got_block_count == expected_block_count);
 }

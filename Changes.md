@@ -1,3 +1,9 @@
+* Allocate memory for `MMDB_entry_data_list_s` structs in separate chunks
+  rather than one large chunk. This simplifies accessing memory in
+  `MMDB_get_entry_data_list()` and increases performance. It builds on the
+  changes in 1.3.0 and 1.3.1.
+
+
 ## 1.3.1 - 2017-11-24
 
 * Fix build problems related to `rpl_malloc()`. Pull request by Rainer

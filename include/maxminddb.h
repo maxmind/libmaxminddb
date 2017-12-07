@@ -135,6 +135,7 @@ typedef struct MMDB_entry_data_s {
 typedef struct MMDB_entry_data_list_s {
     MMDB_entry_data_s entry_data;
     struct MMDB_entry_data_list_s *next;
+    bool head;
 } MMDB_entry_data_list_s;
 
 typedef struct MMDB_description_s {
