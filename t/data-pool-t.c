@@ -9,6 +9,7 @@ static void test_data_pool_new(void);
 static void test_data_pool_destroy(void);
 static void test_data_pool_alloc(void);
 static void test_data_pool_to_list(void);
+static MMDB_data_pool_s make_zero_pool(void);
 static bool create_and_destroy_pool(size_t const,
                                     size_t const);
 static bool create_and_check_list(size_t const,
@@ -29,18 +30,18 @@ int main(void)
 static void test_data_pool_new(void)
 {
     {
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(0, &pool) - 1, "size 0 is not valid");
     }
 
     {
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(SIZE_MAX - 10, &pool) == -1,
            "very large size is not valid");
     }
 
     {
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(512, &pool) == 0, "size 512 is valid");
         cmp_ok(pool.size, "==", 512, "size is 512");
         cmp_ok(pool.used, "==", 0, "used size is 0");
@@ -55,7 +56,7 @@ static void test_data_pool_destroy(void)
     }
 
     {
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(512, &pool) == 0, "created pool");
         data_pool_destroy(&pool, false);
     }
@@ -64,7 +65,7 @@ static void test_data_pool_destroy(void)
 static void test_data_pool_alloc(void)
 {
     {
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(1, &pool) == 0, "created pool");
         cmp_ok(pool.used, "==", 0, "used size starts at 0");
 
@@ -91,7 +92,7 @@ static void test_data_pool_alloc(void)
 
     {
         size_t const initial_size = 10;
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(initial_size, &pool) == 0, "created pool");
 
         MMDB_entry_data_list_s *entry1 = NULL;
@@ -154,7 +155,7 @@ static void test_data_pool_to_list(void)
 {
     {
         size_t const initial_size = 16;
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(initial_size, &pool) == 0, "created pool");
 
         MMDB_entry_data_list_s *const entry1 = data_pool_alloc(&pool);
@@ -187,7 +188,7 @@ static void test_data_pool_to_list(void)
 
     {
         size_t const initial_size = 1;
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(initial_size, &pool) == 0, "created pool");
 
         MMDB_entry_data_list_s *const entry1 = data_pool_alloc(&pool);
@@ -205,7 +206,7 @@ static void test_data_pool_to_list(void)
 
     {
         size_t const initial_size = 2;
-        MMDB_data_pool_s pool = { 0 };
+        MMDB_data_pool_s pool = make_zero_pool();
         ok(data_pool_new(initial_size, &pool) == 0, "created pool");
 
         MMDB_entry_data_list_s *const entry1 = data_pool_alloc(&pool);
@@ -311,6 +312,22 @@ static void test_data_pool_to_list(void)
     }
 }
 
+static MMDB_data_pool_s make_zero_pool(void)
+{
+    // We should be able to just use = {0}. However, there appears to be a bug
+    // in Clang where we get false positives about missing initializers:
+    // https://bugs.llvm.org/show_bug.cgi?id=21689
+    MMDB_data_pool_s pool = {
+        .index  = 0,
+        .size   = 0,
+        .used   = 0,
+        .block  = NULL,
+        .sizes  = { 0 },
+        .blocks = { 0 },
+    };
+    return pool;
+}
+
 // Use assert() rather than libtap as libtap is significantly slower and we run
 // this frequently.
 //
@@ -318,7 +335,7 @@ static void test_data_pool_to_list(void)
 static bool create_and_destroy_pool(size_t const initial_size,
                                     size_t const element_count)
 {
-    MMDB_data_pool_s pool = { 0 };
+    MMDB_data_pool_s pool = make_zero_pool();
     assert(data_pool_new(initial_size, &pool) == 0);
 
     for (size_t i = 0; i < element_count; i++) {
@@ -336,7 +353,7 @@ static bool create_and_destroy_pool(size_t const initial_size,
 static bool create_and_check_list(size_t const initial_size,
                                   size_t const element_count)
 {
-    MMDB_data_pool_s pool = { 0 };
+    MMDB_data_pool_s pool = make_zero_pool();
     assert(data_pool_new(initial_size, &pool) == 0);
 
     assert(pool.used == 0);

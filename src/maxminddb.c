@@ -1648,7 +1648,17 @@ int MMDB_get_metadata_as_entry_data_list(
 int MMDB_get_entry_data_list(
     MMDB_entry_s *start, MMDB_entry_data_list_s **const entry_data_list)
 {
-    MMDB_data_pool_s pool = { 0 };
+    // We should be able to just use = {0}. However, there appears to be a bug
+    // in Clang where we get false positives about missing initializers:
+    // https://bugs.llvm.org/show_bug.cgi?id=21689
+    MMDB_data_pool_s pool = {
+        .index  = 0,
+        .size   = 0,
+        .used   = 0,
+        .block  = NULL,
+        .sizes  = { 0 },
+        .blocks = { 0 },
+    };
     if (data_pool_new(MMDB_POOL_INIT_SIZE, &pool) != 0) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
