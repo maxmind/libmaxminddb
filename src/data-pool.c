@@ -11,28 +11,30 @@ static MMDB_entry_data_list_s *data_pool_get_list_head(
 
 // Allocate an MMDB_data_pool_s. It initially has space for size
 // MMDB_entry_data_list_s structs.
-MMDB_data_pool_s *data_pool_new(size_t const size)
+int data_pool_new(size_t const size, MMDB_data_pool_s *const pool)
 {
-    // We could have this on the stack, but it doesn't make much difference.
-    MMDB_data_pool_s *const pool = calloc(1, sizeof(MMDB_data_pool_s));
     if (!pool) {
-        return NULL;
+        return -1;
     }
 
     if (size == 0 ||
         !can_multiply(SIZE_MAX, size, sizeof(MMDB_entry_data_list_s))) {
         data_pool_destroy(pool, false);
-        return NULL;
+        return -1;
     }
     pool->size = size;
     pool->blocks[0] = calloc(pool->size, sizeof(MMDB_entry_data_list_s));
     if (!pool->blocks[0]) {
         data_pool_destroy(pool, false);
-        return NULL;
+        return -1;
     }
     pool->blocks[0]->head = true;
 
-    return pool;
+    pool->sizes[0] = size;
+
+    pool->block = pool->blocks[0];
+
+    return 0;
 }
 
 // Determine if we can multiply m*n. We can do this if the result will be below
@@ -61,10 +63,13 @@ void data_pool_destroy(MMDB_data_pool_s *const pool, bool const keep_list)
     }
 
     if (!keep_list) {
-        data_pool_list_destroy(pool->blocks[0]);
+        // It might be nice to use data_pool_list_destroy() so we have the same
+        // path either way, but since we may not have linked up the list yet,
+        // that doesn't make sense.
+        for (size_t i = 0; i <= pool->index; i++) {
+            free(pool->blocks[i]);
+        }
     }
-
-    free(pool);
 }
 
 // Claim a new struct from the pool. Doing this may cause the pool's size to
@@ -76,15 +81,7 @@ MMDB_entry_data_list_s *data_pool_alloc(MMDB_data_pool_s *const pool)
     }
 
     if (pool->used < pool->size) {
-        MMDB_entry_data_list_s *const element = pool->blocks[pool->index] +
-                                                pool->used;
-
-        if (pool->used > 0) {
-            MMDB_entry_data_list_s *const prev = pool->blocks[pool->index] +
-                                                 pool->used - 1;
-            prev->next = element;
-        }
-
+        MMDB_entry_data_list_s *const element = pool->block + pool->used;
         pool->used++;
         return element;
     }
@@ -109,19 +106,15 @@ MMDB_entry_data_list_s *data_pool_alloc(MMDB_data_pool_s *const pool)
     if (!pool->blocks[new_index]) {
         return NULL;
     }
-
     pool->blocks[new_index]->head = true;
-    pool->index = new_index;
 
-    MMDB_entry_data_list_s *const prev = pool->blocks[pool->index - 1]
-                                         + pool->size - 1;
+    pool->index = new_index;
+    pool->block = pool->blocks[pool->index];
 
     pool->size = new_size;
+    pool->sizes[pool->index] = pool->size;
 
-    MMDB_entry_data_list_s *const element = pool->blocks[pool->index];
-
-    prev->next = element;
-
+    MMDB_entry_data_list_s *const element = pool->block;
     pool->used = 1;
     return element;
 }
@@ -130,6 +123,9 @@ MMDB_entry_data_list_s *data_pool_alloc(MMDB_data_pool_s *const pool)
 //
 // This destroys only the linked list. This is useful if you used
 // data_pool_destroy() but kept the list around.
+//
+// It is only valid to call this after linking up the list using
+// data_pool_to_list() as it works by traversing the list.
 bool data_pool_list_destroy(MMDB_entry_data_list_s *const list)
 {
     // There are potentially multiple blocks of memory, each containing
@@ -164,6 +160,41 @@ static MMDB_entry_data_list_s *data_pool_get_list_head(
     }
 
     return NULL;
+}
+
+// Turn the structs in the array-like pool into a linked list.
+//
+// Before calling this function, the list isn't linked up.
+MMDB_entry_data_list_s *data_pool_to_list(MMDB_data_pool_s *const pool)
+{
+    if (!pool) {
+        return NULL;
+    }
+
+    if (pool->index == 0 && pool->used == 0) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i <= pool->index; i++) {
+        MMDB_entry_data_list_s *const block = pool->blocks[i];
+
+        size_t size = pool->sizes[i];
+        if (i == pool->index) {
+            size = pool->used;
+        }
+
+        for (size_t j = 0; j < size - 1; j++) {
+            MMDB_entry_data_list_s *const cur = block + j;
+            cur->next = block + j + 1;
+        }
+
+        if (i < pool->index) {
+            MMDB_entry_data_list_s *const last = block + size - 1;
+            last->next = pool->blocks[i + 1];
+        }
+    }
+
+    return pool->blocks[0];
 }
 
 #ifdef TEST_DATA_POOL
