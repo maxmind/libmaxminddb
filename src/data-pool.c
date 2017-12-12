@@ -6,35 +6,34 @@
 #include <stdlib.h>
 
 static bool can_multiply(size_t const, size_t const, size_t const);
-static MMDB_entry_data_list_s *data_pool_get_list_head(
-    MMDB_entry_data_list_s *const);
 
 // Allocate an MMDB_data_pool_s. It initially has space for size
 // MMDB_entry_data_list_s structs.
-int data_pool_new(size_t const size, MMDB_data_pool_s *const pool)
+MMDB_data_pool_s *data_pool_new(size_t const size)
 {
+    MMDB_data_pool_s *const pool = calloc(1, sizeof(MMDB_data_pool_s));
     if (!pool) {
-        return -1;
+        return NULL;
     }
 
     if (size == 0 ||
         !can_multiply(SIZE_MAX, size, sizeof(MMDB_entry_data_list_s))) {
-        data_pool_destroy(pool, false);
-        return -1;
+        data_pool_destroy(pool);
+        return NULL;
     }
     pool->size = size;
     pool->blocks[0] = calloc(pool->size, sizeof(MMDB_entry_data_list_s));
     if (!pool->blocks[0]) {
-        data_pool_destroy(pool, false);
-        return -1;
+        data_pool_destroy(pool);
+        return NULL;
     }
-    pool->blocks[0]->head = true;
+    pool->blocks[0]->pool = pool;
 
     pool->sizes[0] = size;
 
     pool->block = pool->blocks[0];
 
-    return 0;
+    return pool;
 }
 
 // Determine if we can multiply m*n. We can do this if the result will be below
@@ -51,25 +50,17 @@ static bool can_multiply(size_t const max, size_t const m, size_t const n)
 }
 
 // Clean up the data pool.
-//
-// You can keep the list elements around separate from the pool itself by
-// passing keep_list as true. This is useful once you have no further use for
-// the pool's management. If you do, you must clean up the list using
-// data_pool_list_destroy().
-void data_pool_destroy(MMDB_data_pool_s *const pool, bool const keep_list)
+void data_pool_destroy(MMDB_data_pool_s *const pool)
 {
     if (!pool) {
         return;
     }
 
-    if (!keep_list) {
-        // It might be nice to use data_pool_list_destroy() so we have the same
-        // path either way, but since we may not have linked up the list yet,
-        // that doesn't make sense.
-        for (size_t i = 0; i <= pool->index; i++) {
-            free(pool->blocks[i]);
-        }
+    for (size_t i = 0; i <= pool->index; i++) {
+        free(pool->blocks[i]);
     }
+
+    free(pool);
 }
 
 // Claim a new struct from the pool. Doing this may cause the pool's size to
@@ -106,7 +97,9 @@ MMDB_entry_data_list_s *data_pool_alloc(MMDB_data_pool_s *const pool)
     if (!pool->blocks[new_index]) {
         return NULL;
     }
-    pool->blocks[new_index]->head = true;
+
+    // We don't need to set this, but it's useful for introspection in tests.
+    pool->blocks[new_index]->pool = pool;
 
     pool->index = new_index;
     pool->block = pool->blocks[pool->index];
@@ -117,49 +110,6 @@ MMDB_entry_data_list_s *data_pool_alloc(MMDB_data_pool_s *const pool)
     MMDB_entry_data_list_s *const element = pool->block;
     pool->used = 1;
     return element;
-}
-
-// Destroy a linked list created using the data pool.
-//
-// This destroys only the linked list. This is useful if you used
-// data_pool_destroy() but kept the list around.
-//
-// It is only valid to call this after linking up the list using
-// data_pool_to_list() as it works by traversing the list.
-bool data_pool_list_destroy(MMDB_entry_data_list_s *const list)
-{
-    // There are potentially multiple blocks of memory, each containing
-    // multiple list elements. We need to free each block, not each element.
-
-    MMDB_entry_data_list_s *element = list;
-    while (element) {
-        // We should always be at a head.
-        if (!element->head) {
-            return false;
-        }
-
-        MMDB_entry_data_list_s *const next_element = data_pool_get_list_head(
-            element->next);
-        free(element);
-        element = next_element;
-    }
-
-    return true;
-}
-
-static MMDB_entry_data_list_s *data_pool_get_list_head(
-    MMDB_entry_data_list_s *const list)
-{
-    MMDB_entry_data_list_s *element = list;
-    while (element) {
-        if (element->head) {
-            return element;
-        }
-
-        element = element->next;
-    }
-
-    return NULL;
 }
 
 // Turn the structs in the array-like pool into a linked list.

@@ -1648,38 +1648,25 @@ int MMDB_get_metadata_as_entry_data_list(
 int MMDB_get_entry_data_list(
     MMDB_entry_s *start, MMDB_entry_data_list_s **const entry_data_list)
 {
-    // We should be able to just use = {0}. However, there appears to be a bug
-    // in Clang where we get false positives about missing initializers:
-    // https://bugs.llvm.org/show_bug.cgi?id=21689
-    MMDB_data_pool_s pool = {
-        .index  = 0,
-        .size   = 0,
-        .used   = 0,
-        .block  = NULL,
-        .sizes  = { 0 },
-        .blocks = { 0 },
-    };
-    if (data_pool_new(MMDB_POOL_INIT_SIZE, &pool) != 0) {
+    MMDB_data_pool_s *const pool = data_pool_new(MMDB_POOL_INIT_SIZE);
+    if (!pool) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    MMDB_entry_data_list_s *const list = data_pool_alloc(&pool);
+    MMDB_entry_data_list_s *const list = data_pool_alloc(pool);
     if (!list) {
-        data_pool_destroy(&pool, false);
+        data_pool_destroy(pool);
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
     int const status = get_entry_data_list(start->mmdb, start->offset, list,
-                                           &pool, 0);
+                                           pool, 0);
 
-    *entry_data_list = data_pool_to_list(&pool);
+    *entry_data_list = data_pool_to_list(pool);
     if (!*entry_data_list) {
-        data_pool_destroy(&pool, false);
+        data_pool_destroy(pool);
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
-
-    // The caller doesn't know about the pool. Just the list.
-    data_pool_destroy(&pool, true);
 
     return status;
 }
@@ -1866,7 +1853,7 @@ void MMDB_free_entry_data_list(MMDB_entry_data_list_s *const entry_data_list)
     if (entry_data_list == NULL) {
         return;
     }
-    data_pool_list_destroy(entry_data_list);
+    data_pool_destroy(entry_data_list->pool);
 }
 
 void MMDB_close(MMDB_s *const mmdb)
