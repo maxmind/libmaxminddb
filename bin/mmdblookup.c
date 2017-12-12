@@ -653,9 +653,11 @@ NO_PROTO static void *thread(void *arg)
         }
 
         MMDB_entry_data_list_s *entry_data_list = NULL;
-        if (MMDB_get_entry_data_list(&result.entry,
-                                     &entry_data_list) != MMDB_SUCCESS) {
-            fprintf(stderr, "MMDB_get_entry_data_list() failed\n");
+        int const status = MMDB_get_entry_data_list(&result.entry,
+                                                    &entry_data_list);
+        if (status != MMDB_SUCCESS) {
+            fprintf(stderr, "MMDB_get_entry_data_list(): %s\n",
+                    MMDB_strerror(status));
             MMDB_free_entry_data_list(entry_data_list);
             return NULL;
         }
