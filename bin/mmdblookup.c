@@ -61,6 +61,7 @@ static bool start_threaded_benchmark(
     MMDB_s *const mmdb,
     int const thread_count,
     int const iterations);
+static bool get_time(struct timespec *const);
 static void *thread(void *arg);
 #endif
 
@@ -598,7 +599,13 @@ NO_PROTO static bool start_threaded_benchmark(
         return false;
     }
 
-    clock_t const clock_start = clock();
+    // Using clock() isn't appropriate for multiple threads. It's CPU time, not
+    // wall time.
+    struct timespec time_start = { 0 };
+    if (!get_time(&time_start)) {
+        free(tinfo);
+        return false;
+    }
 
     for (int i = 0; i < thread_count; i++) {
         tinfo[i].num = i;
@@ -622,14 +629,37 @@ NO_PROTO static bool start_threaded_benchmark(
 
     free(tinfo);
 
-    clock_t const clock_diff = clock() - clock_start;
-    double const seconds = (double)clock_diff / CLOCKS_PER_SEC;
+    struct timespec time_end = { 0 };
+    if (!get_time(&time_end)) {
+        return false;
+    }
+
+    long double const end_time = time_end.tv_sec
+                                 + ((float)time_end.tv_nsec / 1e9);
+    long double const start_time = time_start.tv_sec
+                                   + ((float)time_start.tv_nsec / 1e9);
+
+    long double const elapsed = end_time - start_time;
+    unsigned long long const total_ips = iterations * thread_count;
+    long double const rate = total_ips / elapsed;
 
     fprintf(stdout,
-            "Looked up %i addresses using %d threads in %.2f seconds. %.2f lookups per second.\n",
-            iterations * thread_count, thread_count, seconds,
-            (iterations * thread_count) / seconds);
+            "Looked up %llu addresses using %d threads in %.2Lf seconds. %.2Lf lookups per second.\n",
+            total_ips, thread_count, elapsed, rate);
 
+    return true;
+}
+
+NO_PROTO static bool get_time(struct timespec *const tp)
+{
+    clockid_t clk_id = CLOCK_REALTIME;
+#ifdef _POSIX_MONOTONIC_CLOCK
+    clk_id = CLOCK_MONOTONIC;
+#endif
+    if (clock_gettime(clk_id, tp) != 0) {
+        fprintf(stderr, "clock_gettime(): %s\n", strerror(errno));
+        return false;
+    }
     return true;
 }
 
