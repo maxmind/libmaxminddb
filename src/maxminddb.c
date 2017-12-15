@@ -375,7 +375,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     ssize_t size;
     int status = MMDB_SUCCESS;
 
-    int fd = open(mmdb->filename, O_RDONLY);
+    int fd = open(mmdb->filename, O_RDONLY | O_CLOEXEC);
     struct stat s;
     if (fd < 0 || fstat(fd, &s)) {
         status = MMDB_FILE_OPEN_ERROR;
