@@ -9,8 +9,6 @@ static void test_data_pool_new(void);
 static void test_data_pool_destroy(void);
 static void test_data_pool_alloc(void);
 static void test_data_pool_to_list(void);
-static bool create_and_destroy_pool(size_t const,
-                                    size_t const);
 static bool create_and_check_list(size_t const,
                                   size_t const);
 static void check_block_count(MMDB_entry_data_list_s const *const,
@@ -290,30 +288,9 @@ static void test_data_pool_to_list(void)
 
         for (size_t element_count = 0; element_count < max_element_count;
              element_count++) {
-            assert(create_and_destroy_pool(initial_size, element_count));
             assert(create_and_check_list(initial_size, element_count));
         }
     }
-}
-
-// Use assert() rather than libtap as libtap is significantly slower and we run
-// this frequently.
-//
-// This is to test us passing false to data_pool_destroy() with varying sizes.
-static bool create_and_destroy_pool(size_t const initial_size,
-                                    size_t const element_count)
-{
-    MMDB_data_pool_s *const pool = data_pool_new(initial_size);
-    assert(pool != NULL);
-
-    for (size_t i = 0; i < element_count; i++) {
-        MMDB_entry_data_list_s *const entry = data_pool_alloc(pool);
-        assert(entry != NULL);
-    }
-
-    data_pool_destroy(pool);
-
-    return true;
 }
 
 // Use assert() rather than libtap as libtap is significantly slower and we run
