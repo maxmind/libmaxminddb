@@ -601,7 +601,10 @@ NO_PROTO static bool start_threaded_benchmark(
 
     // Using clock() isn't appropriate for multiple threads. It's CPU time, not
     // wall time.
-    struct timespec time_start = { 0 };
+    struct timespec time_start = {
+        .tv_sec  = 0,
+        .tv_nsec = 0,
+    };
     if (!get_time(&time_start)) {
         free(tinfo);
         return false;
@@ -629,7 +632,10 @@ NO_PROTO static bool start_threaded_benchmark(
 
     free(tinfo);
 
-    struct timespec time_end = { 0 };
+    struct timespec time_end = {
+        .tv_sec  = 0,
+        .tv_nsec = 0,
+    };
     if (!get_time(&time_end)) {
         return false;
     }
