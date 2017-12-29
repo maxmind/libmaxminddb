@@ -5,6 +5,13 @@
 * We no longer export `data_pool_*` symbols. These are internal functions
   but we were previously exporting them. Pull request by Faidon Liambotis.
   GitHub #162.
+* Build with POSIX.1-2008 by default if the system supports it. This allows
+  use of `open()` with `O_CLOEXEC`. We retain support for systems that
+  provide only POSIX.1-2001.
+* Open the database with the `O_CLOEXEC` flag if the system provides it.
+  This avoids cases where we could leak fds when called in multi-threaded
+  programs that `fork()` and `exec()`. Original report and PR by Brandon L
+  Black.
 
 
 ## 1.3.1 - 2017-11-24
