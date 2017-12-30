@@ -97,11 +97,7 @@ AC_CHECK_TYPE(
 
 AC_CHECK_TYPES([boolean])
 
-AC_CHECK_FUNC(
-        [open_memstream],
-        [AC_DEFINE([HAVE_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
-
-AC_CHECK_FUNCS([clock_gettime])
+AC_CHECK_FUNCS([clock_gettime open_memstream])
 
 AC_C_BIGENDIAN(
         [AC_DEFINE([MMDB_LITTLE_ENDIAN], [0], [System is big-endian])],
