@@ -61,7 +61,7 @@ static bool start_threaded_benchmark(
     MMDB_s *const mmdb,
     int const thread_count,
     int const iterations);
-static bool get_time(struct timespec *const);
+static long double get_time(void);
 static void *thread(void *arg);
 #endif
 
@@ -601,12 +601,8 @@ NO_PROTO static bool start_threaded_benchmark(
 
     // Using clock() isn't appropriate for multiple threads. It's CPU time, not
     // wall time.
-    struct timespec time_start = {
-        .tv_sec  = 0,
-        .tv_nsec = 0,
-    };
-    if (!get_time(&time_start)) {
-        free(tinfo);
+    long double const start_time = get_time();
+    if (start_time == -1) {
         return false;
     }
 
@@ -632,22 +628,17 @@ NO_PROTO static bool start_threaded_benchmark(
 
     free(tinfo);
 
-    struct timespec time_end = {
-        .tv_sec  = 0,
-        .tv_nsec = 0,
-    };
-    if (!get_time(&time_end)) {
+    long double const end_time = get_time();
+    if (end_time == -1) {
         return false;
     }
 
-    long double const end_time = time_end.tv_sec
-                                 + ((float)time_end.tv_nsec / 1e9);
-    long double const start_time = time_start.tv_sec
-                                   + ((float)time_start.tv_nsec / 1e9);
-
     long double const elapsed = end_time - start_time;
     unsigned long long const total_ips = iterations * thread_count;
-    long double const rate = total_ips / elapsed;
+    long double rate = total_ips;
+    if (elapsed != 0) {
+        rate = total_ips / elapsed;
+    }
 
     fprintf(stdout,
             "Looked up %llu addresses using %d threads in %.2Lf seconds. %.2Lf lookups per second.\n",
@@ -656,17 +647,31 @@ NO_PROTO static bool start_threaded_benchmark(
     return true;
 }
 
-NO_PROTO static bool get_time(struct timespec *const tp)
+NO_PROTO static long double get_time(void)
 {
+    // clock_gettime() is not present on OSX until 10.12.
+#ifdef HAVE_CLOCK_GETTIME
+    struct timespec tp = {
+        .tv_sec  = 0,
+        .tv_nsec = 0,
+    };
     clockid_t clk_id = CLOCK_REALTIME;
 #ifdef _POSIX_MONOTONIC_CLOCK
     clk_id = CLOCK_MONOTONIC;
 #endif
-    if (clock_gettime(clk_id, tp) != 0) {
+    if (clock_gettime(clk_id, &tp) != 0) {
         fprintf(stderr, "clock_gettime(): %s\n", strerror(errno));
-        return false;
+        return -1;
     }
-    return true;
+    return tp.tv_sec + ((float)tp.tv_nsec / 1e9);
+#else
+    time_t t = time(NULL);
+    if (t == (time_t)-1) {
+        fprintf(stderr, "time(): %s\n", strerror(errno));
+        return -1;
+    }
+    return (long double)t;
+#endif
 }
 
 NO_PROTO static void *thread(void *arg)

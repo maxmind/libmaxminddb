@@ -101,6 +101,8 @@ AC_CHECK_FUNC(
         [open_memstream],
         [AC_DEFINE([HAVE_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
 
+AC_CHECK_FUNCS([clock_gettime])
+
 AC_C_BIGENDIAN(
         [AC_DEFINE([MMDB_LITTLE_ENDIAN], [0], [System is big-endian])],
         [AC_DEFINE([MMDB_LITTLE_ENDIAN], [1], [System is little-endian])])
