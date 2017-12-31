@@ -2,6 +2,9 @@
   rather than one large chunk. This simplifies accessing memory in
   `MMDB_get_entry_data_list()` and increases performance. It builds on the
   changes in 1.3.0 and 1.3.1.
+* We no longer export `data_pool_*` symbols. These are internal functions
+  but we were previously exporting them. Pull request by Faidon Liambotis.
+  GitHub #162.
 
 
 ## 1.3.1 - 2017-11-24
