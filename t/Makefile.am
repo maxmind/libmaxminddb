@@ -18,6 +18,7 @@ check_PROGRAMS = \
 
 data_pool_t_CFLAGS = $(CFLAGS) -I$(top_srcdir)/src
 data_pool_t_LDFLAGS = $(AM_LDFLAGS) -lm
+data_pool_t_SOURCES = data-pool-t.c ../src/data-pool.c
 
 threads_t_CFLAGS = $(CFLAGS) -pthread
 
