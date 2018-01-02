@@ -11,7 +11,8 @@ extern "C" {
  * features provided by that standard if the implementation provides it. We can
  * check for what the implementation provides by checking the _POSIX_VERSION
  * macro after including unistd.h. If a feature is in POSIX.1-2008 but not
- * POSIX.1-2001, check that macro before using the feature. */
+ * POSIX.1-2001, check that macro before using the feature (or check for the
+ * feature directly if possible). */
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L
 #endif

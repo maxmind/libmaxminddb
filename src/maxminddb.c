@@ -376,7 +376,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     int status = MMDB_SUCCESS;
 
     int flags = O_RDONLY;
-#if _POSIX_VERSION >= 200809L
+#ifdef O_CLOEXEC
     flags |= O_CLOEXEC;
 #endif
     int fd = open(mmdb->filename, flags);
