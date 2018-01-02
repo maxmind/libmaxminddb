@@ -83,6 +83,12 @@ int main(int argc, char **argv)
         dump_meta(&mmdb);
     }
 
+    // The benchmarking and lookup from file modes are hidden features mainly
+    // intended for development right now. This means there are several flags
+    // that exist but are intentionally not mentioned in the usage or man page.
+
+    // The lookup from file mode may be useful to expose publicly in the usage,
+    // but we should have it respect the lookup_path functionality if we do so.
     if (ip_file) {
         free(lookup_path);
         if (!lookup_from_file(&mmdb, ip_file, verbose == 1)) {
