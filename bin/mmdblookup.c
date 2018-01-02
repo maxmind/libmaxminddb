@@ -37,14 +37,12 @@ LOCAL const char **get_options(
     int *iterations,
     int *lookup_path_length,
     int *const thread_count,
-    char **const ip_file,
-    bool *const report);
+    char **const ip_file);
 LOCAL MMDB_s open_or_die(const char *fname);
 LOCAL void dump_meta(MMDB_s *mmdb);
 LOCAL bool lookup_from_file(MMDB_s *const mmdb,
                             char const *const ip_file,
-                            bool const dump,
-                            bool const report);
+                            bool const dump);
 LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
                            const char **lookup_path,
                            int lookup_path_length);
@@ -74,11 +72,10 @@ int main(int argc, char **argv)
     int lookup_path_length = 0;
     int thread_count = 0;
     char *ip_file = NULL;
-    bool report = false;
 
     const char **lookup_path =
         get_options(argc, argv, &mmdb_file, &ip_address, &verbose, &iterations,
-                    &lookup_path_length, &thread_count, &ip_file, &report);
+                    &lookup_path_length, &thread_count, &ip_file);
 
     MMDB_s mmdb = open_or_die(mmdb_file);
 
@@ -88,7 +85,7 @@ int main(int argc, char **argv)
 
     if (ip_file) {
         free(lookup_path);
-        if (!lookup_from_file(&mmdb, ip_file, verbose == 1, report)) {
+        if (!lookup_from_file(&mmdb, ip_file, verbose == 1)) {
             MMDB_close(&mmdb);
             return 1;
         }
@@ -181,8 +178,7 @@ LOCAL const char **get_options(
     int *iterations,
     int *lookup_path_length,
     int *const thread_count,
-    char **const ip_file,
-    bool *const report)
+    char **const ip_file)
 {
     static int help = 0;
     static int version = 0;
@@ -198,7 +194,6 @@ LOCAL const char **get_options(
             { "threads",   required_argument, 0, 't' },
 #endif
             { "ip-file",   required_argument, 0, 'I' },
-            { "report",    no_argument,       0, 'r' },
             { "help",      no_argument,       0, 'h' },
             { "?",         no_argument,       0, 1   },
             { 0,           0,                 0, 0   }
@@ -206,9 +201,9 @@ LOCAL const char **get_options(
 
         int opt_index;
 #ifdef _WIN32
-        char const * const optstring = "f:i:b:I:rvnh?";
+        char const * const optstring = "f:i:b:I:vnh?";
 #else
-        char const * const optstring = "f:i:b:t:I:rvnh?";
+        char const * const optstring = "f:i:b:t:I:vnh?";
 #endif
         int opt_char = getopt_long(argc, argv, optstring, options,
                                    &opt_index);
@@ -233,8 +228,6 @@ LOCAL const char **get_options(
             *thread_count = strtol(optarg, NULL, 10);
         } else if (opt_char == 'I') {
             *ip_file = optarg;
-        } else if (opt_char == 'r') {
-            *report = true;
         }
     }
 
@@ -343,14 +336,17 @@ LOCAL void dump_meta(MMDB_s *mmdb)
 //
 // We look up each IP.
 //
-// If dump is true, we also dump the data to stdout.
+// If dump is true, we dump the data for each IP to stderr. This is useful for
+// comparison in that you can dump out the data for the IPs before and after
+// making changes. It goes to stderr rather than stdout so that the report does
+// not get included in what you will compare (since it will almost always be
+// different).
 //
-// If report is true, we write out how long the lookups took as well as some
-// information about progress (if there are a large number of IPs) to stderr.
+// In addition to being useful for comparisons, this function provides a way to
+// have a more deterministic set of lookups for benchmarking.
 LOCAL bool lookup_from_file(MMDB_s *const mmdb,
                             char const *const ip_file,
-                            bool const dump,
-                            bool const report)
+                            bool const dump)
 {
     FILE *const fh = fopen(ip_file, "r");
     if (!fh) {
@@ -389,9 +385,6 @@ LOCAL bool lookup_from_file(MMDB_s *const mmdb,
         }
 
         i++;
-        if (report && i % 1000000 == 0) {
-            fprintf(stderr, "%llu...\n", i);
-        }
 
         MMDB_lookup_result_s result = lookup_or_die(mmdb, buf);
         if (!result.found_entry) {
@@ -417,7 +410,7 @@ LOCAL bool lookup_from_file(MMDB_s *const mmdb,
 
         if (dump) {
             fprintf(stdout, "%s:\n", buf);
-            int const status = MMDB_dump_entry_data_list(stdout,
+            int const status = MMDB_dump_entry_data_list(stderr,
                                                          entry_data_list, 0);
             if (status != MMDB_SUCCESS) {
                 fprintf(stderr, "MMDB_dump_entry_data_list(): %s\n",
@@ -431,14 +424,12 @@ LOCAL bool lookup_from_file(MMDB_s *const mmdb,
         MMDB_free_entry_data_list(entry_data_list);
     }
 
-    if (report) {
-        clock_t const clock_diff = clock() - clock_start;
-        double const seconds = (double)clock_diff / CLOCKS_PER_SEC;
+    clock_t const clock_diff = clock() - clock_start;
+    double const seconds = (double)clock_diff / CLOCKS_PER_SEC;
 
-        fprintf(stderr,
-                "Looked up %llu addresses in %.2f seconds. %.2f lookups per second.\n",
-                i, seconds, i / seconds);
-    }
+    fprintf(stdout,
+            "Looked up %llu addresses in %.2f seconds. %.2f lookups per second.\n",
+            i, seconds, i / seconds);
 
     return true;
 }
