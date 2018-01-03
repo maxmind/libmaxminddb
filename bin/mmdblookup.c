@@ -7,6 +7,7 @@
 #ifndef _WIN32
 #include <pthread.h>
 #endif
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,9 +36,13 @@ LOCAL const char **get_options(
     int *verbose,
     int *iterations,
     int *lookup_path_length,
-    int *const thread_count);
+    int *const thread_count,
+    char **const ip_file);
 LOCAL MMDB_s open_or_die(const char *fname);
 LOCAL void dump_meta(MMDB_s *mmdb);
+LOCAL bool lookup_from_file(MMDB_s *const mmdb,
+                            char const *const ip_file,
+                            bool const dump);
 LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
                            const char **lookup_path,
                            int lookup_path_length);
@@ -54,6 +59,7 @@ static bool start_threaded_benchmark(
     MMDB_s *const mmdb,
     int const thread_count,
     int const iterations);
+static long double get_time(void);
 static void *thread(void *arg);
 #endif
 
@@ -65,15 +71,32 @@ int main(int argc, char **argv)
     int iterations = 0;
     int lookup_path_length = 0;
     int thread_count = 0;
+    char *ip_file = NULL;
 
     const char **lookup_path =
         get_options(argc, argv, &mmdb_file, &ip_address, &verbose, &iterations,
-                    &lookup_path_length, &thread_count);
+                    &lookup_path_length, &thread_count, &ip_file);
 
     MMDB_s mmdb = open_or_die(mmdb_file);
 
     if (verbose) {
         dump_meta(&mmdb);
+    }
+
+    // The benchmarking and lookup from file modes are hidden features mainly
+    // intended for development right now. This means there are several flags
+    // that exist but are intentionally not mentioned in the usage or man page.
+
+    // The lookup from file mode may be useful to expose publicly in the usage,
+    // but we should have it respect the lookup_path functionality if we do so.
+    if (ip_file) {
+        free(lookup_path);
+        if (!lookup_from_file(&mmdb, ip_file, verbose == 1)) {
+            MMDB_close(&mmdb);
+            return 1;
+        }
+        MMDB_close(&mmdb);
+        return 0;
     }
 
     if (0 == iterations) {
@@ -160,7 +183,8 @@ LOCAL const char **get_options(
     int *verbose,
     int *iterations,
     int *lookup_path_length,
-    int *const thread_count)
+    int *const thread_count,
+    char **const ip_file)
 {
     static int help = 0;
     static int version = 0;
@@ -175,6 +199,7 @@ LOCAL const char **get_options(
 #ifndef _WIN32
             { "threads",   required_argument, 0, 't' },
 #endif
+            { "ip-file",   required_argument, 0, 'I' },
             { "help",      no_argument,       0, 'h' },
             { "?",         no_argument,       0, 1   },
             { 0,           0,                 0, 0   }
@@ -182,9 +207,9 @@ LOCAL const char **get_options(
 
         int opt_index;
 #ifdef _WIN32
-        char const * const optstring = "f:i:b:vnh?";
+        char const * const optstring = "f:i:b:I:vnh?";
 #else
-        char const * const optstring = "f:i:b:t:vnh?";
+        char const * const optstring = "f:i:b:t:I:vnh?";
 #endif
         int opt_char = getopt_long(argc, argv, optstring, options,
                                    &opt_index);
@@ -207,6 +232,8 @@ LOCAL const char **get_options(
             help = 1;
         } else if (opt_char == 't') {
             *thread_count = strtol(optarg, NULL, 10);
+        } else if (opt_char == 'I') {
+            *ip_file = optarg;
         }
     }
 
@@ -231,7 +258,7 @@ LOCAL const char **get_options(
         usage(program, 1, "You must provide a filename with --file");
     }
 
-    if (NULL == *ip_address && *iterations == 0) {
+    if (*ip_address == NULL && *iterations == 0 && !*ip_file) {
         usage(program, 1, "You must provide an IP address with --ip");
     }
 
@@ -309,6 +336,108 @@ LOCAL void dump_meta(MMDB_s *mmdb)
                 mmdb->metadata.description.descriptions[i]->description);
     }
     fprintf(stdout, "\n");
+}
+
+// The input file should have one IP per line.
+//
+// We look up each IP.
+//
+// If dump is true, we dump the data for each IP to stderr. This is useful for
+// comparison in that you can dump out the data for the IPs before and after
+// making changes. It goes to stderr rather than stdout so that the report does
+// not get included in what you will compare (since it will almost always be
+// different).
+//
+// In addition to being useful for comparisons, this function provides a way to
+// have a more deterministic set of lookups for benchmarking.
+LOCAL bool lookup_from_file(MMDB_s *const mmdb,
+                            char const *const ip_file,
+                            bool const dump)
+{
+    FILE *const fh = fopen(ip_file, "r");
+    if (!fh) {
+        fprintf(stderr, "fopen(): %s: %s\n", ip_file, strerror(errno));
+        return false;
+    }
+
+    clock_t const clock_start = clock();
+    char buf[1024] = { 0 };
+    // I'd normally use uint64_t, but support for it is optional in C99.
+    unsigned long long i = 0;
+    while (1) {
+        if (fgets(buf, sizeof(buf), fh) == NULL) {
+            if (!feof(fh)) {
+                fprintf(stderr, "fgets(): %s\n", strerror(errno));
+                fclose(fh);
+                return false;
+            }
+            if (fclose(fh) != 0) {
+                fprintf(stderr, "fclose(): %s\n", strerror(errno));
+                return false;
+            }
+            break;
+        }
+
+        char *ptr = buf;
+        while (*ptr != '\0') {
+            if (*ptr == '\n') {
+                *ptr = '\0';
+                break;
+            }
+            ptr++;
+        }
+        if (strlen(buf) == 0) {
+            continue;
+        }
+
+        i++;
+
+        MMDB_lookup_result_s result = lookup_or_die(mmdb, buf);
+        if (!result.found_entry) {
+            continue;
+        }
+
+        MMDB_entry_data_list_s *entry_data_list = NULL;
+        int const status = MMDB_get_entry_data_list(&result.entry,
+                                                    &entry_data_list);
+        if (status != MMDB_SUCCESS) {
+            fprintf(stderr, "MMDB_get_entry_data_list(): %s\n",
+                    MMDB_strerror(status));
+            fclose(fh);
+            MMDB_free_entry_data_list(entry_data_list);
+            return false;
+        }
+
+        if (!entry_data_list) {
+            fprintf(stderr, "entry_data_list is NULL\n");
+            fclose(fh);
+            return false;
+        }
+
+        if (dump) {
+            fprintf(stdout, "%s:\n", buf);
+            int const status = MMDB_dump_entry_data_list(stderr,
+                                                         entry_data_list, 0);
+            if (status != MMDB_SUCCESS) {
+                fprintf(stderr, "MMDB_dump_entry_data_list(): %s\n",
+                        MMDB_strerror(status));
+                fclose(fh);
+                MMDB_free_entry_data_list(entry_data_list);
+                return false;
+            }
+        }
+
+        MMDB_free_entry_data_list(entry_data_list);
+    }
+
+    clock_t const clock_diff = clock() - clock_start;
+    double const seconds = (double)clock_diff / CLOCKS_PER_SEC;
+
+    fprintf(stdout,
+            "Looked up %llu addresses in %.2f seconds. %.2f lookups per second.\n",
+            i, seconds, i / seconds);
+
+    return true;
 }
 
 LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
@@ -467,7 +596,12 @@ NO_PROTO static bool start_threaded_benchmark(
         return false;
     }
 
-    clock_t const clock_start = clock();
+    // Using clock() isn't appropriate for multiple threads. It's CPU time, not
+    // wall time.
+    long double const start_time = get_time();
+    if (start_time == -1) {
+        return false;
+    }
 
     for (int i = 0; i < thread_count; i++) {
         tinfo[i].num = i;
@@ -491,15 +625,50 @@ NO_PROTO static bool start_threaded_benchmark(
 
     free(tinfo);
 
-    clock_t const clock_diff = clock() - clock_start;
-    double const seconds = (double)clock_diff / CLOCKS_PER_SEC;
+    long double const end_time = get_time();
+    if (end_time == -1) {
+        return false;
+    }
+
+    long double const elapsed = end_time - start_time;
+    unsigned long long const total_ips = iterations * thread_count;
+    long double rate = total_ips;
+    if (elapsed != 0) {
+        rate = total_ips / elapsed;
+    }
 
     fprintf(stdout,
-            "Looked up %i addresses using %d threads in %.2f seconds. %.2f lookups per second.\n",
-            iterations * thread_count, thread_count, seconds,
-            (iterations * thread_count) / seconds);
+            "Looked up %llu addresses using %d threads in %.2Lf seconds. %.2Lf lookups per second.\n",
+            total_ips, thread_count, elapsed, rate);
 
     return true;
+}
+
+NO_PROTO static long double get_time(void)
+{
+    // clock_gettime() is not present on OSX until 10.12.
+#ifdef HAVE_CLOCK_GETTIME
+    struct timespec tp = {
+        .tv_sec  = 0,
+        .tv_nsec = 0,
+    };
+    clockid_t clk_id = CLOCK_REALTIME;
+#ifdef _POSIX_MONOTONIC_CLOCK
+    clk_id = CLOCK_MONOTONIC;
+#endif
+    if (clock_gettime(clk_id, &tp) != 0) {
+        fprintf(stderr, "clock_gettime(): %s\n", strerror(errno));
+        return -1;
+    }
+    return tp.tv_sec + ((float)tp.tv_nsec / 1e9);
+#else
+    time_t t = time(NULL);
+    if (t == (time_t)-1) {
+        fprintf(stderr, "time(): %s\n", strerror(errno));
+        return -1;
+    }
+    return (long double)t;
+#endif
 }
 
 NO_PROTO static void *thread(void *arg)
@@ -522,9 +691,11 @@ NO_PROTO static void *thread(void *arg)
         }
 
         MMDB_entry_data_list_s *entry_data_list = NULL;
-        if (MMDB_get_entry_data_list(&result.entry,
-                                     &entry_data_list) != MMDB_SUCCESS) {
-            fprintf(stderr, "MMDB_get_entry_data_list() failed\n");
+        int const status = MMDB_get_entry_data_list(&result.entry,
+                                                    &entry_data_list);
+        if (status != MMDB_SUCCESS) {
+            fprintf(stderr, "MMDB_get_entry_data_list(): %s\n",
+                    MMDB_strerror(status));
             MMDB_free_entry_data_list(entry_data_list);
             return NULL;
         }
