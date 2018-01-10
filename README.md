@@ -76,8 +76,8 @@ APT sources, run:
 
 Then install the packages by running:
 
-    $ sudo aptitude update
-    $ sudo aptitude install libmaxminddb0 libmaxminddb-dev mmdb-bin
+    $ sudo apt update
+    $ sudo apt install libmaxminddb0 libmaxminddb-dev mmdb-bin
 
 ## On OS X via Homebrew
 
