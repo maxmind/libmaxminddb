@@ -12,6 +12,7 @@
   This avoids cases where we could leak fds when called in multi-threaded
   programs that `fork()` and `exec()`. Original report and PR by Brandon L
   Black.
+* Added a test to ensure we export only intended symbols (e.g. MMDB_*).
 
 
 ## 1.3.1 - 2017-11-24
