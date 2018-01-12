@@ -433,9 +433,10 @@ LOCAL bool lookup_from_file(MMDB_s *const mmdb,
     clock_t const clock_diff = clock() - clock_start;
     double const seconds = (double)clock_diff / CLOCKS_PER_SEC;
 
-    fprintf(stdout,
-            "Looked up %llu addresses in %.2f seconds. %.2f lookups per second.\n",
-            i, seconds, i / seconds);
+    fprintf(
+        stdout,
+        "Looked up %llu addresses in %.2f seconds. %.2f lookups per second.\n",
+        i, seconds, i / seconds);
 
     return true;
 }
@@ -637,9 +638,10 @@ NO_PROTO static bool start_threaded_benchmark(
         rate = total_ips / elapsed;
     }
 
-    fprintf(stdout,
-            "Looked up %llu addresses using %d threads in %.2Lf seconds. %.2Lf lookups per second.\n",
-            total_ips, thread_count, elapsed, rate);
+    fprintf(
+        stdout,
+        "Looked up %llu addresses using %d threads in %.2Lf seconds. %.2Lf lookups per second.\n",
+        total_ips, thread_count, elapsed, rate);
 
     return true;
 }
