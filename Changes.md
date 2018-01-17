@@ -1,3 +1,5 @@
+## 1.3.2 - 2018-01-17
+
 * Allocate memory for `MMDB_entry_data_list_s` structs in separate chunks
   rather than one large chunk. This simplifies accessing memory in
   `MMDB_get_entry_data_list()` and increases performance. It builds on the
