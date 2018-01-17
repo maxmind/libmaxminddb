@@ -17,8 +17,11 @@ check_PROGRAMS = \
 	no_map_get_value_t read_node_t threads_t version_t
 
 data_pool_t_CFLAGS = $(CFLAGS) -I$(top_srcdir)/src
+data_pool_t_LDFLAGS = $(AM_LDFLAGS) -lm
+data_pool_t_SOURCES = data-pool-t.c ../src/data-pool.c
+
 threads_t_CFLAGS = $(CFLAGS) -pthread
 
-TESTS = $(check_PROGRAMS) compile_c++_t.pl mmdblookup_t.pl
+TESTS = $(check_PROGRAMS) compile_c++_t.pl external_symbols_t.pl mmdblookup_t.pl
 
 LDADD = libmmdbtest.la libtap/libtap.a

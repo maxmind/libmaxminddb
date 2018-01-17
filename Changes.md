@@ -1,3 +1,22 @@
+## 1.3.2 - 2018-01-17
+
+* Allocate memory for `MMDB_entry_data_list_s` structs in separate chunks
+  rather than one large chunk. This simplifies accessing memory in
+  `MMDB_get_entry_data_list()` and increases performance. It builds on the
+  changes in 1.3.0 and 1.3.1.
+* We no longer export `data_pool_*` symbols. These are internal functions
+  but we were previously exporting them. Pull request by Faidon Liambotis.
+  GitHub #162.
+* Build with POSIX.1-2008 by default if the system supports it. This allows
+  use of `open()` with `O_CLOEXEC`. We retain support for systems that
+  provide only POSIX.1-2001.
+* Open the database with the `O_CLOEXEC` flag if the system provides it.
+  This avoids cases where we could leak fds when called in multi-threaded
+  programs that `fork()` and `exec()`. Original report and PR by Brandon L
+  Black.
+* Added a test to ensure we export only intended symbols (e.g. MMDB_*).
+
+
 ## 1.3.1 - 2017-11-24
 
 * Fix build problems related to `rpl_malloc()`. Pull request by Rainer

@@ -5,8 +5,16 @@ extern "C" {
 #ifndef MAXMINDDB_H
 #define MAXMINDDB_H
 
+/* Request POSIX.1-2008. However, we want to remain compatible with
+ * POSIX.1-2001 (since we have been historically and see no reason to drop
+ * compatibility). By requesting POSIX.1-2008, we can conditionally use
+ * features provided by that standard if the implementation provides it. We can
+ * check for what the implementation provides by checking the _POSIX_VERSION
+ * macro after including unistd.h. If a feature is in POSIX.1-2008 but not
+ * POSIX.1-2001, check that macro before using the feature (or check for the
+ * feature directly if possible). */
 #ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200112L
+#define _POSIX_C_SOURCE 200809L
 #endif
 
 #include "maxminddb_config.h"
@@ -20,7 +28,7 @@ extern "C" {
 #include <winsock2.h>
 #include <ws2tcpip.h>
 /* libmaxminddb package version from configure */
-#define PACKAGE_VERSION "1.3.1"
+#define PACKAGE_VERSION "1.3.2"
 
 typedef ADDRESS_FAMILY sa_family_t;
 
@@ -135,6 +143,7 @@ typedef struct MMDB_entry_data_s {
 typedef struct MMDB_entry_data_list_s {
     MMDB_entry_data_s entry_data;
     struct MMDB_entry_data_list_s *next;
+    void *pool;
 } MMDB_entry_data_list_s;
 
 typedef struct MMDB_description_s {

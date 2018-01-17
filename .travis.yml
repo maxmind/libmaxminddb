@@ -15,18 +15,40 @@ addons:
 language: c
 matrix:
   include:
+    # Why do we have -Wno-unused-parameter? Because libtap has unused
+    # parameters unfortunately.
+    #
+    # Why -Wno-unused-command-line-argument? Because Clang on OSX does not like
+    # -pthread to be given during linking (while gcc says it should be). We
+    # could alternatively work around this via conditionals in automake, but
+    # that seems uglier. Note we specify this for gcc on OSX as well as gcc
+    # there is a frontend for Clang.
     - os: linux
       compiler: gcc
       env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter"
     - os: osx
       compiler: gcc
-      env: MMCFLAGS="-std=c99 -Wall -Wextra -Wno-unused-parameter"
+      env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-command-line-argument"
     - os: linux
       compiler: clang
       env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter"
     - os: osx
       compiler: clang
-      env: MMCFLAGS="-std=c99 -Wall -Wextra -Wno-unused-parameter"
+      env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-command-line-argument"
+    # The same, but POSIX.1-2001. We default to POSIX.1-2008 but want to remain
+    # compatible with POSIX.1-2001.
+    - os: linux
+      compiler: gcc
+      env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -D_POSIX_C_SOURCE=200112L"
+    - os: osx
+      compiler: gcc
+      env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-command-line-argument -D_POSIX_C_SOURCE=200112L"
+    - os: linux
+      compiler: clang
+      env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -D_POSIX_C_SOURCE=200112L"
+    - os: osx
+      compiler: clang
+      env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-command-line-argument -D_POSIX_C_SOURCE=200112L"
 env:
   global:
     - secure: a2pXNVW/lGrMdJTal+pzH0J5N69RdBErwe2dHU2xDnOeNcDYmiSxmU4Fw52KPYXFzdlR9GuEyZtHtesRQthSHpylcIvfJJCih7EvwbNQ5pfplpT5ri2PKPFWB11ebr6vG23Ucgc5lrqHdgIgv+QtqVmW1IDf0hq62itMpu4MwcQ=

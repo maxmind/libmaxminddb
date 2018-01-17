@@ -20,7 +20,7 @@ This library is licensed under the Apache License, Version 2.
 ## From a Tarball
 
 This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
-on other compilers that supports C99, POSIX 2011.11, and the `-fms-extensions
+on other compilers that supports C99, POSIX.1-2001, and the `-fms-extensions
 flag` (or equivalent). The latter is needed to allow an anonymous union in a
 structure.
 
@@ -76,8 +76,8 @@ APT sources, run:
 
 Then install the packages by running:
 
-    $ sudo aptitude update
-    $ sudo aptitude install libmaxminddb0 libmaxminddb-dev mmdb-bin
+    $ sudo apt update
+    $ sudo apt install libmaxminddb0 libmaxminddb-dev mmdb-bin
 
 ## On OS X via Homebrew
 

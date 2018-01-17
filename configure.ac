@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([libmaxminddb], [1.3.1], [support@maxmind.com])
+AC_INIT([libmaxminddb], [1.3.2], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
 AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
 
@@ -63,9 +63,11 @@ AC_CHECK_HEADERS([arpa/inet.h assert.h fcntl.h inttypes.h libgen.h math.h netdb.
 # so we only run them on non MinGW-Systems. For MinGW we also need to link
 # against ws2_32.
 AC_CANONICAL_HOST
+is_windows=false
 case $host_os in
         mingw*)
                 LDFLAGS="-lws2_32"
+                is_windows=true
         ;;
         *)
                 AC_TYPE_OFF_T
@@ -77,6 +79,7 @@ case $host_os in
         ;;
 esac
 
+AM_CONDITIONAL([WINDOWS], [test x$is_windows = xtrue])
 
 # This check is backwards in order to make life easier for people writing
 # extensions in other languages that link to this library. If they want to
@@ -94,9 +97,7 @@ AC_CHECK_TYPE(
 
 AC_CHECK_TYPES([boolean])
 
-AC_CHECK_FUNC(
-        [open_memstream],
-        [AC_DEFINE([HAVE_OPEN_MEMSTREAM], [1], [Has an open_memstream() function])])
+AC_CHECK_FUNCS([clock_gettime open_memstream])
 
 AC_C_BIGENDIAN(
         [AC_DEFINE([MMDB_LITTLE_ENDIAN], [0], [System is big-endian])],
