@@ -119,6 +119,12 @@ AC_ARG_ENABLE(
         esac],[debug=false])
 AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
+AC_ARG_ENABLE([binaries],
+        AS_HELP_STRING([--enable-binaries], [Compilation of binaries code]),
+        [enable_binaries=${enableval}],
+        [enable_binaries=yes])
+AM_CONDITIONAL([BINARIES], [test "${enable_binaries}" = "yes"])
+
 AC_ARG_ENABLE([tests],
         AS_HELP_STRING([--enable-tests], [Compilation of tests code]),
         [enable_tests=${enableval}],

@@ -4,8 +4,12 @@ include_HEADERS = include/maxminddb.h
 nodist_include_HEADERS = include/maxminddb_config.h
 
 SUBDIRS = \
-  src     \
+  src
+
+if BINARIES
+SUBDIRS += \
   bin
+endif
 
 if TESTS
 SUBDIRS += \
