@@ -1,3 +1,6 @@
+* Add --disable-binaries option to `configure`. Pull request by Fabrice
+  Fontaine. GitHub #166.
+
 ## 1.3.2 - 2018-01-17
 
 * Allocate memory for `MMDB_entry_data_list_s` structs in separate chunks
