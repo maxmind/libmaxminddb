@@ -8,7 +8,11 @@ clean-local:
 AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
 
 noinst_LTLIBRARIES = libmmdbtest.la
-libmmdbtest_la_SOURCES = maxminddb_test_helper.c
+libmmdbtest_la_SOURCES = maxminddb_test_helper.c maxminddb_test_helper.h
+
+EXTRA_DIST = compile_c++_t.pl external_symbols_t.pl  mmdblookup_t.pl \
+	     libtap/COPYING libtap/INSTALL libtap/Makefile libtap/README.md \
+	     libtap/tap.c libtap/tap.h maxmind-db
 
 check_PROGRAMS = \
 	bad_pointers_t bad_databases_t basic_lookup_t data_entry_list_t \
