@@ -1,5 +1,7 @@
 * Add --disable-binaries option to `configure`. Pull request by Fabrice
   Fontaine. GitHub #166.
+* Previous releases incorrectly included `*.Po` files in the `t` directory.
+  This has been corrected. Reported by Daniel Macks. GitHub #168.
 
 ## 1.3.2 - 2018-01-17
 
