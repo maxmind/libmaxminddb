@@ -19,7 +19,9 @@ This library is licensed under the Apache License, Version 2.
 
 ## From a Named Release Tarball
 
-**NOTE:** These instructions are for installation from the _named_ `.tar.gz` tarballs on the [Releases](https://github.com/maxmind/libmaxminddb/releases) page (e.g. `libmaxminddb-*.tar.gz`).
+**NOTE:** These instructions are for installation from the _named_ `.tar.gz`
+tarballs on the [Releases](https://github.com/maxmind/libmaxminddb/releases)
+page (e.g. `libmaxminddb-*.tar.gz`).
 
 This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
 on other compilers that supports C99, POSIX.1-2001, and the `-fms-extensions
@@ -50,9 +52,15 @@ can do this by running the following commands:
 
 ## From a GitHub "Source Code" Archive / Git Repo Clone (Achtung!)
 
-**NOTE:** These instructions are for installation from the GitHub "Source Code" archives also available on the [Releases](https://github.com/maxmind/libmaxminddb/releases) page (e.g. `X.Y.Z.zip` or `X.Y.Z.tar.gz`), as well as installation directly from a clone of the [Git repo](https://github.com/maxmind/libmaxminddb). Installation from these sources are possible, but will present challenges to users not comfortable with manual dependency resolution.
+**NOTE:** These instructions are for installation from the GitHub "Source
+Code" archives also available on the
+[Releases](https://github.com/maxmind/libmaxminddb/releases) page (e.g.
+`X.Y.Z.zip` or `X.Y.Z.tar.gz`), as well as installation directly from a clone
+of the [Git repo](https://github.com/maxmind/libmaxminddb). Installation from
+these sources are possible but will present challenges to users not
+comfortable with manual dependency resolution.
 
-To install from a source code archive, you will need `automake`, `autoconf`, and `libtool` installed
+You will need `automake`, `autoconf`, and `libtool` installed
 in addition to `make` and a compiler.
 
 You can clone this repository and build it by running:
