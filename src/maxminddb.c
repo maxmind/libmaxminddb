@@ -233,6 +233,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     mmdb->data_section = NULL;
     mmdb->metadata.database_type = NULL;
     mmdb->metadata.languages.count = 0;
+    mmdb->metadata.languages.names = NULL;
     mmdb->metadata.description.count = 0;
 
     mmdb->filename = mmdb_strdup(filename);
@@ -1895,7 +1896,7 @@ LOCAL void free_mmdb_struct(MMDB_s *const mmdb)
 
 LOCAL void free_languages_metadata(MMDB_s *mmdb)
 {
-    if (!mmdb->metadata.languages.count) {
+    if (!mmdb->metadata.languages.names) {
         return;
     }
 
