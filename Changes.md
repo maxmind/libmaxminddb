@@ -1,3 +1,7 @@
+* Fix a memory leak that occurred when freeing an `MMDB_s` where the
+  database had no languages defined in the metadata. If you are using an
+  official MaxMind database, this leak does not affect you. Pull request
+  by Kókai Péter. GitHub #180.
 * Add --disable-binaries option to `configure`. Pull request by Fabrice
   Fontaine. GitHub #166.
 * Previous releases incorrectly included `*.Po` files in the `t` directory.
