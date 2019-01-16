@@ -427,6 +427,8 @@ if (MMDB_SUCCESS != status) { ... }
 MMDB_close(&mmdb);
 ```
 
+`filename` must be encoded as UTF-8 on Windows.
+
 The `MMDB_s` structure you pass in can be on the stack or allocated from the
 heap. However, if the open is successful it will contain heap-allocated data,
 so you need to close it with `MMDB_close()`. If the status returned is not

@@ -11,4 +11,8 @@
 #define MMDB_UINT128_IS_BYTE_ARRAY 1
 #endif
 
+#ifndef UNICODE
+#define UNICODE
+#endif
+
 #endif                          /* MAXMINDDB_CONFIG_H */
