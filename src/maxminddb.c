@@ -323,12 +323,30 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 
 #ifdef _WIN32
 
+LOCAL LPWSTR utf8_to_utf16(const char *utf8_str)
+{
+    int wide_chars = MultiByteToWideChar(CP_UTF8, 0, utf8_str, -1, NULL, 0);
+    wchar_t *utf16_str = (wchar_t *) malloc(wide_chars * sizeof(wchar_t));
+
+    if (MultiByteToWideChar(CP_UTF8, 0, utf8_str, -1, utf16_str, wide_chars) < 1) {
+        free(utf16_str);
+        return NULL;
+    }
+
+    return utf16_str;
+}
+
 LOCAL int map_file(MMDB_s *const mmdb)
 {
     DWORD size;
     int status = MMDB_SUCCESS;
     HANDLE mmh = NULL;
-    HANDLE fd = CreateFileA(mmdb->filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+    LPWSTR utf16_filename = utf8_to_utf16(mmdb->filename);
+    if (! utf16_filename) {
+        status = MMDB_FILE_OPEN_ERROR;
+        goto cleanup;
+    }
+    HANDLE fd = CreateFile(utf16_filename, GENERIC_READ, FILE_SHARE_READ, NULL,
                             OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fd == INVALID_HANDLE_VALUE) {
         status = MMDB_FILE_OPEN_ERROR;
@@ -339,7 +357,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
     }
-    mmh = CreateFileMappingA(fd, NULL, PAGE_READONLY, 0, size, NULL);
+    mmh = CreateFileMapping(fd, NULL, PAGE_READONLY, 0, size, NULL);
     /* Microsoft documentation for CreateFileMapping indicates this returns
         NULL not INVALID_HANDLE_VALUE on error */
     if (NULL == mmh) {
@@ -365,11 +383,12 @@ LOCAL int map_file(MMDB_s *const mmdb)
         CloseHandle(mmh);
     }
     errno = saved_errno;
+    free(utf16_filename);
 
     return status;
 }
 
-#else
+#else // _WIN32
 
 LOCAL int map_file(MMDB_s *const mmdb)
 {
@@ -417,7 +436,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
     return status;
 }
 
-#endif
+#endif // _WIN32
 
 LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                                    ssize_t file_size, uint32_t *metadata_size)

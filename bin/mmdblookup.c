@@ -15,8 +15,6 @@
 
 #ifdef _WIN32
 #include <malloc.h>
-#define snprintf _snprintf
-#undef UNICODE /* Use the non-UTF16 version of the gai_strerror */
 #else
 #include <libgen.h>
 #include <unistd.h>
@@ -63,8 +61,40 @@ static long double get_time(void);
 static void *thread(void *arg);
 #endif
 
+#ifdef _WIN32
+int wmain(int argc, wchar_t **wargv)
+{
+    // Convert our argument list from UTF-16 to UTF-8.
+    char **argv = (char **)malloc(argc * sizeof(char *));
+    if (!argv) {
+        fprintf(stderr, "malloc(): %s\n", strerror(errno));
+        exit(1);
+    }
+    for (int i = 0; i < argc; i++) {
+        int utf8_width;
+        char *utf8_string;
+        utf8_width = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, NULL, 0,
+                    NULL, NULL);
+        if (utf8_width < 1) {
+            fprintf(stderr, "WideCharToMultiByte() failed: %d\n", GetLastError());
+            exit(1);
+        }
+        utf8_string = malloc(utf8_width);
+        if (!utf8_string) {
+            fprintf(stderr, "malloc(): %s\n", strerror(errno));
+            exit(1);
+        }
+        if (WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, utf8_string,
+                    utf8_width, NULL, NULL) < 1) {
+            fprintf(stderr, "WideCharToMultiByte() failed: %d\n", GetLastError());
+            exit(1);
+        }
+        argv[i] = utf8_string;
+    }
+#else // _WIN32
 int main(int argc, char **argv)
 {
+#endif // _WIN32
     char *mmdb_file = NULL;
     char *ip_address = NULL;
     int verbose = 0;
@@ -90,7 +120,7 @@ int main(int argc, char **argv)
     // The lookup from file mode may be useful to expose publicly in the usage,
     // but we should have it respect the lookup_path functionality if we do so.
     if (ip_file) {
-        free(lookup_path);
+        free((void *) lookup_path);
         if (!lookup_from_file(&mmdb, ip_file, verbose == 1)) {
             MMDB_close(&mmdb);
             return 1;
@@ -104,9 +134,9 @@ int main(int argc, char **argv)
                               lookup_path_length));
     }
 
-    free(lookup_path);
+    free((void *) lookup_path);
 
-    srand( time(NULL) );
+    srand( (int) time(NULL) );
 
 #ifndef _WIN32
     if (thread_count > 0) {
@@ -250,7 +280,7 @@ LOCAL const char **get_options(
     }
 
     if (version) {
-        fprintf(stdout, "\n  %s version %s\n\n", program, VERSION);
+        fprintf(stdout, "\n  %s version %s\n\n", program, PACKAGE_VERSION);
         exit(0);
     }
 
@@ -496,7 +526,7 @@ LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
  end:
     MMDB_free_entry_data_list(entry_data_list);
     MMDB_close(mmdb);
-    free(lookup_path);
+    free((void *)lookup_path);
 
     return exit_code;
 }
@@ -553,7 +583,13 @@ LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr)
     if (0 != gai_error) {
         fprintf(stderr,
                 "\n  Error from call to getaddrinfo for %s - %s\n\n",
-                ipstr, gai_strerror(gai_error));
+                ipstr,
+#ifdef _WIN32
+                gai_strerrorA(gai_error)
+#else
+                gai_strerror(gai_error)
+#endif
+                );
         exit(3);
     }
 
