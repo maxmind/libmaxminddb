@@ -105,10 +105,8 @@ https://github.com/maxmind/libmaxminddb/issues
 We have a few development tools under the `dev-bin` directory to make
 development easier. These are written in Perl or shell. They are:
 
-* `regen-prototypes.pl` - This regenerates the prototypes in the header and
-  source files. This helps keep headers and code in sync.
-* `uncrustify-all.sh` - This runs `uncrustify` on all the code. It runs
-  `regen-prototypes.pl` first. Please run this before submitting patches.
+* `uncrustify-all.sh` - This runs `uncrustify` on all the code. Please run
+  this before submitting patches.
 * `valgrind-all.pl` - This runs Valgrind on the tests and `mmdblookup` to
   check for memory leaks.
 
