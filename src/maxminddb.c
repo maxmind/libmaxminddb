@@ -27,8 +27,6 @@
 
 #ifdef MMDB_DEBUG
 #define LOCAL
-#define NO_PROTO
-#define DEBUG_FUNC
 #define DEBUG_MSG(msg) fprintf(stderr, msg "\n")
 #define DEBUG_MSGF(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
 #define DEBUG_BINARY(fmt, byte)                                 \
@@ -44,7 +42,6 @@
 #define DEBUG_NL fprintf(stderr, "\n")
 #else
 #define LOCAL static
-#define NO_PROTO static
 #define DEBUG_MSG(...)
 #define DEBUG_MSGF(...)
 #define DEBUG_BINARY(...)
@@ -52,7 +49,7 @@
 #endif
 
 #ifdef MMDB_DEBUG
-DEBUG_FUNC char *byte_to_binary(uint8_t byte)
+char *byte_to_binary(uint8_t byte)
 {
     char *bits = malloc(sizeof(char) * 9);
     if (NULL == bits) {
@@ -67,7 +64,7 @@ DEBUG_FUNC char *byte_to_binary(uint8_t byte)
     return bits;
 }
 
-DEBUG_FUNC char *type_num_to_name(uint8_t num)
+char *type_num_to_name(uint8_t num)
 {
     switch (num) {
     case 0:
@@ -134,7 +131,6 @@ typedef struct record_info_s {
 // 64 leads us to allocating 4 KiB on a 64bit system.
 #define MMDB_POOL_INIT_SIZE 64
 
-/* *INDENT-OFF* */
 LOCAL int map_file(MMDB_s *const mmdb);
 LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                                    ssize_t file_size, uint32_t *metadata_size);
@@ -199,7 +195,6 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
     int *status);
 LOCAL void print_indentation(FILE *stream, int i);
 LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
-/* *INDENT-ON* */
 
 #define CHECKED_DECODE_ONE(mmdb, offset, entry_data)                        \
     do {                                                                    \
@@ -1415,7 +1410,7 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
 }
 
 #if !MMDB_UINT128_IS_BYTE_ARRAY
-NO_PROTO mmdb_uint128_t get_uint128(const uint8_t *p, int length)
+LOCAL mmdb_uint128_t get_uint128(const uint8_t *p, int length)
 {
     mmdb_uint128_t value = 0;
     while (length-- > 0) {

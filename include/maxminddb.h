@@ -198,39 +198,39 @@ typedef struct MMDB_search_node_s {
     MMDB_entry_s right_record_entry;
 } MMDB_search_node_s;
 
-    /* *INDENT-OFF* */
-    extern int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb);
-    extern MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
-                                                   const char *const ipstr,
-                                                   int *const gai_error,
-                                                   int *const mmdb_error);
-    extern MMDB_lookup_result_s MMDB_lookup_sockaddr(
-               MMDB_s *const mmdb,
-               const struct sockaddr *const sockaddr,
-               int *const mmdb_error);
-    extern int MMDB_read_node(MMDB_s *const mmdb, uint32_t node_number,
-                              MMDB_search_node_s *const node);
-    extern int MMDB_get_value(MMDB_entry_s *const start,
-                              MMDB_entry_data_s *const entry_data,
-                              ...);
-    extern int MMDB_vget_value(MMDB_entry_s *const start,
-                               MMDB_entry_data_s *const entry_data,
-                               va_list va_path);
-    extern int MMDB_aget_value(MMDB_entry_s *const start,
-                               MMDB_entry_data_s *const entry_data,
-                               const char *const *const path);
-    extern int MMDB_get_metadata_as_entry_data_list(
-               MMDB_s *const mmdb, MMDB_entry_data_list_s **const entry_data_list);
-    extern int MMDB_get_entry_data_list(
-               MMDB_entry_s *start, MMDB_entry_data_list_s **const entry_data_list);
-    extern void MMDB_free_entry_data_list(MMDB_entry_data_list_s *const entry_data_list);
-    extern void MMDB_close(MMDB_s *const mmdb);
-    extern const char *MMDB_lib_version(void);
-    extern int MMDB_dump_entry_data_list(FILE *const stream,
-                                         MMDB_entry_data_list_s *const entry_data_list,
-                                         int indent);
-    extern const char *MMDB_strerror(int error_code);
-    /* *INDENT-ON* */
+extern int MMDB_open(const char *const filename, uint32_t flags,
+                     MMDB_s *const mmdb);
+extern MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
+                                               const char *const ipstr,
+                                               int *const gai_error,
+                                               int *const mmdb_error);
+extern MMDB_lookup_result_s MMDB_lookup_sockaddr(
+    MMDB_s *const mmdb,
+    const struct sockaddr *const sockaddr,
+    int *const mmdb_error);
+extern int MMDB_read_node(MMDB_s *const mmdb, uint32_t node_number,
+                          MMDB_search_node_s *const node);
+extern int MMDB_get_value(MMDB_entry_s *const start,
+                          MMDB_entry_data_s *const entry_data,
+                          ...);
+extern int MMDB_vget_value(MMDB_entry_s *const start,
+                           MMDB_entry_data_s *const entry_data,
+                           va_list va_path);
+extern int MMDB_aget_value(MMDB_entry_s *const start,
+                           MMDB_entry_data_s *const entry_data,
+                           const char *const *const path);
+extern int MMDB_get_metadata_as_entry_data_list(
+    MMDB_s *const mmdb, MMDB_entry_data_list_s **const entry_data_list);
+extern int MMDB_get_entry_data_list(
+    MMDB_entry_s *start, MMDB_entry_data_list_s **const entry_data_list);
+extern void MMDB_free_entry_data_list(
+    MMDB_entry_data_list_s *const entry_data_list);
+extern void MMDB_close(MMDB_s *const mmdb);
+extern const char *MMDB_lib_version(void);
+extern int MMDB_dump_entry_data_list(FILE *const stream,
+                                     MMDB_entry_data_list_s *const entry_data_list,
+                                     int indent);
+extern const char *MMDB_strerror(int error_code);
 
 #endif                          /* MAXMINDDB_H */
 
