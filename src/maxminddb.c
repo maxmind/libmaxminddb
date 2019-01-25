@@ -27,8 +27,6 @@
 
 #ifdef MMDB_DEBUG
 #define LOCAL
-#define NO_PROTO
-#define DEBUG_FUNC
 #define DEBUG_MSG(msg) fprintf(stderr, msg "\n")
 #define DEBUG_MSGF(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
 #define DEBUG_BINARY(fmt, byte)                                 \
@@ -44,7 +42,6 @@
 #define DEBUG_NL fprintf(stderr, "\n")
 #else
 #define LOCAL static
-#define NO_PROTO static
 #define DEBUG_MSG(...)
 #define DEBUG_MSGF(...)
 #define DEBUG_BINARY(...)
@@ -52,7 +49,7 @@
 #endif
 
 #ifdef MMDB_DEBUG
-DEBUG_FUNC char *byte_to_binary(uint8_t byte)
+char *byte_to_binary(uint8_t byte)
 {
     char *bits = malloc(sizeof(char) * 9);
     if (NULL == bits) {
@@ -67,7 +64,7 @@ DEBUG_FUNC char *byte_to_binary(uint8_t byte)
     return bits;
 }
 
-DEBUG_FUNC char *type_num_to_name(uint8_t num)
+char *type_num_to_name(uint8_t num)
 {
     switch (num) {
     case 0:
@@ -174,6 +171,7 @@ LOCAL int lookup_path_in_map(const char *path_elem, MMDB_s *mmdb,
 LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
 LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
                             MMDB_entry_data_s *entry_data);
+LOCAL mmdb_uint128_t get_uint128(const uint8_t *p, int length);
 LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
                      MMDB_entry_data_s *entry_data);
 LOCAL int get_ext_type(int raw_ext_type);
@@ -1415,7 +1413,7 @@ LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
 }
 
 #if !MMDB_UINT128_IS_BYTE_ARRAY
-NO_PROTO mmdb_uint128_t get_uint128(const uint8_t *p, int length)
+LOCAL mmdb_uint128_t get_uint128(const uint8_t *p, int length)
 {
     mmdb_uint128_t value = 0;
     while (length-- > 0) {

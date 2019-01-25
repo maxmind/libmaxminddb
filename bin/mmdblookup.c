@@ -21,7 +21,6 @@
 #endif
 
 #define LOCAL static
-#define NO_PROTO
 
 /* *INDENT-OFF* */
 LOCAL void usage(char *program, int exit_code, const char *error);
@@ -621,7 +620,7 @@ struct thread_info {
     int iterations;
 };
 
-NO_PROTO static bool start_threaded_benchmark(
+static bool start_threaded_benchmark(
     MMDB_s *const mmdb,
     int const thread_count,
     int const iterations)
@@ -682,7 +681,7 @@ NO_PROTO static bool start_threaded_benchmark(
     return true;
 }
 
-NO_PROTO static long double get_time(void)
+static long double get_time(void)
 {
     // clock_gettime() is not present on OSX until 10.12.
 #ifdef HAVE_CLOCK_GETTIME
@@ -709,7 +708,7 @@ NO_PROTO static long double get_time(void)
 #endif
 }
 
-NO_PROTO static void *thread(void *arg)
+static void *thread(void *arg)
 {
     const struct thread_info *const tinfo = arg;
     if (!tinfo) {
