@@ -1,3 +1,9 @@
+## 1.4.0
+
+* On Windows, the file name passed to `MMDB_open` is now expected to be
+  UTF-8 encoded. This allows Unicode characters to be used in file names.
+  As part of this change, `mmdblookup` on Windows now converts its
+  arguments to UTF-8. PR by Gerald Combs. GitHub #189 & #191.
 * Fix a memory leak that occurred when freeing an `MMDB_s` where the
   database had no languages defined in the metadata. If you are using an
   official MaxMind database, this leak does not affect you. Pull request
