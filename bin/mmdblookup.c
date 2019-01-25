@@ -22,7 +22,6 @@
 
 #define LOCAL static
 
-/* *INDENT-OFF* */
 LOCAL void usage(char *program, int exit_code, const char *error);
 LOCAL const char **get_options(
     int argc,
@@ -45,7 +44,6 @@ LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
 LOCAL int benchmark(MMDB_s *mmdb, int iterations);
 LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr);
 LOCAL void random_ipv4(char *ip);
-/* *INDENT-ON* */
 
 #ifndef _WIN32
 // These aren't with the automatically generated prototypes as we'd lose the

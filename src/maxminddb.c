@@ -131,7 +131,6 @@ typedef struct record_info_s {
 // 64 leads us to allocating 4 KiB on a 64bit system.
 #define MMDB_POOL_INIT_SIZE 64
 
-/* *INDENT-OFF* */
 LOCAL int map_file(MMDB_s *const mmdb);
 LOCAL const uint8_t *find_metadata(const uint8_t *file_content,
                                    ssize_t file_size, uint32_t *metadata_size);
@@ -197,7 +196,6 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
     int *status);
 LOCAL void print_indentation(FILE *stream, int i);
 LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size);
-/* *INDENT-ON* */
 
 #define CHECKED_DECODE_ONE(mmdb, offset, entry_data)                        \
     do {                                                                    \
