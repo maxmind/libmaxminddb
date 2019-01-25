@@ -170,7 +170,6 @@ LOCAL int lookup_path_in_map(const char *path_elem, MMDB_s *mmdb,
 LOCAL int skip_map_or_array(MMDB_s *mmdb, MMDB_entry_data_s *entry_data);
 LOCAL int decode_one_follow(MMDB_s *mmdb, uint32_t offset,
                             MMDB_entry_data_s *entry_data);
-LOCAL mmdb_uint128_t get_uint128(const uint8_t *p, int length);
 LOCAL int decode_one(MMDB_s *mmdb, uint32_t offset,
                      MMDB_entry_data_s *entry_data);
 LOCAL int get_ext_type(int raw_ext_type);
