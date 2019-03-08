@@ -14,6 +14,9 @@
 #include <sys/stat.h>
 
 #ifdef _WIN32
+#ifndef UNICODE
+#define UNICODE
+#endif
 #include <windows.h>
 #include <ws2ipdef.h>
 #else
