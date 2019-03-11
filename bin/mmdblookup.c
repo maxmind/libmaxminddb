@@ -14,6 +14,9 @@
 #include <time.h>
 
 #ifdef _WIN32
+#ifndef UNICODE
+#define UNICODE
+#endif
 #include <malloc.h>
 #else
 #include <libgen.h>
