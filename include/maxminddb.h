@@ -95,7 +95,7 @@ typedef unsigned __int128 mmdb_uint128_t;
 
 /* This is a pointer into the data section for a given IP address lookup */
 typedef struct MMDB_entry_s {
-    struct MMDB_s *mmdb;
+    const struct MMDB_s *const mmdb;
     uint32_t offset;
 } MMDB_entry_s;
 
@@ -200,15 +200,16 @@ typedef struct MMDB_search_node_s {
 
 extern int MMDB_open(const char *const filename, uint32_t flags,
                      MMDB_s *const mmdb);
-extern MMDB_lookup_result_s MMDB_lookup_string(MMDB_s *const mmdb,
+extern MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
                                                const char *const ipstr,
                                                int *const gai_error,
                                                int *const mmdb_error);
 extern MMDB_lookup_result_s MMDB_lookup_sockaddr(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     const struct sockaddr *const sockaddr,
     int *const mmdb_error);
-extern int MMDB_read_node(MMDB_s *const mmdb, uint32_t node_number,
+extern int MMDB_read_node(const MMDB_s *const mmdb,
+                          uint32_t node_number,
                           MMDB_search_node_s *const node);
 extern int MMDB_get_value(MMDB_entry_s *const start,
                           MMDB_entry_data_s *const entry_data,
@@ -220,7 +221,7 @@ extern int MMDB_aget_value(MMDB_entry_s *const start,
                            MMDB_entry_data_s *const entry_data,
                            const char *const *const path);
 extern int MMDB_get_metadata_as_entry_data_list(
-    MMDB_s *const mmdb, MMDB_entry_data_list_s **const entry_data_list);
+    const MMDB_s *const mmdb, MMDB_entry_data_list_s **const entry_data_list);
 extern int MMDB_get_entry_data_list(
     MMDB_entry_s *start, MMDB_entry_data_list_s **const entry_data_list);
 extern void MMDB_free_entry_data_list(
