@@ -95,7 +95,7 @@ typedef unsigned __int128 mmdb_uint128_t;
 
 /* This is a pointer into the data section for a given IP address lookup */
 typedef struct MMDB_entry_s {
-    const struct MMDB_s *const mmdb;
+    const struct MMDB_s *mmdb;
     uint32_t offset;
 } MMDB_entry_s;
 
