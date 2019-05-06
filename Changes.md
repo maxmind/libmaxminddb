@@ -12,6 +12,9 @@
   Fontaine. GitHub #166.
 * Previous releases incorrectly included `*.Po` files in the `t` directory.
   This has been corrected. Reported by Daniel Macks. GitHub #168.
+* The internal use of the `MMDB_s` now has the `const` modifier. Public
+  functions that accepted an `MMDB_s` as an argument now also declare it as
+  `const`. Pull request by Kurt Johnson. GitHub #199.
 
 ## 1.3.2 - 2018-01-17
 
