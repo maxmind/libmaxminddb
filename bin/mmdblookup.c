@@ -637,6 +637,7 @@ static bool start_threaded_benchmark(
     // wall time.
     long double const start_time = get_time();
     if (start_time == -1) {
+        free(tinfo);
         return false;
     }
 
