@@ -1290,11 +1290,19 @@ LOCAL int lookup_path_in_array(const char *path_elem,
     int saved_errno = errno;
     errno = 0;
     int array_index = strtol(path_elem, &first_invalid, 10);
-    if (array_index < 0 || ERANGE == errno) {
+    if (ERANGE == errno) {
         errno = saved_errno;
         return MMDB_INVALID_LOOKUP_PATH_ERROR;
     }
     errno = saved_errno;
+
+    if (array_index < 0) {
+        array_index += size;
+
+        if (array_index < 0) {
+            return MMDB_INVALID_LOOKUP_PATH_ERROR;
+        }
+    }
 
     if (*first_invalid || (uint32_t)array_index >= size) {
         return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
