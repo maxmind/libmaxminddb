@@ -340,12 +340,13 @@ LOCAL int map_file(MMDB_s *const mmdb)
     DWORD size;
     int status = MMDB_SUCCESS;
     HANDLE mmh = NULL;
+    HANDLE fd = INVALID_HANDLE_VALUE;
     LPWSTR utf16_filename = utf8_to_utf16(mmdb->filename);
     if (!utf16_filename) {
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
     }
-    HANDLE fd = CreateFile(utf16_filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+    fd = CreateFile(utf16_filename, GENERIC_READ, FILE_SHARE_READ, NULL,
                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fd == INVALID_HANDLE_VALUE) {
         status = MMDB_FILE_OPEN_ERROR;
