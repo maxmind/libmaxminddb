@@ -137,9 +137,20 @@ void test_simple_structure(int mode, const char *mode_desc)
         MMDB_entry_data_s entry_data;
         int status = MMDB_get_value(&result.entry, &entry_data, "array", "-4",
                                     NULL);
-        cmp_ok(status, "==", MMDB_INVALID_LOOKUP_PATH_ERROR,
+        cmp_ok(status, "==", MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
                "MMDB_get_value() returns error on too large negative integer");
     }
+
+    {
+        MMDB_entry_data_s entry_data;
+        int status =
+            MMDB_get_value(&result.entry, &entry_data, "array",
+                           "-18446744073709551616",
+                           NULL);
+        cmp_ok(status, "==", MMDB_INVALID_LOOKUP_PATH_ERROR,
+               "MMDB_get_value() returns error on integer smaller than LONG_MIN");
+    }
+
 
     {
         MMDB_entry_data_s entry_data;

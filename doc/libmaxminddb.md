@@ -383,13 +383,14 @@ status codes are:
   The database is probably damaged or was generated incorrectly.
 * `MMDB_INVALID_LOOKUP_PATH_ERROR` - The lookup path passed to
   `MMDB_get_value`, `MMDB_vget_value`, or `MMDB_aget_value` contains an array
-  offset that is negative integer or an integer larger than LONG_MAX.
+  offset that is larger than LONG_MAX or smaller than LONG_MIN.
 * `MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR` - The lookup path passed to
   `MMDB_get_value`,`MMDB_vget_value`, or `MMDB_aget_value` does not match the
   data structure for the entry. There are number of reasons this can
   happen. The lookup path could include a key not in a map. The lookup path
-  could include an array index larger than an array. It can also happen when
-  the path expects to find a map or array where none exist.
+  could include an array index larger than an array or smaller than the
+  minimum offset from the end of an array. It can also happen when the path
+  expects to find a map or array where none exist.
 
 All status codes should be treated as `int` values.
 
@@ -557,9 +558,14 @@ nothing is found, then the `has_data` member of this structure will be false.
 If `has_data` is true then you can look at the `data_type` member.
 
 The final parameter is a lookup path. The path consists of a set of strings
-representing either map keys (e.g, "city") or array indexes (e.g., "0", "1")
-to use in the lookup. This allow you to navigate a complex data structure. For
-example, given this example:
+representing either map keys (e.g, "city") or array indexes (e.g., "0", "1",
+"-1") to use in the lookup.
+
+Negative array indexes will be treated as an offset from the end of the array.
+For instance, "-1" refers to the last element of the array.
+
+The lookup path allows you to navigate a complex data structure. For example,
+given this data:
 
 ```js
 {
