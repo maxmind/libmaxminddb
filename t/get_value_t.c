@@ -23,7 +23,7 @@ void test_array_2_result(int status, MMDB_entry_data_s entry_data,
 }
 
 void test_array_minus_3_result(int status, MMDB_entry_data_s entry_data,
-                         char *function)
+                               char *function)
 {
     cmp_ok(status, "==", MMDB_SUCCESS,
            "status for %s() is MMDB_SUCCESS - array[-3]", function);
@@ -34,7 +34,7 @@ void test_array_minus_3_result(int status, MMDB_entry_data_s entry_data,
 }
 
 void test_array_minus_1_result(int status, MMDB_entry_data_s entry_data,
-                         char *function)
+                               char *function)
 {
     cmp_ok(status, "==", MMDB_SUCCESS,
            "status for %s() is MMDB_SUCCESS - array[-1]", function);
@@ -111,7 +111,8 @@ void test_simple_structure(int mode, const char *mode_desc)
         int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         test_array_minus_1_result(status, entry_data, "MMDB_aget_value");
 
-        status = MMDB_get_value(&result.entry, &entry_data, "array", "-1", NULL);
+        status =
+            MMDB_get_value(&result.entry, &entry_data, "array", "-1", NULL);
         test_array_minus_1_result(status, entry_data, "MMDB_get_value");
 
         status =
@@ -125,7 +126,8 @@ void test_simple_structure(int mode, const char *mode_desc)
         int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
         test_array_minus_3_result(status, entry_data, "MMDB_aget_value");
 
-        status = MMDB_get_value(&result.entry, &entry_data, "array", "-3", NULL);
+        status =
+            MMDB_get_value(&result.entry, &entry_data, "array", "-3", NULL);
         test_array_minus_3_result(status, entry_data, "MMDB_get_value");
 
         status =
