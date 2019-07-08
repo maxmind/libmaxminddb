@@ -1301,7 +1301,7 @@ LOCAL int lookup_path_in_array(const char *path_elem,
         array_index += size;
 
         if (array_index < 0) {
-            return MMDB_INVALID_LOOKUP_PATH_ERROR;
+            return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
         }
     }
 
