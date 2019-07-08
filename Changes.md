@@ -1,5 +1,9 @@
 ## 1.4.0
 
+* A negative array index may now be used with `MMDB_get_value`,
+  `MMDB_vget_value`, and `MMDB_aget_value`. This specifies the element
+  from the end of the array. For instance, `-1` would refer to the
+  last element of the array. PR by Kyle Box. GitHub #205.
 * On Windows, the file name passed to `MMDB_open` is now expected to be
   UTF-8 encoded. This allows Unicode characters to be used in file names.
   As part of this change, `mmdblookup` on Windows now converts its
