@@ -2,7 +2,7 @@ Source: libmaxminddb
 Section: net
 Priority: optional
 Maintainer: Gregory J. Oschwald <goschwald@maxmind.com>
-Build-Depends: debhelper (>= 9), dh-autoreconf,
+Build-Depends: debhelper (>= 10),
  perl,
  libipc-run3-perl,
  libtest-output-perl,
@@ -11,10 +11,10 @@ Build-Depends: debhelper (>= 9), dh-autoreconf,
  libipc-system-simple-perl,
  libfile-slurp-perl,
  libfile-which-perl
-Standards-Version: 3.9.6.1
-Homepage: http://maxmind.github.io/libmaxminddb/
-Vcs-Git: git://github.com/maxmind/libmaxminddb.git
+Standards-Version: 4.1.4
+Homepage: https://maxmind.github.io/libmaxminddb/
 Vcs-Browser: https://github.com/maxmind/libmaxminddb/
+Vcs-Git: git://github.com/maxmind/libmaxminddb.git
 
 Package: libmaxminddb0
 Section: libs
@@ -31,24 +31,6 @@ Description: IP geolocation database library
  The MaxMind DB format is an open format. The spec is available at
  http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
  Commons Attribution-ShareAlike 3.0 Unported License.
-
-Package: libmaxminddb-dbg
-Section: debug
-Priority: extra
-Architecture: any
-Multi-Arch: same
-Depends: libmaxminddb0 (= ${binary:Version}), ${misc:Depends}
-Description: IP geolocation database library (debugging symbols)
- The libmaxminddb library provides a C library for reading MaxMind DB files,
- including the GeoIP2 databases from MaxMind. This is a custom binary format
- designed to facilitate fast lookups of IP addresses while allowing for great
- flexibility in the type of data associated with an address.
- .
- The MaxMind DB format is an open format. The spec is available at
- http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
- Commons Attribution-ShareAlike 3.0 Unported License.
- .
- This package contains the debugging symbols for the libmaxminddb library.
 
 Package: libmaxminddb-dev
 Section: libdevel
@@ -82,4 +64,4 @@ Description: IP geolocation lookup command-line tool
  Commons Attribution-ShareAlike 3.0 Unported License.
  .
  This package contains the command line utilities to resolve IPs using the
- libmaxminddb library.
+ libmaxminddb library. 
