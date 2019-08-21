@@ -2,7 +2,7 @@ Source: libmaxminddb
 Section: net
 Priority: optional
 Maintainer: Gregory J. Oschwald <goschwald@maxmind.com>
-Build-Depends: debhelper (>= 10),
+Build-Depends: debhelper (>= 9), dh-autoreconf,
  perl,
  libipc-run3-perl,
  libtest-output-perl,
