@@ -6,6 +6,7 @@ clean-local:
 		cd libtap && $(MAKE) $(AM_MAKEFLAGS) clean
 
 AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
+CFLAGS += -I$(top_srcdir)/src
 
 noinst_LTLIBRARIES = libmmdbtest.la
 libmmdbtest_la_SOURCES = maxminddb_test_helper.c maxminddb_test_helper.h
@@ -20,7 +21,6 @@ check_PROGRAMS = \
 	ipv4_start_cache_t ipv6_lookup_in_ipv4_t metadata_t metadata_pointers_t \
 	no_map_get_value_t read_node_t threads_t version_t
 
-data_pool_t_CFLAGS = $(CFLAGS) -I$(top_srcdir)/src
 data_pool_t_LDFLAGS = $(AM_LDFLAGS) -lm
 data_pool_t_SOURCES = data-pool-t.c ../src/data-pool.c
 

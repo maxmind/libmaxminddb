@@ -23,11 +23,11 @@ void test_one_result(MMDB_s *mmdb, MMDB_lookup_result_s result,
     MMDB_entry_data_s data =
         data_ok(&result, MMDB_DATA_TYPE_UTF8_STRING, "result{ip}", "ip", NULL);
 
-    char *string = strndup(data.utf8_string, data.data_size);
+    char *string = mmdb_strndup(data.utf8_string, data.data_size);
 
     char *real_expect;
     if (mmdb->metadata.ip_version == 4 || strncmp(expect, "::", 2) == 0) {
-        real_expect = strndup(expect, strlen(expect));
+        real_expect = mmdb_strndup(expect, strlen(expect));
     } else {
         // When looking up IPv4 addresses in a mixed DB the result will be
         // something like "::1.2.3.4", not just "1.2.3.4".

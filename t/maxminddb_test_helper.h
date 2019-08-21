@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "maxminddb.h"
+#include "maxminddb-compat-util.h"
 #include "libtap/tap.h"
 
 #ifdef _WIN32
@@ -38,10 +39,6 @@
 #endif
 
 #define MAX_DESCRIPTION_LENGTH 500
-
-#ifndef strndup
-extern char *strndup(const char *s, size_t n);
-#endif
 
 extern void for_all_record_sizes(const char *filename_fmt,
                                  void (*tests)(int record_size,
