@@ -55,7 +55,7 @@ void test_one_ip(MMDB_s *mmdb, const char *ip, test_result_s *test_result)
         return;
     }
 
-    test_result->data_value = strndup(data.utf8_string, data.data_size);
+    test_result->data_value = mmdb_strndup(data.utf8_string, data.data_size);
 
     return;
 }

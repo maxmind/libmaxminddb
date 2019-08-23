@@ -17,27 +17,6 @@
 #include <unistd.h>
 #endif
 
-#ifndef strndup
-/* *INDENT-OFF* */
-/* Copied from the libiberty strndup.c, which is LPGPL 2+ */
-char *strndup (const char *s, size_t n)
-{
-  char *result;
-  size_t len = strlen (s);
-
-  if (n < len)
-    len = n;
-
-  result = (char *) malloc (len + 1);
-  if (!result)
-    return 0;
-
-  result[len] = '\0';
-  return (char *) memcpy (result, s, len);
-}
-/* *INDENT-ON* */
-#endif
-
 void for_all_record_sizes(const char *filename_fmt,
                           void (*tests)(int record_size, const char *filename,
                                         const char *description))
@@ -87,9 +66,9 @@ const char *test_database_path(const char *filename)
 
 const char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data)
 {
-    const char *string = strndup(entry_data.utf8_string, entry_data.data_size);
+    const char *string = mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
     if (NULL == string) {
-        BAIL_OUT("strndup failed");
+        BAIL_OUT("mmdb_strndup failed");
     }
 
     return string;

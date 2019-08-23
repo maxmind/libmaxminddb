@@ -25,9 +25,9 @@ void test_one_ip(MMDB_s *mmdb, const char *filename, const char *mode_desc,
                 "country", "iso_code", NULL);
 
     if (ok(entry_data.has_data, "found data for country{iso_code}")) {
-        char *string = strndup(entry_data.utf8_string, entry_data.data_size);
+        char *string = mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
         if (!string) {
-            ok(0, "strndup() call failed");
+            ok(0, "mmdb_strndup() call failed");
             exit(1);
         }
         if (!ok(strcmp(string,

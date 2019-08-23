@@ -11,7 +11,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         MMDB_entry_data_s data =
             data_ok(result, MMDB_DATA_TYPE_UTF8_STRING, description,
                     "utf8_string", NULL);
-        const char *string = strndup(data.utf8_string, data.data_size);
+        const char *string = mmdb_strndup(data.utf8_string, data.data_size);
         // This is hex for "unicode! ☯ - ♫" as bytes
         char expect[19] =
         { 0x75, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x21, 0x20, 0xe2, 0x98,
@@ -170,7 +170,7 @@ void test_all_data_types(MMDB_lookup_result_s *result, const char *ip,
         data =
             data_ok(result, MMDB_DATA_TYPE_UTF8_STRING, description, "map",
                     "mapX", "utf8_stringX", NULL);
-        const char *string = strndup(data.utf8_string, data.data_size);
+        const char *string = mmdb_strndup(data.utf8_string, data.data_size);
         is(string, "hello", "map{mapX}{utf8_stringX} is 'hello'");
         free((char *)string);
 
