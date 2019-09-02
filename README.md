@@ -127,3 +127,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+# Why does this fork exist
+
+Under ubuntu when we want to build this library we often encounter errors about int128, this forked version differs from original one only in commented block with typedefs in `maxminddb.h`.

@@ -86,11 +86,11 @@ typedef ADDRESS_FAMILY sa_family_t;
 #define MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR (11)
 
 #if !(MMDB_UINT128_IS_BYTE_ARRAY)
-#if MMDB_UINT128_USING_MODE
+// #if MMDB_UINT128_USING_MODE
 typedef unsigned int mmdb_uint128_t __attribute__ ((__mode__(TI)));
-#else
-typedef unsigned __int128 mmdb_uint128_t;
-#endif
+// #else
+// typedef unsigned __int128 mmdb_uint128_t;
+// #endif
 #endif
 
 /* This is a pointer into the data section for a given IP address lookup */
