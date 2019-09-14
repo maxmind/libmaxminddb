@@ -158,9 +158,6 @@ LOCAL int find_address_in_search_tree(const MMDB_s *const mmdb,
                                       MMDB_lookup_result_s *result);
 LOCAL record_info_s record_info_for_database(const MMDB_s *const mmdb);
 LOCAL int find_ipv4_start_node(MMDB_s *const mmdb);
-LOCAL uint8_t maybe_populate_result(const MMDB_s *const mmdb, uint32_t record,
-                                    uint16_t netmask,
-                                    MMDB_lookup_result_s *result);
 LOCAL uint8_t record_type(const MMDB_s *const mmdb, uint64_t record);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
 LOCAL uint32_t get_right_28_bit_record(const uint8_t *record);
@@ -930,76 +927,48 @@ LOCAL int find_address_in_search_tree(const MMDB_s *const mmdb,
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
-    DEBUG_NL;
-    DEBUG_MSG("Looking for address in search tree");
-
     uint32_t value = 0;
-    uint16_t max_depth0 = mmdb->depth - 1;
-    uint16_t start_bit = max_depth0;
-
+    uint16_t current_bit = 0;
     if (mmdb->metadata.ip_version == 6 && address_family == AF_INET) {
-        /* ipv4 start node values set at open */
-        DEBUG_MSGF("IPv4 start node is %u (netmask %u)",
-                   mmdb->ipv4_start_node.node_value,
-                   mmdb->ipv4_start_node.netmask);
-
-        uint8_t type = maybe_populate_result(mmdb,
-                                             mmdb->ipv4_start_node.node_value,
-                                             mmdb->ipv4_start_node.netmask,
-                                             result);
-        if (MMDB_RECORD_TYPE_INVALID == type) {
-            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
-        }
-
-        /* We have an IPv6 database with no IPv4 data */
-        if (MMDB_RECORD_TYPE_SEARCH_NODE != type) {
-            return MMDB_SUCCESS;
-        }
-
         value = mmdb->ipv4_start_node.node_value;
-        start_bit -= mmdb->ipv4_start_node.netmask;
+        current_bit = mmdb->ipv4_start_node.netmask;
     }
 
+    uint32_t node_count = mmdb->metadata.node_count;
     const uint8_t *search_tree = mmdb->file_content;
     const uint8_t *record_pointer;
-    for (int current_bit = start_bit; current_bit >= 0; current_bit--) {
-        uint8_t bit_is_true =
-            address[(max_depth0 - current_bit) >> 3]
-            & (1U << (~(max_depth0 - current_bit) & 7)) ? 1 : 0;
-
-        DEBUG_MSGF("Looking at bit %i - bit's value is %i", current_bit,
-                   bit_is_true);
-        DEBUG_MSGF("  current node = %u", value);
+    for (; current_bit < mmdb->depth && value < node_count; current_bit++) {
+        uint8_t bit = 1U &
+                      (address[current_bit >> 3] >> (7 - (current_bit % 8)));
 
         record_pointer = &search_tree[value * record_info.record_length];
         if (record_pointer + record_info.record_length > mmdb->data_section) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
-        if (bit_is_true) {
+        if (bit) {
             record_pointer += record_info.right_record_offset;
             value = record_info.right_record_getter(record_pointer);
         } else {
             value = record_info.left_record_getter(record_pointer);
         }
-
-        uint8_t type = maybe_populate_result(mmdb, value, (uint16_t)current_bit,
-                                             result);
-        if (MMDB_RECORD_TYPE_INVALID == type) {
-            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
-        }
-
-        if (MMDB_RECORD_TYPE_SEARCH_NODE != type) {
-            return MMDB_SUCCESS;
-        }
-
-        DEBUG_MSGF("  proceeding to search tree node %i", value);
     }
 
-    DEBUG_MSG(
-        "Reached the end of the address bits without leaving the search tree");
+    result->netmask = current_bit;
 
-    // We should not be able to reach this return. If we do, something very bad happened.
-    return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+    if (value >= node_count + mmdb->data_section_size) {
+        // The pointer points off the end of the database.
+        return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+    }
+
+    if (value == node_count) {
+        // record is empty
+        result->found_entry = false;
+        return MMDB_SUCCESS;
+    }
+    result->found_entry = true;
+    result->entry.offset = data_section_offset_for_record(mmdb, value);
+
+    return MMDB_SUCCESS;
 }
 
 LOCAL record_info_s record_info_for_database(const MMDB_s *const mmdb)
@@ -1043,45 +1012,20 @@ LOCAL int find_ipv4_start_node(MMDB_s *const mmdb)
     uint32_t node_value = 0;
     const uint8_t *record_pointer;
     uint16_t netmask;
-    for (netmask = 0; netmask < 96; netmask++) {
+    uint32_t node_count = mmdb->metadata.node_count;
+
+    for (netmask = 0; netmask < 96 && node_value < node_count; netmask++) {
         record_pointer = &search_tree[node_value * record_info.record_length];
         if (record_pointer + record_info.record_length > mmdb->data_section) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
         node_value = record_info.left_record_getter(record_pointer);
-        /* This can happen if there's no IPv4 data _or_ if there is a subnet
-         * with data that contains the entire IPv4 range (like ::/64) */
-        if (node_value >= mmdb->metadata.node_count) {
-            break;
-        }
     }
 
     mmdb->ipv4_start_node.node_value = node_value;
     mmdb->ipv4_start_node.netmask = netmask;
 
     return MMDB_SUCCESS;
-}
-
-LOCAL uint8_t maybe_populate_result(const MMDB_s *const mmdb, uint32_t record,
-                                    uint16_t netmask,
-                                    MMDB_lookup_result_s *result)
-{
-    uint8_t type = record_type(mmdb, record);
-
-    if (MMDB_RECORD_TYPE_SEARCH_NODE == type ||
-        MMDB_RECORD_TYPE_INVALID == type) {
-        return type;
-    }
-
-    result->netmask = mmdb->depth - netmask;
-
-    result->entry.offset = data_section_offset_for_record(mmdb, record);
-
-    // type is either MMDB_RECORD_TYPE_DATA or MMDB_RECORD_TYPE_EMPTY
-    // at this point
-    result->found_entry = MMDB_RECORD_TYPE_DATA == type;
-
-    return type;
 }
 
 LOCAL uint8_t record_type(const MMDB_s *const mmdb, uint64_t record)
