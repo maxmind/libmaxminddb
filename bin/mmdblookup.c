@@ -43,7 +43,8 @@ LOCAL bool lookup_from_file(MMDB_s *const mmdb,
                             bool const dump);
 LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
                            const char **lookup_path,
-                           int lookup_path_length);
+                           int lookup_path_length,
+                           bool verbose);
 LOCAL int benchmark(MMDB_s *mmdb, int iterations);
 LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr);
 LOCAL void random_ipv4(char *ip);
@@ -131,7 +132,7 @@ int main(int argc, char **argv)
 
     if (0 == iterations) {
         exit(lookup_and_print(&mmdb, ip_address, lookup_path,
-                              lookup_path_length));
+                              lookup_path_length, verbose));
     }
 
     free((void *)lookup_path);
@@ -473,13 +474,22 @@ LOCAL bool lookup_from_file(MMDB_s *const mmdb,
 
 LOCAL int lookup_and_print(MMDB_s *mmdb, const char *ip_address,
                            const char **lookup_path,
-                           int lookup_path_length)
+                           int lookup_path_length,
+                           bool verbose)
 {
 
     MMDB_lookup_result_s result = lookup_or_die(mmdb, ip_address);
     MMDB_entry_data_list_s *entry_data_list = NULL;
 
     int exit_code = 0;
+
+    if (verbose) {
+        fprintf(
+            stdout,
+            "\n  Record prefix length: %d\n",
+            result.netmask
+            );
+    }
 
     if (result.found_entry) {
         int status;
