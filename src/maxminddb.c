@@ -1536,13 +1536,13 @@ LOCAL int decode_one(const MMDB_s *const mmdb, uint32_t offset,
 
     DEBUG_MSGF("Size: %i", size);
 
-    if (type == MMDB_DATA_TYPE_MAP || type == MMDB_DATA_TYPE_ARRAY) {
+    switch (type) {
+    case MMDB_DATA_TYPE_MAP:
+    case MMDB_DATA_TYPE_ARRAY:
         entry_data->data_size = size;
         entry_data->offset_to_next = offset;
         return MMDB_SUCCESS;
-    }
-
-    if (type == MMDB_DATA_TYPE_BOOLEAN) {
+    case MMDB_DATA_TYPE_BOOLEAN:
         entry_data->boolean = size ? true : false;
         entry_data->data_size = 0;
         entry_data->offset_to_next = offset;
@@ -1559,35 +1559,40 @@ LOCAL int decode_one(const MMDB_s *const mmdb, uint32_t offset,
         return MMDB_INVALID_DATA_ERROR;
     }
 
-    if (type == MMDB_DATA_TYPE_UINT16) {
+    switch (type) {
+    case MMDB_DATA_TYPE_UINT16:
         if (size > 2) {
             DEBUG_MSGF("uint16 of size %d", size);
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint16 = (uint16_t)get_uintX(&mem[offset], size);
         DEBUG_MSGF("uint16 value: %u", entry_data->uint16);
-    } else if (type == MMDB_DATA_TYPE_UINT32) {
+        break;
+    case MMDB_DATA_TYPE_UINT32:
         if (size > 4) {
             DEBUG_MSGF("uint32 of size %d", size);
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint32 = (uint32_t)get_uintX(&mem[offset], size);
         DEBUG_MSGF("uint32 value: %u", entry_data->uint32);
-    } else if (type == MMDB_DATA_TYPE_INT32) {
+        break;
+    case MMDB_DATA_TYPE_INT32:
         if (size > 4) {
             DEBUG_MSGF("int32 of size %d", size);
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->int32 = get_sintX(&mem[offset], size);
         DEBUG_MSGF("int32 value: %i", entry_data->int32);
-    } else if (type == MMDB_DATA_TYPE_UINT64) {
+        break;
+    case MMDB_DATA_TYPE_UINT64:
         if (size > 8) {
             DEBUG_MSGF("uint64 of size %d", size);
             return MMDB_INVALID_DATA_ERROR;
         }
         entry_data->uint64 = get_uintX(&mem[offset], size);
         DEBUG_MSGF("uint64 value: %" PRIu64, entry_data->uint64);
-    } else if (type == MMDB_DATA_TYPE_UINT128) {
+        break;
+    case MMDB_DATA_TYPE_UINT128:
         if (size > 16) {
             DEBUG_MSGF("uint128 of size %d", size);
             return MMDB_INVALID_DATA_ERROR;
@@ -1600,7 +1605,8 @@ LOCAL int decode_one(const MMDB_s *const mmdb, uint32_t offset,
 #else
         entry_data->uint128 = get_uint128(&mem[offset], size);
 #endif
-    } else if (type == MMDB_DATA_TYPE_FLOAT) {
+        break;
+    case MMDB_DATA_TYPE_FLOAT:
         if (size != 4) {
             DEBUG_MSGF("float of size %d", size);
             return MMDB_INVALID_DATA_ERROR;
@@ -1608,7 +1614,8 @@ LOCAL int decode_one(const MMDB_s *const mmdb, uint32_t offset,
         size = 4;
         entry_data->float_value = get_ieee754_float(&mem[offset]);
         DEBUG_MSGF("float value: %f", entry_data->float_value);
-    } else if (type == MMDB_DATA_TYPE_DOUBLE) {
+        break;
+    case MMDB_DATA_TYPE_DOUBLE:
         if (size != 8) {
             DEBUG_MSGF("double of size %d", size);
             return MMDB_INVALID_DATA_ERROR;
@@ -1616,7 +1623,8 @@ LOCAL int decode_one(const MMDB_s *const mmdb, uint32_t offset,
         size = 8;
         entry_data->double_value = get_ieee754_double(&mem[offset]);
         DEBUG_MSGF("double value: %f", entry_data->double_value);
-    } else if (type == MMDB_DATA_TYPE_UTF8_STRING) {
+        break;
+    case MMDB_DATA_TYPE_UTF8_STRING:
         entry_data->utf8_string = size == 0 ? "" : (char *)&mem[offset];
         entry_data->data_size = size;
 #ifdef MMDB_DEBUG
@@ -1628,9 +1636,11 @@ LOCAL int decode_one(const MMDB_s *const mmdb, uint32_t offset,
         DEBUG_MSGF("string value: %s", string);
         free(string);
 #endif
-    } else if (type == MMDB_DATA_TYPE_BYTES) {
+        break;
+    case MMDB_DATA_TYPE_BYTES:
         entry_data->bytes = &mem[offset];
         entry_data->data_size = size;
+        break;
     }
 
     entry_data->offset_to_next = offset + size;
