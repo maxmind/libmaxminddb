@@ -19,6 +19,8 @@
 * The internal use of the `MMDB_s` now has the `const` modifier. Public
   functions that accepted an `MMDB_s` as an argument now also declare it as
   `const`. Pull request by Kurt Johnson. GitHub #199.
+* `mmdblookup` now displays the prefix length for the record when using
+  the verbose flag. GitHub #172.
 
 ## 1.3.2 - 2018-01-17
 
