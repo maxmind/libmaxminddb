@@ -14,7 +14,7 @@
 #include "libtap/tap.h"
 
 #ifdef _WIN32
-#include <Winsock2.h>
+#include <winsock2.h>
 #include <ws2tcpip.h>
 
 #define R_OK 4
