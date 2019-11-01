@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([libmaxminddb], [1.3.2], [support@maxmind.com])
+AC_INIT([libmaxminddb], [1.4.0], [support@maxmind.com])
 AC_CONFIG_SRCDIR([include/maxminddb.h])
 AC_CONFIG_HEADERS([config.h include/maxminddb_config.h])
 
@@ -118,6 +118,12 @@ AC_ARG_ENABLE(
           *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
         esac],[debug=false])
 AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
+
+AC_ARG_ENABLE([binaries],
+        AS_HELP_STRING([--enable-binaries], [Compilation of binaries code]),
+        [enable_binaries=${enableval}],
+        [enable_binaries=yes])
+AM_CONDITIONAL([BINARIES], [test "${enable_binaries}" = "yes"])
 
 AC_ARG_ENABLE([tests],
         AS_HELP_STRING([--enable-tests], [Compilation of tests code]),

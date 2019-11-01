@@ -17,7 +17,11 @@ This library is licensed under the Apache License, Version 2.
 
 # Installation
 
-## From a Tarball
+## From a Named Release Tarball
+
+**NOTE:** These instructions are for installation from the _named_ `.tar.gz`
+tarballs on the [Releases](https://github.com/maxmind/libmaxminddb/releases)
+page (e.g. `libmaxminddb-*.tar.gz`).
 
 This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
 on other compilers that supports C99, POSIX.1-2001, and the `-fms-extensions
@@ -46,20 +50,25 @@ can do this by running the following commands:
     $ sudo sh -c "echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf"
     $ ldconfig
 
-## From the Git Repository
+## From a GitHub "Source Code" Archive / Git Repo Clone (Achtung!)
 
-To install from Git, you will need automake, autoconf, and libtool installed
-in addition to make and a compiler.
+**NOTE:** These instructions are for installation from the GitHub "Source
+Code" archives also available on the
+[Releases](https://github.com/maxmind/libmaxminddb/releases) page (e.g.
+`X.Y.Z.zip` or `X.Y.Z.tar.gz`), as well as installation directly from a clone
+of the [Git repo](https://github.com/maxmind/libmaxminddb). Installation from
+these sources are possible but will present challenges to users not
+comfortable with manual dependency resolution.
 
-Our public git repository is hosted on GitHub at
-https://github.com/maxmind/libmaxminddb
+You will need `automake`, `autoconf`, and `libtool` installed
+in addition to `make` and a compiler.
 
 You can clone this repository and build it by running:
 
     $ git clone --recursive https://github.com/maxmind/libmaxminddb
 
 After cloning, run `./bootstrap` from the `libmaxminddb` directory and then
-follow the instructions for installing from a tarball as described above.
+follow the instructions for installing from a named release tarball as described above.
 
 ## On Windows via Visual Studio 2013+
 
@@ -96,10 +105,8 @@ https://github.com/maxmind/libmaxminddb/issues
 We have a few development tools under the `dev-bin` directory to make
 development easier. These are written in Perl or shell. They are:
 
-* `regen-prototypes.pl` - This regenerates the prototypes in the header and
-  source files. This helps keep headers and code in sync.
-* `uncrustify-all.sh` - This runs `uncrustify` on all the code. It runs
-  `regen-prototypes.pl` first. Please run this before submitting patches.
+* `uncrustify-all.sh` - This runs `uncrustify` on all the code. Please run
+  this before submitting patches.
 * `valgrind-all.pl` - This runs Valgrind on the tests and `mmdblookup` to
   check for memory leaks.
 

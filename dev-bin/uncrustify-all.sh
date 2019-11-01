@@ -17,5 +17,3 @@ for dir in bin include src t; do
         $uncrustify $dir/*.h;
     fi
 done
-
-./dev-bin/regen-prototypes.pl

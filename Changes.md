@@ -1,3 +1,27 @@
+## 1.4.0 - 2019-11-01
+
+* A negative array index may now be used with `MMDB_get_value`,
+  `MMDB_vget_value`, and `MMDB_aget_value`. This specifies the element
+  from the end of the array. For instance, `-1` would refer to the
+  last element of the array. PR by Kyle Box. GitHub #205.
+* On Windows, the file name passed to `MMDB_open` is now expected to be
+  UTF-8 encoded. This allows Unicode characters to be used in file names.
+  As part of this change, `mmdblookup` on Windows now converts its
+  arguments to UTF-8. PR by Gerald Combs. GitHub #189 & #191.
+* Fix a memory leak that occurred when freeing an `MMDB_s` where the
+  database had no languages defined in the metadata. If you are using an
+  official MaxMind database, this leak does not affect you. Pull request
+  by Kókai Péter. GitHub #180.
+* Add `--disable-binaries` option to `configure`. Pull request by Fabrice
+  Fontaine. GitHub #166.
+* Previous releases incorrectly included `*.Po` files in the `t` directory.
+  This has been corrected. Reported by Daniel Macks. GitHub #168.
+* The internal use of the `MMDB_s` now has the `const` modifier. Public
+  functions that accepted an `MMDB_s` as an argument now also declare it as
+  `const`. Pull request by Kurt Johnson. GitHub #199.
+* `mmdblookup` now displays the prefix length for the record when using
+  the verbose flag. GitHub #172.
+
 ## 1.3.2 - 2018-01-17
 
 * Allocate memory for `MMDB_entry_data_list_s` structs in separate chunks

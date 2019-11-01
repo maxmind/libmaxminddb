@@ -22,6 +22,29 @@ void test_array_2_result(int status, MMDB_entry_data_s entry_data,
     cmp_ok(entry_data.uint32, "==", 3, "entry value is 3 - array[2]");
 }
 
+void test_array_minus_3_result(int status, MMDB_entry_data_s entry_data,
+                               char *function)
+{
+    cmp_ok(status, "==", MMDB_SUCCESS,
+           "status for %s() is MMDB_SUCCESS - array[-3]", function);
+    ok(entry_data.has_data, "found a value for array[-3]");
+    cmp_ok(entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+           "returned entry type is uint32 - array[-3]");
+    cmp_ok(entry_data.uint32, "==", 1, "entry value is 1 - array[-3]");
+}
+
+void test_array_minus_1_result(int status, MMDB_entry_data_s entry_data,
+                               char *function)
+{
+    cmp_ok(status, "==", MMDB_SUCCESS,
+           "status for %s() is MMDB_SUCCESS - array[-1]", function);
+    ok(entry_data.has_data, "found a value for array[-1]");
+    cmp_ok(entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+           "returned entry type is uint32 - array[-1]");
+    cmp_ok(entry_data.uint32, "==", 3, "entry value is 3 - array[-1]");
+}
+
+
 int call_vget_value(MMDB_entry_s *entry, MMDB_entry_data_s *entry_data, ...)
 {
     va_list keys;
@@ -84,11 +107,52 @@ void test_simple_structure(int mode, const char *mode_desc)
 
     {
         MMDB_entry_data_s entry_data;
-        int status = MMDB_get_value(&result.entry, &entry_data, "array", "-1",
-                                    NULL);
-        cmp_ok(status, "==", MMDB_INVALID_LOOKUP_PATH_ERROR,
-               "MMDB_get_value() returns error on negative integer");
+        const char *lookup_path[] = { "array", "-1", NULL };
+        int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
+        test_array_minus_1_result(status, entry_data, "MMDB_aget_value");
+
+        status =
+            MMDB_get_value(&result.entry, &entry_data, "array", "-1", NULL);
+        test_array_minus_1_result(status, entry_data, "MMDB_get_value");
+
+        status =
+            call_vget_value(&result.entry, &entry_data, "array", "-1", NULL);
+        test_array_minus_1_result(status, entry_data, "MMDB_vget_value");
     }
+
+    {
+        MMDB_entry_data_s entry_data;
+        const char *lookup_path[] = { "array", "-3", NULL };
+        int status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
+        test_array_minus_3_result(status, entry_data, "MMDB_aget_value");
+
+        status =
+            MMDB_get_value(&result.entry, &entry_data, "array", "-3", NULL);
+        test_array_minus_3_result(status, entry_data, "MMDB_get_value");
+
+        status =
+            call_vget_value(&result.entry, &entry_data, "array", "-3", NULL);
+        test_array_minus_3_result(status, entry_data, "MMDB_vget_value");
+    }
+
+    {
+        MMDB_entry_data_s entry_data;
+        int status = MMDB_get_value(&result.entry, &entry_data, "array", "-4",
+                                    NULL);
+        cmp_ok(status, "==", MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
+               "MMDB_get_value() returns error on too large negative integer");
+    }
+
+    {
+        MMDB_entry_data_s entry_data;
+        int status =
+            MMDB_get_value(&result.entry, &entry_data, "array",
+                           "-18446744073709551616",
+                           NULL);
+        cmp_ok(status, "==", MMDB_INVALID_LOOKUP_PATH_ERROR,
+               "MMDB_get_value() returns error on integer smaller than LONG_MIN");
+    }
+
 
     {
         MMDB_entry_data_s entry_data;
