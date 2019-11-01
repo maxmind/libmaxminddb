@@ -1,4 +1,4 @@
-## 1.4.0
+## 1.4.0 - 2019-11-01
 
 * A negative array index may now be used with `MMDB_get_value`,
   `MMDB_vget_value`, and `MMDB_aget_value`. This specifies the element
@@ -12,7 +12,7 @@
   database had no languages defined in the metadata. If you are using an
   official MaxMind database, this leak does not affect you. Pull request
   by Kókai Péter. GitHub #180.
-* Add --disable-binaries option to `configure`. Pull request by Fabrice
+* Add `--disable-binaries` option to `configure`. Pull request by Fabrice
   Fontaine. GitHub #166.
 * Previous releases incorrectly included `*.Po` files in the `t` directory.
   This has been corrected. Reported by Daniel Macks. GitHub #168.
