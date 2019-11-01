@@ -1,3 +1,9 @@
+## 1.4.1 - 2019-11-01
+
+* The man page links for function calls were not generated correctly in
+  1.4.0. This has been corrected.
+
+
 ## 1.4.0 - 2019-11-01
 
 * A negative array index may now be used with `MMDB_get_value`,
@@ -21,6 +27,7 @@
   `const`. Pull request by Kurt Johnson. GitHub #199.
 * `mmdblookup` now displays the prefix length for the record when using
   the verbose flag. GitHub #172.
+
 
 ## 1.3.2 - 2018-01-17
 
