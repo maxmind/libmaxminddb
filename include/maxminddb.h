@@ -174,13 +174,6 @@ typedef struct MMDB_ipv4_start_node_s {
     uint32_t node_value;
 } MMDB_ipv4_start_node_s;
 
-typedef struct MMDB_record_info_s {
-    uint16_t record_length;
-    uint32_t (*left_record_getter)(const uint8_t *);
-    uint32_t (*right_record_getter)(const uint8_t *);
-    uint8_t right_record_offset;
-} MMDB_record_info_s;
-
 typedef struct MMDB_s {
     uint32_t flags;
     const char *filename;
@@ -194,7 +187,6 @@ typedef struct MMDB_s {
     uint16_t depth;
     MMDB_ipv4_start_node_s ipv4_start_node;
     MMDB_metadata_s metadata;
-    MMDB_record_info_s record_info;
 } MMDB_s;
 
 typedef struct MMDB_search_node_s {
