@@ -28,7 +28,7 @@ extern "C" {
 #include <winsock2.h>
 #include <ws2tcpip.h>
 /* libmaxminddb package version from configure */
-#define PACKAGE_VERSION "1.4.1"
+#define PACKAGE_VERSION "1.4.2"
 
 typedef ADDRESS_FAMILY sa_family_t;
 
@@ -151,6 +151,10 @@ typedef struct MMDB_description_s {
     const char *description;
 } MMDB_description_s;
 
+/* WARNING: do not add new fields to this struct without bumping the SONAME.
+ * The struct is allocated by the users of this library and increasing the
+ * size will cause existing users to allocate too little space when the shared
+ * library is upgraded */
 typedef struct MMDB_metadata_s {
     uint32_t node_count;
     uint16_t record_size;
@@ -167,20 +171,23 @@ typedef struct MMDB_metadata_s {
         size_t count;
         MMDB_description_s **descriptions;
     } description;
+    /* See above warning before adding fields */
 } MMDB_metadata_s;
 
+/* WARNING: do not add new fields to this struct without bumping the SONAME.
+ * The struct is allocated by the users of this library and increasing the
+ * size will cause existing users to allocate too little space when the shared
+ * library is upgraded */
 typedef struct MMDB_ipv4_start_node_s {
     uint16_t netmask;
     uint32_t node_value;
+    /* See above warning before adding fields */
 } MMDB_ipv4_start_node_s;
 
-typedef struct MMDB_record_info_s {
-    uint16_t record_length;
-    uint32_t (*left_record_getter)(const uint8_t *);
-    uint32_t (*right_record_getter)(const uint8_t *);
-    uint8_t right_record_offset;
-} MMDB_record_info_s;
-
+/* WARNING: do not add new fields to this struct without bumping the SONAME.
+ * The struct is allocated by the users of this library and increasing the
+ * size will cause existing users to allocate too little space when the shared
+ * library is upgraded */
 typedef struct MMDB_s {
     uint32_t flags;
     const char *filename;
@@ -194,7 +201,7 @@ typedef struct MMDB_s {
     uint16_t depth;
     MMDB_ipv4_start_node_s ipv4_start_node;
     MMDB_metadata_s metadata;
-    MMDB_record_info_s record_info;
+    /* See above warning before adding fields */
 } MMDB_s;
 
 typedef struct MMDB_search_node_s {

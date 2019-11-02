@@ -120,6 +120,13 @@ char *type_num_to_name(uint8_t num)
 #define MAYBE_CHECK_SIZE_OVERFLOW(...)
 #endif
 
+typedef struct record_info_s {
+    uint16_t record_length;
+    uint32_t (*left_record_getter)(const uint8_t *);
+    uint32_t (*right_record_getter)(const uint8_t *);
+    uint8_t right_record_offset;
+} record_info_s;
+
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
 #define METADATA_BLOCK_MAX_SIZE 131072
@@ -149,7 +156,7 @@ LOCAL int find_address_in_search_tree(const MMDB_s *const mmdb,
                                       uint8_t *address,
                                       sa_family_t address_family,
                                       MMDB_lookup_result_s *result);
-LOCAL MMDB_record_info_s record_info_for_database(const MMDB_s *const mmdb);
+LOCAL record_info_s record_info_for_database(const MMDB_s *const mmdb);
 LOCAL int find_ipv4_start_node(MMDB_s *const mmdb);
 LOCAL uint8_t record_type(const MMDB_s *const mmdb, uint64_t record);
 LOCAL uint32_t get_left_28_bit_record(const uint8_t *record);
@@ -290,8 +297,6 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
     mmdb->metadata_section = metadata;
     mmdb->ipv4_start_node.node_value = 0;
     mmdb->ipv4_start_node.netmask = 0;
-
-    mmdb->record_info = record_info_for_database(mmdb);
 
     // We do this immediately as otherwise there is a race to set
     // ipv4_start_node.node_value and ipv4_start_node.netmask.
@@ -917,7 +922,7 @@ LOCAL int find_address_in_search_tree(const MMDB_s *const mmdb,
                                       sa_family_t address_family,
                                       MMDB_lookup_result_s *result)
 {
-    MMDB_record_info_s record_info = mmdb->record_info;
+    record_info_s record_info = record_info_for_database(mmdb);
     if (0 == record_info.right_record_offset) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
@@ -966,9 +971,9 @@ LOCAL int find_address_in_search_tree(const MMDB_s *const mmdb,
     return MMDB_SUCCESS;
 }
 
-LOCAL MMDB_record_info_s record_info_for_database(const MMDB_s *const mmdb)
+LOCAL record_info_s record_info_for_database(const MMDB_s *const mmdb)
 {
-    MMDB_record_info_s record_info = {
+    record_info_s record_info = {
         .record_length       = mmdb->full_record_byte_size,
         .right_record_offset = 0
     };
@@ -994,14 +999,14 @@ LOCAL MMDB_record_info_s record_info_for_database(const MMDB_s *const mmdb)
 
 LOCAL int find_ipv4_start_node(MMDB_s *const mmdb)
 {
-    MMDB_record_info_s record_info = mmdb->record_info;
-
     /* In a pathological case of a database with a single node search tree,
      * this check will be true even after we've found the IPv4 start node, but
      * that doesn't seem worth trying to fix. */
     if (mmdb->ipv4_start_node.node_value != 0) {
         return MMDB_SUCCESS;
     }
+
+    record_info_s record_info = record_info_for_database(mmdb);
 
     const uint8_t *search_tree = mmdb->file_content;
     uint32_t node_value = 0;
@@ -1066,7 +1071,7 @@ LOCAL uint32_t get_right_28_bit_record(const uint8_t *record)
 int MMDB_read_node(const MMDB_s *const mmdb, uint32_t node_number,
                    MMDB_search_node_s *const node)
 {
-    MMDB_record_info_s record_info = mmdb->record_info;
+    record_info_s record_info = record_info_for_database(mmdb);
     if (0 == record_info.right_record_offset) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
