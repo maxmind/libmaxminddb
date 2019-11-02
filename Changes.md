@@ -1,3 +1,10 @@
+## 1.4.2
+
+* The 1.4.0 release introduced a change that increased the size of `MMDB_s`,
+  unintentionally causing an ABI break. This release reverts the relevant
+  commit.
+
+
 ## 1.4.1 - 2019-11-01
 
 * The man page links for function calls were not generated correctly in
