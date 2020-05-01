@@ -343,7 +343,7 @@ LOCAL int map_file(MMDB_s *const mmdb)
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
     }
-    fd = CreateFile(utf16_filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+    fd = CreateFileW(utf16_filename, GENERIC_READ, FILE_SHARE_READ, NULL,
                     OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fd == INVALID_HANDLE_VALUE) {
         status = MMDB_FILE_OPEN_ERROR;
