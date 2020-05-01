@@ -1,3 +1,9 @@
+## 1.4.3
+
+* On Windows, always call `CreateFileW` instead of `CreateFile`.
+  `CreateFile` could be mapped to `CreateFileA` and not work as expected.
+  Pull request by Sandu Liviu Catalin. GitHub #228.
+
 ## 1.4.2 - 2019-11-02
 
 * The 1.4.0 release introduced a change that increased the size of `MMDB_s`,
