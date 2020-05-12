@@ -254,7 +254,7 @@ The `data_size` member is only relevant for `utf8_string` and `bytes` data.
 `utf8_string` is not null terminated and `data_size` _must_ be used to
 determine its length.
 
-The `type` member can be compared to one of the `MMDB_DTYPE_*` macros.
+The `type` member can be compared to one of the `MMDB_DATA_TYPE_*` macros.
 
 ### 128-bit Integers
 
