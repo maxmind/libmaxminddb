@@ -7,5 +7,5 @@ Name: libmaxminddb
 Description: C library for the MaxMind DB file format
 URL: http://maxmind.github.io/libmaxminddb/
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lmaxminddb
+Libs: -L${libdir} -R${libdir} -lmaxminddb
 Cflags: -I${includedir}
