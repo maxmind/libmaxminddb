@@ -85,7 +85,7 @@ MMDB_entry_data_list_s *test_description_value(
     MMDB_entry_data_list_s *entry_data_list)
 {
     MMDB_entry_data_list_s *description = entry_data_list =
-                                              entry_data_list->next;
+        entry_data_list->next;
     cmp_ok(description->entry_data.type, "==", MMDB_DATA_TYPE_MAP,
            "'description' key's value is a map");
     cmp_ok(description->entry_data.data_size, "==", 2,
@@ -93,14 +93,14 @@ MMDB_entry_data_list_s *test_description_value(
 
     for (int i = 0; i < 2; i++) {
         MMDB_entry_data_list_s *key = entry_data_list =
-                                          entry_data_list->next;
+            entry_data_list->next;
         cmp_ok(key->entry_data.type, "==",
                MMDB_DATA_TYPE_UTF8_STRING,
                "found a map key in 'map'");
         const char *key_name = dup_entry_string_or_bail(key->entry_data);
 
         MMDB_entry_data_list_s *value = entry_data_list =
-                                            entry_data_list->next;
+            entry_data_list->next;
         cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
                "map value is a UTF8_STRING");
         const char *description =
@@ -140,7 +140,7 @@ void test_metadata_as_data_entry_list(MMDB_s * mmdb,
 
     while (1) {
         MMDB_entry_data_list_s *key = entry_data_list =
-                                          entry_data_list->next;
+            entry_data_list->next;
 
         if (!key) {
             break;
