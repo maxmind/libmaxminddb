@@ -1,7 +1,7 @@
 ---
 layout: default
 title: libmaxminddb - a library for working with MaxMind DB files
-version: 1.4.2
+version: 1.4.3
 ---
 # NAME
 
@@ -259,7 +259,7 @@ The `data_size` member is only relevant for `utf8_string` and `bytes` data.
 `utf8_string` is not null terminated and `data_size` _must_ be used to
 determine its length.
 
-The `type` member can be compared to one of the `MMDB_DTYPE_*` macros.
+The `type` member can be compared to one of the `MMDB_DATA_TYPE_*` macros.
 
 ### 128-bit Integers
 
@@ -312,7 +312,7 @@ libmaxminddb code.
 
 The `utf8_string`, `bytes`, and (maybe) the `uint128` members of this structure
 are all pointers directly into the database's data section. This can either be
-a `malloc`'d or `mmap`'d block of memory. In either case, these pointers will
+a `calloc`'d or `mmap`'d block of memory. In either case, these pointers will
 become invalid after `MMDB_close()` is called.
 
 If you need to refer to this data after that time you should copy the data
