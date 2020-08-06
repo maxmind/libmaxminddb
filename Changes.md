@@ -1,3 +1,13 @@
+## 1.4.3 - 2020-08-06
+
+* On Windows, always call `CreateFileW` instead of `CreateFile`.
+  `CreateFile` could be mapped to `CreateFileA` and not work as expected.
+  Pull request by Sandu Liviu Catalin. GitHub #228.
+* Fixed use of uninitialized memory in `dump_entry_data_list()` that could
+  cause a heap buffer flow in `mmdblookup`. As part of this fix, most uses
+  of `malloc` were replaced with `calloc`. Reported by azhou. GitHub #236.
+
+
 ## 1.4.2 - 2019-11-02
 
 * The 1.4.0 release introduced a change that increased the size of `MMDB_s`,

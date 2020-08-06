@@ -64,9 +64,9 @@ static void *thread(void *arg);
 int wmain(int argc, wchar_t **wargv)
 {
     // Convert our argument list from UTF-16 to UTF-8.
-    char **argv = (char **)malloc(argc * sizeof(char *));
+    char **argv = (char **)calloc(argc, sizeof(char *));
     if (!argv) {
-        fprintf(stderr, "malloc(): %s\n", strerror(errno));
+        fprintf(stderr, "calloc(): %s\n", strerror(errno));
         exit(1);
     }
     for (int i = 0; i < argc; i++) {
@@ -79,9 +79,9 @@ int wmain(int argc, wchar_t **wargv)
                     GetLastError());
             exit(1);
         }
-        utf8_string = malloc(utf8_width);
+        utf8_string = calloc(utf8_width, sizeof(char));
         if (!utf8_string) {
-            fprintf(stderr, "malloc(): %s\n", strerror(errno));
+            fprintf(stderr, "calloc(): %s\n", strerror(errno));
             exit(1);
         }
         if (WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, utf8_string,
@@ -294,7 +294,7 @@ LOCAL const char **get_options(
     }
 
     const char **lookup_path =
-        malloc(sizeof(const char *) * ((argc - optind) + 1));
+        calloc((argc - optind) + 1, sizeof(const char *));
     int i;
     for (i = 0; i < argc - optind; i++) {
         lookup_path[i] = argv[i + optind];

@@ -36,7 +36,7 @@
     do {                                                        \
         char *binary = byte_to_binary(byte);                    \
         if (NULL == binary) {                                   \
-            fprintf(stderr, "Malloc failed in DEBUG_BINARY\n"); \
+            fprintf(stderr, "Calloc failed in DEBUG_BINARY\n"); \
             abort();                                            \
         }                                                       \
         fprintf(stderr, fmt "\n", binary);                      \
@@ -54,7 +54,7 @@
 #ifdef MMDB_DEBUG
 char *byte_to_binary(uint8_t byte)
 {
-    char *bits = malloc(sizeof(char) * 9);
+    char *bits = calloc(9, sizeof(char));
     if (NULL == bits) {
         return bits;
     }
@@ -321,7 +321,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb)
 LOCAL LPWSTR utf8_to_utf16(const char *utf8_str)
 {
     int wide_chars = MultiByteToWideChar(CP_UTF8, 0, utf8_str, -1, NULL, 0);
-    wchar_t *utf16_str = (wchar_t *)malloc(wide_chars * sizeof(wchar_t));
+    wchar_t *utf16_str = (wchar_t *)calloc(wide_chars, sizeof(wchar_t));
 
     if (MultiByteToWideChar(CP_UTF8, 0, utf8_str, -1, utf16_str,
                             wide_chars) < 1) {
@@ -343,8 +343,8 @@ LOCAL int map_file(MMDB_s *const mmdb)
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
     }
-    fd = CreateFile(utf16_filename, GENERIC_READ, FILE_SHARE_READ, NULL,
-                    OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    fd = CreateFileW(utf16_filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+                     OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fd == INVALID_HANDLE_VALUE) {
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
@@ -704,7 +704,7 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                               MMDB_INVALID_METADATA_ERROR);
 
     mmdb->metadata.languages.count = 0;
-    mmdb->metadata.languages.names = malloc(array_size * sizeof(char *));
+    mmdb->metadata.languages.names = calloc(array_size, sizeof(char *));
     if (NULL == mmdb->metadata.languages.names) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
@@ -722,7 +722,7 @@ LOCAL int populate_languages_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
         if (NULL == mmdb->metadata.languages.names[i]) {
             return MMDB_OUT_OF_MEMORY_ERROR;
         }
-        // We assign this as we go so that if we fail a malloc and need to
+        // We assign this as we go so that if we fail a calloc and need to
         // free it, the count is right.
         mmdb->metadata.languages.count = i + 1;
     }
@@ -774,7 +774,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
                               MMDB_INVALID_METADATA_ERROR);
 
     mmdb->metadata.description.descriptions =
-        malloc(map_size * sizeof(MMDB_description_s *));
+        calloc(map_size, sizeof(MMDB_description_s *));
     if (NULL == mmdb->metadata.description.descriptions) {
         status = MMDB_OUT_OF_MEMORY_ERROR;
         goto cleanup;
@@ -782,7 +782,7 @@ LOCAL int populate_description_metadata(MMDB_s *mmdb, MMDB_s *metadata_db,
 
     for (uint32_t i = 0; i < map_size; i++) {
         mmdb->metadata.description.descriptions[i] =
-            malloc(sizeof(MMDB_description_s));
+            calloc(1, sizeof(MMDB_description_s));
         if (NULL == mmdb->metadata.description.descriptions[i]) {
             status = MMDB_OUT_OF_MEMORY_ERROR;
             goto cleanup;
@@ -1134,7 +1134,7 @@ int MMDB_vget_value(MMDB_entry_s *const start,
     MAYBE_CHECK_SIZE_OVERFLOW(length, SIZE_MAX / sizeof(const char *) - 1,
                               MMDB_INVALID_METADATA_ERROR);
 
-    const char **path = malloc((length + 1) * sizeof(const char *));
+    const char **path = calloc(length + 1, sizeof(const char *));
     if (NULL == path) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
@@ -2010,6 +2010,7 @@ LOCAL MMDB_entry_data_list_s *dump_entry_data_list(
             char *hex_string =
                 bytes_to_hex((uint8_t *)entry_data_list->entry_data.bytes,
                              entry_data_list->entry_data.data_size);
+
             if (NULL == hex_string) {
                 *status = MMDB_OUT_OF_MEMORY_ERROR;
                 return NULL;
@@ -2103,7 +2104,7 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
     char *hex_string;
     MAYBE_CHECK_SIZE_OVERFLOW(size, SIZE_MAX / 2 - 1, NULL);
 
-    hex_string = malloc((size * 2) + 1);
+    hex_string = calloc((size * 2) + 1, sizeof(char));
     if (NULL == hex_string) {
         return NULL;
     }
@@ -2111,6 +2112,8 @@ LOCAL char *bytes_to_hex(uint8_t *bytes, uint32_t size)
     for (uint32_t i = 0; i < size; i++) {
         sprintf(hex_string + (2 * i), "%02X", bytes[i]);
     }
+
+
 
     return hex_string;
 }
