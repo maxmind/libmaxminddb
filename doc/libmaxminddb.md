@@ -307,7 +307,7 @@ libmaxminddb code.
 
 The `utf8_string`, `bytes`, and (maybe) the `uint128` members of this structure
 are all pointers directly into the database's data section. This can either be
-a `malloc`'d or `mmap`'d block of memory. In either case, these pointers will
+a `calloc`'d or `mmap`'d block of memory. In either case, these pointers will
 become invalid after `MMDB_close()` is called.
 
 If you need to refer to this data after that time you should copy the data
