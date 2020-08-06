@@ -1,4 +1,4 @@
-## 1.4.3
+## 1.4.3 - 2020-08-06
 
 * On Windows, always call `CreateFileW` instead of `CreateFile`.
   `CreateFile` could be mapped to `CreateFileA` and not work as expected.
