@@ -13,11 +13,6 @@ addons:
     build_command: make -j 4
     branch_pattern: .*coverity.*
 language: c
-
-arch:
-   - ppc64le
-   - amd64
-
 matrix:
   include:
     # Why do we have -Wno-unused-parameter? Because libtap has unused
@@ -31,6 +26,10 @@ matrix:
     #
     # We have -Wno-unused-function as maxminddb-compat-util.h includes functions
     # that may not all be used in every file it is imported into.
+    - os: linux
+      arch: ppc64le
+      compiler: gcc
+      env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-function"
     - os: linux
       compiler: gcc
       env: MMCFLAGS="-std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-function"
