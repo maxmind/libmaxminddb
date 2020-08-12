@@ -13,6 +13,11 @@ addons:
     build_command: make -j 4
     branch_pattern: .*coverity.*
 language: c
+
+arch:
+   - ppc64le
+   - amd64
+
 matrix:
   include:
     # Why do we have -Wno-unused-parameter? Because libtap has unused
