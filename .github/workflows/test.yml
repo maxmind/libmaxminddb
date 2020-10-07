@@ -1,0 +1,40 @@
+name: Run tests
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '3 20 * * SUN'
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cc: [gcc, clang]
+        posix: ['', -D_POSIX_C_SOURCE=200112L]
+    runs-on: ${{ matrix.os }}
+    env:
+      CC: ${{ matrix.cc }}
+      VERBOSE: 1
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - run: sudo apt install libipc-run3-perl
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - run: brew install autoconf automake libtool
+        if: ${{ matrix.os == 'macos-latest' }}
+      - run: ./bootstrap
+      - run: ./configure
+        env:
+          CFLAGS: -std=c99 -Wall -Wextra -Werror -Wno-unused-parameter ${{ matrix.posix }}
+      - run: make
+      - run: make check
+  #test-windows:
+  #  runs-on: windows-latest
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #      with:
+  #        submodules: true
+  #    - name: Add msbuild to PATH
+  #      uses: microsoft/setup-msbuild@v1.0.2
+  #    - run: msbuild projects\VS12\libmaxminddb.sln
