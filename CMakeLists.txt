@@ -61,6 +61,9 @@ add_executable(mmdblookup
 )
 
 target_link_libraries(mmdblookup maxminddb pthread)
+if(NOT WIN32)
+  target_link_libraries(mmdblookup pthread)
+endif()
 
 install(
   TARGETS mmdblookup
@@ -73,16 +76,25 @@ add_library(tap
 
 enable_testing()
 
+if(WIN32)
+  set(skipped_tests bad_databases_t threads_t)
+endif()
+
 file(GLOB tests "t/*_t.c")
 foreach(file ${tests})
   string(REGEX REPLACE ".*/t/([a-z0-9_]*)\.c" "\\1" test_name ${file})
 
-  add_executable(${test_name}
-    ${file}
-    t/maxminddb_test_helper.c
-  )
+  if(NOT ${test_name} IN_LIST skipped_tests)
+    add_executable(${test_name}
+      ${file}
+      t/maxminddb_test_helper.c
+    )
 
-  target_link_libraries(${test_name} maxminddb tap pthread)
+    target_link_libraries(${test_name} maxminddb tap)
+    if(NOT WIN32)
+      target_link_libraries(${test_name} pthread)
+    endif()
 
-  add_test(${test_name} ${test_name})
+    add_test(${test_name} ${test_name})
+  endif()
 endforeach()
