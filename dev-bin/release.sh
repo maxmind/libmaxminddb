@@ -40,10 +40,19 @@ EOF
 )
 
 perl -MFile::Slurp=edit_file -e \
-    "edit_file { s/\Q$old_version/$version/g } \$_ for qw( configure.ac include/maxminddb.h )"
+    "edit_file { s/\Q$old_version/$version/g } \$_ for qw( configure.ac include/maxminddb.h CMakeLists.txt )"
 
 if [ -n "$(git status --porcelain)" ]; then
-    git add configure.ac include/maxminddb.h
+    git diff
+
+    read -e -p "Commit changes? " should_commit
+
+    if [ "$should_commit" != "y" ]; then
+        echo "Aborting"
+        exit 1
+    fi
+
+    git add configure.ac include/maxminddb.h CMakeLists.txt
     git commit -m "Bumped version to $version"
 fi
 
