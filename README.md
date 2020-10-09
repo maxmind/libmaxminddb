@@ -73,7 +73,7 @@ follow the instructions for installing from a named release tarball as described
 ## Using CMake
 
 We provide a CMake build script. This is primarily targeted at Windows users,
-but it can be used in other circumstances where the Autotools script do not
+but it can be used in other circumstances where the Autotools script does not
 work.
 
     $ cmake --build .
