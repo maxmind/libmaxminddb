@@ -56,19 +56,18 @@ install(
   ARCHIVE DESTINATION lib
 )
 
-add_executable(mmdblookup
-  bin/mmdblookup.c
-)
-
-target_link_libraries(mmdblookup maxminddb pthread)
 if(NOT WIN32)
-  target_link_libraries(mmdblookup pthread)
-endif()
+  add_executable(mmdblookup
+    bin/mmdblookup.c
+  )
 
-install(
-  TARGETS mmdblookup
-  RUNTIME DESTINATION bin
-)
+  target_link_libraries(mmdblookup maxminddb pthread)
+
+  install(
+    TARGETS mmdblookup
+    RUNTIME DESTINATION bin
+  )
+endif()
 
 add_library(tap
   t/libtap/tap.c
