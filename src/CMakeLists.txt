@@ -10,6 +10,7 @@ endif()
 set_target_properties(maxminddb
   PROPERTIES PUBLIC_HEADER
   "../include/maxminddb_config.h;../include/maxminddb.h"
+  SOVERSION ${MAXMINDDB_SOVERSION}
 )
 
 install(

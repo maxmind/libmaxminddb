@@ -3,7 +3,7 @@ project(maxminddb
   LANGUAGES C
   VERSION 1.4.3
 )
-
+set(MAXMINDDB_SOVERSION 0.0.7)
 add_definitions(-DPACKAGE_VERSION="${PROJECT_VERSION}")
 
 include(CheckTypeSize)
