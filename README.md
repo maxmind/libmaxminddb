@@ -70,11 +70,15 @@ You can clone this repository and build it by running:
 After cloning, run `./bootstrap` from the `libmaxminddb` directory and then
 follow the instructions for installing from a named release tarball as described above.
 
-## On Windows via Visual Studio 2013+
+## Using CMake
 
-We provide a Visual Studio solution in `projects\VS12`. This can be used to
-build both the the library and the tests. Please see the `README.md` file in
-the same directory for more information.
+We provide a CMake build script. This is primarily targeted at Windows users,
+but it can be used in other circumstances where the Autotools script do not
+work.
+
+    $ cmake --build .
+    $ ctest -V .
+    $ cmake --build . --target install
 
 ## On Ubuntu via PPA
 

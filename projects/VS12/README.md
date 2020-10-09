@@ -1,3 +1,8 @@
+# Deprecated
+
+*These files are deprecated and will be removed in a future release.
+Please use CMake instead.*
+
 # Project Notes
 
 DO NOT modify project settings for each configuration and/or platform
