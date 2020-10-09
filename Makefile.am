@@ -16,7 +16,9 @@ SUBDIRS += \
   t
 endif
 
-EXTRA_DIST = doc Changes.md LICENSE NOTICE README.md projects/VS12 projects/VS12-tests
+EXTRA_DIST = doc Changes.md LICENSE NOTICE README.md projects/VS12 projects/VS12-tests \
+			 CMakeLists.txt t/CMakeLists.txt bin/CMakeLists.txt src/CMakeLists.txt
+
 dist-hook:
 	dev-bin/make-man-pages.pl $(distdir)
 	find $(distdir) -name '.git*' | xargs rm -fr
