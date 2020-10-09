@@ -44,7 +44,7 @@ const char *test_database_path(const char *filename)
 {
     char *test_db_dir;
 #ifdef _WIN32
-    test_db_dir = "./t/maxmind-db/test-data";
+    test_db_dir = "../t/maxmind-db/test-data";
 #else
     char cwd[500];
     char *UNUSED(tmp) = getcwd(cwd, 500);
