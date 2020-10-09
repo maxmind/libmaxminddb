@@ -1,4 +1,4 @@
-## 1.4.4
+## 1.5.0
 
 * A CMake build script has been added for Windows builds. The Visual
   Studio project files in `projects` are now considered deprecated and will
