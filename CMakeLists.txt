@@ -35,65 +35,9 @@ configure_file(include/maxminddb_config.h.cmake.in include/maxminddb_config.h)
 
 include_directories(. src include)
 
-add_library(maxminddb
-  src/maxminddb.c
-  src/data-pool.c
-)
-
-if(WIN32)
-  target_link_libraries(maxminddb ws2_32)
-endif()
-
-set_target_properties(maxminddb
-  PROPERTIES PUBLIC_HEADER
-  "include/maxminddb_config.h;include/maxminddb.h"
-)
-
-install(
-  TARGETS maxminddb
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
-
-if(NOT WIN32)
-  add_executable(mmdblookup
-    bin/mmdblookup.c
-  )
-
-  target_link_libraries(mmdblookup maxminddb pthread)
-
-  install(
-    TARGETS mmdblookup
-    RUNTIME DESTINATION bin
-  )
-endif()
-
-add_library(tap
-  t/libtap/tap.c
-)
+add_subdirectory(src)
+add_subdirectory(bin)
 
 enable_testing()
+add_subdirectory(t)
 
-if(WIN32)
-  set(skipped_tests bad_databases_t threads_t)
-endif()
-
-file(GLOB tests "t/*_t.c")
-foreach(file ${tests})
-  string(REGEX REPLACE ".*/t/([a-z0-9_]*)\.c" "\\1" test_name ${file})
-
-  if(NOT ${test_name} IN_LIST skipped_tests)
-    add_executable(${test_name}
-      ${file}
-      t/maxminddb_test_helper.c
-    )
-
-    target_link_libraries(${test_name} maxminddb tap)
-    if(NOT WIN32)
-      target_link_libraries(${test_name} pthread)
-    endif()
-
-    add_test(${test_name} ${test_name})
-  endif()
-endforeach()

@@ -25,11 +25,13 @@
 /man
 /missing
 /src/libmaxminddb.pc
+/src/libmaxminddb.a
 /src/test-data-pool
 /t/*.log
 /t/*.trs
 /t/*_t
 /t/*-t
+/t/libtap.a
 /test-driver
 \#*\#
 aclocal.m4
@@ -42,7 +44,3 @@ Makefile
 Makefile.in
 Testing/
 install_manifest.txt
-libmaxminddb.a
-libtap.a
-mmdblookup
-*_t
