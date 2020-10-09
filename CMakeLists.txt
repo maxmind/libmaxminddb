@@ -28,6 +28,10 @@ if(NOT IS_BIG_ENDIAN)
   add_definitions(-DMMDB_LITTLE_ENDIAN=1)
 endif()
 
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
 set(CMAKE_SHARED_LIBRARY_PREFIX lib)
 set(CMAKE_STATIC_LIBRARY_PREFIX lib)
 

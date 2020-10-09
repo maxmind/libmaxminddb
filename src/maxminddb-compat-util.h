@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#pragma GCC diagnostic ignored "-Wunused-function"
-
 /* *INDENT-OFF* */
 
 /* The memmem, strdup, and strndup functions were all copied from the
