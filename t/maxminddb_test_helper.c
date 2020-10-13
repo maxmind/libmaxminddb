@@ -42,13 +42,13 @@ void for_all_modes(void (*tests)(int mode, const char *description))
 
 const char *test_database_path(const char *filename)
 {
+    char *test_db_dir;
+#ifdef _WIN32
+    test_db_dir = "../t/maxmind-db/test-data";
+#else
     char cwd[500];
     char *UNUSED(tmp) = getcwd(cwd, 500);
 
-    char *test_db_dir;
-#ifdef _WIN32
-    test_db_dir = "./t/maxmind-db/test-data";
-#else
     if (strcmp(basename(cwd), "t") == 0) {
         test_db_dir = "./maxmind-db/test-data";
     } else {

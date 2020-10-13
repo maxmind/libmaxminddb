@@ -1,3 +1,9 @@
+## 1.5.0
+
+* A CMake build script has been added for Windows builds. The Visual
+  Studio project files in `projects` are now considered deprecated and will
+  be removed in a future release.
+
 ## 1.4.3 - 2020-08-06
 
 * On Windows, always call `CreateFileW` instead of `CreateFile`.

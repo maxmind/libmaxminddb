@@ -5,12 +5,13 @@ on:
   schedule:
     - cron: '3 20 * * SUN'
 jobs:
-  test:
+  test-autoconf:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
         cc: [gcc, clang]
         posix: ['', -D_POSIX_C_SOURCE=200112L]
+    name: Autotools build on ${{matrix.os}} using ${{matrix.cc}} ${{matrix.posix}}
     runs-on: ${{ matrix.os }}
     env:
       CC: ${{ matrix.cc }}
@@ -26,15 +27,20 @@ jobs:
       - run: ./bootstrap
       - run: ./configure
         env:
-          CFLAGS: -std=c99 -Wall -Wextra -Werror -Wno-unused-parameter ${{ matrix.posix }}
+          CFLAGS: -std=c99 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter ${{ matrix.posix }}
       - run: make
       - run: make check
-  #test-windows:
-  #  runs-on: windows-latest
-  #  steps:
-  #    - uses: actions/checkout@v2
-  #      with:
-  #        submodules: true
-  #    - name: Add msbuild to PATH
-  #      uses: microsoft/setup-msbuild@v1.0.2
-  #    - run: msbuild projects\VS12\libmaxminddb.sln
+
+  test-cmake:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    name: CMake build on ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - run: cmake -V .
+      - run: cmake --build .
+      - run: ctest -V .
