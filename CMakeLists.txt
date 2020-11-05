@@ -85,7 +85,7 @@ install(EXPORT maxminddb
         NAMESPACE maxminddb::
         DESTINATION lib/cmake/maxminddb)
 
-if (MAXMINDDB_BUILD_TEST_PROGRAMS)
+if (BUILD_TESTING)
   add_subdirectory(bin)
 
   enable_testing()
