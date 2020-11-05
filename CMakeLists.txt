@@ -63,7 +63,7 @@ target_include_directories(maxminddb PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-set(HEADERS
+set(MAXMINDB_HEADERS
   include/maxminddb.h
   include/maxminddb_config.h
 )
