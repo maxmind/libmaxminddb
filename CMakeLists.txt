@@ -5,6 +5,7 @@ project(maxminddb
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
 
+option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
 option(MAXMINDDB_BUILD_TEST_PROGRAMS "Build test programs" ON)
 
 include(CheckTypeSize)
@@ -36,6 +37,8 @@ add_library(maxminddb
   src/data-pool.c
 )
 add_library(maxminddb::maxminddb ALIAS maxminddb)
+
+set_target_properties(maxminddb PROPERTIES VERSION ${MAXMINDDB_SOVERSION})
 
 target_compile_definitions(maxminddb PUBLIC PACKAGE_VERSION="${PROJECT_VERSION}")
 
