@@ -50,6 +50,10 @@ if(MSVC)
   target_compile_definitions(maxminddb PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
+if(WIN32)
+  target_link_libraries(maxminddb ws2_32)
+endif()
+
 set(CMAKE_SHARED_LIBRARY_PREFIX lib)
 set(CMAKE_STATIC_LIBRARY_PREFIX lib)
 
@@ -83,6 +87,7 @@ install(EXPORT maxminddb
 
 if (MAXMINDDB_BUILD_TEST_PROGRAMS)
   add_subdirectory(bin)
+
   enable_testing()
   add_subdirectory(t)
 endif()
