@@ -6,7 +6,7 @@ project(maxminddb
 set(MAXMINDDB_SOVERSION 0.0.7)
 
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
-option(MAXMINDDB_BUILD_TEST_PROGRAMS "Build test programs" ON)
+option(BUILD_TESTING "Build test programs" ON)
 
 include(CheckTypeSize)
 check_type_size("unsigned __int128" UINT128)
