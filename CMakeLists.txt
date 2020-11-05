@@ -24,6 +24,10 @@ endif()
 include (TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 configure_file(${PROJECT_SOURCE_DIR}/include/maxminddb_config.h.cmake.in 
                ${PROJECT_SOURCE_DIR}/include/maxminddb_config.h)
 
