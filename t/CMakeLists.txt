@@ -26,6 +26,7 @@ if(UNIX)  # or if (NOT WIN32)
     bad_databases_t
     threads_t
   )
+  find_package(Threads)
 endif()
 
 foreach(TEST_TARGET_NAME ${TEST_TARGET_NAMES})
@@ -35,6 +36,10 @@ foreach(TEST_TARGET_NAME ${TEST_TARGET_NAMES})
 
   if(UNIX)
     target_link_libraries(${TEST_TARGET_NAME} m)
+  endif()
+
+  if (UNIX)
+    target_link_libraries(${TEST_TARGET_NAME} ${CMAKE_THREAD_LIBS_INIT})
   endif()
 
   add_test(${TEST_TARGET_NAME} ${TEST_TARGET_NAME})
