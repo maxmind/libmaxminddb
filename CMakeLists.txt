@@ -4,7 +4,9 @@ project(maxminddb
   VERSION 1.4.3
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
-add_definitions(-DPACKAGE_VERSION="${PROJECT_VERSION}")
+
+option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
+option(BUILD_TESTING "Build test programs" ON)
 
 include(CheckTypeSize)
 check_type_size("unsigned __int128" UINT128)
@@ -22,24 +24,72 @@ endif()
 
 include (TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
+configure_file(${PROJECT_SOURCE_DIR}/include/maxminddb_config.h.cmake.in 
+               ${PROJECT_SOURCE_DIR}/include/maxminddb_config.h)
+
+add_library(maxminddb
+  src/maxminddb.c
+  src/data-pool.c
+)
+add_library(maxminddb::maxminddb ALIAS maxminddb)
+
+set_target_properties(maxminddb PROPERTIES VERSION ${MAXMINDDB_SOVERSION})
+
+target_compile_definitions(maxminddb PUBLIC PACKAGE_VERSION="${PROJECT_VERSION}")
+
 if(NOT IS_BIG_ENDIAN)
-  add_definitions(-DMMDB_LITTLE_ENDIAN=1)
+  target_compile_definitions(maxminddb PRIVATE MMDB_LITTLE_ENDIAN=1)
 endif()
 
 if(MSVC)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  target_compile_definitions(maxminddb PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
+if(WIN32)
+  target_link_libraries(maxminddb ws2_32)
 endif()
 
 set(CMAKE_SHARED_LIBRARY_PREFIX lib)
 set(CMAKE_STATIC_LIBRARY_PREFIX lib)
 
-configure_file(include/maxminddb_config.h.cmake.in include/maxminddb_config.h)
+set(MAXMINDB_INCLUDE_DIR
+  .
+  include
+)
 
-include_directories(. src include)
+target_include_directories(maxminddb PUBLIC
+  $<BUILD_INTERFACE:${MAXMINDB_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>
+)
 
-add_subdirectory(src)
+set(MAXMINDB_HEADERS
+  include/maxminddb.h
+  include/maxminddb_config.h
+)
+set_target_properties(maxminddb PROPERTIES PUBLIC_HEADER "${MAXMINDB_HEADERS}")
+
+install(TARGETS maxminddb
+        EXPORT maxminddb
+        ARCHIVE DESTINATION lib
+        PUBLIC_HEADER DESTINATION include/
+)
+
+# This is required to work with FetchContent
+install(EXPORT maxminddb
+        FILE maxminddb-config.cmake
+        NAMESPACE maxminddb::
+        DESTINATION lib/cmake/maxminddb)
+
+# We always want to build mmdblookup
 add_subdirectory(bin)
 
-enable_testing()
-add_subdirectory(t)
+if (BUILD_TESTING)
+  enable_testing()
+  add_subdirectory(t)
+endif()
 

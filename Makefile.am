@@ -17,7 +17,7 @@ SUBDIRS += \
 endif
 
 EXTRA_DIST = doc Changes.md LICENSE NOTICE README.md projects/VS12 projects/VS12-tests \
-			 CMakeLists.txt t/CMakeLists.txt bin/CMakeLists.txt src/CMakeLists.txt \
+			 CMakeLists.txt t/CMakeLists.txt bin/CMakeLists.txt \
 			 include/maxminddb_config.h.cmake.in
 
 dist-hook:
