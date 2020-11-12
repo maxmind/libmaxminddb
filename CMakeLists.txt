@@ -85,9 +85,10 @@ install(EXPORT maxminddb
         NAMESPACE maxminddb::
         DESTINATION lib/cmake/maxminddb)
 
-if (BUILD_TESTING)
-  add_subdirectory(bin)
+# We always want to build mmdblookup
+add_subdirectory(bin)
 
+if (BUILD_TESTING)
   enable_testing()
   add_subdirectory(t)
 endif()
