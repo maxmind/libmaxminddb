@@ -23,31 +23,29 @@
 #include <unistd.h>
 #endif
 
-#define LOCAL static
-
-LOCAL void usage(char *program, int exit_code, const char *error);
-LOCAL const char **get_options(int argc,
-                               char **argv,
-                               char **mmdb_file,
-                               char **ip_address,
-                               int *verbose,
-                               int *iterations,
-                               int *lookup_path_length,
-                               int *const thread_count,
-                               char **const ip_file);
-LOCAL MMDB_s open_or_die(const char *fname);
-LOCAL void dump_meta(MMDB_s *mmdb);
-LOCAL bool lookup_from_file(MMDB_s *const mmdb,
-                            char const *const ip_file,
-                            bool const dump);
-LOCAL int lookup_and_print(MMDB_s *mmdb,
-                           const char *ip_address,
-                           const char **lookup_path,
-                           int lookup_path_length,
-                           bool verbose);
-LOCAL int benchmark(MMDB_s *mmdb, int iterations);
-LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr);
-LOCAL void random_ipv4(char *ip);
+static void usage(char *program, int exit_code, const char *error);
+static const char **get_options(int argc,
+                                char **argv,
+                                char **mmdb_file,
+                                char **ip_address,
+                                int *verbose,
+                                int *iterations,
+                                int *lookup_path_length,
+                                int *const thread_count,
+                                char **const ip_file);
+static MMDB_s open_or_die(const char *fname);
+static void dump_meta(MMDB_s *mmdb);
+static bool lookup_from_file(MMDB_s *const mmdb,
+                             char const *const ip_file,
+                             bool const dump);
+static int lookup_and_print(MMDB_s *mmdb,
+                            const char *ip_address,
+                            const char **lookup_path,
+                            int lookup_path_length,
+                            bool verbose);
+static int benchmark(MMDB_s *mmdb, int iterations);
+static MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr);
+static void random_ipv4(char *ip);
 
 #ifndef _WIN32
 // These aren't with the automatically generated prototypes as we'd lose the
@@ -157,7 +155,7 @@ int main(int argc, char **argv) {
     exit(benchmark(&mmdb, iterations));
 }
 
-LOCAL void usage(char *program, int exit_code, const char *error) {
+static void usage(char *program, int exit_code, const char *error) {
     if (NULL != error) {
         fprintf(stderr, "\n  *ERROR: %s\n", error);
     }
@@ -213,15 +211,15 @@ LOCAL void usage(char *program, int exit_code, const char *error) {
     exit(exit_code);
 }
 
-LOCAL const char **get_options(int argc,
-                               char **argv,
-                               char **mmdb_file,
-                               char **ip_address,
-                               int *verbose,
-                               int *iterations,
-                               int *lookup_path_length,
-                               int *const thread_count,
-                               char **const ip_file) {
+static const char **get_options(int argc,
+                                char **argv,
+                                char **mmdb_file,
+                                char **ip_address,
+                                int *verbose,
+                                int *iterations,
+                                int *lookup_path_length,
+                                int *const thread_count,
+                                char **const ip_file) {
     static int help = 0;
     static int version = 0;
 
@@ -308,7 +306,7 @@ LOCAL const char **get_options(int argc,
     return lookup_path;
 }
 
-LOCAL MMDB_s open_or_die(const char *fname) {
+static MMDB_s open_or_die(const char *fname) {
     MMDB_s mmdb;
     int status = MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
 
@@ -328,7 +326,7 @@ LOCAL MMDB_s open_or_die(const char *fname) {
     return mmdb;
 }
 
-LOCAL void dump_meta(MMDB_s *mmdb) {
+static void dump_meta(MMDB_s *mmdb) {
     const char *meta_dump = "\n"
                             "  Database metadata\n"
                             "    Node count:    %i\n"
@@ -384,9 +382,9 @@ LOCAL void dump_meta(MMDB_s *mmdb) {
 //
 // In addition to being useful for comparisons, this function provides a way to
 // have a more deterministic set of lookups for benchmarking.
-LOCAL bool lookup_from_file(MMDB_s *const mmdb,
-                            char const *const ip_file,
-                            bool const dump) {
+static bool lookup_from_file(MMDB_s *const mmdb,
+                             char const *const ip_file,
+                             bool const dump) {
     FILE *const fh = fopen(ip_file, "r");
     if (!fh) {
         fprintf(stderr, "fopen(): %s: %s\n", ip_file, strerror(errno));
@@ -478,11 +476,11 @@ LOCAL bool lookup_from_file(MMDB_s *const mmdb,
     return true;
 }
 
-LOCAL int lookup_and_print(MMDB_s *mmdb,
-                           const char *ip_address,
-                           const char **lookup_path,
-                           int lookup_path_length,
-                           bool verbose) {
+static int lookup_and_print(MMDB_s *mmdb,
+                            const char *ip_address,
+                            const char **lookup_path,
+                            int lookup_path_length,
+                            bool verbose) {
 
     MMDB_lookup_result_s result = lookup_or_die(mmdb, ip_address);
     MMDB_entry_data_list_s *entry_data_list = NULL;
@@ -541,7 +539,7 @@ end:
     return exit_code;
 }
 
-LOCAL int benchmark(MMDB_s *mmdb, int iterations) {
+static int benchmark(MMDB_s *mmdb, int iterations) {
     char ip_address[16];
     int exit_code = 0;
 
@@ -586,7 +584,7 @@ end:
     return exit_code;
 }
 
-LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr) {
+static MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr) {
     int gai_error, mmdb_error;
     MMDB_lookup_result_s result =
         MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
@@ -614,7 +612,7 @@ LOCAL MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr) {
     return result;
 }
 
-LOCAL void random_ipv4(char *ip) {
+static void random_ipv4(char *ip) {
     // rand() is perfectly fine for this use case
     // coverity[dont_call]
     int ip_int = rand();
