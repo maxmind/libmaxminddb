@@ -1,11 +1,19 @@
+## 1.5.0 - 2021-01-05
+
+* A CMake build script has been added for Windows builds. The Visual
+  Studio project files in `projects` are now considered deprecated and will
+  be removed in a future release.
+
+
 ## 1.4.3 - 2020-08-06
 
 * On Windows, always call `CreateFileW` instead of `CreateFile`.
   `CreateFile` could be mapped to `CreateFileA` and not work as expected.
   Pull request by Sandu Liviu Catalin. GitHub #228.
 * Fixed use of uninitialized memory in `dump_entry_data_list()` that could
-  cause a heap buffer flow in `mmdblookup`. As part of this fix, most uses
-  of `malloc` were replaced with `calloc`. Reported by azhou. GitHub #236.
+  cause a heap buffer overflow in `mmdblookup`. As part of this fix, most
+  uses of `malloc` were replaced with `calloc`. Reported by azhou. GitHub
+  #236.
 
 
 ## 1.4.2 - 2019-11-02
