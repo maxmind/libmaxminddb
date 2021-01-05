@@ -1,3 +1,9 @@
+libmaxminddb (1.5.0-0+maxmind1) focal; urgency=low
+
+  * New upstream release.
+
+ -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Tue, 05 Jan 2021 14:59:19 -0800
+
 libmaxminddb (1.4.3-0+maxmind1) focal; urgency=low
 
   * New upstream release.
