@@ -8,9 +8,10 @@
 
 #include "maxminddb_test_helper.h"
 
-int test_read(const char *path, const struct stat *UNUSED(
-                  sbuf), int flags, struct FTW *UNUSED(ftw))
-{
+int test_read(const char *path,
+              const struct stat *UNUSED(sbuf),
+              int flags,
+              struct FTW *UNUSED(ftw)) {
     // Check if path is a regular file)
     if (flags != FTW_F) {
         return 0;
@@ -36,16 +37,15 @@ int test_read(const char *path, const struct stat *UNUSED(
         BAIL_OUT("could not parse IP address");
     }
 
-    cmp_ok(mmdb_error, "!=", MMDB_SUCCESS, "opening %s returned an error",
-           path);
+    cmp_ok(
+        mmdb_error, "!=", MMDB_SUCCESS, "opening %s returned an error", path);
 
     MMDB_close(mmdb);
     free(mmdb);
     return 0;
 }
 
-int main(void)
-{
+int main(void) {
     char *test_db_dir;
 #ifdef _WIN32
     test_db_dir = "../t/maxmind-db/bad-data";
