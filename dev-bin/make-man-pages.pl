@@ -53,7 +53,7 @@ sub _make_lib_man_links {
     my $target = shift;
 
     my $header = read_file("$Bin/../include/maxminddb.h");
-    for my $proto ( $header =~ /^ *extern.+?(\w+)\(/gsm ) {
+    for my $proto ( $header =~ /^ *extern.+?(MMDB_\w+)\(/gsm ) {
         open my $fh, '>', "$target/man/man3/$proto.3";
         print {$fh} ".so man3/libmaxminddb.3\n";
         close $fh;
