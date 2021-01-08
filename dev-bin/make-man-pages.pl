@@ -14,20 +14,31 @@ use File::Which qw( which );
 sub main {
     my $target = shift || "$Bin/..";
 
-    my $pandoc = which('pandoc')
-        or die
-        "\n  You must install pandoc in order to generate the man pages.\n\n";
+    my @translators = qw ( pandoc lowdown );
+    my $translator;
+    foreach my $p ( @translators ) {
+        if (defined which($p)) {
+            $translator = $p;
+            last;
+        }
+    }
+    unless ( defined $translator ) {
+        die
+        "\n  You must install one of " . join(', ', @translators) .
+        " in order to generate the man pages.\n\n";
+    }
 
-    _make_man( $target, 'libmaxminddb', 3 );
+    _make_man( $translator, $target, 'libmaxminddb', 3 );
     _make_lib_man_links($target);
 
-    _make_man( $target, 'mmdblookup', 1 );
+    _make_man( $translator, $target, 'mmdblookup', 1 );
 }
 
 sub _make_man {
-    my $target  = shift;
-    my $name    = shift;
-    my $section = shift;
+    my $translator = shift;
+    my $target     = shift;
+    my $name       = shift;
+    my $section    = shift;
 
     my $man_dir = "$target/man/man$section";
     mkpath($man_dir);
@@ -35,7 +46,8 @@ sub _make_man {
     my $tempdir = tempdir( CLEANUP => 1 );
 
     my $markdown = <<"EOF";
-% $name($section)
+title: $name
+section: $section
 
 EOF
     $markdown .= read_file("$Bin/../doc/$name.md");
@@ -44,9 +56,13 @@ EOF
     write_file( $tempfile, $markdown );
 
     my $man_file = "$man_dir/$name.$section";
-    system( qw( pandoc -s -t man ), $tempfile, '-o', $man_file );
 
-    _pandoc_postprocess($man_file);
+    if ( $translator eq 'pandoc' ) {
+        system( qw( pandoc -s -f markdown+mmd_title_block -t man ), $tempfile, '-o', $man_file );
+        _pandoc_postprocess($man_file);
+    } elsif ( $translator eq 'lowdown' ) {
+        system( qw( lowdown -s -Tman ), $tempfile, '-o', $man_file );
+    }
 }
 
 sub _make_lib_man_links {
