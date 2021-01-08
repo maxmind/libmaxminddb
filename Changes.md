@@ -1,3 +1,10 @@
+## 1.5.1
+
+* The formatting of the manpages has been improved and the script that
+  generates them now supports `lowdown` in addition to `pandoc`. Pull request
+  by Faidon Liambotis. GitHub #248.
+
+
 ## 1.5.0 - 2021-01-05
 
 * A CMake build script has been added for Windows builds. The Visual
