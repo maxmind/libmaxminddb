@@ -58,7 +58,7 @@ EOF
     my $man_file = "$man_dir/$name.$section";
 
     if ( $translator eq 'pandoc' ) {
-        system( qw( pandoc -s -f markdown+mmd_title_block-smart -t man ), $tempfile, '-o', $man_file );
+        system( qw( pandoc -s -f markdown_mmd+backtick_code_blocks -t man ), $tempfile, '-o', $man_file );
         _pandoc_postprocess($man_file);
     } elsif ( $translator eq 'lowdown' ) {
         system( qw( lowdown --out-no-smarty -s -Tman ), $tempfile, '-o', $man_file );
