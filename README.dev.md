@@ -27,7 +27,7 @@ configurations different than Greg's machine.
 Check whether any new Ubuntu versions need to be listed in this script
 before running it.
 
-You should run it from `master`.
+You should run it from `main`.
 
 ## Homebrew
 
