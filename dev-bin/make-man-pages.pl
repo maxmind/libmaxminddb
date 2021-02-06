@@ -16,16 +16,16 @@ sub main {
 
     my @translators = qw ( pandoc lowdown );
     my $translator;
-    foreach my $p ( @translators ) {
-        if (defined which($p)) {
+    foreach my $p (@translators) {
+        if ( defined which($p) ) {
             $translator = $p;
             last;
         }
     }
     unless ( defined $translator ) {
-        die
-        "\n  You must install one of " . join(', ', @translators) .
-        " in order to generate the man pages.\n\n";
+        die "\n  You must install one of "
+            . join( ', ', @translators )
+            . " in order to generate the man pages.\n\n";
     }
 
     _make_man( $translator, $target, 'libmaxminddb', 3 );
@@ -40,8 +40,10 @@ sub _make_man {
     my $name       = shift;
     my $section    = shift;
 
+    my $input   = "$Bin/../doc/$name.md";
     my $man_dir = "$target/man/man$section";
     mkpath($man_dir);
+    my $output = "$man_dir/$name.$section";
 
     my $tempdir = tempdir( CLEANUP => 1 );
 
@@ -55,13 +57,26 @@ EOF
     my $tempfile = "$tempdir/$name.$section.md";
     write_file( $tempfile, $markdown );
 
-    my $man_file = "$man_dir/$name.$section";
-
     if ( $translator eq 'pandoc' ) {
-        system( qw( pandoc -s -f markdown_mmd+backtick_code_blocks -t man ), $tempfile, '-o', $man_file );
-        _pandoc_postprocess($man_file);
-    } elsif ( $translator eq 'lowdown' ) {
-        system( qw( lowdown --out-no-smarty -s -Tman ), $tempfile, '-o', $man_file );
+        system(
+            'pandoc',
+            '-s',
+            '-f', 'markdown_mmd+backtick_code_blocks',
+            '-t', 'man',
+            $tempfile,
+            '-o', $output,
+        );
+        _pandoc_postprocess($output);
+    }
+    elsif ( $translator eq 'lowdown' ) {
+        system(
+            'lowdown',
+            '-s',
+            '--out-no-smarty',
+            '-Tman',
+            $tempfile,
+            '-o', $output,
+        );
     }
 }
 
