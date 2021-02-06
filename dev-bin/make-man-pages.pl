@@ -7,8 +7,7 @@ use autodie qw( :all );
 use FindBin qw( $Bin );
 
 use File::Path qw( mkpath );
-use File::Slurp qw( edit_file read_file write_file );
-use File::Temp qw( tempdir );
+use File::Slurp qw( edit_file read_file );
 use File::Which qw( which );
 
 sub main {
@@ -45,25 +44,15 @@ sub _make_man {
     mkpath($man_dir);
     my $output = "$man_dir/$name.$section";
 
-    my $tempdir = tempdir( CLEANUP => 1 );
-
-    my $markdown = <<"EOF";
-title: $name
-section: $section
-
-EOF
-    $markdown .= read_file("$Bin/../doc/$name.md");
-
-    my $tempfile = "$tempdir/$name.$section.md";
-    write_file( $tempfile, $markdown );
-
     if ( $translator eq 'pandoc' ) {
         system(
             'pandoc',
             '-s',
             '-f', 'markdown_mmd+backtick_code_blocks',
             '-t', 'man',
-            $tempfile,
+            '-M', "title:$name",
+            '-M', "section:$section",
+            $input,
             '-o', $output,
         );
         _pandoc_postprocess($output);
@@ -74,7 +63,9 @@ EOF
             '-s',
             '--out-no-smarty',
             '-Tman',
-            $tempfile,
+            '-M', "title:$name",
+            '-M', "section:$section",
+            $input,
             '-o', $output,
         );
     }
