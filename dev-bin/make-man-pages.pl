@@ -13,7 +13,7 @@ use File::Which qw( which );
 sub main {
     my $target = shift || "$Bin/..";
 
-    my @translators = qw ( pandoc lowdown );
+    my @translators = qw ( lowdown pandoc );
     my $translator;
     foreach my $p (@translators) {
         if ( defined which($p) ) {
