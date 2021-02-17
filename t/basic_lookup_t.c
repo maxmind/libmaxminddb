@@ -38,6 +38,9 @@ void test_one_result(MMDB_s *mmdb,
         // something like "::1.2.3.4", not just "1.2.3.4".
         int maxlen = strlen(expect) + 3;
         real_expect = malloc(maxlen);
+        if (!real_expect) {
+            BAIL_OUT("could not allocate memory");
+        }
         snprintf(real_expect, maxlen, "::%s", expect);
     }
 

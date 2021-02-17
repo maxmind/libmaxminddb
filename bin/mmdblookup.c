@@ -296,6 +296,10 @@ static const char **get_options(int argc,
 
     const char **lookup_path =
         calloc((argc - optind) + 1, sizeof(const char *));
+    if (!lookup_path) {
+        fprintf(stderr, "calloc(): %s\n", strerror(errno));
+        exit(1);
+    }
     int i;
     for (i = 0; i < argc - optind; i++) {
         lookup_path[i] = argv[i + optind];

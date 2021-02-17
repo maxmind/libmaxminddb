@@ -1,5 +1,9 @@
 ## 1.5.1
 
+* With `libmaxminddb` on Windows and `mmdblookup` generally, there were
+  instances where the return value of `calloc` was not checked, which could
+  lead to issues in low memory situations or when resource limits had been
+  set. Reported by cve-reporting. GitHub #252.
 * The formatting of the manpages has been improved and the script that
   generates them now supports `lowdown` in addition to `pandoc`. Pull request
   by Faidon Liambotis. GitHub #248.
