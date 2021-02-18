@@ -66,6 +66,9 @@ void *run_one_thread(void *arg) {
     const char *ip = thread_arg->ip_to_lookup;
 
     test_result_s *result = malloc(sizeof(test_result_s));
+    if (!result) {
+        BAIL_OUT("could not allocate memory");
+    }
     test_one_ip(mmdb, ip, result);
 
     pthread_exit((void *)result);

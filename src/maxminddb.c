@@ -333,6 +333,9 @@ cleanup:
 static LPWSTR utf8_to_utf16(const char *utf8_str) {
     int wide_chars = MultiByteToWideChar(CP_UTF8, 0, utf8_str, -1, NULL, 0);
     wchar_t *utf16_str = (wchar_t *)calloc(wide_chars, sizeof(wchar_t));
+    if (!utf16_str) {
+        return NULL;
+    }
 
     if (MultiByteToWideChar(CP_UTF8, 0, utf8_str, -1, utf16_str, wide_chars) <
         1) {
