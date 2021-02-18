@@ -53,3 +53,7 @@ dch -v "$VERSION-0+maxmind1" -D "${DISTS[0]}" -u low "New upstream release."
 git add debian/changelog
 git commit -m "Update debian/changelog for $VERSION"
 git push
+
+popd
+
+git pull
