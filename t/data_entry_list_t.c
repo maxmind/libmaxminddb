@@ -1,57 +1,68 @@
 #include "maxminddb_test_helper.h"
 
-MMDB_entry_data_list_s *test_array_value(MMDB_entry_data_list_s
-                                         *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_array_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *array = entry_data_list = entry_data_list->next;
-    cmp_ok(array->entry_data.type, "==", MMDB_DATA_TYPE_ARRAY,
+    cmp_ok(array->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_ARRAY,
            "'array' key's value is an array");
-    cmp_ok(array->entry_data.data_size, "==", 3,
+    cmp_ok(array->entry_data.data_size,
+           "==",
+           3,
            "'array' key's value has 3 elements");
 
     MMDB_entry_data_list_s *idx0 = entry_data_list = entry_data_list->next;
-    cmp_ok(idx0->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+    cmp_ok(idx0->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT32,
            "first array entry is a UINT32");
     cmp_ok(idx0->entry_data.uint32, "==", 1, "first array entry value is 1");
 
     MMDB_entry_data_list_s *idx1 = entry_data_list = entry_data_list->next;
-    cmp_ok(idx1->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+    cmp_ok(idx1->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT32,
            "second array entry is a UINT32");
     cmp_ok(idx1->entry_data.uint32, "==", 2, "second array entry value is 2");
 
     MMDB_entry_data_list_s *idx2 = entry_data_list = entry_data_list->next;
-    cmp_ok(idx2->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+    cmp_ok(idx2->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT32,
            "third array entry is a UINT32");
     cmp_ok(idx2->entry_data.uint32, "==", 3, "third array entry value is 3");
 
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_boolean_value(MMDB_entry_data_list_s
-                                           *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_boolean_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_BOOLEAN,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_BOOLEAN,
            "'boolean' key's value is a boolean");
     ok(value->entry_data.boolean, "'boolean' key's value is true");
 
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_bytes_value(MMDB_entry_data_list_s
-                                         *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_bytes_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_BYTES,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_BYTES,
            "'bytes' key's value is bytes");
     uint8_t *bytes = malloc(value->entry_data.data_size);
     if (NULL == bytes) {
         BAIL_OUT("malloc failed");
     }
     memcpy(bytes, value->entry_data.bytes, value->entry_data.data_size);
-    uint8_t expect[] = { 0x00, 0x00, 0x00, 0x2a };
+    uint8_t expect[] = {0x00, 0x00, 0x00, 0x2a};
 
     ok(memcmp(bytes, expect, 4) == 0, "got expected value for bytes key");
 
@@ -60,12 +71,13 @@ MMDB_entry_data_list_s *test_bytes_value(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_double_value(MMDB_entry_data_list_s
-                                          *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_double_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_DOUBLE,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_DOUBLE,
            "'double' key's value is a double");
 
     compare_double(value->entry_data.double_value, 42.123456);
@@ -73,12 +85,13 @@ MMDB_entry_data_list_s *test_double_value(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_float_value(MMDB_entry_data_list_s
-                                         *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_float_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_FLOAT,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_FLOAT,
            "'float' key's value is a float");
 
     compare_float(value->entry_data.float_value, 1.1F);
@@ -86,64 +99,79 @@ MMDB_entry_data_list_s *test_float_value(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_int32_value(MMDB_entry_data_list_s
-                                         *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_int32_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_INT32,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_INT32,
            "'int32' key's value is an int32");
 
     int32_t expect = 1 << 28;
     expect *= -1;
-    cmp_ok(value->entry_data.int32, "==", expect,
+    cmp_ok(value->entry_data.int32,
+           "==",
+           expect,
            "got expected value for int32 key");
 
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_arrayX_value(MMDB_entry_data_list_s
-                                          *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_arrayX_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *arrayX = entry_data_list = entry_data_list->next;
-    cmp_ok(arrayX->entry_data.type, "==", MMDB_DATA_TYPE_ARRAY,
+    cmp_ok(arrayX->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_ARRAY,
            "'map{mapX}{arrayX}' key's value is an array");
-    cmp_ok(arrayX->entry_data.data_size, "==", 3,
+    cmp_ok(arrayX->entry_data.data_size,
+           "==",
+           3,
            "'map{mapX}{arrayX}' key's value has 3 elements");
 
     MMDB_entry_data_list_s *idx0 = entry_data_list = entry_data_list->next;
-    cmp_ok(idx0->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+    cmp_ok(idx0->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT32,
            "first array entry is a UINT32");
     cmp_ok(idx0->entry_data.uint32, "==", 7, "first array entry value is 7");
 
     MMDB_entry_data_list_s *idx1 = entry_data_list = entry_data_list->next;
-    cmp_ok(idx1->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+    cmp_ok(idx1->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT32,
            "second array entry is a UINT32");
     cmp_ok(idx1->entry_data.uint32, "==", 8, "second array entry value is 8");
 
     MMDB_entry_data_list_s *idx2 = entry_data_list = entry_data_list->next;
-    cmp_ok(idx2->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+    cmp_ok(idx2->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT32,
            "third array entry is a UINT32");
     cmp_ok(idx2->entry_data.uint32, "==", 9, "third array entry value is 9");
 
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_mapX_key_value_pair(MMDB_entry_data_list_s
-                                                 *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_mapX_key_value_pair(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *mapX_key = entry_data_list = entry_data_list->next;
-    cmp_ok(mapX_key->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
+    cmp_ok(mapX_key->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UTF8_STRING,
            "found a map key in 'map{mapX}'");
     const char *mapX_key_name = dup_entry_string_or_bail(mapX_key->entry_data);
 
     if (strcmp(mapX_key_name, "utf8_stringX") == 0) {
-        MMDB_entry_data_list_s *mapX_value =
-            entry_data_list = entry_data_list->next;
-        cmp_ok(mapX_value->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
+        MMDB_entry_data_list_s *mapX_value = entry_data_list =
+            entry_data_list->next;
+        cmp_ok(mapX_value->entry_data.type,
+               "==",
+               MMDB_DATA_TYPE_UTF8_STRING,
                "'map{mapX}{utf8_stringX}' type is utf8_string");
-        const char *utf8_stringX_value = dup_entry_string_or_bail(
-            mapX_value->entry_data);
+        const char *utf8_stringX_value =
+            dup_entry_string_or_bail(mapX_value->entry_data);
         ok(strcmp(utf8_stringX_value, "hello") == 0,
            "map{mapX}{utf8_stringX} value is 'hello'");
         free((void *)utf8_stringX_value);
@@ -158,16 +186,22 @@ MMDB_entry_data_list_s *test_mapX_key_value_pair(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_map_value(MMDB_entry_data_list_s *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_map_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *map = entry_data_list = entry_data_list->next;
-    cmp_ok(map->entry_data.type, "==", MMDB_DATA_TYPE_MAP,
+    cmp_ok(map->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_MAP,
            "'map' key's value is a map");
-    cmp_ok(map->entry_data.data_size, "==", 1,
+    cmp_ok(map->entry_data.data_size,
+           "==",
+           1,
            "'map' key's value has 1 key/value pair");
 
     MMDB_entry_data_list_s *map_key_1 = entry_data_list = entry_data_list->next;
-    cmp_ok(map_key_1->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
+    cmp_ok(map_key_1->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UTF8_STRING,
            "found a map key in 'map'");
     const char *map_key_1_name =
         dup_entry_string_or_bail(map_key_1->entry_data);
@@ -175,9 +209,13 @@ MMDB_entry_data_list_s *test_map_value(MMDB_entry_data_list_s *entry_data_list)
     free((void *)map_key_1_name);
 
     MMDB_entry_data_list_s *mapX = entry_data_list = entry_data_list->next;
-    cmp_ok(mapX->entry_data.type, "==", MMDB_DATA_TYPE_MAP,
+    cmp_ok(mapX->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_MAP,
            "'map{mapX}' key's value is a map");
-    cmp_ok(mapX->entry_data.data_size, "==", 2,
+    cmp_ok(mapX->entry_data.data_size,
+           "==",
+           2,
            "'map' key's value has 2 key/value pairs");
 
     entry_data_list = test_mapX_key_value_pair(entry_data_list);
@@ -186,17 +224,32 @@ MMDB_entry_data_list_s *test_map_value(MMDB_entry_data_list_s *entry_data_list)
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_uint128_value(MMDB_entry_data_list_s
-                                           *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_uint128_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UINT128,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT128,
            "'uint128' key's value is an uint128");
 
 #if MMDB_UINT128_IS_BYTE_ARRAY
-    uint8_t expect[16] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    uint8_t expect[16] = {0x01,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00,
+                          0x00};
     ok(memcmp(value->entry_data.uint128, expect, 16) == 0,
        "uint128 field is 2**120");
 #else
@@ -208,12 +261,13 @@ MMDB_entry_data_list_s *test_uint128_value(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_uint16_value(MMDB_entry_data_list_s
-                                          *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_uint16_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UINT16,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT16,
            "'uint16' key's value is an uint16");
     uint16_t expect = 100;
     ok(value->entry_data.uint16 == expect, "uint16 field is 100");
@@ -221,12 +275,13 @@ MMDB_entry_data_list_s *test_uint16_value(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_uint32_value(MMDB_entry_data_list_s
-                                          *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_uint32_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UINT32,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT32,
            "'uint32' key's value is an uint32");
     uint32_t expect = 1 << 28;
     cmp_ok(value->entry_data.uint32, "==", expect, "uint32 field is 100");
@@ -234,12 +289,13 @@ MMDB_entry_data_list_s *test_uint32_value(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_uint64_value(MMDB_entry_data_list_s
-                                          *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_uint64_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UINT64,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UINT64,
            "'uint64' key's value is an uint64");
     uint64_t expect = 1;
     expect <<= 60;
@@ -248,18 +304,35 @@ MMDB_entry_data_list_s *test_uint64_value(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-MMDB_entry_data_list_s *test_utf8_string_value(MMDB_entry_data_list_s
-                                               *entry_data_list)
-{
+MMDB_entry_data_list_s *
+test_utf8_string_value(MMDB_entry_data_list_s *entry_data_list) {
     MMDB_entry_data_list_s *value = entry_data_list = entry_data_list->next;
 
-    cmp_ok(value->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
+    cmp_ok(value->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_UTF8_STRING,
            "'utf8_string' key's value is a string");
     const char *utf8_string = dup_entry_string_or_bail(value->entry_data);
     // This is hex for "unicode! ☯ - ♫" as bytes
-    char expect[19] =
-    { 0x75, 0x6e, 0x69, 0x63, 0x6f, 0x64, 0x65, 0x21, 0x20, 0xe2, 0x98,
-      0xaf, 0x20, 0x2d, 0x20, 0xe2, 0x99, 0xab, 0x00 };
+    char expect[19] = {0x75,
+                       0x6e,
+                       0x69,
+                       0x63,
+                       0x6f,
+                       0x64,
+                       0x65,
+                       0x21,
+                       0x20,
+                       0xe2,
+                       0x98,
+                       0xaf,
+                       0x20,
+                       0x2d,
+                       0x20,
+                       0xe2,
+                       0x99,
+                       0xab,
+                       0x00};
 
     is(utf8_string, expect, "got expected value for utf8_string key");
 
@@ -268,8 +341,7 @@ MMDB_entry_data_list_s *test_utf8_string_value(MMDB_entry_data_list_s
     return entry_data_list;
 }
 
-void run_tests(int mode, const char *description)
-{
+void run_tests(int mode, const char *description) {
     const char *filename = "MaxMind-DB-test-decoder.mmdb";
     const char *path = test_database_path(filename);
     MMDB_s *mmdb = open_ok(path, mode, description);
@@ -286,15 +358,19 @@ void run_tests(int mode, const char *description)
         BAIL_OUT("MMDB_get_entry_data_list failed with %s",
                  MMDB_strerror(status));
     } else {
-        cmp_ok(status, "==", MMDB_SUCCESS,
-               "MMDB_get_entry_data_list succeeded");
+        cmp_ok(
+            status, "==", MMDB_SUCCESS, "MMDB_get_entry_data_list succeeded");
     }
 
     first = entry_data_list;
 
-    cmp_ok(entry_data_list->entry_data.type, "==", MMDB_DATA_TYPE_MAP,
+    cmp_ok(entry_data_list->entry_data.type,
+           "==",
+           MMDB_DATA_TYPE_MAP,
            "first entry in entry data list is a map");
-    cmp_ok(entry_data_list->entry_data.data_size, "==", 12,
+    cmp_ok(entry_data_list->entry_data.data_size,
+           "==",
+           12,
            "first map in entry data list has 12 k/v pairs");
 
     while (1) {
@@ -304,7 +380,9 @@ void run_tests(int mode, const char *description)
             break;
         }
 
-        cmp_ok(key->entry_data.type, "==", MMDB_DATA_TYPE_UTF8_STRING,
+        cmp_ok(key->entry_data.type,
+               "==",
+               MMDB_DATA_TYPE_UTF8_STRING,
                "found a map key");
 
         const char *key_name = dup_entry_string_or_bail(key->entry_data);
@@ -345,8 +423,7 @@ void run_tests(int mode, const char *description)
     free(mmdb);
 }
 
-int main(void)
-{
+int main(void) {
     plan(NO_PLAN);
     for_all_modes(&run_tests);
     done_testing();

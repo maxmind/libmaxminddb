@@ -6,12 +6,12 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "libtap/tap.h"
+#include "maxminddb-compat-util.h"
+#include "maxminddb.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "maxminddb.h"
-#include "maxminddb-compat-util.h"
-#include "libtap/tap.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -33,9 +33,9 @@
 #define MMDB_TEST_HELPER_C (1)
 
 #ifdef __GNUC__
-#  define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
+#define UNUSED(x) UNUSED_##x __attribute__((__unused__))
 #else
-#  define UNUSED
+#define UNUSED
 #endif
 
 #define MAX_DESCRIPTION_LENGTH 500
@@ -48,18 +48,24 @@ extern void for_all_modes(void (*tests)(int mode, const char *description));
 extern const char *test_database_path(const char *filename);
 extern const char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data);
 extern MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc);
-extern MMDB_lookup_result_s lookup_string_ok(MMDB_s *mmdb, const char *ip,
+extern MMDB_lookup_result_s lookup_string_ok(MMDB_s *mmdb,
+                                             const char *ip,
                                              const char *file,
                                              const char *mode_desc);
-extern MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb, const char *ip,
+extern MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb,
+                                               const char *ip,
                                                const char *file,
                                                const char *mode_desc);
-extern void test_lookup_errors(int gai_error, int mmdb_error,
-                               const char *function, const char *ip,
-                               const char *file, const char *mode_desc);
+extern void test_lookup_errors(int gai_error,
+                               int mmdb_error,
+                               const char *function,
+                               const char *ip,
+                               const char *file,
+                               const char *mode_desc);
 extern MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result,
                                  uint32_t expect_type,
-                                 const char *description, ...);
+                                 const char *description,
+                                 ...);
 extern void compare_double(double got, double expect);
 extern void compare_float(float got, float expect);
 
