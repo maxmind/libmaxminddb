@@ -1,4 +1,4 @@
-## 1.5.1
+## 1.5.1 - 2021-02-18
 
 * With `libmaxminddb` on Windows and `mmdblookup` generally, there were
   instances where the return value of `calloc` was not checked, which could
