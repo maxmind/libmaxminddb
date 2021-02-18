@@ -15,6 +15,8 @@ say \$1;
 EOF
 )
 
+git push
+
 RESULTS=/tmp/build-libmaxminddb-results/
 SRCDIR="$RESULTS/libmaxminddb"
 
