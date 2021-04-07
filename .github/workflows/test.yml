@@ -41,6 +41,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - run: cmake -DBUILD_TESTING=ON -V .
+      - run: cmake -DBUILD_TESTING=ON .
       - run: cmake --build .
       - run: ctest -V .
