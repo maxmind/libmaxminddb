@@ -4,6 +4,8 @@ project(maxminddb
   VERSION 1.5.2
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_EXTENSIONS OFF)
 
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
 option(BUILD_TESTING "Build test programs" ON)
