@@ -56,9 +56,6 @@ if(WIN32)
   target_link_libraries(maxminddb ws2_32)
 endif()
 
-set(CMAKE_SHARED_LIBRARY_PREFIX lib)
-set(CMAKE_STATIC_LIBRARY_PREFIX lib)
-
 set(MAXMINDB_INCLUDE_DIR
   .
   include
