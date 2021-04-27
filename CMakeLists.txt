@@ -56,13 +56,9 @@ if(WIN32)
   target_link_libraries(maxminddb ws2_32)
 endif()
 
-set(MAXMINDB_INCLUDE_DIR
-  .
-  include
-)
-
 target_include_directories(maxminddb PUBLIC
-  $<BUILD_INTERFACE:${MAXMINDB_INCLUDE_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 
