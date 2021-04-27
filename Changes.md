@@ -1,3 +1,15 @@
+## 1.5.3
+
+* This release includes several improvements to the CMake build. In
+  particular:
+  * C99 support is now properly enabled, fixing builds on older `gcc`
+    versions. Pull request by Jan Včelák. GitHub #257.
+  * `CMAKE_SHARED_LIBRARY_PREFIX` and `CMAKE_STATIC_LIBRARY_PREFIX` are
+    no longer explicitly set and now use the default values for the platform.
+    Pull request by Jan Včelák. GitHub #258.
+  * `target_include_directories` now works as expected. Pull request by Jan
+    Včelák. GitHub #259.
+
 ## 1.5.2 - 2021-02-18
 
 * With `libmaxminddb` on Windows and `mmdblookup` generally, there were
