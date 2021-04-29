@@ -1,4 +1,4 @@
-## 1.5.3
+## 1.6.0 - 2021-04-29
 
 * This release includes several improvements to the CMake build. In
   particular:
@@ -9,6 +9,11 @@
     Pull request by Jan Včelák. GitHub #258.
   * `target_include_directories` now works as expected. Pull request by Jan
     Včelák. GitHub #259.
+  * DLLs are now installed on Windows when `libmaxminddb` is built as a
+    shared library. Pull request by Jan Včelák. GitHub #261.
+  * When built as a dynamic library on Windows, all symbols are now exported.
+    Pull request by Jan Včelák. GitHub #262.
+
 
 ## 1.5.2 - 2021-02-18
 
@@ -16,6 +21,7 @@
   instances where the return value of `calloc` was not checked, which could
   lead to issues in low memory situations or when resource limits had been
   set. Reported by cve-reporting. GitHub #252.
+
 
 ## 1.5.1 - 2021-02-18
 
