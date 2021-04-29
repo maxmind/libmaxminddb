@@ -1,3 +1,4 @@
+*.a
 *.la
 *.lo
 *.o
@@ -25,13 +26,11 @@
 /man
 /missing
 /src/libmaxminddb.pc
-/src/libmaxminddb.a
 /src/test-data-pool
 /t/*.log
 /t/*.trs
 /t/*_t
 /t/*-t
-/t/libtap.a
 /test-driver
 \#*\#
 aclocal.m4
