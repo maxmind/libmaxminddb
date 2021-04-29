@@ -4,7 +4,7 @@ set -e
 set -x
 set -u
 
-DISTS=( groovy focal bionic xenial trusty )
+DISTS=( hirsute focal bionic xenial trusty )
 
 VERSION=$(perl -MFile::Slurp::Tiny=read_file -MDateTime <<EOF
 use v5.16;
