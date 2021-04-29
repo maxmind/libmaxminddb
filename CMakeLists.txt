@@ -4,6 +4,8 @@ project(maxminddb
   VERSION 1.5.2
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_EXTENSIONS OFF)
 
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
 option(BUILD_TESTING "Build test programs" ON)
@@ -52,18 +54,14 @@ endif()
 
 if(WIN32)
   target_link_libraries(maxminddb ws2_32)
+  if(BUILD_SHARED_LIBS)
+    set_target_properties(maxminddb PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  endif()
 endif()
 
-set(CMAKE_SHARED_LIBRARY_PREFIX lib)
-set(CMAKE_STATIC_LIBRARY_PREFIX lib)
-
-set(MAXMINDB_INCLUDE_DIR
-  .
-  include
-)
-
 target_include_directories(maxminddb PUBLIC
-  $<BUILD_INTERFACE:${MAXMINDB_INCLUDE_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 
@@ -74,10 +72,7 @@ set(MAXMINDB_HEADERS
 set_target_properties(maxminddb PROPERTIES PUBLIC_HEADER "${MAXMINDB_HEADERS}")
 
 install(TARGETS maxminddb
-        EXPORT maxminddb
-        ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/
-)
+	EXPORT maxminddb)
 
 # This is required to work with FetchContent
 install(EXPORT maxminddb
