@@ -1,12 +1,12 @@
 cmake_minimum_required (VERSION 3.9)
 
 if (WIN32 AND MSVC_STATIC_RUNTIME)
-	# On MSVC, when MSVC_STATIC_RUNTIME is ON, MT (Release) and MTd (Debug) run-time libraries will be used instead of MD/MDd.
-	# The default is OFF so MD/MDd are used when nothing related is passed.
-	set(CMAKE_USER_MAKE_RULES_OVERRIDE
-		${CMAKE_CURRENT_SOURCE_DIR}/c_flag_overrides.cmake)
-	set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
-		${CMAKE_CURRENT_SOURCE_DIR}/cxx_flag_overrides.cmake)
+  # On MSVC, when MSVC_STATIC_RUNTIME is ON, MT (Release) and MTd (Debug) run-time libraries will be used instead of MD/MDd.
+  # The default is OFF so MD/MDd are used when nothing related is passed.
+  set(CMAKE_USER_MAKE_RULES_OVERRIDE
+      ${CMAKE_CURRENT_SOURCE_DIR}/c_flag_overrides.cmake)
+  set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
+      ${CMAKE_CURRENT_SOURCE_DIR}/cxx_flag_overrides.cmake)
 endif()
 
 project(maxminddb
@@ -17,7 +17,9 @@ set(MAXMINDDB_SOVERSION 0.0.7)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_EXTENSIONS OFF)
 
-option(MSVC_STATIC_RUNTIME "When ON the library will be built by using MT/MTd run-time libraries" OFF)
+if (WIN32)
+  option(MSVC_STATIC_RUNTIME "When ON the library will be built by using MT/MTd run-time libraries" OFF)
+endif()
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
 option(BUILD_TESTING "Build test programs" ON)
 
