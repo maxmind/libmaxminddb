@@ -65,6 +65,8 @@ if(WIN32)
     # On MSVC, when MSVC_STATIC_RUNTIME is ON, MT (Release) and MTd (Debug)
     # run-time libraries will be used instead of MD/MDd. The default is OFF so
     # MD/MDd are used when nothing related is passed.
+    #
+    # Adapted from https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#make-override-files
     set(CMAKE_USER_MAKE_RULES_OVERRIDE
         ${CMAKE_CURRENT_SOURCE_DIR}/c_flag_overrides.cmake)
     set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
