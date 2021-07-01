@@ -80,10 +80,10 @@ work.
     $ ctest -V .
     $ cmake --build . --target install
 
-On Windows, when using ``MSVC`` if the multithreaded (MT/MTd) run-time library is desired
-instead of the shared default (MD/MDd). Try the following during build scripts generation:
+When building with Visual Studio, you may build a multithreaded (MT/MTd)
+runtime library, using the `MSVC_STATIC_RUNTIME` setting:
 
-	$ cmake -DMSVC_STATIC_RUNTIME=ON -DBUILD_SHARED_LIBS=OFF ..
+    $ cmake -DMSVC_STATIC_RUNTIME=ON -DBUILD_SHARED_LIBS=OFF ..
 
 ## On Ubuntu via PPA
 
