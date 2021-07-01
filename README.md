@@ -68,7 +68,8 @@ You can clone this repository and build it by running:
     $ git clone --recursive https://github.com/maxmind/libmaxminddb
 
 After cloning, run `./bootstrap` from the `libmaxminddb` directory and then
-follow the instructions for installing from a named release tarball as described above.
+follow the instructions for installing from a named release tarball as
+described above.
 
 ## Using CMake
 
