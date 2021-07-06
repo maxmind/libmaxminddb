@@ -1,14 +1,5 @@
 cmake_minimum_required (VERSION 3.9)
 
-if (WIN32 AND MSVC_STATIC_RUNTIME)
-  # On MSVC, when MSVC_STATIC_RUNTIME is ON, MT (Release) and MTd (Debug) run-time libraries will be used instead of MD/MDd.
-  # The default is OFF so MD/MDd are used when nothing related is passed.
-  set(CMAKE_USER_MAKE_RULES_OVERRIDE
-      ${CMAKE_CURRENT_SOURCE_DIR}/c_flag_overrides.cmake)
-  set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
-      ${CMAKE_CURRENT_SOURCE_DIR}/cxx_flag_overrides.cmake)
-endif()
-
 project(maxminddb
   LANGUAGES C
   VERSION 1.6.0
@@ -69,6 +60,17 @@ if(WIN32)
   target_link_libraries(maxminddb ws2_32)
   if(BUILD_SHARED_LIBS)
     set_target_properties(maxminddb PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  endif()
+  if(MSVC_STATIC_RUNTIME)
+    # On MSVC, when MSVC_STATIC_RUNTIME is ON, MT (Release) and MTd (Debug)
+    # run-time libraries will be used instead of MD/MDd. The default is OFF so
+    # MD/MDd are used when nothing related is passed.
+    #
+    # Adapted from https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#make-override-files
+    set(CMAKE_USER_MAKE_RULES_OVERRIDE
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_flag_overrides.cmake)
+    set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
+        ${CMAKE_CURRENT_SOURCE_DIR}/cxx_flag_overrides.cmake)
   endif()
 endif()
 
