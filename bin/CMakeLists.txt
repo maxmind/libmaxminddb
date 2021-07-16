@@ -8,6 +8,6 @@ if(NOT WIN32)
 
   install(
     TARGETS mmdblookup
-    RUNTIME DESTINATION bin
+    DESTINATION bin
   )
 endif()
