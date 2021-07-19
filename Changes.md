@@ -3,6 +3,7 @@
 * When building with Visual Studio, you may now build a static runtime with
   CMake by setting `MSVC_STATIC_RUNTIME` to `ON`. Pull request by Rafael
   Santiago. GitHub #269.
+* The CMake build now works on iOS. Pull request by SpaceIm. GitHub #271.
 
 ## 1.6.0 - 2021-04-29
 
