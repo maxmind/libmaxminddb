@@ -409,13 +409,25 @@ static int map_file(MMDB_s *const mmdb) {
     ssize_t size;
     int status = MMDB_SUCCESS;
 
-    int flags = O_RDONLY;
+    int o_flags = O_RDONLY;
 #ifdef O_CLOEXEC
-    flags |= O_CLOEXEC;
+    o_flags |= O_CLOEXEC;
 #endif
-    int fd = open(mmdb->filename, flags);
+    int fd = open(mmdb->filename, o_flags);
+    if (fd < 0) {
+        status = MMDB_FILE_OPEN_ERROR;
+        goto cleanup;
+    }
+
+#ifdef FD_CLOEXEC
+    int fd_flags = fcntl(fd, F_GETFD);
+    if (fd_flags >= 0) {
+        fcntl(fd, F_SETFD, fd_flags | FD_CLOEXEC);
+    }
+#endif
+
     struct stat s;
-    if (fd < 0 || fstat(fd, &s)) {
+    if (fstat(fd, &s)) {
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
     }

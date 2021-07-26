@@ -1,5 +1,7 @@
-## 1.6.1
+## 1.7.0
 
+* `FD_CLOEXEC` is now set on platforms that do not support `O_CLOEXEC`.
+  Reported by rittneje. GitHub #273.
 * When building with Visual Studio, you may now build a static runtime with
   CMake by setting `MSVC_STATIC_RUNTIME` to `ON`. Pull request by Rafael
   Santiago. GitHub #269.
