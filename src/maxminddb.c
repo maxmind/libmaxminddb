@@ -419,7 +419,7 @@ static int map_file(MMDB_s *const mmdb) {
         goto cleanup;
     }
 
-#ifdef FD_CLOEXEC
+#if defined(FD_CLOEXEC) && !defined(O_CLOEXEC)
     int fd_flags = fcntl(fd, F_GETFD);
     if (fd_flags >= 0) {
         fcntl(fd, F_SETFD, fd_flags | FD_CLOEXEC);
