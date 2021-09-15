@@ -1144,11 +1144,10 @@ int MMDB_vget_value(MMDB_entry_s *const start,
 
 static int path_length(va_list va_path) {
     int i = 0;
-    const char *ignore;
     va_list path_copy;
     va_copy(path_copy, va_path);
 
-    while (NULL != (ignore = va_arg(path_copy, char *))) {
+    while (NULL != va_arg(path_copy, char *)) {
         i++;
     }
 
