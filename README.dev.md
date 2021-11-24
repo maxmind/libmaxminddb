@@ -52,8 +52,7 @@ some reason.
   autoconf automake libtool git-buildpackage libfile-slurp-perl pandoc
   dirmngr libfile-slurp-tiny-perl libdatetime-perl debhelper dh-autoreconf
   libipc-run3-perl libtest-output-perl devscripts
-* Install [hub](https://github.com/github/hub/releases). (Using `./install`
-  from the tarball is fine)
+* Install [gh](https://github.com/cli/cli/releases).
 * GitHub ssh key (e.g. in `~/.ssh/id_rsa`)
 * Git config (e.g. `~/.gitconfig`)
 * Import your GPG secret key (or create one if you don't have a suitable
