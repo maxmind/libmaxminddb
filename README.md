@@ -6,10 +6,10 @@ designed to facilitate fast lookups of IP addresses while allowing for great
 flexibility in the type of data associated with an address.
 
 The MaxMind DB format is an open format. The spec is available at
-http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
-Commons Attribution-ShareAlike 3.0 Unported License.
+https://maxmind.github.io/MaxMind-DB/. This spec is licensed under the
+Creative Commons Attribution-ShareAlike 3.0 Unported License.
 
-See http://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
+See https://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
 
 # License
 
@@ -100,7 +100,7 @@ Then install the packages by running:
 
 ## On OS X via Homebrew
 
-If you are on OS X and you have homebrew (see http://brew.sh/) you can install
+If you are on OS X and you have homebrew (see https://brew.sh/) you can install
 libmaxminddb via brew.
 
     $ brew install libmaxminddb
@@ -132,7 +132,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
