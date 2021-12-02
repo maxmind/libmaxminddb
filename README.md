@@ -110,16 +110,6 @@ libmaxminddb via brew.
 Please report bugs by filing an issue with our GitHub issue tracker at
 https://github.com/maxmind/libmaxminddb/issues
 
-# Dev Tools
-
-We have a few development tools under the `dev-bin` directory to make
-development easier. These are written in Perl or shell. They are:
-
-* `uncrustify-all.sh` - This runs `uncrustify` on all the code. Please run
-  this before submitting patches.
-* `valgrind-all.pl` - This runs Valgrind on the tests and `mmdblookup` to
-  check for memory leaks.
-
 # Creating a Release Tarball
 
 Use `make safedist` to check the resulting tarball.
