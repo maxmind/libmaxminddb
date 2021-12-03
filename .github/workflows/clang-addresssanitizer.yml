@@ -1,0 +1,25 @@
+name: Run Clang AddressSanitizer
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '13 20 * * SUN'
+jobs:
+  addresssanitizer:
+    name: Clang AddressSanitizer
+    runs-on: ubuntu-latest
+    env:
+      CC: clang
+      CXX: clang++
+      CFLAGS: -fsanitize=address
+      CXXFLAGS: -fsanitize=address
+      LDFLAGS: -fsanitize=address
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - run: sudo apt install clang libipc-run3-perl
+      - run: ./bootstrap
+      - run: ./configure
+      - run: make
+      - run: make check
