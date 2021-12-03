@@ -49,8 +49,17 @@ my $include_dir = abs_path("$Bin/../include");
 my $lib_dir = abs_path("$Bin/../src/.libs");
 
 my $cxx = $ENV{CXX} || 'c++';
+my @cxxflags = $ENV{CXXFLAGS} ? ( split ' ', $ENV{CXXFLAGS} ) : ();
 _test_cmd(
-    [ $cxx, $file, "-I$include_dir", "-L$lib_dir", "-lmaxminddb", "-o$exe" ],
+    [
+        $cxx,
+        $file,
+        @cxxflags,
+        "-I$include_dir",
+        "-L$lib_dir",
+        "-lmaxminddb",
+        "-o$exe",
+    ],
     qr/^$/,
     q{},
     0,
