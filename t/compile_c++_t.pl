@@ -28,7 +28,11 @@ int main(int argc, char *argv[])
 {
     const char *fname = "$test_db";
     MMDB_s mmdb;
-    return MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
+    if (MMDB_open(fname, MMDB_MODE_MMAP, &mmdb) != MMDB_SUCCESS) {
+        return 1;
+    }
+    MMDB_close(&mmdb);
+    return 0;
 }
 EOF
 
