@@ -6,6 +6,9 @@
   CMake by setting `MSVC_STATIC_RUNTIME` to `ON`. Pull request by Rafael
   Santiago. GitHub #269.
 * The CMake build now works on iOS. Pull request by SpaceIm. GitHub #271.
+* The CMake build now uses the correct library directory on Linux systems
+  using alternate directory structures. Pull request by Satadru Pramanik.
+  GitHub #284.
 
 ## 1.6.0 - 2021-04-29
 
