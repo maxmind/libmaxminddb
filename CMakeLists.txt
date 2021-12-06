@@ -14,6 +14,8 @@ endif()
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
 option(BUILD_TESTING "Build test programs" ON)
 
+include(GNUInstallDirs)
+
 include(CheckTypeSize)
 check_type_size("unsigned __int128" UINT128)
 check_type_size("unsigned int __attribute__((mode(TI)))" UINT128_USING_MODE)
@@ -93,7 +95,7 @@ install(TARGETS maxminddb
 install(EXPORT maxminddb
         FILE maxminddb-config.cmake
         NAMESPACE maxminddb::
-        DESTINATION lib/cmake/maxminddb)
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maxminddb)
 
 # We always want to build mmdblookup
 add_subdirectory(bin)
