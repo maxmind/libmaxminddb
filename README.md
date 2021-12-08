@@ -6,10 +6,10 @@ designed to facilitate fast lookups of IP addresses while allowing for great
 flexibility in the type of data associated with an address.
 
 The MaxMind DB format is an open format. The spec is available at
-http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
-Commons Attribution-ShareAlike 3.0 Unported License.
+https://maxmind.github.io/MaxMind-DB/. This spec is licensed under the
+Creative Commons Attribution-ShareAlike 3.0 Unported License.
 
-See http://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
+See https://dev.maxmind.com/ for more details about MaxMind's GeoIP2 products.
 
 # License
 
@@ -100,7 +100,7 @@ Then install the packages by running:
 
 ## On OS X via Homebrew
 
-If you are on OS X and you have homebrew (see http://brew.sh/) you can install
+If you are on OS X and you have homebrew (see https://brew.sh/) you can install
 libmaxminddb via brew.
 
     $ brew install libmaxminddb
@@ -109,16 +109,6 @@ libmaxminddb via brew.
 
 Please report bugs by filing an issue with our GitHub issue tracker at
 https://github.com/maxmind/libmaxminddb/issues
-
-# Dev Tools
-
-We have a few development tools under the `dev-bin` directory to make
-development easier. These are written in Perl or shell. They are:
-
-* `uncrustify-all.sh` - This runs `uncrustify` on all the code. Please run
-  this before submitting patches.
-* `valgrind-all.pl` - This runs Valgrind on the tests and `mmdblookup` to
-  check for memory leaks.
 
 # Creating a Release Tarball
 
@@ -132,7 +122,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
