@@ -152,7 +152,7 @@ static int populate_description_metadata(MMDB_s *mmdb,
                                          MMDB_entry_s *metadata_start);
 static int resolve_any_address(const char *ipstr, struct addrinfo **addresses);
 static int find_address_in_search_tree(const MMDB_s *const mmdb,
-                                       uint8_t *address,
+                                       uint8_t const *address,
                                        sa_family_t address_family,
                                        MMDB_lookup_result_s *result);
 static record_info_s record_info_for_database(const MMDB_s *const mmdb);
@@ -201,7 +201,7 @@ dump_entry_data_list(FILE *stream,
                      int indent,
                      int *status);
 static void print_indentation(FILE *stream, int i);
-static char *bytes_to_hex(uint8_t *bytes, uint32_t size);
+static char *bytes_to_hex(uint8_t const *bytes, uint32_t size);
 
 #define CHECKED_DECODE_ONE(mmdb, offset, entry_data)                           \
     do {                                                                       \
@@ -472,9 +472,9 @@ static const uint8_t *find_metadata(const uint8_t *file_content,
                            ? METADATA_BLOCK_MAX_SIZE
                            : file_size;
 
-    uint8_t *search_area = (uint8_t *)(file_content + (file_size - max_size));
-    uint8_t *start = search_area;
-    uint8_t *tmp;
+    uint8_t const *search_area = (file_content + (file_size - max_size));
+    uint8_t const *start = search_area;
+    uint8_t const *tmp;
     do {
         tmp = mmdb_memmem(search_area, max_size, METADATA_MARKER, marker_len);
 
@@ -683,7 +683,7 @@ value_for_key_as_string(MMDB_entry_s *start, char *key, char const **value) {
                    type_num_to_name(entry_data.type));
         return MMDB_INVALID_METADATA_ERROR;
     }
-    *value = mmdb_strndup((char *)entry_data.utf8_string, entry_data.data_size);
+    *value = mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
     if (NULL == *value) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
@@ -731,9 +731,8 @@ static int populate_languages_metadata(MMDB_s *mmdb,
             return MMDB_INVALID_METADATA_ERROR;
         }
 
-        mmdb->metadata.languages.names[i] =
-            mmdb_strndup((char *)member->entry_data.utf8_string,
-                         member->entry_data.data_size);
+        mmdb->metadata.languages.names[i] = mmdb_strndup(
+            member->entry_data.utf8_string, member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.languages.names[i]) {
             return MMDB_OUT_OF_MEMORY_ERROR;
@@ -815,9 +814,8 @@ static int populate_description_metadata(MMDB_s *mmdb,
             goto cleanup;
         }
 
-        mmdb->metadata.description.descriptions[i]->language =
-            mmdb_strndup((char *)member->entry_data.utf8_string,
-                         member->entry_data.data_size);
+        mmdb->metadata.description.descriptions[i]->language = mmdb_strndup(
+            member->entry_data.utf8_string, member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.description.descriptions[i]->language) {
             status = MMDB_OUT_OF_MEMORY_ERROR;
@@ -831,9 +829,8 @@ static int populate_description_metadata(MMDB_s *mmdb,
             goto cleanup;
         }
 
-        mmdb->metadata.description.descriptions[i]->description =
-            mmdb_strndup((char *)member->entry_data.utf8_string,
-                         member->entry_data.data_size);
+        mmdb->metadata.description.descriptions[i]->description = mmdb_strndup(
+            member->entry_data.utf8_string, member->entry_data.data_size);
 
         if (NULL == mmdb->metadata.description.descriptions[i]->description) {
             status = MMDB_OUT_OF_MEMORY_ERROR;
@@ -891,22 +888,24 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
                                    .netmask = 0,
                                    .entry = {.mmdb = mmdb, .offset = 0}};
 
-    uint8_t mapped_address[16], *address;
+    uint8_t mapped_address[16];
+    uint8_t const *address;
     if (mmdb->metadata.ip_version == 4) {
         if (sockaddr->sa_family == AF_INET6) {
             *mmdb_error = MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR;
             return result;
         }
-        address = (uint8_t *)&((struct sockaddr_in *)sockaddr)->sin_addr.s_addr;
+        address = (uint8_t const *)&((struct sockaddr_in const *)sockaddr)
+                      ->sin_addr.s_addr;
     } else {
         if (sockaddr->sa_family == AF_INET6) {
-            address = (uint8_t *)&((struct sockaddr_in6 *)sockaddr)
+            address = (uint8_t const *)&((struct sockaddr_in6 const *)sockaddr)
                           ->sin6_addr.s6_addr;
         } else {
             address = mapped_address;
-            memset(address, 0, 12);
-            memcpy(address + 12,
-                   &((struct sockaddr_in *)sockaddr)->sin_addr.s_addr,
+            memset(mapped_address, 0, 12);
+            memcpy(mapped_address + 12,
+                   &((struct sockaddr_in const *)sockaddr)->sin_addr.s_addr,
                    4);
         }
     }
@@ -918,7 +917,7 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
 }
 
 static int find_address_in_search_tree(const MMDB_s *const mmdb,
-                                       uint8_t *address,
+                                       uint8_t const *address,
                                        sa_family_t address_family,
                                        MMDB_lookup_result_s *result) {
     record_info_s record_info = record_info_for_database(mmdb);
@@ -1137,7 +1136,7 @@ int MMDB_vget_value(MMDB_entry_s *const start,
 
     int status = MMDB_aget_value(start, entry_data, path);
 
-    free((char **)path);
+    free(path);
 
     return status;
 }
@@ -1549,7 +1548,7 @@ static int decode_one(const MMDB_s *const mmdb,
         entry_data->double_value = get_ieee754_double(&mem[offset]);
         DEBUG_MSGF("double value: %f", entry_data->double_value);
     } else if (type == MMDB_DATA_TYPE_UTF8_STRING) {
-        entry_data->utf8_string = size == 0 ? "" : (char *)&mem[offset];
+        entry_data->utf8_string = size == 0 ? "" : (char const *)&mem[offset];
         entry_data->data_size = size;
 #ifdef MMDB_DEBUG
         char *string =
@@ -1731,7 +1730,7 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
 
 static float get_ieee754_float(const uint8_t *restrict p) {
     volatile float f;
-    uint8_t *q = (void *)&f;
+    volatile uint8_t *q = (volatile void *)&f;
 /* Windows builds don't use autoconf but we can assume they're all
  * little-endian. */
 #if MMDB_LITTLE_ENDIAN || _WIN32
@@ -1747,7 +1746,7 @@ static float get_ieee754_float(const uint8_t *restrict p) {
 
 static double get_ieee754_double(const uint8_t *restrict p) {
     volatile double d;
-    uint8_t *q = (void *)&d;
+    volatile uint8_t *q = (volatile void *)&d;
 #if MMDB_LITTLE_ENDIAN || _WIN32
     q[7] = p[0];
     q[6] = p[1];
@@ -1802,7 +1801,12 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
     }
 
     if (NULL != mmdb->filename) {
+// This is a const char * that we need to free, which isn't valid. However it
+// would mean changing the public API to fix this.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
         FREE_AND_SET_NULL(mmdb->filename);
+#pragma clang diagnostic pop
     }
     if (NULL != mmdb->file_content) {
 #ifdef _WIN32
@@ -1811,12 +1815,22 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
          * to cleanup then. */
         WSACleanup();
 #else
+// This is a const char * that we need to free, which isn't valid. However it
+// would mean changing the public API to fix this.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
         munmap((void *)mmdb->file_content, mmdb->file_size);
+#pragma clang diagnostic pop
 #endif
     }
 
     if (NULL != mmdb->metadata.database_type) {
+// This is a const char * that we need to free, which isn't valid. However it
+// would mean changing the public API to fix this.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
         FREE_AND_SET_NULL(mmdb->metadata.database_type);
+#pragma clang diagnostic pop
     }
 
     free_languages_metadata(mmdb);
@@ -1829,7 +1843,12 @@ static void free_languages_metadata(MMDB_s *mmdb) {
     }
 
     for (size_t i = 0; i < mmdb->metadata.languages.count; i++) {
+// This is a const char * that we need to free, which isn't valid. However it
+// would mean changing the public API to fix this.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
         FREE_AND_SET_NULL(mmdb->metadata.languages.names[i]);
+#pragma clang diagnostic pop
     }
     FREE_AND_SET_NULL(mmdb->metadata.languages.names);
 }
@@ -1842,14 +1861,24 @@ static void free_descriptions_metadata(MMDB_s *mmdb) {
     for (size_t i = 0; i < mmdb->metadata.description.count; i++) {
         if (NULL != mmdb->metadata.description.descriptions[i]) {
             if (NULL != mmdb->metadata.description.descriptions[i]->language) {
+// This is a const char * that we need to free, which isn't valid. However it
+// would mean changing the public API to fix this.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
                 FREE_AND_SET_NULL(
                     mmdb->metadata.description.descriptions[i]->language);
+#pragma clang diagnostic pop
             }
 
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->description) {
+// This is a const char * that we need to free, which isn't valid. However it
+// would mean changing the public API to fix this.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
                 FREE_AND_SET_NULL(
                     mmdb->metadata.description.descriptions[i]->description);
+#pragma clang diagnostic pop
             }
             FREE_AND_SET_NULL(mmdb->metadata.description.descriptions[i]);
         }
@@ -1890,9 +1919,9 @@ dump_entry_data_list(FILE *stream,
                     *status = MMDB_INVALID_DATA_ERROR;
                     return NULL;
                 }
-                char *key = mmdb_strndup(
-                    (char *)entry_data_list->entry_data.utf8_string,
-                    entry_data_list->entry_data.data_size);
+                char *key =
+                    mmdb_strndup(entry_data_list->entry_data.utf8_string,
+                                 entry_data_list->entry_data.data_size);
                 if (NULL == key) {
                     *status = MMDB_OUT_OF_MEMORY_ERROR;
                     return NULL;
@@ -1937,9 +1966,8 @@ dump_entry_data_list(FILE *stream,
             fprintf(stream, "]\n");
         } break;
         case MMDB_DATA_TYPE_UTF8_STRING: {
-            char *string =
-                mmdb_strndup((char *)entry_data_list->entry_data.utf8_string,
-                             entry_data_list->entry_data.data_size);
+            char *string = mmdb_strndup(entry_data_list->entry_data.utf8_string,
+                                        entry_data_list->entry_data.data_size);
             if (NULL == string) {
                 *status = MMDB_OUT_OF_MEMORY_ERROR;
                 return NULL;
@@ -1951,7 +1979,7 @@ dump_entry_data_list(FILE *stream,
         } break;
         case MMDB_DATA_TYPE_BYTES: {
             char *hex_string =
-                bytes_to_hex((uint8_t *)entry_data_list->entry_data.bytes,
+                bytes_to_hex(entry_data_list->entry_data.bytes,
                              entry_data_list->entry_data.data_size);
 
             if (NULL == hex_string) {
@@ -2048,7 +2076,7 @@ static void print_indentation(FILE *stream, int i) {
     fputs(buffer, stream);
 }
 
-static char *bytes_to_hex(uint8_t *bytes, uint32_t size) {
+static char *bytes_to_hex(uint8_t const *bytes, uint32_t size) {
     char *hex_string;
     MAYBE_CHECK_SIZE_OVERFLOW(size, SIZE_MAX / 2 - 1, NULL);
 
