@@ -85,7 +85,7 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc) {
         BAIL_OUT("could not allocate memory for our MMDB_s struct");
     }
 
-    int status = MMDB_open(db_file, mode, mmdb);
+    int status = MMDB_open(db_file, (uint32_t)mode, mmdb);
 
     int is_ok = ok(MMDB_SUCCESS == status,
                    "open %s status is success - %s",
@@ -211,9 +211,9 @@ MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result,
                "no error from call to MMDB_vget_value - %s",
                description)) {
 
-        if (!cmp_ok(data.type,
+        if (!cmp_ok((int)data.type,
                     "==",
-                    expect_type,
+                    (int)expect_type,
                     "got the expected data type - %s",
                     description)) {
 

@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
 
     free((void *)lookup_path);
 
-    srand((int)time(NULL));
+    srand((unsigned int)time(NULL));
 
 #ifndef _WIN32
     if (thread_count > 0) {
@@ -295,7 +295,7 @@ static const char **get_options(int argc,
     }
 
     const char **lookup_path =
-        calloc((argc - optind) + 1, sizeof(const char *));
+        calloc((size_t)(argc - optind) + 1, sizeof(const char *));
     if (!lookup_path) {
         fprintf(stderr, "calloc(): %s\n", strerror(errno));
         exit(1);
@@ -643,7 +643,7 @@ static bool start_threaded_benchmark(MMDB_s *const mmdb,
                                      int const thread_count,
                                      int const iterations) {
     struct thread_info *const tinfo =
-        calloc(thread_count, sizeof(struct thread_info));
+        calloc((size_t)thread_count, sizeof(struct thread_info));
     if (!tinfo) {
         fprintf(stderr, "calloc(): %s\n", strerror(errno));
         return false;
@@ -685,7 +685,8 @@ static bool start_threaded_benchmark(MMDB_s *const mmdb,
     }
 
     long double const elapsed = end_time - start_time;
-    unsigned long long const total_ips = iterations * thread_count;
+    unsigned long long const total_ips =
+        (unsigned long long)(iterations * thread_count);
     long double rate = total_ips;
     if (elapsed != 0) {
         rate = total_ips / elapsed;
