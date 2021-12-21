@@ -461,12 +461,12 @@ static bool lookup_from_file(MMDB_s *const mmdb,
 
         if (dump) {
             fprintf(stdout, "%s:\n", buf);
-            int const status =
+            int const status2 =
                 MMDB_dump_entry_data_list(stderr, entry_data_list, 0);
-            if (status != MMDB_SUCCESS) {
+            if (status2 != MMDB_SUCCESS) {
                 fprintf(stderr,
                         "MMDB_dump_entry_data_list(): %s\n",
-                        MMDB_strerror(status));
+                        MMDB_strerror(status2));
                 fclose(fh);
                 MMDB_free_entry_data_list(entry_data_list);
                 return false;
