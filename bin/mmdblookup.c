@@ -481,10 +481,10 @@ static bool lookup_from_file(MMDB_s *const mmdb,
 
     fprintf(
         stdout,
-        "Looked up %llu addresses in %.2f seconds. %.2f lookups per second.\n",
+        "Looked up %llu addresses in %.2f seconds. %.2Lf lookups per second.\n",
         i,
         seconds,
-        i / seconds);
+        (long double)i / seconds);
 
     return true;
 }
@@ -727,7 +727,7 @@ static long double get_time(void) {
         fprintf(stderr, "clock_gettime(): %s\n", strerror(errno));
         return -1;
     }
-    return tp.tv_sec + ((float)tp.tv_nsec / 1e9);
+    return (long double)tp.tv_sec + ((float)tp.tv_nsec / 1e9);
 #else
     time_t t = time(NULL);
     if (t == (time_t)-1) {
