@@ -603,15 +603,15 @@ static MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr) {
         MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
+#ifdef _WIN32
+        char const *const strerr = gai_strerrorA(gai_error);
+#else
+        char const *const strerr = gai_strerror(gai_error);
+#endif
         fprintf(stderr,
                 "\n  Error from call to getaddrinfo for %s - %s\n\n",
                 ipstr,
-#ifdef _WIN32
-                gai_strerrorA(gai_error)
-#else
-                gai_strerror(gai_error)
-#endif
-        );
+                strerr);
         exit(3);
     }
 
