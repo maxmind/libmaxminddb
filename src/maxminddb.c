@@ -1464,6 +1464,7 @@ static int decode_one(const MMDB_s *const mmdb,
             }
             size = 65821 + get_uint24(&mem[offset]);
             offset += 3;
+            break;
         default:
             break;
     }
