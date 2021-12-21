@@ -9,9 +9,10 @@ jobs:
     name: Clang AddressSanitizer
     runs-on: ubuntu-latest
     env:
+      ASAN_OPTIONS: strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2
       CC: clang
       CXX: clang++
-      CFLAGS: -fsanitize=address
+      CFLAGS: -fsanitize=address -Wall -Wextra -Wpedantic -Wformat=2 -Walloca -Wvla -Wimplicit-fallthrough -Wcast-qual -Wconversion -Wshadow -Wundef -Wstrict-prototypes -Wswitch-enum -fstack-protector -D_FORTIFY_SOURCE=2
       CXXFLAGS: -fsanitize=address
       LDFLAGS: -fsanitize=address
     steps:
