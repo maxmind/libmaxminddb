@@ -7,6 +7,7 @@
 #ifndef _WIN32
 #include <pthread.h>
 #endif
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -223,6 +224,14 @@ static const char **get_options(int argc,
     static int help = 0;
     static int version = 0;
 
+#ifdef _WIN32
+    char *program = alloca(strlen(argv[0]));
+    _splitpath(argv[0], NULL, NULL, program, NULL);
+    _splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
+#else
+    char *program = basename(argv[0]);
+#endif
+
     while (1) {
         static struct option options[] = {
             {"file", required_argument, 0, 'f'},
@@ -259,23 +268,23 @@ static const char **get_options(int argc,
         } else if ('n' == opt_char) {
             version = 1;
         } else if ('b' == opt_char) {
-            *iterations = strtol(optarg, NULL, 10);
+            long const i = strtol(optarg, NULL, 10);
+            if (i > INT_MAX) {
+                usage(program, 1, "iterations exceeds maximum value");
+            }
+            *iterations = (int)i;
         } else if ('h' == opt_char || '?' == opt_char) {
             help = 1;
         } else if (opt_char == 't') {
-            *thread_count = strtol(optarg, NULL, 10);
+            long const i = strtol(optarg, NULL, 10);
+            if (i > INT_MAX) {
+                usage(program, 1, "thread count exceeds maximum value");
+            }
+            *thread_count = (int)i;
         } else if (opt_char == 'I') {
             *ip_file = optarg;
         }
     }
-
-#ifdef _WIN32
-    char *program = alloca(strlen(argv[0]));
-    _splitpath(argv[0], NULL, NULL, program, NULL);
-    _splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
-#else
-    char *program = basename(argv[0]);
-#endif
 
     if (help) {
         usage(program, 0, NULL);

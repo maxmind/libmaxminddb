@@ -1223,7 +1223,7 @@ static int lookup_path_in_array(const char *path_elem,
 
     int saved_errno = errno;
     errno = 0;
-    int array_index = strtol(path_elem, &first_invalid, 10);
+    long array_index = strtol(path_elem, &first_invalid, 10);
     if (ERANGE == errno) {
         errno = saved_errno;
         return MMDB_INVALID_LOOKUP_PATH_ERROR;
@@ -1238,11 +1238,11 @@ static int lookup_path_in_array(const char *path_elem,
         }
     }
 
-    if (*first_invalid || (uint32_t)array_index >= size) {
+    if (*first_invalid || (unsigned long)array_index >= size) {
         return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
     }
 
-    for (int i = 0; i < array_index; i++) {
+    for (long i = 0; i < array_index; i++) {
         /* We don't want to follow a pointer here. If the next element is a
          * pointer we simply skip it and keep going */
         CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);
