@@ -1124,7 +1124,7 @@ int MMDB_vget_value(MMDB_entry_s *const start,
     int i = 0;
 
     if (length == SIZE_MAX) {
-        return MMDB_OUT_OF_MEMORY_ERROR;
+        return MMDB_INVALID_METADATA_ERROR;
     }
 
     const char **path = calloc(length + 1, sizeof(const char *));
