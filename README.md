@@ -98,12 +98,15 @@ Then install the packages by running:
     $ sudo apt update
     $ sudo apt install libmaxminddb0 libmaxminddb-dev mmdb-bin
 
-## On OS X via Homebrew
+## On macOS via Homebrew or MacPorts
 
-If you are on OS X and you have homebrew (see https://brew.sh/) you can install
-libmaxminddb via brew.
+You can install libmaxminddb on macOS using [Homebrew](https://brew.sh):
 
     $ brew install libmaxminddb
+
+Or with [MacPorts](https://ports.macports.org/port/libmaxminddb):
+
+    $ sudo port install libmaxminddb
 
 # Bug Reports
 
