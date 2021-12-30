@@ -23,7 +23,7 @@
 #include <netdb.h>
 #endif
 
-#if (_MSC_VER && _MSC_VER < 1900)
+#if defined _MSC_VER && _MSC_VER < 1900
 /* _snprintf has security issues, but I don't think it is worth
    worrying about for the unit tests. */
 #define snprintf _snprintf
