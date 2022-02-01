@@ -77,12 +77,12 @@ void run_ipX_tests(const char *filename,
                    int missing_ips_length,
                    const char *pairs[][2],
                    int pairs_rows) {
-    const char *path = test_database_path(filename);
+    char *path = test_database_path(filename);
     int mode = Current_Mode;
     const char *mode_desc = Current_Mode_Description;
 
     MMDB_s *mmdb = open_ok(path, mode, mode_desc);
-    free((void *)path);
+    free(path);
 
     char desc_suffix[500];
     snprintf(desc_suffix, 500, "%s - %s", filename, mode_desc);
@@ -180,12 +180,12 @@ void all_record_sizes(int mode, const char *description) {
 
 static void test_big_lookup(void) {
     const char *const db_filename = "GeoIP2-Precision-Enterprise-Test.mmdb";
-    const char *const db_path = test_database_path(db_filename);
+    char *db_path = test_database_path(db_filename);
     ok(db_path != NULL, "got database path");
 
     MMDB_s *const mmdb = open_ok(db_path, MMDB_MODE_MMAP, "mmap mode");
     ok(mmdb != NULL, "opened MMDB");
-    free((char *)db_path);
+    free(db_path);
 
     int gai_err = 0, mmdb_err = 0;
     const char *const ip_address = "81.2.69.160";
