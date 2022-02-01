@@ -36,7 +36,7 @@ void test_one_result(MMDB_s *mmdb,
     } else {
         // When looking up IPv4 addresses in a mixed DB the result will be
         // something like "::1.2.3.4", not just "1.2.3.4".
-        int maxlen = strlen(expect) + 3;
+        size_t maxlen = strlen(expect) + 3;
         real_expect = malloc(maxlen);
         if (!real_expect) {
             BAIL_OUT("could not allocate memory");
