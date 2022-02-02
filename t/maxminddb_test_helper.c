@@ -43,7 +43,7 @@ void for_all_modes(void (*tests)(int mode, const char *description)) {
     tests(MMDB_MODE_MMAP, "mmap mode");
 }
 
-const char *test_database_path(const char *filename) {
+char *test_database_path(const char *filename) {
     char *test_db_dir;
 #ifdef _WIN32
     test_db_dir = "../t/maxmind-db/test-data";
@@ -63,11 +63,11 @@ const char *test_database_path(const char *filename) {
 
     snprintf(path, 500, "%s/%s", test_db_dir, filename);
 
-    return (const char *)path;
+    return path;
 }
 
-const char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data) {
-    const char *string =
+char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data) {
+    char *string =
         mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
     if (NULL == string) {
         BAIL_OUT("mmdb_strndup failed");
