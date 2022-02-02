@@ -323,15 +323,15 @@ test_utf8_string_value(MMDB_entry_data_list_s *entry_data_list) {
                        0x65,
                        0x21,
                        0x20,
-                       0xe2,
-                       0x98,
-                       0xaf,
+                       (char) 0xe2,
+                       (char) 0x98,
+                       (char) 0xaf,
                        0x20,
                        0x2d,
                        0x20,
-                       0xe2,
-                       0x99,
-                       0xab,
+                       (char) 0xe2,
+                       (char) 0x99,
+                       (char) 0xab,
                        0x00};
 
     is(utf8_string, expect, "got expected value for utf8_string key");
