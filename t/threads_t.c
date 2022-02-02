@@ -128,7 +128,6 @@ void process_result(test_result_s *result,
 void run_ipX_tests(MMDB_s *mmdb,
                    const char *pairs[][2],
                    int pairs_rows,
-                   int mode,
                    const char *mode_desc) {
     pthread_t *threads = malloc((unsigned long)pairs_rows * sizeof(pthread_t));
     struct thread_arg *thread_args = malloc((unsigned long)pairs_rows * sizeof(struct thread_arg));
@@ -193,7 +192,7 @@ void run_tests(int mode, const char *mode_desc) {
         {"::2:0:59", "::2:0:58"},
     };
 
-    run_ipX_tests(mmdb, pairs, 18, mode, mode_desc);
+    run_ipX_tests(mmdb, pairs, 18, mode_desc);
 
     MMDB_close(mmdb);
     free(mmdb);
