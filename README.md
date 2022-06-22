@@ -76,7 +76,9 @@ described above.
 We provide a CMake build script. This is primarily targeted at Windows users,
 but it can be used in other circumstances where the Autotools script does not
 work.
-
+    
+    $ mkdir build && cd build
+    $ cmake ..
     $ cmake --build .
     $ ctest -V .
     $ cmake --build . --target install
