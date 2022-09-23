@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -406,7 +407,6 @@ cleanup:;
 #else // _WIN32
 
 static int map_file(MMDB_s *const mmdb) {
-    ssize_t size;
     int status = MMDB_SUCCESS;
 
     int o_flags = O_RDONLY;
@@ -432,8 +432,8 @@ static int map_file(MMDB_s *const mmdb) {
         goto cleanup;
     }
 
-    size = s.st_size;
-    if (size < 0 || size != s.st_size) {
+    off_t size = s.st_size;
+    if (size < 0 || size > SSIZE_MAX) {
         status = MMDB_OUT_OF_MEMORY_ERROR;
         goto cleanup;
     }
@@ -449,7 +449,7 @@ static int map_file(MMDB_s *const mmdb) {
         goto cleanup;
     }
 
-    mmdb->file_size = size;
+    mmdb->file_size = (ssize_t)size;
     mmdb->file_content = file_content;
 
 cleanup:;
