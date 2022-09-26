@@ -9,6 +9,8 @@
 * The CMake build now uses the correct library directory on Linux systems
   using alternate directory structures. Pull request by Satadru Pramanik.
   GitHub #284.
+* File size check now correctly compares the size to `SSIZE_MAX`. Reported
+  by marakew. GitHub #301.
 
 ## 1.6.0 - 2021-04-29
 
