@@ -1,4 +1,4 @@
-## 1.7.0
+## 1.7.0 - 2022-09-28
 
 * `FD_CLOEXEC` is now set on platforms that do not support `O_CLOEXEC`.
   Reported by rittneje. GitHub #273.
