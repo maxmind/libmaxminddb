@@ -878,7 +878,7 @@ Rolsky (drolsky@maxmind.com).
 
 # COPYRIGHT AND LICENSE
 
-Copyright 2013-2021 MaxMind, Inc.
+Copyright 2013-2022 MaxMind, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
