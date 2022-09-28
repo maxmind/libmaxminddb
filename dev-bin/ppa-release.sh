@@ -6,10 +6,9 @@ set -u
 
 DISTS=( kinetic jammy focal bionic )
 
-
-VERSION=$(perl -MFile::Slurp::Tiny=read_file -MDateTime <<EOF
+VERSION=$(perl -MFile::Slurper=read_text -MDateTime <<EOF
 use v5.16;
-my \$log = read_file(q{Changes.md});
+my \$log = read_text(q{Changes.md});
 \$log =~ /^## (\d+\.\d+\.\d+) - (\d{4}-\d{2}-\d{2})/;
 die 'Release time is not today!' unless DateTime->now->ymd eq \$2;
 say \$1;
