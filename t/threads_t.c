@@ -130,7 +130,8 @@ void run_ipX_tests(MMDB_s *mmdb,
                    int pairs_rows,
                    const char *mode_desc) {
     pthread_t *threads = malloc((unsigned long)pairs_rows * sizeof(pthread_t));
-    struct thread_arg *thread_args = malloc((unsigned long)pairs_rows * sizeof(struct thread_arg));
+    struct thread_arg *thread_args =
+        malloc((unsigned long)pairs_rows * sizeof(struct thread_arg));
 
     for (int i = 0; i < pairs_rows; i += 1) {
         thread_args[i].thread_id = i;

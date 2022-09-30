@@ -1,3 +1,8 @@
+## 1.7.1 - 2022-09-30
+
+* The external symbols test now only runs on Linux. It assumes a Linux
+  environment. Reported by Carlo Cabrera. GitHub #304.
+
 ## 1.7.0 - 2022-09-28
 
 * `FD_CLOEXEC` is now set on platforms that do not support `O_CLOEXEC`.
