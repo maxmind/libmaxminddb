@@ -203,8 +203,7 @@ test_map_value(MMDB_entry_data_list_s *entry_data_list) {
            "==",
            MMDB_DATA_TYPE_UTF8_STRING,
            "found a map key in 'map'");
-    char *map_key_1_name =
-        dup_entry_string_or_bail(map_key_1->entry_data);
+    char *map_key_1_name = dup_entry_string_or_bail(map_key_1->entry_data);
     ok(strcmp(map_key_1_name, "mapX") == 0, "key name is mapX");
     free(map_key_1_name);
 
@@ -323,15 +322,15 @@ test_utf8_string_value(MMDB_entry_data_list_s *entry_data_list) {
                        0x65,
                        0x21,
                        0x20,
-                       (char) 0xe2,
-                       (char) 0x98,
-                       (char) 0xaf,
+                       (char)0xe2,
+                       (char)0x98,
+                       (char)0xaf,
                        0x20,
                        0x2d,
                        0x20,
-                       (char) 0xe2,
-                       (char) 0x99,
-                       (char) 0xab,
+                       (char)0xe2,
+                       (char)0x99,
+                       (char)0xab,
                        0x00};
 
     is(utf8_string, expect, "got expected value for utf8_string key");

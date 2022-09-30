@@ -67,8 +67,7 @@ char *test_database_path(const char *filename) {
 }
 
 char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data) {
-    char *string =
-        mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
+    char *string = mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
     if (NULL == string) {
         BAIL_OUT("mmdb_strndup failed");
     }
