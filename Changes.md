@@ -1,4 +1,4 @@
-## 1.7.1
+## 1.7.1 - 2022-09-30
 
 * The external symbols test now only runs on Linux. It assumes a Linux
   environment. Reported by Carlo Cabrera. GitHub #304.
