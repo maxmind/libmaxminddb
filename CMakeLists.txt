@@ -48,7 +48,7 @@ add_library(maxminddb::maxminddb ALIAS maxminddb)
 
 set_target_properties(maxminddb PROPERTIES VERSION ${MAXMINDDB_SOVERSION})
 
-target_compile_definitions(maxminddb PUBLIC PACKAGE_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(maxminddb PRIVATE PACKAGE_VERSION="${PROJECT_VERSION}")
 
 if(NOT IS_BIG_ENDIAN)
   target_compile_definitions(maxminddb PRIVATE MMDB_LITTLE_ENDIAN=1)
