@@ -1,3 +1,8 @@
+## 1.7.2
+
+* `PACKAGE_VERSION` is now a private compile definition when building
+  with CMake. Pull request by bsergean. GitHub #308.
+
 ## 1.7.1 - 2022-09-30
 
 * The external symbols test now only runs on Linux. It assumes a Linux
