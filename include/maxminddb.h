@@ -28,7 +28,10 @@ extern "C" {
 #include <winsock2.h>
 #include <ws2tcpip.h>
 /* libmaxminddb package version from configure */
+#ifndef PACKAGE_VERSION
+/* This is used by msbuild. Once we delete those files, we can remove this. */
 #define PACKAGE_VERSION "1.7.1"
+#endif
 
 typedef ADDRESS_FAMILY sa_family_t;
 

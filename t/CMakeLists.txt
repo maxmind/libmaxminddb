@@ -33,6 +33,7 @@ foreach(TEST_TARGET_NAME ${TEST_TARGET_NAMES})
   add_executable(${TEST_TARGET_NAME} ${TEST_TARGET_NAME}.c maxminddb_test_helper.c)
   target_include_directories(${TEST_TARGET_NAME} PRIVATE ../src)
   target_link_libraries(${TEST_TARGET_NAME} maxminddb tap)
+  target_compile_definitions(${TEST_TARGET_NAME} PRIVATE PACKAGE_VERSION="${PROJECT_VERSION}")
 
   if(UNIX)
     target_link_libraries(${TEST_TARGET_NAME} m)
