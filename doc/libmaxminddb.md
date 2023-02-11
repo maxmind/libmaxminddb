@@ -13,13 +13,15 @@ int MMDB_open(
     MMDB_s *const mmdb);
 void MMDB_close(MMDB_s *const mmdb);
 
-MMDB_lookup_result_s MMDB_lookup_string(
+void MMDB_lookup_string(
     MMDB_s *const mmdb,
+    MMDB_lookup_result_s *result
     const char *const ipstr,
     int *const gai_error,
     int *const mmdb_error);
-MMDB_lookup_result_s MMDB_lookup_sockaddr(
+void MMDB_lookup_sockaddr(
     MMDB_s *const mmdb,
+    MMDB_lookup_result_s *result
     const struct sockaddr *const
     sockaddr,
     int *const mmdb_error);
