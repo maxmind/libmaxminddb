@@ -15,13 +15,13 @@ void MMDB_close(MMDB_s *const mmdb);
 
 void MMDB_lookup_string(
     MMDB_s *const mmdb,
-    MMDB_lookup_result_s *result
+    MMDB_lookup_result_s *result,
     const char *const ipstr,
     int *const gai_error,
     int *const mmdb_error);
 void MMDB_lookup_sockaddr(
     MMDB_s *const mmdb,
-    MMDB_lookup_result_s *result
+    MMDB_lookup_result_s *result,
     const struct sockaddr *const
     sockaddr,
     int *const mmdb_error);
@@ -553,7 +553,7 @@ The three functions allow three slightly different calling styles, but they
 all do the same thing.
 
 The first parameter is an `MMDB_entry_s` value. In most cases this will come
-from the `MMDB_lookup_result_s` value returned by `MMDB_lookup_string()` or
+from the `MMDB_lookup_result_s` value set by `MMDB_lookup_string()` or
 `MMDB_lookup_sockaddr()`.
 
 The second parameter is a reference to an `MMDB_entry_data_s` structure. This
@@ -584,8 +584,8 @@ given this data:
 We could look up the English name with this code:
 
 ```c
-MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
+MMDB_lookup_result_s result;
+MMDB_lookup_sockaddr(&mmdb, &result, address->ai_addr, &mmdb_error);
 MMDB_entry_data_s entry_data;
 int status =
     MMDB_get_value(&result.entry, &entry_data,
@@ -628,8 +628,8 @@ at once, rather than looking up each piece using repeated calls to
 `MMDB_get_value()`.
 
 ```c
-MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
+MMDB_lookup_result_s result;
+MMDB_lookup_sockaddr(&mmdb, &result, address->ai_addr, &mmdb_error);
 MMDB_entry_data_list_s *entry_data_list, *first;
 int status =
     MMDB_get_entry_data_list(&result.entry, &entry_data_list);
@@ -804,8 +804,8 @@ int main(int argc, char **argv)
     }
 
     int gai_error, mmdb_error;
-    MMDB_lookup_result_s result =
-        MMDB_lookup_string(&mmdb, ip_address, &gai_error, &mmdb_error);
+    MMDB_lookup_result_s result;
+    MMDB_lookup_string(&mmdb, &result, ip_address, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
         fprintf(stderr,
