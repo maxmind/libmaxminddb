@@ -23,8 +23,8 @@ void test_one_ip(MMDB_s *mmdb, const char *ip, test_result_s *test_result) {
 
     int gai_error = 0;
     int mmdb_error = 0;
-    MMDB_lookup_result_s result =
-        MMDB_lookup_string(mmdb, ip, &gai_error, &mmdb_error);
+    MMDB_lookup_result_s result;
+    MMDB_lookup_string(mmdb, &result, ip, &gai_error, &mmdb_error);
 
     test_result->lookup_string_gai_error = gai_error;
     if (gai_error) {

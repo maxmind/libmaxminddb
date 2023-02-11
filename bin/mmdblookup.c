@@ -599,8 +599,8 @@ end:
 
 static MMDB_lookup_result_s lookup_or_die(MMDB_s *mmdb, const char *ipstr) {
     int gai_error, mmdb_error;
-    MMDB_lookup_result_s result =
-        MMDB_lookup_string(mmdb, ipstr, &gai_error, &mmdb_error);
+    MMDB_lookup_result_s result;
+    MMDB_lookup_string(mmdb, &result, ipstr, &gai_error, &mmdb_error);
 
     if (0 != gai_error) {
 #ifdef _WIN32

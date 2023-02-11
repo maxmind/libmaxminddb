@@ -8,8 +8,8 @@ void run_tests(int mode, const char *mode_desc) {
 
     const char *ip = "::abcd";
     int gai_error, mmdb_error;
-    MMDB_lookup_result_s UNUSED(result) =
-        MMDB_lookup_string(mmdb, ip, &gai_error, &mmdb_error);
+    MMDB_lookup_result_s result;
+    MMDB_lookup_string(mmdb, &result, ip, &gai_error, &mmdb_error);
 
     cmp_ok(mmdb_error,
            "==",
@@ -28,7 +28,7 @@ void run_tests(int mode, const char *mode_desc) {
     }
 
     mmdb_error = 0;
-    MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, &mmdb_error);
+    MMDB_lookup_sockaddr(mmdb, &result, addresses->ai_addr, &mmdb_error);
 
     cmp_ok(mmdb_error,
            "==",

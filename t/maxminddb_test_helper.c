@@ -119,8 +119,8 @@ MMDB_lookup_result_s lookup_string_ok(MMDB_s *mmdb,
                                       const char *file,
                                       const char *mode_desc) {
     int gai_error, mmdb_error;
-    MMDB_lookup_result_s result =
-        MMDB_lookup_string(mmdb, ip, &gai_error, &mmdb_error);
+    MMDB_lookup_result_s result;
+    MMDB_lookup_string(mmdb, &result, ip, &gai_error, &mmdb_error);
 
     test_lookup_errors(
         gai_error, mmdb_error, "MMDB_lookup_string", ip, file, mode_desc);
@@ -152,7 +152,7 @@ MMDB_lookup_result_s lookup_sockaddr_ok(MMDB_s *mmdb,
     int mmdb_error = 0;
     MMDB_lookup_result_s result = {.found_entry = false};
     if (gai_error == 0) {
-        result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, &mmdb_error);
+        MMDB_lookup_sockaddr(mmdb, &result, addresses->ai_addr, &mmdb_error);
     }
     if (NULL != addresses) {
         freeaddrinfo(addresses);

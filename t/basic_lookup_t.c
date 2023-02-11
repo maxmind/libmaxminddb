@@ -189,8 +189,8 @@ static void test_big_lookup(void) {
 
     int gai_err = 0, mmdb_err = 0;
     const char *const ip_address = "81.2.69.160";
-    MMDB_lookup_result_s result =
-        MMDB_lookup_string(mmdb, ip_address, &gai_err, &mmdb_err);
+    MMDB_lookup_result_s result;
+    MMDB_lookup_string(mmdb, &result, ip_address, &gai_err, &mmdb_err);
     ok(gai_err == 0, "no getaddrinfo error");
     ok(mmdb_err == MMDB_SUCCESS, "no error from maxminddb library");
     ok(result.found_entry, "found IP");

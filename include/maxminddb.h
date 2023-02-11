@@ -219,14 +219,15 @@ typedef struct MMDB_search_node_s {
 
 extern int
 MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb);
-extern MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
-                                               const char *const ipstr,
-                                               int *const gai_error,
-                                               int *const mmdb_error);
-extern MMDB_lookup_result_s
-MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
-                     const struct sockaddr *const sockaddr,
-                     int *const mmdb_error);
+extern void MMDB_lookup_string(const MMDB_s *const mmdb,
+                               MMDB_lookup_result_s *result,
+                               const char *const ipstr,
+                               int *const gai_error,
+                               int *const mmdb_error);
+extern void MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
+                                 MMDB_lookup_result_s *result,
+                                 const struct sockaddr *const sockaddr,
+                                 int *const mmdb_error);
 extern int MMDB_read_node(const MMDB_s *const mmdb,
                           uint32_t node_number,
                           MMDB_search_node_s *const node);

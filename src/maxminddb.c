@@ -848,26 +848,25 @@ cleanup:
     return status;
 }
 
-MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
-                                        const char *const ipstr,
-                                        int *const gai_error,
-                                        int *const mmdb_error) {
-    MMDB_lookup_result_s result = {.found_entry = false,
-                                   .netmask = 0,
-                                   .entry = {.mmdb = mmdb, .offset = 0}};
+void MMDB_lookup_string(const MMDB_s *const mmdb,
+                        MMDB_lookup_result_s *result,
+                        const char *const ipstr,
+                        int *const gai_error,
+                        int *const mmdb_error) {
+    *result = (MMDB_lookup_result_s) {.found_entry = false,
+                                      .netmask = 0,
+                                      .entry = {.mmdb = mmdb, .offset = 0}};
 
     struct addrinfo *addresses = NULL;
     *gai_error = resolve_any_address(ipstr, &addresses);
 
     if (!*gai_error) {
-        result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
+        MMDB_lookup_sockaddr(mmdb, result, addresses->ai_addr, mmdb_error);
     }
 
     if (NULL != addresses) {
         freeaddrinfo(addresses);
     }
-
-    return result;
 }
 
 static int resolve_any_address(const char *ipstr, struct addrinfo **addresses) {
@@ -885,19 +884,20 @@ static int resolve_any_address(const char *ipstr, struct addrinfo **addresses) {
     return 0;
 }
 
-MMDB_lookup_result_s MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
-                                          const struct sockaddr *const sockaddr,
-                                          int *const mmdb_error) {
-    MMDB_lookup_result_s result = {.found_entry = false,
-                                   .netmask = 0,
-                                   .entry = {.mmdb = mmdb, .offset = 0}};
+void MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
+                          MMDB_lookup_result_s *result,
+                          const struct sockaddr *const sockaddr,
+                          int *const mmdb_error) {
+    *result = (MMDB_lookup_result_s) {.found_entry = false,
+                                      .netmask = 0,
+                                      .entry = {.mmdb = mmdb, .offset = 0}};
 
     uint8_t mapped_address[16];
     uint8_t const *address;
     if (mmdb->metadata.ip_version == 4) {
         if (sockaddr->sa_family == AF_INET6) {
             *mmdb_error = MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR;
-            return result;
+            return;
         }
         address = (uint8_t const *)&((struct sockaddr_in const *)sockaddr)
                       ->sin_addr.s_addr;
@@ -915,9 +915,7 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
     }
 
     *mmdb_error = find_address_in_search_tree(
-        mmdb, address, sockaddr->sa_family, &result);
-
-    return result;
+        mmdb, address, sockaddr->sa_family, result);
 }
 
 static int find_address_in_search_tree(const MMDB_s *const mmdb,
