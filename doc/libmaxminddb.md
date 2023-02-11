@@ -101,7 +101,7 @@ data structures. Databases are opened by calling `MMDB_open()`. You can
 look up IP addresses as a string with `MMDB_lookup_string()` or as a
 pointer to a `sockaddr` structure with `MMDB_lookup_sockaddr()`.
 
-If the lookup finds the IP address in the database, it returns a
+If the lookup finds the IP address in the database, it sets a
 `MMDB_lookup_result_s` structure. If that structure indicates that the database
 has data for the IP, there are a number of functions that can be used to fetch
 that data. These include `MMDB_get_value()` and `MMDB_get_entry_data_list()`.
@@ -464,8 +464,9 @@ freeing it.
 ## `MMDB_lookup_string()`
 
 ```c
-MMDB_lookup_result_s MMDB_lookup_string(
+void MMDB_lookup_string(
     MMDB_s *const mmdb,
+    MMDB_lookup_result_s *result,
     const char *const ipstr,
     int *const gai_error,
     int *const mmdb_error);
@@ -479,15 +480,15 @@ the database. If you have already resolved an address you can call
 
 ```c
 int gai_error, mmdb_error;
-MMDB_lookup_result_s result =
-    MMDB_lookup_string(&mmdb, "1.2.3.4", &gai_error, &mmdb_error);
+MMDB_lookup_result_s result;
+MMDB_lookup_string(&mmdb, &result, "1.2.3.4", &gai_error, &mmdb_error);
 if (0 != gai_error) { ... }
 if (MMDB_SUCCESS != mmdb_error) { ... }
 
 if (result.found_entry) { ... }
 ```
 
-This function always returns an `MMDB_lookup_result_s` structure, but you
+This function always sets an `MMDB_lookup_result_s` structure, but you
 should also check the `gai_error` and `mmdb_error` parameters. If either of
 these indicates an error then the returned structure is meaningless.
 
@@ -507,8 +508,9 @@ If you pass an IPv6 address to a database with only IPv4 data then the
 ## `MMDB_lookup_sockaddr()`
 
 ```c
-MMDB_lookup_result_s MMDB_lookup_sockaddr(
+void MMDB_lookup_sockaddr(
     MMDB_s *const mmdb,
+    MMDB_lookup_result_s *result,
     const struct sockaddr *const sockaddr,
     int *const mmdb_error);
 ```
@@ -521,8 +523,8 @@ the `MMDB_lookup_string()` function.
 
 ```c
 int mmdb_error;
-MMDB_lookup_result_s result =
-    MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
+MMDB_lookup_result_s result;
+MMDB_lookup_sockaddr(&mmdb, &result, address->ai_addr, &mmdb_error);
 if (MMDB_SUCCESS != mmdb_error) { ... }
 
 if (result.found_entry) { ... }
