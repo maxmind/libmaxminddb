@@ -1,3 +1,7 @@
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "maxminddb_test_helper.h"
 
 void test_metadata(MMDB_s *mmdb, const char *mode_desc) {

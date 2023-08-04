@@ -1,7 +1,10 @@
-## 1.7.2
+## 1.8.0
 
 * `PACKAGE_VERSION` is now a private compile definition when building
   with CMake. Pull request by bsergean. GitHub #308.
+* The feature test macro `_POSIX_C_SOURCE` is no longer set by
+  `maxminddb.h`. As discussed in GitHub #318, this should be set by
+  applications rather than by libraries.
 
 ## 1.7.1 - 2022-09-30
 

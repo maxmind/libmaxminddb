@@ -1,5 +1,8 @@
 // This test currently does not work on Windows as nftw is
 // not available.
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
 #define _XOPEN_SOURCE 500
 #include <ftw.h>
 

@@ -1,3 +1,7 @@
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "maxminddb_test_helper.h"
 
 /* This test exercises a bug found in MMDB_get_value for certain types of
