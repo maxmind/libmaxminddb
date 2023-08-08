@@ -851,6 +851,11 @@ int main(int argc, char **argv)
 }
 ```
 
+# REQUIREMENTS
+
+libmaxminddb requires a minimum of POSIX.1-2001 support. If not specified
+at compilation time, it defaults to requesting POSIX.1-2008 support.
+
 # THREAD SAFETY
 
 This library is thread safe when compiled and linked with a thread-safe
