@@ -1,6 +1,3 @@
-#ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200809L
-#endif
 #define _XOPEN_SOURCE 700
 
 #include "maxminddb_test_helper.h"

@@ -1,7 +1,3 @@
-#ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200809L
-#endif
-
 #include "libtap/tap.h"
 #include "maxminddb_test_helper.h"
 #include <assert.h>

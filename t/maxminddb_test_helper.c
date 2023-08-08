@@ -1,14 +1,14 @@
+#include "maxminddb_test_helper.h"
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#define _POSIX_C_SOURCE 200112L
 #include <assert.h>
 #include <stdarg.h>
 #include <sys/types.h>
 
 #include "maxminddb.h"
-#include "maxminddb_test_helper.h"
 
 #ifdef _WIN32
 #include <io.h>

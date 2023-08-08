@@ -1,7 +1,3 @@
-#ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200809L
-#endif
-
 #include "maxminddb_test_helper.h"
 
 void test_entry_data(MMDB_s *mmdb,
