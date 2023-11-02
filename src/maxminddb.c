@@ -1009,6 +1009,9 @@ static int find_ipv4_start_node(MMDB_s *const mmdb) {
     }
 
     record_info_s record_info = record_info_for_database(mmdb);
+    if (record_info.right_record_offset == 0) {
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
+    }
 
     const uint8_t *search_tree = mmdb->file_content;
     uint32_t node_value = 0;
