@@ -8,7 +8,6 @@
 #include "data-pool.h"
 #include "maxminddb-compat-util.h"
 #include "maxminddb.h"
-#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -929,7 +928,7 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        sa_family_t address_family,
                                        MMDB_lookup_result_s *result) {
     record_info_s record_info = record_info_for_database(mmdb);
-    if (0 == record_info.right_record_offset) {
+    if (record_info.right_record_offset == 0) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
@@ -993,9 +992,10 @@ static record_info_s record_info_for_database(const MMDB_s *const mmdb) {
         record_info.left_record_getter = &get_uint32;
         record_info.right_record_getter = &get_uint32;
         record_info.right_record_offset = 4;
-    } else {
-        assert(false);
     }
+
+    // Callers must check that right_record_offset is non-zero in case none of
+    // the above conditions matched.
 
     return record_info;
 }
@@ -1009,6 +1009,9 @@ static int find_ipv4_start_node(MMDB_s *const mmdb) {
     }
 
     record_info_s record_info = record_info_for_database(mmdb);
+    if (record_info.right_record_offset == 0) {
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
+    }
 
     const uint8_t *search_tree = mmdb->file_content;
     uint32_t node_value = 0;
@@ -1071,7 +1074,7 @@ int MMDB_read_node(const MMDB_s *const mmdb,
                    uint32_t node_number,
                    MMDB_search_node_s *const node) {
     record_info_s record_info = record_info_for_database(mmdb);
-    if (0 == record_info.right_record_offset) {
+    if (record_info.right_record_offset == 0) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
