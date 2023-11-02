@@ -5,6 +5,7 @@
 * The feature test macro `_POSIX_C_SOURCE` is no longer set by
   `maxminddb.h`. As discussed in GitHub #318, this should be set by
   applications rather than by libraries.
+* `assert()` is no longer used outside test code.
 
 ## 1.7.1 - 2022-09-30
 

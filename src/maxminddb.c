@@ -8,7 +8,6 @@
 #include "data-pool.h"
 #include "maxminddb-compat-util.h"
 #include "maxminddb.h"
-#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -993,9 +992,10 @@ static record_info_s record_info_for_database(const MMDB_s *const mmdb) {
         record_info.left_record_getter = &get_uint32;
         record_info.right_record_getter = &get_uint32;
         record_info.right_record_offset = 4;
-    } else {
-        assert(false);
     }
+
+    // Callers must check that right_record_offset is non-zero in case none of
+    // the above conditions matched.
 
     return record_info;
 }
