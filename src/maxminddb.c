@@ -928,7 +928,7 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        sa_family_t address_family,
                                        MMDB_lookup_result_s *result) {
     record_info_s record_info = record_info_for_database(mmdb);
-    if (0 == record_info.right_record_offset) {
+    if (record_info.right_record_offset == 0) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
@@ -1074,7 +1074,7 @@ int MMDB_read_node(const MMDB_s *const mmdb,
                    uint32_t node_number,
                    MMDB_search_node_s *const node) {
     record_info_s record_info = record_info_for_database(mmdb);
-    if (0 == record_info.right_record_offset) {
+    if (record_info.right_record_offset == 0) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
