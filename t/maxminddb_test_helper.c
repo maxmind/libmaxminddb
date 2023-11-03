@@ -80,7 +80,12 @@ char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data) {
 }
 
 MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc) {
-    if (0 != access(db_file, R_OK)) {
+#ifdef _WIN32
+    int access_rv = _access(db_file, 04);
+#else
+    int access_rv = access(db_file, R_OK);
+#endif
+    if (access_rv != 0) {
         BAIL_OUT("could not read the specified file - %s\nIf you are in a git "
                  "checkout try running 'git submodule update --init'",
                  db_file);
