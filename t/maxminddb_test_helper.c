@@ -26,11 +26,15 @@ void for_all_record_sizes(const char *filename_fmt,
         int size = sizes[i];
 
         char filename[500];
+#if defined(__clang__)
 // This warning seems ok to ignore here in the tests.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
         snprintf(filename, 500, filename_fmt, size);
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
 
         char description[14];
         snprintf(description, 14, "%i bit record", size);
