@@ -6,6 +6,9 @@
   `maxminddb.h`. As discussed in GitHub #318, this should be set by
   applications rather than by libraries.
 * `assert()` is no longer used outside test code.
+* The deprecated Visual Studio 12 project files in the `projects/`
+  directory have been removed. CMake should be used when building on
+  Windows.
 
 ## 1.7.1 - 2022-09-30
 
