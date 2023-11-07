@@ -1,4 +1,4 @@
-## 1.8.0
+## 1.8.0 - 2023-11-07
 
 * `PACKAGE_VERSION` is now a private compile definition when building
   with CMake. Pull request by bsergean. GitHub #308.
