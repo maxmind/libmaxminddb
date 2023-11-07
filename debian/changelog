@@ -1,3 +1,9 @@
+libmaxminddb (1.8.0-0+maxmind1) mantic; urgency=low
+
+  * New upstream release.
+
+ -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Tue, 07 Nov 2023 10:51:13 -0800
+
 libmaxminddb (1.7.1-0+maxmind1) kinetic; urgency=low
 
   * New upstream release.
