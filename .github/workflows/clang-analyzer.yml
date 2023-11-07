@@ -9,7 +9,7 @@ jobs:
     name: Clang static analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: sudo apt install clang-tools libipc-run3-perl
       - run: ./bootstrap
       - run: scan-build ./configure
