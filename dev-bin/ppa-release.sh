@@ -4,7 +4,7 @@ set -e
 set -x
 set -u
 
-DISTS=( kinetic jammy focal bionic )
+DISTS=( mantic jammy focal bionic )
 
 VERSION=$(perl -MFile::Slurper=read_text -MDateTime <<EOF
 use v5.16;
