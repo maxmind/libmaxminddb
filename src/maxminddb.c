@@ -1815,12 +1815,16 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
     }
 
     if (NULL != mmdb->filename) {
+#if defined(__clang__)
 // This is a const char * that we need to free, which isn't valid. However it
 // would mean changing the public API to fix this.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
+#endif
         FREE_AND_SET_NULL(mmdb->filename);
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
     }
     if (NULL != mmdb->file_content) {
 #ifdef _WIN32
@@ -1829,22 +1833,30 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
          * to cleanup then. */
         WSACleanup();
 #else
+#if defined(__clang__)
 // This is a const char * that we need to free, which isn't valid. However it
 // would mean changing the public API to fix this.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
+#endif
         munmap((void *)mmdb->file_content, (size_t)mmdb->file_size);
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
 #endif
     }
 
     if (NULL != mmdb->metadata.database_type) {
+#if defined(__clang__)
 // This is a const char * that we need to free, which isn't valid. However it
 // would mean changing the public API to fix this.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
+#endif
         FREE_AND_SET_NULL(mmdb->metadata.database_type);
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
     }
 
     free_languages_metadata(mmdb);
@@ -1857,12 +1869,16 @@ static void free_languages_metadata(MMDB_s *mmdb) {
     }
 
     for (size_t i = 0; i < mmdb->metadata.languages.count; i++) {
+#if defined(__clang__)
 // This is a const char * that we need to free, which isn't valid. However it
 // would mean changing the public API to fix this.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
+#endif
         FREE_AND_SET_NULL(mmdb->metadata.languages.names[i]);
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
     }
     FREE_AND_SET_NULL(mmdb->metadata.languages.names);
 }
@@ -1875,24 +1891,32 @@ static void free_descriptions_metadata(MMDB_s *mmdb) {
     for (size_t i = 0; i < mmdb->metadata.description.count; i++) {
         if (NULL != mmdb->metadata.description.descriptions[i]) {
             if (NULL != mmdb->metadata.description.descriptions[i]->language) {
+#if defined(__clang__)
 // This is a const char * that we need to free, which isn't valid. However it
 // would mean changing the public API to fix this.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
+#endif
                 FREE_AND_SET_NULL(
                     mmdb->metadata.description.descriptions[i]->language);
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
             }
 
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->description) {
+#if defined(__clang__)
 // This is a const char * that we need to free, which isn't valid. However it
 // would mean changing the public API to fix this.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
+#endif
                 FREE_AND_SET_NULL(
                     mmdb->metadata.description.descriptions[i]->description);
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
             }
             FREE_AND_SET_NULL(mmdb->metadata.description.descriptions[i]);
         }
