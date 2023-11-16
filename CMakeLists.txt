@@ -37,8 +37,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-configure_file(${PROJECT_SOURCE_DIR}/include/maxminddb_config.h.cmake.in 
-               ${PROJECT_SOURCE_DIR}/include/maxminddb_config.h)
+configure_file(${PROJECT_SOURCE_DIR}/include/maxminddb_config.h.cmake.in
+          ${CMAKE_CURRENT_BINARY_DIR}/generated/maxminddb_config.h)
 
 add_library(maxminddb
   src/maxminddb.c
@@ -80,6 +80,10 @@ target_include_directories(maxminddb PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
+)
+
+target_include_directories(maxminddb PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/"
 )
 
 set(MAXMINDB_HEADERS
