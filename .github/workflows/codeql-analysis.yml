@@ -27,7 +27,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
 
     - run: sudo apt install libipc-run3-perl libipc-system-simple-perl libfile-slurp-perl libfile-which-perl pandoc
     - run: |
@@ -37,4 +37,4 @@ jobs:
             make safedist
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
