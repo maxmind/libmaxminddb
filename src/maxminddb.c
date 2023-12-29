@@ -23,6 +23,7 @@
 #endif
 #include <windows.h>
 #include <ws2ipdef.h>
+typedef ADDRESS_FAMILY sa_family_t;
 #else
 #include <arpa/inet.h>
 #include <sys/mman.h>
