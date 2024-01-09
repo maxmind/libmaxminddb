@@ -23,7 +23,9 @@
 #endif
 #include <windows.h>
 #include <ws2ipdef.h>
+#ifndef SSIZE_MAX
 #define SSIZE_MAX INTPTR_MAX
+#endif
 typedef ADDRESS_FAMILY sa_family_t;
 #else
 #include <arpa/inet.h>

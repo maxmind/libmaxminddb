@@ -1,3 +1,9 @@
+## 1.9.1
+
+* `SSIZE_MAX` is now defined conditionally on Windows. The 1.9.0
+  release would cause a redefinition warning when compiled with MinGW.
+  Reported by Andreas Vögele. GitHub #338.
+
 ## 1.9.0 - 2024-01-09
 
 * On very large databases, the calculation to determine the search tree
