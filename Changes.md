@@ -1,3 +1,9 @@
+## 1.8.1
+
+* On very large databases, the calculation to determine the search tree
+  size could overflow. This was fixed and several additional guards
+  against overflows were added. Reported by Sami Salonen. GitHub #335.
+
 ## 1.8.0 - 2023-11-07
 
 * `PACKAGE_VERSION` is now a private compile definition when building
