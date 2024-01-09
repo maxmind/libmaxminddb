@@ -301,7 +301,8 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
 
     mmdb->data_section =
         mmdb->file_content + search_tree_size + MMDB_DATA_SECTION_SEPARATOR;
-    if (search_tree_size + MMDB_DATA_SECTION_SEPARATOR > mmdb->file_size) {
+    if (mmdb->file_size < MMDB_DATA_SECTION_SEPARATOR ||
+        search_tree_size > mmdb->file_size - MMDB_DATA_SECTION_SEPARATOR) {
         status = MMDB_INVALID_METADATA_ERROR;
         goto cleanup;
     }
