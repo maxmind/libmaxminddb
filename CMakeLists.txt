@@ -13,6 +13,7 @@ if (WIN32)
 endif()
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
 option(BUILD_TESTING "Build test programs" ON)
+option(maxminddb_BUILD_BINARIES "Build binaries" ON)
 
 include(GNUInstallDirs)
 
@@ -99,8 +100,9 @@ install(EXPORT maxminddb
         NAMESPACE maxminddb::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maxminddb)
 
-# We always want to build mmdblookup
-add_subdirectory(bin)
+if (maxminddb_BUILD_BINARIES)
+  add_subdirectory(bin)
+endif()
 
 if (BUILD_TESTING)
   enable_testing()
