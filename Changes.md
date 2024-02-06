@@ -1,3 +1,10 @@
+## 1.10.0
+
+* When building with CMake, it is now possible to disable the building
+  of binaries (e.g., `mmdblookup`) with the `MAXMINDDB_BUILD_BINARIES`
+  option and the install target generation with the `MAXMINDDB_INSTALL`
+  option. Pull request by Seena Fallah. GitHub #342.
+
 ## 1.9.1 - 2024-01-09
 
 * `SSIZE_MAX` is now defined conditionally on Windows. The 1.9.0
