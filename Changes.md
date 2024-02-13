@@ -237,7 +237,7 @@
   code to think it had found valid metadata when none existed. In addition,
   this could lead to an attempt to read past the end of the database
   entirely. Finally, if there are multiple metadata markers in the database,
-  we treat the final one as the start of the metdata, instead of the first.
+  we treat the final one as the start of the metadata, instead of the first.
   Implemented by Tobias Stoeckmann. GitHub #102.
 * Don't attempt to mmap a file that is too large to be mmapped on the
   system. Implemented by Tobias Stoeckmann. GitHub #101.
