@@ -18,7 +18,7 @@ if(NOT MSVC)
   if (MAXMINDDB_INSTALL)
     install(
       TARGETS mmdblookup
-      DESTINATION bin
+      DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
   endif()
 endif()
