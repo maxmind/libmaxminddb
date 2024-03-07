@@ -115,9 +115,9 @@ endif()
 # Generate libmaxminddb.pc file for pkg-config
 # Set the required variables as same with autotools
 set(prefix ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix \${prefix})
-set(libdir \${exec_prefix}/lib)
-set(includedir \${prefix}/include)
+set(exec_prefix ${CMAKE_INSTALL_PREFIX})
+set(libdir ${CMAKE_INSTALL_LIBDIR})
+set(includedir ${CMAKE_INSTALL_INCLUDEDIR})
 set(PACKAGE_VERSION ${maxminddb_VERSION})
 
 if (MAXMINDDB_INSTALL)
