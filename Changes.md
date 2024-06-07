@@ -4,6 +4,9 @@
   of binaries (e.g., `mmdblookup`) with the `MAXMINDDB_BUILD_BINARIES`
   option and the install target generation with the `MAXMINDDB_INSTALL`
   option. Pull request by Seena Fallah. GitHub #342.
+* The reader can now lookup records on a database with a search tree
+  that is greater than 4 gigabytes without sometimes returning erroneous
+  results due to an integer overflow.
 
 ## 1.9.1 - 2024-01-09
 
