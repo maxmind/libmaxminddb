@@ -1,4 +1,4 @@
-## 1.10.0
+## 1.10.0 - 2024-06-10
 
 * When building with CMake, it is now possible to disable the building
   of binaries (e.g., `mmdblookup`) with the `MAXMINDDB_BUILD_BINARIES`
