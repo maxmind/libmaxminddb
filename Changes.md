@@ -1,10 +1,12 @@
-## 1.10.0
+## 1.10.0 - 2024-06-10
 
 * When building with CMake, it is now possible to disable the building
   of binaries (e.g., `mmdblookup`) with the `MAXMINDDB_BUILD_BINARIES`
   option and the install target generation with the `MAXMINDDB_INSTALL`
   option. Pull request by Seena Fallah. GitHub #342.
-* The reader can now lookup records on a database with a search tree
+* CMake now makes greater use of GNUInstallDirs. Pull request by Maximilian
+  Downey Twiss. GitHub #346.
+* The reader can now look up records on a database with a search tree
   that is greater than 4 gigabytes without sometimes returning erroneous
   results due to an integer overflow.
 
