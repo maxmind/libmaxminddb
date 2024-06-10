@@ -4,6 +4,8 @@
   of binaries (e.g., `mmdblookup`) with the `MAXMINDDB_BUILD_BINARIES`
   option and the install target generation with the `MAXMINDDB_INSTALL`
   option. Pull request by Seena Fallah. GitHub #342.
+* CMake now makes greater use of GNUInstallDirs. Pull request by Maximilian
+  Downey Twiss. GitHub #346.
 * The reader can now lookup records on a database with a search tree
   that is greater than 4 gigabytes without sometimes returning erroneous
   results due to an integer overflow.
