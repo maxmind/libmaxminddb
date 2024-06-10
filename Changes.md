@@ -6,7 +6,7 @@
   option. Pull request by Seena Fallah. GitHub #342.
 * CMake now makes greater use of GNUInstallDirs. Pull request by Maximilian
   Downey Twiss. GitHub #346.
-* The reader can now lookup records on a database with a search tree
+* The reader can now look up records on a database with a search tree
   that is greater than 4 gigabytes without sometimes returning erroneous
   results due to an integer overflow.
 
