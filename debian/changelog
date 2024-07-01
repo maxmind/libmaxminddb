@@ -4,144 +4,166 @@ libmaxminddb (1.10.0-0+maxmind1) noble; urgency=low
 
  -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Mon, 10 Jun 2024 10:26:36 -0700
 
-libmaxminddb (1.9.0-0+maxmind1) mantic; urgency=low
+libmaxminddb (1.9.1-1) unstable; urgency=medium
 
   * New upstream release.
 
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Tue, 09 Jan 2024 11:44:48 -0800
+ -- Faidon Liambotis <paravoid@debian.org>  Thu, 11 Jan 2024 17:29:44 +0200
 
-libmaxminddb (1.8.0-0+maxmind1) mantic; urgency=low
-
-  * New upstream release.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Tue, 07 Nov 2023 10:51:13 -0800
-
-libmaxminddb (1.7.1-0+maxmind1) kinetic; urgency=low
+libmaxminddb (1.8.0-1) unstable; urgency=medium
 
   * New upstream release.
+  * Bump Standards-Version to 4.6.2, no changes needed.
+  * Switch URLs in the extended description to https.
 
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Fri, 30 Sep 2022 14:55:01 -0700
+ -- Faidon Liambotis <paravoid@debian.org>  Mon, 13 Nov 2023 06:59:13 +0200
 
-libmaxminddb (1.7.0-0+maxmind1) kinetic; urgency=low
-
-  * New upstream release.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Wed, 28 Sep 2022 14:38:08 -0700
-
-libmaxminddb (1.6.0-0+maxmind1) hirsute; urgency=low
+libmaxminddb (1.7.1-1) unstable; urgency=medium
 
   * New upstream release.
+  * Switch debian/watch to the GitHub API, as the old scraping method did not
+    work anymore.
+  * Bump Standards-Version to 4.6.1, no changes needed.
 
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Thu, 29 Apr 2021 10:21:24 -0700
+ -- Faidon Liambotis <paravoid@debian.org>  Sat, 07 Jan 2023 02:28:38 +0200
 
-libmaxminddb (1.5.2-0+maxmind1) groovy; urgency=low
-
-  * New upstream release.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Thu, 18 Feb 2021 09:10:52 -0800
-
-libmaxminddb (1.5.1-0+maxmind1) groovy; urgency=low
+libmaxminddb (1.5.2-1) unstable; urgency=medium
 
   * New upstream release.
+    - Drop all five patches that were adding functionality around manpage
+      generation; merged upstream.
 
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Thu, 18 Feb 2021 07:32:44 -0800
+ -- Faidon Liambotis <paravoid@debian.org>  Sun, 21 Feb 2021 17:14:33 +0200
 
-libmaxminddb (1.5.0-0+maxmind1) focal; urgency=low
+libmaxminddb (1.5.0-3) unstable; urgency=medium
+
+  * Use lowdown for the manpage generation by default, and keep pandoc only as
+    a fallback for backports. The package should now build in the buildd
+    network in all architectures. (Closes: #956041)
+
+ -- Faidon Liambotis <paravoid@debian.org>  Thu, 11 Feb 2021 00:40:34 +0200
+
+libmaxminddb (1.5.0-2) unstable; urgency=medium
+
+  * Manpage generation improvements:
+    - Add support for the "nodoc" build option/profile.
+    - Refresh patches 0001-Remove-Pandoc-version-from-manpages and
+      0002-Limit-scope-of-generated-3-manpages-to-MMDB_ as these have now been
+      forwarded and merged upstream.
+    - Add three more manpage changes to facilitate building with alternative
+      Markdown translators; see upstream PR #248 for more details.
+    - Add lowdown as an alternative Markdown translator to be used instead of
+      pandoc, to ease bootstrappability for new ports. (Closes: #956041)
+  * Add support for the "nocheck" build option/profile.
+  * Utilize debian/no-installed and debian/clean to remove a couple of
+    debian/rules override targets.
+  * Add autopkgtests: one to test mmdblookup and another to test the
+    compilation of a simple C program utilizing libmaxminddb.
+  * gbp: use "debian/sid" as debian branch name, and "main" as upstream name.
+
+ -- Faidon Liambotis <paravoid@debian.org>  Thu, 04 Feb 2021 04:18:31 +0200
+
+libmaxminddb (1.5.0-1) unstable; urgency=medium
+
+  [ Faidon Liambotis ]
+  * New upstream release.
+  * Stop shipping the defined(3) manpage.
+
+  [ Debian Janitor ]
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository,
+    Repository-Browse.
+
+ -- Faidon Liambotis <paravoid@debian.org>  Thu, 07 Jan 2021 17:59:18 +0200
+
+libmaxminddb (1.4.3-2) unstable; urgency=medium
+
+  * d/control: Add Breaks+Replaces on libmaxminddb-dev.
+    libmaxminddb-dev will Break+Replace libmaxminddb0 (<< 1.4.3-2),
+    because of the move of libmaxminddb.3 to libmaxminddb-dev. (Closes: #977034)
+
+ -- Sergio Durigan Junior <sergiodj@debian.org>  Thu, 10 Dec 2020 11:55:16 -0500
+
+libmaxminddb (1.4.3-1) unstable; urgency=medium
+
+  [ Faidon Liambotis ]
+  * Move libmaxminddb.3 to libmaxminddb-dev.
+    This is developer documentation, not runtime documentation. Thanks to
+    Helmut Grohne for spotting this!
+  * Annotate test only build-depends with <!nocheck>
+    Thanks to Helmut Grohne for identifying this and for the patch.
+    (Closes: #968633)
+
+  [ Sergio Durigan Junior ]
+  * New upstream release. (Closes: #973878)
+  * d/control: Bump to debhelper-compat 13.  Remove d/compat.
+  * d/control: Bump to Standards-Version 4.5.1.
+  * d/libmaxminddb-dev.install: Add defined.3 manpage.
+  * d/rules: Enable hardening when building the library.
+  * d/rules: Override dh_auto_install and delete libmaxminddb.la.
+  * d/watch: Bump version to 4.
+  * d/control: Remove trailing whitespace.
+  * d/copyright: Several fixes to address lintian warnings.
+    Namely: (1) added the text for CC-BY-SA-3.0 license, adjusted
+    reference to /usr/share/common-licenses/GPL-2 file, adjusted a few
+    links (s/http/https/).
+  * d/control: Add Rules-Requires-Root: no.
+  * d/control: Add myself as an Uploader.
+
+ -- Sergio Durigan Junior <sergiodj@debian.org>  Mon, 07 Dec 2020 16:10:13 -0500
+
+libmaxminddb (1.3.2-1) unstable; urgency=medium
 
   * New upstream release.
+    - Drop Add-export-symbols-regexp-to-Makefile patch, merged upstream.
+  * Update Vcs-* URLs to point to salsa.debian.org.
+  * Bump Standards-Version to 4.1.4, no changes needed.
+  * Remove pre-stretch dbgsym-migration Conflicts.
 
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Tue, 05 Jan 2021 14:59:19 -0800
+ -- Faidon Liambotis <paravoid@debian.org>  Sat, 26 May 2018 19:37:59 +0300
 
-libmaxminddb (1.4.3-0+maxmind1) focal; urgency=low
-
-  * New upstream release.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Thu, 06 Aug 2020 09:33:32 -0700
-
-libmaxminddb (1.4.2-0+maxmind1) eoan; urgency=low
+libmaxminddb (1.3.1-1) unstable; urgency=medium
 
   * New upstream release.
+  * Bump Standards-Version to 4.1.2, no changes needed.
+  * Add NOTICE to debian/docs, per Apache-2.0's requirements, as identified by
+    lintian.
+  * Add patch to remove Pandoc version from manpages, as that may introduce
+    deltas between builds on different architecture, thus breaking multi-arch.
+    (Closes: #874247)
+  * Add patch to pass -export-symbols-regex to LDFLAGS, to export only MMDB_*
+    symbols and thus avoid exporting the new data_pool_* symbols, which are
+    seemingly internal-only.
 
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Sat, 02 Nov 2019 09:02:46 -0700
+ -- Faidon Liambotis <paravoid@debian.org>  Wed, 27 Dec 2017 04:01:35 +0200
 
-libmaxminddb (1.4.1-0+maxmind1) eoan; urgency=low
-
-  * New upstream release.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Fri, 01 Nov 2019 15:44:49 -0700
-
-libmaxminddb (1.4.0-0+maxmind1) disco; urgency=low
-
-  * New upstream release.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Fri, 01 Nov 2019 14:40:57 -0700
-
-libmaxminddb (1.3.2-0+maxmind2) disco; urgency=medium
-
-  * Re-sync with Debian package.
-  * Include pkg-config in -dev package. (Closes: GitHub #194)
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Wed, 21 Aug 2019 13:43:35 -0700
-
-libmaxminddb (1.3.2-0+maxmind1) artful; urgency=low
+libmaxminddb (1.2.1-1) unstable; urgency=medium
 
   * New upstream release.
+  * Bump Standards-Version to 4.0.0.
+  * Bump debhelper compatibility level to 10.
 
- -- Florian Ragwitz <rafl@debian.org>  Wed, 17 Jan 2018 13:43:40 -0800
+ -- Faidon Liambotis <paravoid@debian.org>  Fri, 04 Aug 2017 22:40:10 +0300
 
-libmaxminddb (1.3.1-0+maxmind1) artful; urgency=low
-
-  * New upstream release.
-
- -- William Storey <wstorey@maxmind.com>  Fri, 24 Nov 2017 19:23:36 +0000
-
-libmaxminddb (1.3.0-0+maxmind1) artful; urgency=low
+libmaxminddb (1.2.0-1) unstable; urgency=medium
 
   * New upstream release.
+  * Bump Standards-Version to 3.9.8.
+  * Pass -O--dbgsym-migration to dh_strip and relax the debhelper dependency
+    to ease backports.
 
- -- William Storey <wstorey@maxmind.com>  Fri, 10 Nov 2017 21:33:15 +0000
+ -- Faidon Liambotis <paravoid@debian.org>  Fri, 15 Jul 2016 13:09:07 +0300
 
-libmaxminddb (1.3.0-0+maxmind1~precise) precise; urgency=low
+libmaxminddb (1.1.5-1) unstable; urgency=medium
 
-  * New upstream release.
+  * New upstream release. (Closes: #816783)
+    - Fixes bound checking on several datatypes. (Closes: #805657)
+    - Drop patch fix-exec-includedir, superseded upstream.
+  * Bump Standards-Version to 3.9.7, no changes needed.
+  * Switch Homepage, Vcs-Git and Vcs-Browser to https URLs.
+  * Ship the pkg-config .pc file in the -dev package.
+  * Migrate from our own -dbg package to the automatic -dbgsym package.
 
- -- William Storey <wstorey@maxmind.com>  Fri, 10 Nov 2017 21:28:47 +0000
-
-libmaxminddb (1.2.1-0+maxmind1) zesty; urgency=low
-
-  * New upstream release.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Mon, 15 May 2017 09:58:52 -0700
-
-libmaxminddb (1.2.0-0+maxmind1~wily) wily; urgency=low
-
-  * New upstream release.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Wed, 23 Mar 2016 10:51:36 -0700
-
-libmaxminddb (1.1.5-0+maxmind1~0.1) wily; urgency=medium
-
-  * New upstream release.
-
- -- Florian Ragwitz <rafl@debian.org>  Sun, 20 Mar 2016 16:14:02 -0700
-
-libmaxminddb (1.1.3-0+maxmind1~wily) wily; urgency=medium
-
-  * New upstream version.
-
- -- Dave Rolsky (MaxMind, Inc.) <drolsky@maxmind.com>  Tue, 05 Jan 2016 16:05:19 -0600
-
-libmaxminddb (1.1.2-0+maxmind1~wily) wily; urgency=medium
-
-  * New upstream version.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Mon, 16 Nov 2015 09:48:57 -0800
-
-libmaxminddb (1.1.0-0+maxmind1~utopic) utopic; urgency=medium
-
-  * New upstream version.
-
- -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Tue, 21 Jul 2015 15:13:31 -0700
+ -- Faidon Liambotis <paravoid@debian.org>  Wed, 23 Mar 2016 01:20:35 +0200
 
 libmaxminddb (1.0.4-2) unstable; urgency=medium
 

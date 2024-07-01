@@ -2,4 +2,3 @@ usr/include/*
 usr/lib/*/lib*.a
 usr/lib/*/lib*.so
 usr/lib/*/pkgconfig/*
-usr/share/man/man3/MMDB*

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+cat > $AUTOPKGTEST_TMP/open.c <<EOF
+#include <maxminddb.h>
+
+int main(int argc, char *argv[])
+{
+    const char *fname = "t/maxmind-db/test-data/GeoIP2-City-Test.mmdb";
+    MMDB_s mmdb;
+    return MMDB_open(fname, MMDB_MODE_MMAP, &mmdb);
+}
+EOF
+
+gcc -o $AUTOPKGTEST_TMP/open $AUTOPKGTEST_TMP/open.c -lmaxminddb
+
+$AUTOPKGTEST_TMP/open

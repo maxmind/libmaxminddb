@@ -2,19 +2,21 @@ Source: libmaxminddb
 Section: net
 Priority: optional
 Maintainer: Gregory J. Oschwald <goschwald@maxmind.com>
-Build-Depends: debhelper (>= 9), dh-autoreconf,
- perl,
- libipc-run3-perl,
- libtest-output-perl,
+Build-Depends:
+ debhelper-compat (= 13),
+ perl <!nodoc !nocheck>,
+ libipc-run3-perl <!nocheck>,
+ libtest-output-perl <!nocheck>,
 # for dev-bin/make-man-pages.pl
- pandoc,
- libipc-system-simple-perl,
- libfile-slurp-perl,
- libfile-which-perl
-Standards-Version: 4.1.4
+ lowdown <!nodoc> | pandoc <!nodoc>,
+ libipc-system-simple-perl <!nodoc>,
+ libfile-slurp-perl <!nodoc>,
+ libfile-which-perl <!nodoc>,
+Standards-Version: 4.6.2
 Homepage: https://maxmind.github.io/libmaxminddb/
 Vcs-Browser: https://github.com/maxmind/libmaxminddb/
 Vcs-Git: git://github.com/maxmind/libmaxminddb.git
+Rules-Requires-Root: no
 
 Package: libmaxminddb0
 Section: libs
@@ -29,13 +31,15 @@ Description: IP geolocation database library
  flexibility in the type of data associated with an address.
  .
  The MaxMind DB format is an open format. The spec is available at
- http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
+ https://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
  Commons Attribution-ShareAlike 3.0 Unported License.
 
 Package: libmaxminddb-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
+Breaks: libmaxminddb0 (<< 1.4.3-2)
+Replaces: libmaxminddb0 (<< 1.4.3-2)
 Depends: libmaxminddb0 (= ${binary:Version}), ${misc:Depends}
 Description: IP geolocation database library (development headers)
  The libmaxminddb library provides a C library for reading MaxMind DB files,
@@ -44,7 +48,7 @@ Description: IP geolocation database library (development headers)
  flexibility in the type of data associated with an address.
  .
  The MaxMind DB format is an open format. The spec is available at
- http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
+ https://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
  Commons Attribution-ShareAlike 3.0 Unported License.
  .
  This package contains the development files for the libmaxminddb library.
@@ -60,8 +64,8 @@ Description: IP geolocation lookup command-line tool
  flexibility in the type of data associated with an address.
  .
  The MaxMind DB format is an open format. The spec is available at
- http://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
+ https://maxmind.github.io/MaxMind-DB/. This spec is licensed under the Creative
  Commons Attribution-ShareAlike 3.0 Unported License.
  .
  This package contains the command line utilities to resolve IPs using the
- libmaxminddb library. 
+ libmaxminddb library.

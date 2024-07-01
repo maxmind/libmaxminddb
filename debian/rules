@@ -1,28 +1,29 @@
 #!/usr/bin/make -f
 
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
-	DEBUG += --enable-debug
+	CONFIGURE_OPTS += --enable-debug
+endif
+
+ifneq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS) $(DEB_BUILD_PROFILES)))
+	CONFIGURE_OPTS += --disable-tests
 endif
 
 %:
-	dh $@  --with autoreconf
+	dh $@
 
 override_dh_auto_configure:
 	dh_auto_configure -- \
 		--includedir="\$${prefix}/include/$(DEB_HOST_MULTIARCH)" \
-		$(DEBUG)
+		$(CONFIGURE_OPTS)
 
 override_dh_auto_build:
-	# build manpages (needs pandoc); these are included in tarballs
+ifeq (,$(findstring nodoc,$(DEB_BUILD_OPTIONS) $(DEB_BUILD_PROFILES)))
+	# build manpages; these are included in tarballs but we regenerate them
 	dev-bin/make-man-pages.pl
+endif
 	dh_auto_build
-
-override_dh_auto_clean:
-	dh_auto_clean
-	rm -f Makefile.in aclocal.m4 bin/Makefile.in compile config.guess \
-	   config.h.in config.sub configure depcomp install-sh ltmain.sh \
-	    missing src/Makefile.in t/Makefile.in test-driver
-	rm -rf man/
 
 override_dh_installchangelogs:
 	dh_installchangelogs Changes.md

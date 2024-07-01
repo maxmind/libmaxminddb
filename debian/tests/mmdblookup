@@ -1,0 +1,2 @@
+#!/bin/sh
+mmdblookup --file t/maxmind-db/test-data/GeoIP2-City-Test.mmdb  --ip 2.125.160.217 | grep -q Boxford

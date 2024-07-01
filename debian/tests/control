@@ -1,0 +1,8 @@
+# Test whether mmdblookup works
+# explicitly depend only on the -bin package, not @, and nothing else
+Tests: mmdblookup
+Depends: mmdb-bin 
+
+# Test whether the library works by compiling a simple program that opens a database
+Tests: compile-open
+Depends: build-essential, libmaxminddb-dev
