@@ -107,6 +107,33 @@ if (MAXMINDDB_BUILD_BINARIES)
   add_subdirectory(bin)
 endif()
 
+# Check if man pages exist, if not, generate them
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/man")
+    find_program(PERL perl)
+    if(PERL)
+        message(STATUS "Generating man pages")
+        execute_process(
+            COMMAND ${PERL} ${CMAKE_CURRENT_SOURCE_DIR}/dev-bin/make-man-pages.pl
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+    else()
+        message(WARNING "Perl not found. Unable to generate man pages.")
+    endif()
+endif()
+
+# Install man pages if they exist
+if(MAXMINDDB_INSTALL AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/man")
+    install(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/man/man1
+        DESTINATION ${CMAKE_INSTALL_MANDIR}
+    )
+
+    install(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/man/man3
+        DESTINATION ${CMAKE_INSTALL_MANDIR}
+    )
+endif()
+
 if (BUILD_TESTING)
   enable_testing()
   add_subdirectory(t)

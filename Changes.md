@@ -1,3 +1,8 @@
+## 1.11.0
+
+* When building with CMake, the man pages will now be generated and installed.
+  Requested by Thomas Klausner. GitHub #351.
+
 ## 1.10.0 - 2024-06-10
 
 * When building with CMake, it is now possible to disable the building
