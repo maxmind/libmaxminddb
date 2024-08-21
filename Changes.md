@@ -1,7 +1,10 @@
-## 1.11.0
+## 1.11.0 - 2024-08-21
 
-* When building with CMake, the man pages will now be generated and installed.
-  Requested by Thomas Klausner. GitHub #351.
+* When building with CMake, the man pages will now be generated and
+  installed. Requested by Thomas Klausner. GitHub #351.
+* Removed unnecessary `$<INSTALL_INTERFACE:generated>` directory from
+  `target_include_directories` in the CMake build configuration. This is
+  a private build directory. Pull request by Ankur Verma. GitHub #354.
 
 ## 1.10.0 - 2024-06-10
 
