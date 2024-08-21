@@ -83,7 +83,6 @@ target_include_directories(maxminddb PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated/>
   $<INSTALL_INTERFACE:include>
-  $<INSTALL_INTERFACE:generated>
 )
 
 set(MAXMINDB_HEADERS
