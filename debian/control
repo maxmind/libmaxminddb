@@ -38,8 +38,8 @@ Package: libmaxminddb-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Breaks: libmaxminddb0 (<< 1.4.3-2)
-Replaces: libmaxminddb0 (<< 1.4.3-2)
+Breaks: libmaxminddb0 (<< 1.11.0-0)
+Replaces: libmaxminddb0 (<< 1.11.0-0)
 Depends: libmaxminddb0 (= ${binary:Version}), ${misc:Depends}
 Description: IP geolocation database library (development headers)
  The libmaxminddb library provides a C library for reading MaxMind DB files,
