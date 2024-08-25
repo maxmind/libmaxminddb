@@ -1,3 +1,11 @@
+libmaxminddb (1.11.0-0+maxmind2~noble) noble; urgency=medium
+
+  * d/control: Add Breaks+Replaces on libmaxminddb-dev.
+    libmaxminddb-dev will Break+Replace libmaxminddb0 (<< 1.11.0-0),
+    because of the move of libmaxminddb.3 to libmaxminddb-dev.
+
+ -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Sat, 24 Aug 2024 17:00:51 -0700
+
 libmaxminddb (1.11.0-0+maxmind1) noble; urgency=low
 
   * New upstream release.
