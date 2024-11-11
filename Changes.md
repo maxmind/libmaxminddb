@@ -1,3 +1,13 @@
+## 1.12.0
+
+* Fixed memory leaks in `MMDB_open()`. These could happen with invalid
+  databases or in error situations such as failing to allocate memory. As
+  part of the fix, `MMDB_get_entry_data_list()` now frees memory it
+  allocates on additional errors. Previously it failed to clean up when
+  certain errors occurred. Pull request by pkillarjun. GitHub #356.
+* There is now a build target to fuzz the library. Pull request by
+  pkillarjun. GitHub #357.
+
 ## 1.11.0 - 2024-08-21
 
 * When building with CMake, the man pages will now be generated and
