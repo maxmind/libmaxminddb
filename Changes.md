@@ -7,6 +7,11 @@
   certain errors occurred. Pull request by pkillarjun. GitHub #356.
 * There is now a build target to fuzz the library. Pull request by
   pkillarjun. GitHub #357.
+* Updated `cmake_minimum_required` to a version range to quiet deprecation
+  warnings on new CMake versions. Reported by gmou3. GitHub #359.
+* The script for generating man pages no longer uses `autodie`. This
+  eliminates the dependency on `IPC::System::Simple`. Reported by gmou3.
+  GitHub #359.
 
 ## 1.11.0 - 2024-08-21
 
