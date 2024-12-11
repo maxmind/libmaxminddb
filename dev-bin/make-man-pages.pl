@@ -82,6 +82,9 @@ sub _make_lib_man_links {
     open my $header_fh, '<', "$Bin/../include/maxminddb.h"
         or die "Failed to open header file: $!";
     my $header = do { local $/; <$header_fh> };
+
+    die "Error reading file header file: $!" unless defined $header;
+
     close $header_fh or die "Failed to close header file: $!";
 
     for my $proto ( $header =~ /^ *extern.+?(MMDB_\w+)\(/gsm ) {
@@ -100,6 +103,8 @@ sub _pandoc_postprocess {
 
     open my $fh, '<', $file or die "Failed to open man file for reading: $!";
     my @lines = <$fh>;
+    die "Error when reading man page: $!" if $!;
+
     close $fh or die "Failed to close file: $!";
 
     for my $line (@lines) {
