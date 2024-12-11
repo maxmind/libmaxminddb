@@ -59,7 +59,7 @@ sub _make_man {
             '-M', "section:$section",
             $input,
             '-o', $output,
-        ) == 0 or die "Failed to run pandoc: $!";
+        ) == 0 or die "Failed to run pandoc: $?";
         _pandoc_postprocess($output);
     }
     elsif ( $translator eq 'lowdown' ) {
@@ -72,7 +72,7 @@ sub _make_man {
             '-M', "section:$section",
             $input,
             '-o', $output,
-        ) == 0 or die "Failed to run lowdown: $!";
+        ) == 0 or die "Failed to run lowdown: $?";
     }
 }
 
