@@ -12,6 +12,8 @@
 * The script for generating man pages no longer uses `autodie`. This
   eliminates the dependency on `IPC::System::Simple`. Reported by gmou3.
   GitHub #359.
+* An uninstall target is now included for CMake. Pull request by gmou3.
+  GitHub #362.
 
 ## 1.11.0 - 2024-08-21
 
