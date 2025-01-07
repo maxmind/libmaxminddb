@@ -1,3 +1,9 @@
+libmaxminddb (1.12.0-0+maxmind1) oracular; urgency=low
+
+  * New upstream release.
+
+ -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Tue, 07 Jan 2025 15:24:20 -0800
+
 libmaxminddb (1.11.0-0+maxmind2~noble) noble; urgency=medium
 
   * d/control: Add Breaks+Replaces on libmaxminddb-dev.
