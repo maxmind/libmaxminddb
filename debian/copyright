@@ -3,7 +3,7 @@ Upstream-Name: libmaxminddb
 Source: https://maxmind.github.io/libmaxminddb/
 
 Files: *
-Copyright: 2013-2024 MaxMind, Inc.
+Copyright: 2013-2025 MaxMind, Inc.
 License: Apache-2.0
 
 Files: t/maxmind-db/*
