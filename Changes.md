@@ -1,4 +1,4 @@
-## 1.12.0
+## 1.12.0 - 2025-01-07
 
 * Fixed memory leaks in `MMDB_open()`. These could happen with invalid
   databases or in error situations such as failing to allocate memory. As
