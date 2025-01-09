@@ -1,4 +1,10 @@
-## 1.12.0
+## 1.12.1 - 2025-01-08
+
+* Added missing `cmake_uninstall.cmake.in` to the source distribution. This
+  was missing from 1.12.0, causing CMake builds to fail. Reported by Marcel
+  Raad. GitHub #367.
+
+## 1.12.0 - 2025-01-07
 
 * Fixed memory leaks in `MMDB_open()`. These could happen with invalid
   databases or in error situations such as failing to allocate memory. As
