@@ -1,4 +1,4 @@
-## 1.12.2
+## 1.12.2 - 2025-01-10
 
 * `MMDB_get_entry_data_list()` now always sets the passed `entry_data_list`
   parameter to either `NULL` or valid memory. This makes it safe for
