@@ -1,3 +1,9 @@
+libmaxminddb (1.12.2-0+maxmind1) oracular; urgency=low
+
+  * New upstream release.
+
+ -- Gregory J. Oschwald (MaxMind, Inc.) <goschwald@maxmind.com>  Fri, 10 Jan 2025 10:00:49 -0800
+
 libmaxminddb (1.12.0-0+maxmind1) oracular; urgency=low
 
   * New upstream release.
