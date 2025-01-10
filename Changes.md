@@ -1,3 +1,21 @@
+## 1.12.2 - 2025-01-10
+
+* `MMDB_get_entry_data_list()` now always sets the passed `entry_data_list`
+  parameter to either `NULL` or valid memory. This makes it safe for
+  callers to use `MMDB_free_entry_data_list()` on it even in case of error.
+  In 1.12.0 `MMDB_get_entry_data_list()` was changed to not set this
+  parameter to valid memory in additional error cases. That change caused
+  segfaults for certain libraries that assumed it was safe to free memory
+  on error. Doing so was never safe, but worked in some cases. This change
+  makes such calls safe. Reported by Petr Pisar. GitHub
+  maxmind/MaxMind-DB-Reader-XS#39.
+
+## 1.12.1 - 2025-01-08
+
+* Added missing `cmake_uninstall.cmake.in` to the source distribution. This
+  was missing from 1.12.0, causing CMake builds to fail. Reported by Marcel
+  Raad. GitHub #367.
+
 ## 1.12.0 - 2025-01-07
 
 * Fixed memory leaks in `MMDB_open()`. These could happen with invalid
