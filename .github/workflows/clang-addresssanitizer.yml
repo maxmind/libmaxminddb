@@ -4,6 +4,7 @@ on:
   pull_request:
   schedule:
     - cron: '13 20 * * SUN'
+permissions: {}
 jobs:
   addresssanitizer:
     name: Clang AddressSanitizer

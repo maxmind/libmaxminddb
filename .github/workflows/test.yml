@@ -4,6 +4,7 @@ on:
   pull_request:
   schedule:
     - cron: '3 20 * * SUN'
+permissions: {}
 jobs:
   test-autoconf:
     strategy:
