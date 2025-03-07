@@ -21,8 +21,6 @@ extern "C" {
 /* MSVC doesn't define signed size_t, copy it from configure */
 #define ssize_t SSIZE_T
 
-/* MSVC doesn't support restricted pointers */
-#define restrict
 #endif
 #else
 #include <netdb.h>
