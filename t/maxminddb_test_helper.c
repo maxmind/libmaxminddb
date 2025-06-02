@@ -1,7 +1,7 @@
 #include "maxminddb_test_helper.h"
 
 #if HAVE_CONFIG_H
-#include <config.h>
+    #include <config.h>
 #endif
 
 #include <assert.h>
@@ -11,10 +11,10 @@
 #include "maxminddb.h"
 
 #ifdef _WIN32
-#include <io.h>
+    #include <io.h>
 #else
-#include <libgen.h>
-#include <unistd.h>
+    #include <libgen.h>
+    #include <unistd.h>
 #endif
 
 void for_all_record_sizes(const char *filename_fmt,
@@ -27,13 +27,13 @@ void for_all_record_sizes(const char *filename_fmt,
 
         char filename[500];
 #if defined(__clang__)
-// This warning seems ok to ignore here in the tests.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
+    // This warning seems ok to ignore here in the tests.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
         snprintf(filename, 500, filename_fmt, size);
 #if defined(__clang__)
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
 #endif
 
         char description[14];
