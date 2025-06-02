@@ -1803,9 +1803,7 @@ static float get_ieee754_float(const uint8_t *restrict p) {
 
     memcpy(&i, p, sizeof(uint32_t));
 
-/* Windows builds don't use autoconf but we can assume they're all
- * little-endian. */
-#if MMDB_LITTLE_ENDIAN || _WIN32
+#if MMDB_LITTLE_ENDIAN
     i = bswap32(i);
 #endif
 
@@ -1820,7 +1818,7 @@ static double get_ieee754_double(const uint8_t *restrict p) {
 
     memcpy(&i, p, sizeof(uint64_t));
 
-#if MMDB_LITTLE_ENDIAN || _WIN32
+#if MMDB_LITTLE_ENDIAN
     i = bswap64(i);
 #endif
 

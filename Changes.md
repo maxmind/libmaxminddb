@@ -2,6 +2,7 @@
 
 * The handling of float and double types was rewritten to fix compiler errors
   and to eliminate the use of volatile.
+* Improved endian preprocessor check if `MMDB_LITTLE_ENDIAN` is not set.
 
 ## 1.12.2 - 2025-01-10
 

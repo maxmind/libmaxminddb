@@ -12,6 +12,14 @@ extern "C" {
 #include <stdio.h>
 #include <sys/types.h>
 
+#ifdef __has_include
+#if __has_include(<endian.h>)
+#include <endian.h>
+#elif __has_include(<sys/endian.h>)
+#include <sys/endian.h>
+#endif
+#endif
+
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -26,6 +34,17 @@ extern "C" {
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#endif
+
+#if !defined(MMDB_LITTLE_ENDIAN)
+#if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__)
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define MMDB_LITTLE_ENDIAN 1
+#endif
+#elif defined(_WIN32) || defined(_WIN64)
+// We assume modern Windows targets are little endian
+#define MMDB_LITTLE_ENDIAN 1
+#endif
 #endif
 
 #define MMDB_DATA_TYPE_EXTENDED (0)
