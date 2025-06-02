@@ -1,3 +1,8 @@
+## 1.13.0
+
+* The handling of float and double types was rewritten to fix compiler errors
+  and to eliminate the use of volatile.
+
 ## 1.12.2 - 2025-01-10
 
 * `MMDB_get_entry_data_list()` now always sets the passed `entry_data_list`
