@@ -1,9 +1,9 @@
 #ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200809L
+    #define _POSIX_C_SOURCE 200809L
 #endif
 
 #if HAVE_CONFIG_H
-#include <config.h>
+    #include <config.h>
 #endif
 #include "data-pool.h"
 #include "maxminddb-compat-util.h"
@@ -18,43 +18,43 @@
 #include <sys/stat.h>
 
 #ifdef _WIN32
-#ifndef UNICODE
-#define UNICODE
-#endif
-#include <windows.h>
-#include <ws2ipdef.h>
-#ifndef SSIZE_MAX
-#define SSIZE_MAX INTPTR_MAX
-#endif
+    #ifndef UNICODE
+        #define UNICODE
+    #endif
+    #include <windows.h>
+    #include <ws2ipdef.h>
+    #ifndef SSIZE_MAX
+        #define SSIZE_MAX INTPTR_MAX
+    #endif
 typedef ADDRESS_FAMILY sa_family_t;
 #else
-#include <arpa/inet.h>
-#include <sys/mman.h>
-#include <unistd.h>
+    #include <arpa/inet.h>
+    #include <sys/mman.h>
+    #include <unistd.h>
 #endif
 
 #define MMDB_DATA_SECTION_SEPARATOR (16)
 #define MAXIMUM_DATA_STRUCTURE_DEPTH (512)
 
 #ifdef MMDB_DEBUG
-#define DEBUG_MSG(msg) fprintf(stderr, msg "\n")
-#define DEBUG_MSGF(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
-#define DEBUG_BINARY(fmt, byte)                                                \
-    do {                                                                       \
-        char *binary = byte_to_binary(byte);                                   \
-        if (NULL == binary) {                                                  \
-            fprintf(stderr, "Calloc failed in DEBUG_BINARY\n");                \
-            abort();                                                           \
-        }                                                                      \
-        fprintf(stderr, fmt "\n", binary);                                     \
-        free(binary);                                                          \
-    } while (0)
-#define DEBUG_NL fprintf(stderr, "\n")
+    #define DEBUG_MSG(msg) fprintf(stderr, msg "\n")
+    #define DEBUG_MSGF(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
+    #define DEBUG_BINARY(fmt, byte)                                            \
+        do {                                                                   \
+            char *binary = byte_to_binary(byte);                               \
+            if (NULL == binary) {                                              \
+                fprintf(stderr, "Calloc failed in DEBUG_BINARY\n");            \
+                abort();                                                       \
+            }                                                                  \
+            fprintf(stderr, fmt "\n", binary);                                 \
+            free(binary);                                                      \
+        } while (0)
+    #define DEBUG_NL fprintf(stderr, "\n")
 #else
-#define DEBUG_MSG(...)
-#define DEBUG_MSGF(...)
-#define DEBUG_BINARY(...)
-#define DEBUG_NL
+    #define DEBUG_MSG(...)
+    #define DEBUG_MSGF(...)
+    #define DEBUG_BINARY(...)
+    #define DEBUG_NL
 #endif
 
 #ifdef MMDB_DEBUG
@@ -116,12 +116,12 @@ char *type_num_to_name(uint8_t num) {
  * platforms where SIZE_MAX is a 64-bit integer, this would be a no-op, and it
  * makes the compiler complain if we do the check anyway. */
 #if SIZE_MAX == UINT32_MAX
-#define MAYBE_CHECK_SIZE_OVERFLOW(lhs, rhs, error)                             \
-    if ((lhs) > (rhs)) {                                                       \
-        return error;                                                          \
-    }
+    #define MAYBE_CHECK_SIZE_OVERFLOW(lhs, rhs, error)                         \
+        if ((lhs) > (rhs)) {                                                   \
+            return error;                                                      \
+        }
 #else
-#define MAYBE_CHECK_SIZE_OVERFLOW(...)
+    #define MAYBE_CHECK_SIZE_OVERFLOW(...)
 #endif
 
 typedef struct record_info_s {
@@ -428,21 +428,21 @@ static int map_file(MMDB_s *const mmdb) {
     int status = MMDB_SUCCESS;
 
     int o_flags = O_RDONLY;
-#ifdef O_CLOEXEC
+    #ifdef O_CLOEXEC
     o_flags |= O_CLOEXEC;
-#endif
+    #endif
     int fd = open(mmdb->filename, o_flags);
     if (fd < 0) {
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
     }
 
-#if defined(FD_CLOEXEC) && !defined(O_CLOEXEC)
+    #if defined(FD_CLOEXEC) && !defined(O_CLOEXEC)
     int fd_flags = fcntl(fd, F_GETFD);
     if (fd_flags >= 0) {
         fcntl(fd, F_SETFD, fd_flags | FD_CLOEXEC);
     }
-#endif
+    #endif
 
     struct stat s;
     if (fstat(fd, &s)) {
@@ -1767,37 +1767,62 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
     return MMDB_SUCCESS;
 }
 
-static float get_ieee754_float(const uint8_t *restrict p) {
-    volatile float f;
-    volatile uint8_t *q = (volatile void *)&f;
-/* Windows builds don't use autoconf but we can assume they're all
- * little-endian. */
-#if MMDB_LITTLE_ENDIAN || _WIN32
-    q[3] = p[0];
-    q[2] = p[1];
-    q[1] = p[2];
-    q[0] = p[3];
-#else
-    memcpy(q, p, 4);
+#ifndef __has_builtin
+    #define __has_builtin(x) 0
 #endif
+
+static inline uint32_t bswap32(uint32_t x) {
+#if defined(_MSC_VER)
+    return _byteswap_ulong(x);
+#elif __has_builtin(__builtin_bswap32)
+    return __builtin_bswap32(x);
+#else
+    x = ((x << 8) & 0xFF00FF00) | ((x >> 8) & 0x00FF00FF);
+    return (x << 16) | (x >> 16);
+#endif
+}
+
+static inline uint64_t bswap64(uint64_t x) {
+#if defined(_MSC_VER)
+    return _byteswap_uint64(x);
+#elif __has_builtin(__builtin_bswap64)
+    return __builtin_bswap64(x);
+#else
+    x = ((x & 0x00000000FFFFFFFFULL) << 32) |
+        ((x & 0xFFFFFFFF00000000ULL) >> 32);
+    x = ((x & 0x0000FFFF0000FFFFULL) << 16) |
+        ((x & 0xFFFF0000FFFF0000ULL) >> 16);
+    return ((x & 0x00FF00FF00FF00FFULL) << 8) |
+           ((x & 0xFF00FF00FF00FF00ULL) >> 8);
+#endif
+}
+
+static float get_ieee754_float(const uint8_t *restrict p) {
+    float f;
+    uint32_t i;
+
+    memcpy(&i, p, sizeof(uint32_t));
+
+#if MMDB_LITTLE_ENDIAN
+    i = bswap32(i);
+#endif
+
+    memcpy(&f, &i, sizeof(float));
+
     return f;
 }
 
 static double get_ieee754_double(const uint8_t *restrict p) {
-    volatile double d;
-    volatile uint8_t *q = (volatile void *)&d;
-#if MMDB_LITTLE_ENDIAN || _WIN32
-    q[7] = p[0];
-    q[6] = p[1];
-    q[5] = p[2];
-    q[4] = p[3];
-    q[3] = p[4];
-    q[2] = p[5];
-    q[1] = p[6];
-    q[0] = p[7];
-#else
-    memcpy(q, p, 8);
+    double d;
+    uint64_t i;
+
+    memcpy(&i, p, sizeof(uint64_t));
+
+#if MMDB_LITTLE_ENDIAN
+    i = bswap64(i);
 #endif
+
+    memcpy(&d, &i, sizeof(double));
 
     return d;
 }
@@ -1841,14 +1866,14 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
 
     if (NULL != mmdb->filename) {
 #if defined(__clang__)
-// This is a const char * that we need to free, which isn't valid. However it
-// would mean changing the public API to fix this.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
+    // This is a const char * that we need to free, which isn't valid. However
+    // it would mean changing the public API to fix this.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-qual"
 #endif
         FREE_AND_SET_NULL(mmdb->filename);
 #if defined(__clang__)
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
 #endif
     }
     if (NULL != mmdb->file_content) {
@@ -1858,29 +1883,29 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
          * to cleanup then. */
         WSACleanup();
 #else
-#if defined(__clang__)
-// This is a const char * that we need to free, which isn't valid. However it
-// would mean changing the public API to fix this.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
-#endif
+    #if defined(__clang__)
+        // This is a const char * that we need to free, which isn't valid.
+        // However it would mean changing the public API to fix this.
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wcast-qual"
+    #endif
         munmap((void *)mmdb->file_content, (size_t)mmdb->file_size);
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
+    #if defined(__clang__)
+        #pragma clang diagnostic pop
+    #endif
 #endif
     }
 
     if (NULL != mmdb->metadata.database_type) {
 #if defined(__clang__)
-// This is a const char * that we need to free, which isn't valid. However it
-// would mean changing the public API to fix this.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
+    // This is a const char * that we need to free, which isn't valid. However
+    // it would mean changing the public API to fix this.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-qual"
 #endif
         FREE_AND_SET_NULL(mmdb->metadata.database_type);
 #if defined(__clang__)
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
 #endif
     }
 
@@ -1895,14 +1920,14 @@ static void free_languages_metadata(MMDB_s *mmdb) {
 
     for (size_t i = 0; i < mmdb->metadata.languages.count; i++) {
 #if defined(__clang__)
-// This is a const char * that we need to free, which isn't valid. However it
-// would mean changing the public API to fix this.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
+    // This is a const char * that we need to free, which isn't valid. However
+    // it would mean changing the public API to fix this.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-qual"
 #endif
         FREE_AND_SET_NULL(mmdb->metadata.languages.names[i]);
 #if defined(__clang__)
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
 #endif
     }
     FREE_AND_SET_NULL(mmdb->metadata.languages.names);
@@ -1917,30 +1942,30 @@ static void free_descriptions_metadata(MMDB_s *mmdb) {
         if (NULL != mmdb->metadata.description.descriptions[i]) {
             if (NULL != mmdb->metadata.description.descriptions[i]->language) {
 #if defined(__clang__)
-// This is a const char * that we need to free, which isn't valid. However it
-// would mean changing the public API to fix this.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
+    // This is a const char * that we need to free, which isn't valid. However
+    // it would mean changing the public API to fix this.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-qual"
 #endif
                 FREE_AND_SET_NULL(
                     mmdb->metadata.description.descriptions[i]->language);
 #if defined(__clang__)
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
 #endif
             }
 
             if (NULL !=
                 mmdb->metadata.description.descriptions[i]->description) {
 #if defined(__clang__)
-// This is a const char * that we need to free, which isn't valid. However it
-// would mean changing the public API to fix this.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
+    // This is a const char * that we need to free, which isn't valid. However
+    // it would mean changing the public API to fix this.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-qual"
 #endif
                 FREE_AND_SET_NULL(
                     mmdb->metadata.description.descriptions[i]->description);
 #if defined(__clang__)
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
 #endif
             }
             FREE_AND_SET_NULL(mmdb->metadata.description.descriptions[i]);

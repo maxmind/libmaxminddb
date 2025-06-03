@@ -1,15 +1,15 @@
 #ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200809L
+    #define _POSIX_C_SOURCE 200809L
 #endif
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+    #include <config.h>
 #endif
 #include "maxminddb.h"
 #include <errno.h>
 #include <getopt.h>
 #ifndef _WIN32
-#include <pthread.h>
+    #include <pthread.h>
 #endif
 #include <limits.h>
 #include <stdbool.h>
@@ -19,13 +19,13 @@
 #include <time.h>
 
 #ifdef _WIN32
-#ifndef UNICODE
-#define UNICODE
-#endif
-#include <malloc.h>
+    #ifndef UNICODE
+        #define UNICODE
+    #endif
+    #include <malloc.h>
 #else
-#include <libgen.h>
-#include <unistd.h>
+    #include <libgen.h>
+    #include <unistd.h>
 #endif
 
 static void usage(char *program, int exit_code, const char *error);
@@ -718,28 +718,28 @@ static bool start_threaded_benchmark(MMDB_s *const mmdb,
 
 static long double get_time(void) {
     // clock_gettime() is not present on OSX until 10.12.
-#ifdef HAVE_CLOCK_GETTIME
+    #ifdef HAVE_CLOCK_GETTIME
     struct timespec tp = {
         .tv_sec = 0,
         .tv_nsec = 0,
     };
     clockid_t clk_id = CLOCK_REALTIME;
-#ifdef _POSIX_MONOTONIC_CLOCK
+        #ifdef _POSIX_MONOTONIC_CLOCK
     clk_id = CLOCK_MONOTONIC;
-#endif
+        #endif
     if (clock_gettime(clk_id, &tp) != 0) {
         fprintf(stderr, "clock_gettime(): %s\n", strerror(errno));
         return -1;
     }
     return (long double)tp.tv_sec + ((float)tp.tv_nsec / 1e9);
-#else
+    #else
     time_t t = time(NULL);
     if (t == (time_t)-1) {
         fprintf(stderr, "time(): %s\n", strerror(errno));
         return -1;
     }
     return (long double)t;
-#endif
+    #endif
 }
 
 static void *thread(void *arg) {

@@ -2,11 +2,11 @@
 // this is test code, it should be fine to set it here. Setting it here avoids
 // setting it in every test program.
 #ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200809L
+    #define _POSIX_C_SOURCE 200809L
 #endif
 
 #if HAVE_CONFIG_H
-#include <config.h>
+    #include <config.h>
 #endif
 #include "libtap/tap.h"
 #include "maxminddb-compat-util.h"
@@ -16,31 +16,31 @@
 #include <string.h>
 
 #ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
 
-#define R_OK 4
+    #define R_OK 4
 
 #else
-#include <netdb.h>
+    #include <netdb.h>
 #endif
 
 #if defined _MSC_VER && _MSC_VER < 1900
-/* _snprintf has security issues, but I don't think it is worth
-   worrying about for the unit tests. */
-#define snprintf _snprintf
+    /* _snprintf has security issues, but I don't think it is worth
+       worrying about for the unit tests. */
+    #define snprintf _snprintf
 #endif
 
 #ifndef MMDB_TEST_HELPER_C
-#define MMDB_TEST_HELPER_C (1)
+    #define MMDB_TEST_HELPER_C (1)
 
-#ifdef __GNUC__
-#define UNUSED(x) UNUSED_##x __attribute__((__unused__))
-#else
-#define UNUSED
-#endif
+    #ifdef __GNUC__
+        #define UNUSED(x) UNUSED_##x __attribute__((__unused__))
+    #else
+        #define UNUSED
+    #endif
 
-#define MAX_DESCRIPTION_LENGTH 500
+    #define MAX_DESCRIPTION_LENGTH 500
 
 extern void for_all_record_sizes(const char *filename_fmt,
                                  void (*tests)(int record_size,
