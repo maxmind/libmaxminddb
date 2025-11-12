@@ -611,6 +611,53 @@ If you want to get all of the entry data at once you can call
 For each of the three functions, the return value is a status code as
 defined above.
 
+### Accessing Elements in Maps and Arrays
+
+When `MMDB_get_value()` returns an `MMDB_entry_data_s` with a type of
+`MMDB_DATA_TYPE_MAP` or `MMDB_DATA_TYPE_ARRAY`, you can access individual
+elements by extending the lookup path.
+
+For maps, you can directly access values by their keys:
+
+```c
+MMDB_entry_data_s entry_data;
+// Get the "en" value from the "names" map
+int status = MMDB_get_value(&result.entry, &entry_data,
+                            "names", "en", NULL);
+```
+
+For arrays, you can access elements by their numeric index (as a string):
+
+```c
+MMDB_entry_data_s entry_data;
+// Get the first element from the "cities" array
+int status = MMDB_get_value(&result.entry, &entry_data,
+                            "cities", "0", NULL);
+```
+
+You can also use negative indices to access elements from the end of the array:
+
+```c
+MMDB_entry_data_s entry_data;
+// Get the last element from the "cities" array
+int status = MMDB_get_value(&result.entry, &entry_data,
+                            "cities", "-1", NULL);
+```
+
+The lookup path can navigate through multiple nested levels of maps and arrays:
+
+```c
+MMDB_entry_data_s entry_data;
+// Navigate: top map -> "location" key -> "coordinates" array -> first element
+int status = MMDB_get_value(&result.entry, &entry_data,
+                            "location", "coordinates", "0", NULL);
+```
+
+If you need to iterate over all elements in a map or array without knowing
+the keys or size in advance, use `MMDB_get_entry_data_list()` which returns
+all data in a depth-first traversal. See the `MMDB_get_entry_data_list()`
+documentation below for details.
+
 ## `MMDB_get_entry_data_list()`
 
 ```c
@@ -622,6 +669,10 @@ int MMDB_get_entry_data_list(
 This function allows you to get all of the data for a complex data structure
 at once, rather than looking up each piece using repeated calls to
 `MMDB_get_value()`.
+
+The `start` parameter is an `MMDB_entry_s` value. In most cases, this will
+come from the `entry` member of the `MMDB_lookup_result_s` structure returned
+by `MMDB_lookup_string()` or `MMDB_lookup_sockaddr()`.
 
 ```c
 MMDB_lookup_result_s result =
