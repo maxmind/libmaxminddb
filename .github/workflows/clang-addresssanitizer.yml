@@ -17,7 +17,7 @@ jobs:
       CXXFLAGS: -fsanitize=address
       LDFLAGS: -fsanitize=address
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
           persist-credentials: false
