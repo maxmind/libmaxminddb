@@ -2,6 +2,24 @@
 
 set -eu -o pipefail
 
+# Check that we're not on the main branch
+current_branch=$(git branch --show-current)
+if [ "$current_branch" = "main" ]; then
+    echo "Error: Releases should not be done directly on the main branch."
+    echo "Please create a release branch and run this script from there."
+    exit 1
+fi
+
+# Fetch latest changes and check that we're not behind origin/main
+echo "Fetching from origin..."
+git fetch origin
+
+if ! git merge-base --is-ancestor origin/main HEAD; then
+    echo "Error: Current branch is behind origin/main."
+    echo "Please merge or rebase with origin/main before releasing."
+    exit 1
+fi
+
 changelog=$(cat Changes.md)
 
 regex='## ([0-9]+\.[0-9]+\.[0-9]+) - ([0-9]{4}-[0-9]{2}-[0-9]{2})
