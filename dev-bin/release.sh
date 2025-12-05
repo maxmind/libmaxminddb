@@ -2,6 +2,38 @@
 
 set -eu -o pipefail
 
+# Pre-flight checks - verify all required tools are available and configured
+# before making any changes to the repository
+
+check_command() {
+    if ! command -v "$1" &>/dev/null; then
+        echo "Error: $1 is not installed or not in PATH"
+        exit 1
+    fi
+}
+
+# Verify gh CLI is authenticated
+if ! gh auth status &>/dev/null; then
+    echo "Error: gh CLI is not authenticated. Run 'gh auth login' first."
+    exit 1
+fi
+
+# Verify we can access this repository via gh
+if ! gh repo view --json name &>/dev/null; then
+    echo "Error: Cannot access repository via gh. Check your authentication and repository access."
+    exit 1
+fi
+
+# Verify git can connect to the remote (catches SSH key issues, etc.)
+if ! git ls-remote origin &>/dev/null; then
+    echo "Error: Cannot connect to git remote. Check your git credentials/SSH keys."
+    exit 1
+fi
+
+check_command perl
+check_command make
+check_command autoconf
+
 # Check that we're not on the main branch
 current_branch=$(git branch --show-current)
 if [ "$current_branch" = "main" ]; then
@@ -22,24 +54,24 @@ fi
 
 changelog=$(cat Changes.md)
 
-regex='## ([0-9]+\.[0-9]+\.[0-9]+) - ([0-9]{4}-[0-9]{2}-[0-9]{2})
+regex='## ([0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?) - ([0-9]{4}-[0-9]{2}-[0-9]{2})
 
 ((.|
 )*)
 '
 
 if [[ ! $changelog =~ $regex ]]; then
-      echo "Could not find date line in change log!"
-      exit 1
+    echo "Could not find date line in change log!"
+    exit 1
 fi
 
 version="${BASH_REMATCH[1]}"
-date="${BASH_REMATCH[2]}"
-notes="$(echo "${BASH_REMATCH[3]}" | sed -n -e '/^## [0-9]\+\.[0-9]\+\.[0-9]\+/,$!p')"
+date="${BASH_REMATCH[3]}"
+notes="$(echo "${BASH_REMATCH[4]}" | sed -n -E '/^## [0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?/,$!p')"
 
 dist="libmaxminddb-$version.tar.gz"
 
-if [[ "$date" !=  $(date +"%Y-%m-%d") ]]; then
+if [[ "$date" != "$(date +"%Y-%m-%d")" ]]; then
     echo "$date is not today!"
     exit 1
 fi
@@ -49,7 +81,8 @@ if [ -n "$(git status --porcelain)" ]; then
     exit 1
 fi
 
-old_version=$(perl -MFile::Slurp=read_file <<EOF
+old_version=$(
+    perl -MFile::Slurp=read_file <<EOF
 use v5.16;
 my \$conf = read_file(q{configure.ac});
 \$conf =~ /AC_INIT.+\[(\d+\.\d+\.\d+)\]/;
@@ -63,7 +96,7 @@ perl -MFile::Slurp=edit_file -e \
 if [ -n "$(git status --porcelain)" ]; then
     git diff
 
-    read -e -p "Commit changes? " should_commit
+    read -r -e -p "Commit changes? (y/n) " should_commit
 
     if [ "$should_commit" != "y" ]; then
         echo "Aborting"
@@ -97,7 +130,7 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 index=index.md
-cat <<EOF > $index
+cat <<EOF >$index
 ---
 layout: default
 title: libmaxminddb - a library for working with MaxMind DB files
@@ -105,10 +138,10 @@ version: $version
 ---
 EOF
 
-cat ../doc/libmaxminddb.md >> $index
+cat ../doc/libmaxminddb.md >>$index
 
 mmdblookup=mmdblookup.md
-cat <<EOF > $mmdblookup
+cat <<EOF >$mmdblookup
 ---
 layout: default
 title: mmdblookup - a utility to look up an IP address in a MaxMind DB file
@@ -116,11 +149,11 @@ version: $version
 ---
 EOF
 
-cat ../doc/mmdblookup.md >> $mmdblookup
+cat ../doc/mmdblookup.md >>$mmdblookup
 
 git commit -m "Updated for $version" -a
 
-read -p "Push to origin? (y/n) " should_push
+read -r -e -p "Push to origin? (y/n) " should_push
 
 if [ "$should_push" != "y" ]; then
     echo "Aborting"
