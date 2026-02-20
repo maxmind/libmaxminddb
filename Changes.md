@@ -1,5 +1,9 @@
 ## 1.13.0
 
+* `MMDB_close()` now NULLs the `file_content` pointer after unmapping.
+  Previously, calling `MMDB_close()` twice on the same struct (or calling
+  it after a failed `MMDB_open()` that succeeded at mapping) would
+  double-munmap the file content, which is undefined behavior.
 * Fixed a stack buffer overflow in `print_indentation()` when
   `MMDB_dump_entry_data_list()` was called with a negative `indent`
   value. The negative integer was cast to `size_t`, producing a massive

@@ -1906,6 +1906,8 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
         #pragma clang diagnostic pop
     #endif
 #endif
+        mmdb->file_content = NULL;
+        mmdb->file_size = 0;
     }
 
     if (NULL != mmdb->metadata.database_type) {
@@ -1943,6 +1945,7 @@ static void free_languages_metadata(MMDB_s *mmdb) {
 #endif
     }
     FREE_AND_SET_NULL(mmdb->metadata.languages.names);
+    mmdb->metadata.languages.count = 0;
 }
 
 static void free_descriptions_metadata(MMDB_s *mmdb) {
@@ -1985,6 +1988,7 @@ static void free_descriptions_metadata(MMDB_s *mmdb) {
     }
 
     FREE_AND_SET_NULL(mmdb->metadata.description.descriptions);
+    mmdb->metadata.description.count = 0;
 }
 
 const char *MMDB_lib_version(void) { return PACKAGE_VERSION; }
