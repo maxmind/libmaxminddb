@@ -178,7 +178,8 @@ static int lookup_path_in_map(const char *path_elem,
                               const MMDB_s *const mmdb,
                               MMDB_entry_data_s *entry_data);
 static int skip_map_or_array(const MMDB_s *const mmdb,
-                             MMDB_entry_data_s *entry_data);
+                             MMDB_entry_data_s *entry_data,
+                             int depth);
 static int decode_one_follow(const MMDB_s *const mmdb,
                              uint32_t offset,
                              MMDB_entry_data_s *entry_data);
@@ -1272,7 +1273,7 @@ static int lookup_path_in_array(const char *path_elem,
         /* We don't want to follow a pointer here. If the next element is a
          * pointer we simply skip it and keep going */
         CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);
-        int status = skip_map_or_array(mmdb, entry_data);
+        int status = skip_map_or_array(mmdb, entry_data, 0);
         if (MMDB_SUCCESS != status) {
             return status;
         }
@@ -1314,7 +1315,7 @@ static int lookup_path_in_map(const char *path_elem,
             /* We don't want to follow a pointer here. If the next element is
              * a pointer we simply skip it and keep going */
             CHECKED_DECODE_ONE(mmdb, offset_to_value, &value);
-            int status = skip_map_or_array(mmdb, &value);
+            int status = skip_map_or_array(mmdb, &value, 0);
             if (MMDB_SUCCESS != status) {
                 return status;
             }
@@ -1327,7 +1328,13 @@ static int lookup_path_in_map(const char *path_elem,
 }
 
 static int skip_map_or_array(const MMDB_s *const mmdb,
-                             MMDB_entry_data_s *entry_data) {
+                             MMDB_entry_data_s *entry_data,
+                             int depth) {
+    if (depth >= MAXIMUM_DATA_STRUCTURE_DEPTH) {
+        DEBUG_MSG("reached the maximum data structure depth");
+        return MMDB_INVALID_DATA_ERROR;
+    }
+
     if (entry_data->type == MMDB_DATA_TYPE_MAP) {
         uint32_t size = entry_data->data_size;
         while (size-- > 0) {
@@ -1335,7 +1342,7 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
                 mmdb, entry_data->offset_to_next, entry_data); // key
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // value
-            int status = skip_map_or_array(mmdb, entry_data);
+            int status = skip_map_or_array(mmdb, entry_data, depth + 1);
             if (MMDB_SUCCESS != status) {
                 return status;
             }
@@ -1345,7 +1352,7 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
         while (size-- > 0) {
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // value
-            int status = skip_map_or_array(mmdb, entry_data);
+            int status = skip_map_or_array(mmdb, entry_data, depth + 1);
             if (MMDB_SUCCESS != status) {
                 return status;
             }

@@ -1,5 +1,10 @@
 ## 1.13.0
 
+* Added a recursion depth limit to `skip_map_or_array()`, matching the
+  existing `MAXIMUM_DATA_STRUCTURE_DEPTH` (512) limit already used by
+  `get_entry_data_list()`. A crafted MMDB file with deeply nested maps
+  or arrays could previously cause a stack overflow via unbounded
+  recursion in the `MMDB_aget_value` / `MMDB_get_value` code path.
 * Fixed an off-by-one error in `MMDB_read_node()` that allowed reading one
   node past the end of the search tree when called with
   `node_number == node_count`. This caused the function to read from the
