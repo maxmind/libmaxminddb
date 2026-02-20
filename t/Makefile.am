@@ -13,7 +13,7 @@ libmmdbtest_la_SOURCES = maxminddb_test_helper.c maxminddb_test_helper.h
 
 EXTRA_DIST = compile_c++_t.pl external_symbols_t.pl  mmdblookup_t.pl \
 	     libtap/COPYING libtap/INSTALL libtap/Makefile libtap/README.md \
-	     libtap/tap.c libtap/tap.h maxmind-db
+	     libtap/tap.c libtap/tap.h maxmind-db mmdb_test_writer.h
 
 check_PROGRAMS = \
 	bad_pointers_t bad_databases_t bad_data_size_t bad_epoch_t bad_indent_t \

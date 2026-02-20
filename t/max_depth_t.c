@@ -1,57 +1,6 @@
 #include "maxminddb_test_helper.h"
+#include "mmdb_test_writer.h"
 #include <stdlib.h>
-
-/* MMDB binary format constants */
-#define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
-#define METADATA_MARKER_LEN 14
-#define DATA_SEPARATOR_SIZE 16
-
-/* Write a map with size entries (size must be < 29) */
-static int write_map(uint8_t *buf, uint32_t size) {
-    buf[0] = (7 << 5) | (size & 0x1f);
-    return 1;
-}
-
-/* Write a utf8_string (type 2). For short strings (len < 29). */
-static int write_string(uint8_t *buf, const char *str, uint32_t len) {
-    buf[0] = (2 << 5) | (len & 0x1f);
-    memcpy(buf + 1, str, len);
-    return 1 + len;
-}
-
-static int write_uint16(uint8_t *buf, uint16_t value) {
-    buf[0] = (5 << 5) | 2;
-    buf[1] = (value >> 8) & 0xff;
-    buf[2] = value & 0xff;
-    return 3;
-}
-
-static int write_uint32(uint8_t *buf, uint32_t value) {
-    buf[0] = (6 << 5) | 4;
-    buf[1] = (value >> 24) & 0xff;
-    buf[2] = (value >> 16) & 0xff;
-    buf[3] = (value >> 8) & 0xff;
-    buf[4] = value & 0xff;
-    return 5;
-}
-
-static int write_uint64(uint8_t *buf, uint64_t value) {
-    buf[0] = (0 << 5) | 8;
-    buf[1] = 2; /* extended type: 7 + 2 = 9 (uint64) */
-    buf[2] = (value >> 56) & 0xff;
-    buf[3] = (value >> 48) & 0xff;
-    buf[4] = (value >> 40) & 0xff;
-    buf[5] = (value >> 32) & 0xff;
-    buf[6] = (value >> 24) & 0xff;
-    buf[7] = (value >> 16) & 0xff;
-    buf[8] = (value >> 8) & 0xff;
-    buf[9] = value & 0xff;
-    return 10;
-}
-
-static int write_meta_key(uint8_t *buf, const char *key) {
-    return write_string(buf, key, strlen(key));
-}
 
 /*
  * Create a crafted MMDB file with deeply nested maps and write it to path.
