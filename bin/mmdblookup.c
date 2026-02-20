@@ -356,7 +356,12 @@ static void dump_meta(MMDB_s *mmdb) {
 
     char date[40];
     const time_t epoch = (const time_t)mmdb->metadata.build_epoch;
-    strftime(date, 40, "%F %T UTC", gmtime(&epoch));
+    struct tm *tm = gmtime(&epoch);
+    if (tm != NULL) {
+        strftime(date, sizeof(date), "%F %T UTC", tm);
+    } else {
+        snprintf(date, sizeof(date), "unknown");
+    }
 
     fprintf(stdout,
             meta_dump,

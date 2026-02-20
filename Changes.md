@@ -1,5 +1,8 @@
 ## 1.13.0
 
+* Fixed a NULL pointer dereference in `mmdblookup` when displaying
+  metadata for a database with an out-of-range `build_epoch`. The
+  `gmtime()` return value is now checked before passing to `strftime()`.
 * `MMDB_close()` now NULLs the `file_content` pointer after unmapping.
   Previously, calling `MMDB_close()` twice on the same struct (or calling
   it after a failed `MMDB_open()` that succeeded at mapping) would
