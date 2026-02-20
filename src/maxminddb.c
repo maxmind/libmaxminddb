@@ -1045,7 +1045,8 @@ static int find_ipv4_start_node(MMDB_s *const mmdb) {
     uint32_t node_count = mmdb->metadata.node_count;
 
     for (netmask = 0; netmask < 96 && node_value < node_count; netmask++) {
-        record_pointer = &search_tree[node_value * record_info.record_length];
+        record_pointer =
+            &search_tree[(uint64_t)node_value * record_info.record_length];
         if (record_pointer + record_info.record_length > mmdb->data_section) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
@@ -1109,7 +1110,7 @@ int MMDB_read_node(const MMDB_s *const mmdb,
 
     const uint8_t *search_tree = mmdb->file_content;
     const uint8_t *record_pointer =
-        &search_tree[node_number * record_info.record_length];
+        &search_tree[(uint64_t)node_number * record_info.record_length];
     node->left_record = record_info.left_record_getter(record_pointer);
     record_pointer += record_info.right_record_offset;
     node->right_record = record_info.right_record_getter(record_pointer);

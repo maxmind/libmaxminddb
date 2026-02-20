@@ -1,5 +1,10 @@
 ## 1.13.0
 
+* Fixed integer overflow in `MMDB_read_node()` and `find_ipv4_start_node()`
+  pointer arithmetic. The `node_number * record_length` multiplication
+  was performed in `uint32_t`, which could overflow for very large
+  databases. Now cast to `uint64_t` before multiplying, matching the
+  pattern already used in `find_address_in_search_tree()`.
 * Fixed printf format specifier mismatches in `mmdblookup`'s metadata
   dump. `%i` was used for unsigned types and `%llu` for `uint64_t`,
   which is technically undefined behavior. Now uses the portable
