@@ -8,6 +8,7 @@
 #include "maxminddb.h"
 #include <errno.h>
 #include <getopt.h>
+#include <inttypes.h>
 #ifndef _WIN32
     #include <pthread.h>
 #endif
@@ -346,11 +347,11 @@ static MMDB_s open_or_die(const char *fname) {
 static void dump_meta(MMDB_s *mmdb) {
     const char *meta_dump = "\n"
                             "  Database metadata\n"
-                            "    Node count:    %i\n"
-                            "    Record size:   %i bits\n"
-                            "    IP version:    IPv%i\n"
-                            "    Binary format: %i.%i\n"
-                            "    Build epoch:   %llu (%s)\n"
+                            "    Node count:    %" PRIu32 "\n"
+                            "    Record size:   %" PRIu16 " bits\n"
+                            "    IP version:    IPv%" PRIu16 "\n"
+                            "    Binary format: %" PRIu16 ".%" PRIu16 "\n"
+                            "    Build epoch:   %" PRIu64 " (%s)\n"
                             "    Type:          %s\n"
                             "    Languages:     ";
 

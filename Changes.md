@@ -1,5 +1,9 @@
 ## 1.13.0
 
+* Fixed printf format specifier mismatches in `mmdblookup`'s metadata
+  dump. `%i` was used for unsigned types and `%llu` for `uint64_t`,
+  which is technically undefined behavior. Now uses the portable
+  `PRIu32`, `PRIu16`, and `PRIu64` macros from `<inttypes.h>`.
 * Fixed an integer overflow in the search tree bounds check in
   `find_address_in_search_tree()`. The addition of `node_count` and
   `data_section_size` was performed in `uint32_t` arithmetic, which
