@@ -1,5 +1,10 @@
 ## 1.13.0
 
+* Fixed an integer overflow in the search tree bounds check in
+  `find_address_in_search_tree()`. The addition of `node_count` and
+  `data_section_size` was performed in `uint32_t` arithmetic, which
+  could wrap on very large databases, causing valid lookups to be
+  incorrectly rejected as corrupt.
 * Fixed a NULL pointer dereference in `mmdblookup` when displaying
   metadata for a database with an out-of-range `build_epoch`. The
   `gmtime()` return value is now checked before passing to `strftime()`.

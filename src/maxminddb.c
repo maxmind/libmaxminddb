@@ -985,7 +985,7 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
 
     result->netmask = current_bit;
 
-    if (value >= node_count + mmdb->data_section_size) {
+    if (value >= (uint64_t)node_count + mmdb->data_section_size) {
         // The pointer points off the end of the database.
         return MMDB_CORRUPT_SEARCH_TREE_ERROR;
     }
