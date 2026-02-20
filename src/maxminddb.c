@@ -367,7 +367,7 @@ static LPWSTR utf8_to_utf16(const char *utf8_str) {
 }
 
 static int map_file(MMDB_s *const mmdb) {
-    DWORD size;
+    ssize_t size;
     int status = MMDB_SUCCESS;
     HANDLE mmh = NULL;
     HANDLE fd = INVALID_HANDLE_VALUE;
@@ -387,12 +387,17 @@ static int map_file(MMDB_s *const mmdb) {
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
     }
-    size = GetFileSize(fd, NULL);
-    if (size == INVALID_FILE_SIZE) {
-        status = MMDB_FILE_OPEN_ERROR;
+    LARGE_INTEGER file_size;
+    if (!GetFileSizeEx(fd, &file_size)) {
+        status = MMDB_IO_ERROR;
         goto cleanup;
     }
-    mmh = CreateFileMapping(fd, NULL, PAGE_READONLY, 0, size, NULL);
+    if (file_size.QuadPart < 0 || file_size.QuadPart > SSIZE_MAX) {
+        status = MMDB_IO_ERROR;
+        goto cleanup;
+    }
+    size = (ssize_t)file_size.QuadPart;
+    mmh = CreateFileMapping(fd, NULL, PAGE_READONLY, 0, 0, NULL);
     /* Microsoft documentation for CreateFileMapping indicates this returns
         NULL not INVALID_HANDLE_VALUE on error */
     if (NULL == mmh) {

@@ -1,5 +1,9 @@
 ## 1.13.0
 
+* On Windows, `GetFileSize()` was replaced with `GetFileSizeEx()` to
+  correctly handle files larger than 4GB. The previous code passed
+  `NULL` for the high DWORD, discarding the upper 32 bits of the file
+  size.
 * Fixed integer overflow in `MMDB_read_node()` and `find_ipv4_start_node()`
   pointer arithmetic. The `node_number * record_length` multiplication
   was performed in `uint32_t`, which could overflow for very large
