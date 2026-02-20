@@ -1,5 +1,10 @@
 ## 1.13.0
 
+* `MMDB_get_entry_data_list()` now validates that the claimed array/map
+  size is plausible given the remaining bytes in the data section. A
+  crafted database could previously claim millions of array elements
+  while only having a few bytes of data, causing disproportionate memory
+  allocation (memory amplification DoS).
 * On Windows, `GetFileSize()` was replaced with `GetFileSizeEx()` to
   correctly handle files larger than 4GB. The previous code passed
   `NULL` for the high DWORD, discarding the upper 32 bits of the file

@@ -1725,6 +1725,11 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
         case MMDB_DATA_TYPE_ARRAY: {
             uint32_t array_size = entry_data_list->entry_data.data_size;
             uint32_t array_offset = entry_data_list->entry_data.offset_to_next;
+            if (array_offset >= mmdb->data_section_size ||
+                array_size > mmdb->data_section_size - array_offset) {
+                DEBUG_MSG("array size exceeds remaining data section");
+                return MMDB_INVALID_DATA_ERROR;
+            }
             while (array_size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to =
                     data_pool_alloc(pool);
@@ -1748,6 +1753,12 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
             uint32_t size = entry_data_list->entry_data.data_size;
 
             offset = entry_data_list->entry_data.offset_to_next;
+            /* Each map entry needs at least a key and a value (1 byte each). */
+            if (offset >= mmdb->data_section_size ||
+                size > (mmdb->data_section_size - offset) / 2) {
+                DEBUG_MSG("map size exceeds remaining data section");
+                return MMDB_INVALID_DATA_ERROR;
+            }
             while (size-- > 0) {
                 MMDB_entry_data_list_s *list_key = data_pool_alloc(pool);
                 if (!list_key) {
