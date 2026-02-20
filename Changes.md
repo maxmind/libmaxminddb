@@ -1,5 +1,10 @@
 ## 1.13.0
 
+* Fixed an off-by-one error in `MMDB_read_node()` that allowed reading one
+  node past the end of the search tree when called with
+  `node_number == node_count`. This caused the function to read from the
+  data section separator and return an invalid record with an underflowed
+  data offset. The check now correctly rejects `node_number >= node_count`.
 * The handling of float and double types was rewritten to fix compiler errors
   and to eliminate the use of volatile.
 * Improved endian preprocessor check if `MMDB_LITTLE_ENDIAN` is not set.

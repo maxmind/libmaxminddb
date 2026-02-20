@@ -1097,7 +1097,7 @@ int MMDB_read_node(const MMDB_s *const mmdb,
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
-    if (node_number > mmdb->metadata.node_count) {
+    if (node_number >= mmdb->metadata.node_count) {
         return MMDB_INVALID_NODE_NUMBER_ERROR;
     }
 
