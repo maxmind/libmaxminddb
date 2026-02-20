@@ -1,5 +1,9 @@
 ## 1.13.0
 
+* `MMDB_lookup_string()` now sets `*mmdb_error` to `MMDB_SUCCESS` when
+  `getaddrinfo` fails (non-zero `*gai_error`). Previously, `*mmdb_error`
+  was left uninitialized in this case, which could cause callers to read
+  an indeterminate value.
 * Fixed an off-by-one in `mmdblookup` on Windows where `alloca` allocated
   one byte too few for the program name buffer, causing `_splitpath` to
   write one byte past the end when appending the null terminator.

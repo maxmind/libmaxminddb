@@ -883,6 +883,11 @@ MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
 
     if (!*gai_error) {
         result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
+    } else {
+        /* No MMDB error occurred; the GAI failure is reported via
+         * *gai_error. Set *mmdb_error to a defined value so callers
+         * don't read indeterminate memory. */
+        *mmdb_error = MMDB_SUCCESS;
     }
 
     if (NULL != addresses) {
