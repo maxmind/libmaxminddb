@@ -1,5 +1,10 @@
 ## 1.13.0
 
+* Fixed a stack buffer overflow in `print_indentation()` when
+  `MMDB_dump_entry_data_list()` was called with a negative `indent`
+  value. The negative integer was cast to `size_t`, producing a massive
+  value passed to `memset()`. Negative indent values are now clamped
+  to 0.
 * `MMDB_lookup_string()` now sets `*mmdb_error` to `MMDB_SUCCESS` when
   `getaddrinfo` fails (non-zero `*gai_error`). Previously, `*mmdb_error`
   was left uninitialized in this case, which could cause callers to read

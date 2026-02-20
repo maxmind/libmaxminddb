@@ -2170,7 +2170,7 @@ dump_entry_data_list(FILE *stream,
 
 static void print_indentation(FILE *stream, int i) {
     char buffer[1024];
-    int size = i >= 1024 ? 1023 : i;
+    int size = i < 0 ? 0 : (i >= 1024 ? 1023 : i);
     memset(buffer, 32, (size_t)size);
     buffer[size] = '\0';
     fputs(buffer, stream);
