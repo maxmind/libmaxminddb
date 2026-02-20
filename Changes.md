@@ -1,5 +1,8 @@
 ## 1.13.0
 
+* Fixed an off-by-one in `mmdblookup` on Windows where `alloca` allocated
+  one byte too few for the program name buffer, causing `_splitpath` to
+  write one byte past the end when appending the null terminator.
 * Added a recursion depth limit to `skip_map_or_array()`, matching the
   existing `MAXIMUM_DATA_STRUCTURE_DEPTH` (512) limit already used by
   `get_entry_data_list()`. A crafted MMDB file with deeply nested maps

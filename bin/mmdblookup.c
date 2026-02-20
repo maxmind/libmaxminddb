@@ -229,7 +229,7 @@ static const char **get_options(int argc,
     static int version = 0;
 
 #ifdef _WIN32
-    char *program = alloca(strlen(argv[0]));
+    char *program = alloca(strlen(argv[0]) + 1);
     _splitpath(argv[0], NULL, NULL, program, NULL);
     _splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
 #else
