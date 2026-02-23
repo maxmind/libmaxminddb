@@ -16,6 +16,8 @@ void test_double_close(void) {
     MMDB_close(&mmdb);
 
     ok(mmdb.file_content == NULL, "file_content is NULL after first close");
+    ok(mmdb.data_section == NULL, "data_section is NULL after close");
+    ok(mmdb.metadata_section == NULL, "metadata_section is NULL after close");
     cmp_ok(mmdb.metadata.languages.count,
            "==",
            0,
