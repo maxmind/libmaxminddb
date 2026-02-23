@@ -1,6 +1,4 @@
 #include "maxminddb_test_helper.h"
-#include "mmdb_test_writer.h"
-#include <stdlib.h>
 
 /*
  * Test that the bounds check in find_address_in_search_tree uses 64-bit
