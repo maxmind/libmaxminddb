@@ -26,10 +26,12 @@
 * Fixed a NULL pointer dereference in `mmdblookup` when displaying
   metadata for a database with an out-of-range `build_epoch`. The
   `gmtime()` return value is now checked before passing to `strftime()`.
-* `MMDB_close()` now NULLs the `file_content` pointer after unmapping.
-  Previously, calling `MMDB_close()` twice on the same struct (or calling
-  it after a failed `MMDB_open()` that succeeded at mapping) would
-  double-munmap the file content, which is undefined behavior.
+* `MMDB_close()` now NULLs the `file_content`, `data_section`, and
+  `metadata_section` pointers and zeroes `file_size`, `data_section_size`,
+  and `metadata_section_size` after unmapping. Previously, calling
+  `MMDB_close()` twice on the same struct (or calling it after a failed
+  `MMDB_open()` that succeeded at mapping) would double-munmap the file
+  content, which is undefined behavior.
 * Fixed a stack buffer overflow in `print_indentation()` when
   `MMDB_dump_entry_data_list()` was called with a negative `indent`
   value. The negative integer was cast to `size_t`, producing a massive

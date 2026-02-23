@@ -1929,7 +1929,9 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
         mmdb->file_content = NULL;
         mmdb->file_size = 0;
         mmdb->data_section = NULL;
+        mmdb->data_section_size = 0;
         mmdb->metadata_section = NULL;
+        mmdb->metadata_section_size = 0;
     }
 
     if (NULL != mmdb->metadata.database_type) {

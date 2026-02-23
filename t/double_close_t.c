@@ -27,6 +27,10 @@ void test_double_close(void) {
            0,
            "description.count is 0 after close");
     cmp_ok(mmdb.file_size, "==", 0, "file_size is 0 after close");
+    cmp_ok(mmdb.data_section_size, "==", 0,
+           "data_section_size is 0 after close");
+    cmp_ok(mmdb.metadata_section_size, "==", 0,
+           "metadata_section_size is 0 after close");
 
     /* Second close should be a safe no-op (file_content was NULLed) */
     MMDB_close(&mmdb);
