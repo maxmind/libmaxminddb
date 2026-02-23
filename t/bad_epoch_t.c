@@ -77,7 +77,11 @@ static void create_bad_epoch_db(const char *path) {
         free(file);
         BAIL_OUT("fopen failed");
     }
-    fwrite(file, 1, pos, f);
+    if (fwrite(file, 1, pos, f) != pos) {
+        fclose(f);
+        free(file);
+        BAIL_OUT("fwrite failed");
+    }
     fclose(f);
     free(file);
 }

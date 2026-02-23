@@ -84,7 +84,11 @@ static void create_deep_nesting_db(const char *path, int depth) {
         free(file);
         BAIL_OUT("fopen failed");
     }
-    fwrite(file, 1, pos, f);
+    if (fwrite(file, 1, pos, f) != pos) {
+        fclose(f);
+        free(file);
+        BAIL_OUT("fwrite failed");
+    }
     fclose(f);
     free(file);
 }

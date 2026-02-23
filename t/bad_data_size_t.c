@@ -123,7 +123,11 @@ static void create_bad_data_size_db(const char *path) {
         free(file);
         BAIL_OUT("fopen failed");
     }
-    fwrite(file, 1, pos, f);
+    if (fwrite(file, 1, pos, f) != pos) {
+        fclose(f);
+        free(file);
+        BAIL_OUT("fwrite failed");
+    }
     fclose(f);
     free(file);
 }
@@ -251,7 +255,11 @@ static void create_bad_map_size_db(const char *path) {
         free(file);
         BAIL_OUT("fopen failed");
     }
-    fwrite(file, 1, pos, f);
+    if (fwrite(file, 1, pos, f) != pos) {
+        fclose(f);
+        free(file);
+        BAIL_OUT("fwrite failed");
+    }
     fclose(f);
     free(file);
 }
