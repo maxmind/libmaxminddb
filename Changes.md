@@ -1,5 +1,59 @@
 ## 1.13.0
 
+* `MMDB_get_entry_data_list()` now validates that the claimed array/map
+  size is plausible given the remaining bytes in the data section. A
+  crafted database could previously claim millions of array elements
+  while only having a few bytes of data, causing disproportionate memory
+  allocation (memory amplification DoS).
+* On Windows, `GetFileSize()` was replaced with `GetFileSizeEx()` to
+  correctly handle files larger than 4GB. The previous code passed
+  `NULL` for the high DWORD, discarding the upper 32 bits of the file
+  size.
+* Fixed integer overflow in `MMDB_read_node()` and `find_ipv4_start_node()`
+  pointer arithmetic. The `node_number * record_length` multiplication
+  was performed in `uint32_t`, which could overflow for very large
+  databases. Now cast to `uint64_t` before multiplying, matching the
+  pattern already used in `find_address_in_search_tree()`.
+* Fixed printf format specifier mismatches in `mmdblookup`'s metadata
+  dump. `%i` was used for unsigned types and `%llu` for `uint64_t`,
+  which is technically undefined behavior. Now uses the portable
+  `PRIu32`, `PRIu16`, and `PRIu64` macros from `<inttypes.h>`.
+* Fixed an integer overflow in the search tree bounds check in
+  `find_address_in_search_tree()`. The addition of `node_count` and
+  `data_section_size` was performed in `uint32_t` arithmetic, which
+  could wrap on very large databases, causing valid lookups to be
+  incorrectly rejected as corrupt.
+* Fixed a NULL pointer dereference in `mmdblookup` when displaying
+  metadata for a database with an out-of-range `build_epoch`. The
+  `gmtime()` return value is now checked before passing to `strftime()`.
+* `MMDB_close()` now NULLs the `file_content`, `data_section`, and
+  `metadata_section` pointers and zeroes `file_size`, `data_section_size`,
+  and `metadata_section_size` after unmapping. Previously, calling
+  `MMDB_close()` twice on the same struct (or calling it after a failed
+  `MMDB_open()` that succeeded at mapping) would double-munmap the file
+  content, which is undefined behavior.
+* Fixed a stack buffer overflow in `print_indentation()` when
+  `MMDB_dump_entry_data_list()` was called with a negative `indent`
+  value. The negative integer was cast to `size_t`, producing a massive
+  value passed to `memset()`. Negative indent values are now clamped
+  to 0.
+* `MMDB_lookup_string()` now sets `*mmdb_error` to `MMDB_SUCCESS` when
+  `getaddrinfo` fails (non-zero `*gai_error`). Previously, `*mmdb_error`
+  was left uninitialized in this case, which could cause callers to read
+  an indeterminate value.
+* Fixed an off-by-one in `mmdblookup` on Windows where `alloca` allocated
+  one byte too few for the program name buffer, causing `_splitpath` to
+  write one byte past the end when appending the null terminator.
+* Added a recursion depth limit to `skip_map_or_array()`, matching the
+  existing `MAXIMUM_DATA_STRUCTURE_DEPTH` (512) limit already used by
+  `get_entry_data_list()`. A crafted MMDB file with deeply nested maps
+  or arrays could previously cause a stack overflow via unbounded
+  recursion in the `MMDB_aget_value` / `MMDB_get_value` code path.
+* Fixed an off-by-one error in `MMDB_read_node()` that allowed reading one
+  node past the end of the search tree when called with
+  `node_number == node_count`. This caused the function to read from the
+  data section separator and return an invalid record with an underflowed
+  data offset. The check now correctly rejects `node_number >= node_count`.
 * The handling of float and double types was rewritten to fix compiler errors
   and to eliminate the use of volatile.
 * Improved endian preprocessor check if `MMDB_LITTLE_ENDIAN` is not set.

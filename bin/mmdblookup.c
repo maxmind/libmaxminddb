@@ -8,6 +8,7 @@
 #include "maxminddb.h"
 #include <errno.h>
 #include <getopt.h>
+#include <inttypes.h>
 #ifndef _WIN32
     #include <pthread.h>
 #endif
@@ -229,7 +230,7 @@ static const char **get_options(int argc,
     static int version = 0;
 
 #ifdef _WIN32
-    char *program = alloca(strlen(argv[0]));
+    char *program = alloca(strlen(argv[0]) + 1);
     _splitpath(argv[0], NULL, NULL, program, NULL);
     _splitpath(argv[0], NULL, NULL, NULL, program + strlen(program));
 #else
@@ -346,17 +347,22 @@ static MMDB_s open_or_die(const char *fname) {
 static void dump_meta(MMDB_s *mmdb) {
     const char *meta_dump = "\n"
                             "  Database metadata\n"
-                            "    Node count:    %i\n"
-                            "    Record size:   %i bits\n"
-                            "    IP version:    IPv%i\n"
-                            "    Binary format: %i.%i\n"
-                            "    Build epoch:   %llu (%s)\n"
+                            "    Node count:    %" PRIu32 "\n"
+                            "    Record size:   %" PRIu16 " bits\n"
+                            "    IP version:    IPv%" PRIu16 "\n"
+                            "    Binary format: %" PRIu16 ".%" PRIu16 "\n"
+                            "    Build epoch:   %" PRIu64 " (%s)\n"
                             "    Type:          %s\n"
                             "    Languages:     ";
 
     char date[40];
     const time_t epoch = (const time_t)mmdb->metadata.build_epoch;
-    strftime(date, 40, "%F %T UTC", gmtime(&epoch));
+    struct tm *tm = gmtime(&epoch);
+    if (tm != NULL) {
+        strftime(date, sizeof(date), "%F %T UTC", tm);
+    } else {
+        snprintf(date, sizeof(date), "out of range");
+    }
 
     fprintf(stdout,
             meta_dump,

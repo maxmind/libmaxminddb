@@ -178,7 +178,8 @@ static int lookup_path_in_map(const char *path_elem,
                               const MMDB_s *const mmdb,
                               MMDB_entry_data_s *entry_data);
 static int skip_map_or_array(const MMDB_s *const mmdb,
-                             MMDB_entry_data_s *entry_data);
+                             MMDB_entry_data_s *entry_data,
+                             int depth);
 static int decode_one_follow(const MMDB_s *const mmdb,
                              uint32_t offset,
                              MMDB_entry_data_s *entry_data);
@@ -366,7 +367,7 @@ static LPWSTR utf8_to_utf16(const char *utf8_str) {
 }
 
 static int map_file(MMDB_s *const mmdb) {
-    DWORD size;
+    ssize_t size;
     int status = MMDB_SUCCESS;
     HANDLE mmh = NULL;
     HANDLE fd = INVALID_HANDLE_VALUE;
@@ -386,12 +387,17 @@ static int map_file(MMDB_s *const mmdb) {
         status = MMDB_FILE_OPEN_ERROR;
         goto cleanup;
     }
-    size = GetFileSize(fd, NULL);
-    if (size == INVALID_FILE_SIZE) {
-        status = MMDB_FILE_OPEN_ERROR;
+    LARGE_INTEGER file_size;
+    if (!GetFileSizeEx(fd, &file_size)) {
+        status = MMDB_IO_ERROR;
         goto cleanup;
     }
-    mmh = CreateFileMapping(fd, NULL, PAGE_READONLY, 0, size, NULL);
+    if (file_size.QuadPart < 0 || file_size.QuadPart > SSIZE_MAX) {
+        status = MMDB_IO_ERROR;
+        goto cleanup;
+    }
+    size = (ssize_t)file_size.QuadPart;
+    mmh = CreateFileMapping(fd, NULL, PAGE_READONLY, 0, 0, NULL);
     /* Microsoft documentation for CreateFileMapping indicates this returns
         NULL not INVALID_HANDLE_VALUE on error */
     if (NULL == mmh) {
@@ -882,6 +888,11 @@ MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
 
     if (!*gai_error) {
         result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
+    } else {
+        /* No MMDB error occurred; the GAI failure is reported via
+         * *gai_error. Set *mmdb_error to a defined value so callers
+         * don't read indeterminate memory. */
+        *mmdb_error = MMDB_SUCCESS;
     }
 
     if (NULL != addresses) {
@@ -979,7 +990,7 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
 
     result->netmask = current_bit;
 
-    if (value >= node_count + mmdb->data_section_size) {
+    if (value >= (uint64_t)node_count + mmdb->data_section_size) {
         // The pointer points off the end of the database.
         return MMDB_CORRUPT_SEARCH_TREE_ERROR;
     }
@@ -1039,7 +1050,8 @@ static int find_ipv4_start_node(MMDB_s *const mmdb) {
     uint32_t node_count = mmdb->metadata.node_count;
 
     for (netmask = 0; netmask < 96 && node_value < node_count; netmask++) {
-        record_pointer = &search_tree[node_value * record_info.record_length];
+        record_pointer =
+            &search_tree[(uint64_t)node_value * record_info.record_length];
         if (record_pointer + record_info.record_length > mmdb->data_section) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;
         }
@@ -1097,13 +1109,16 @@ int MMDB_read_node(const MMDB_s *const mmdb,
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
-    if (node_number > mmdb->metadata.node_count) {
+    if (node_number >= mmdb->metadata.node_count) {
         return MMDB_INVALID_NODE_NUMBER_ERROR;
     }
 
     const uint8_t *search_tree = mmdb->file_content;
     const uint8_t *record_pointer =
-        &search_tree[node_number * record_info.record_length];
+        &search_tree[(uint64_t)node_number * record_info.record_length];
+    if (record_pointer + record_info.record_length > mmdb->data_section) {
+        return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+    }
     node->left_record = record_info.left_record_getter(record_pointer);
     record_pointer += record_info.right_record_offset;
     node->right_record = record_info.right_record_getter(record_pointer);
@@ -1272,7 +1287,7 @@ static int lookup_path_in_array(const char *path_elem,
         /* We don't want to follow a pointer here. If the next element is a
          * pointer we simply skip it and keep going */
         CHECKED_DECODE_ONE(mmdb, entry_data->offset_to_next, entry_data);
-        int status = skip_map_or_array(mmdb, entry_data);
+        int status = skip_map_or_array(mmdb, entry_data, 0);
         if (MMDB_SUCCESS != status) {
             return status;
         }
@@ -1314,7 +1329,7 @@ static int lookup_path_in_map(const char *path_elem,
             /* We don't want to follow a pointer here. If the next element is
              * a pointer we simply skip it and keep going */
             CHECKED_DECODE_ONE(mmdb, offset_to_value, &value);
-            int status = skip_map_or_array(mmdb, &value);
+            int status = skip_map_or_array(mmdb, &value, 0);
             if (MMDB_SUCCESS != status) {
                 return status;
             }
@@ -1327,7 +1342,13 @@ static int lookup_path_in_map(const char *path_elem,
 }
 
 static int skip_map_or_array(const MMDB_s *const mmdb,
-                             MMDB_entry_data_s *entry_data) {
+                             MMDB_entry_data_s *entry_data,
+                             int depth) {
+    if (depth >= MAXIMUM_DATA_STRUCTURE_DEPTH) {
+        DEBUG_MSG("reached the maximum data structure depth");
+        return MMDB_INVALID_DATA_ERROR;
+    }
+
     if (entry_data->type == MMDB_DATA_TYPE_MAP) {
         uint32_t size = entry_data->data_size;
         while (size-- > 0) {
@@ -1335,7 +1356,7 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
                 mmdb, entry_data->offset_to_next, entry_data); // key
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // value
-            int status = skip_map_or_array(mmdb, entry_data);
+            int status = skip_map_or_array(mmdb, entry_data, depth + 1);
             if (MMDB_SUCCESS != status) {
                 return status;
             }
@@ -1345,7 +1366,7 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
         while (size-- > 0) {
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // value
-            int status = skip_map_or_array(mmdb, entry_data);
+            int status = skip_map_or_array(mmdb, entry_data, depth + 1);
             if (MMDB_SUCCESS != status) {
                 return status;
             }
@@ -1707,6 +1728,12 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
         case MMDB_DATA_TYPE_ARRAY: {
             uint32_t array_size = entry_data_list->entry_data.data_size;
             uint32_t array_offset = entry_data_list->entry_data.offset_to_next;
+            /* Each array element needs at least 1 byte. */
+            if (array_offset >= mmdb->data_section_size ||
+                array_size > mmdb->data_section_size - array_offset) {
+                DEBUG_MSG("array size exceeds remaining data section");
+                return MMDB_INVALID_DATA_ERROR;
+            }
             while (array_size-- > 0) {
                 MMDB_entry_data_list_s *entry_data_list_to =
                     data_pool_alloc(pool);
@@ -1730,6 +1757,12 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
             uint32_t size = entry_data_list->entry_data.data_size;
 
             offset = entry_data_list->entry_data.offset_to_next;
+            /* Each map entry needs at least a key and a value (1 byte each). */
+            if (offset >= mmdb->data_section_size ||
+                size > (mmdb->data_section_size - offset) / 2) {
+                DEBUG_MSG("map size exceeds remaining data section");
+                return MMDB_INVALID_DATA_ERROR;
+            }
             while (size-- > 0) {
                 MMDB_entry_data_list_s *list_key = data_pool_alloc(pool);
                 if (!list_key) {
@@ -1894,6 +1927,12 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
         #pragma clang diagnostic pop
     #endif
 #endif
+        mmdb->file_content = NULL;
+        mmdb->file_size = 0;
+        mmdb->data_section = NULL;
+        mmdb->data_section_size = 0;
+        mmdb->metadata_section = NULL;
+        mmdb->metadata_section_size = 0;
     }
 
     if (NULL != mmdb->metadata.database_type) {
@@ -1931,6 +1970,7 @@ static void free_languages_metadata(MMDB_s *mmdb) {
 #endif
     }
     FREE_AND_SET_NULL(mmdb->metadata.languages.names);
+    mmdb->metadata.languages.count = 0;
 }
 
 static void free_descriptions_metadata(MMDB_s *mmdb) {
@@ -1973,6 +2013,7 @@ static void free_descriptions_metadata(MMDB_s *mmdb) {
     }
 
     FREE_AND_SET_NULL(mmdb->metadata.description.descriptions);
+    mmdb->metadata.description.count = 0;
 }
 
 const char *MMDB_lib_version(void) { return PACKAGE_VERSION; }
@@ -2158,7 +2199,7 @@ dump_entry_data_list(FILE *stream,
 
 static void print_indentation(FILE *stream, int i) {
     char buffer[1024];
-    int size = i >= 1024 ? 1023 : i;
+    int size = i < 0 ? 0 : (i >= 1024 ? 1023 : i);
     memset(buffer, 32, (size_t)size);
     buffer[size] = '\0';
     fputs(buffer, stream);
