@@ -489,6 +489,10 @@ This function always returns an `MMDB_lookup_result_s` structure, but you
 should also check the `gai_error` and `mmdb_error` parameters. If either of
 these indicates an error then the returned structure is meaningless.
 
+When `*gai_error` is non-zero (i.e., `getaddrinfo()` failed), `*mmdb_error`
+is set to `MMDB_SUCCESS` because no database error occurred. You should always
+check `*gai_error` first.
+
 If no error occurred you still need to make sure that the `found_entry` member
 in the returned result is true. If it's not, this means that the IP address
 does not have an entry in the database.
