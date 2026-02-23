@@ -361,7 +361,7 @@ static void dump_meta(MMDB_s *mmdb) {
     if (tm != NULL) {
         strftime(date, sizeof(date), "%F %T UTC", tm);
     } else {
-        snprintf(date, sizeof(date), "unknown");
+        snprintf(date, sizeof(date), "out of range");
     }
 
     fprintf(stdout,
