@@ -1116,6 +1116,9 @@ int MMDB_read_node(const MMDB_s *const mmdb,
     const uint8_t *search_tree = mmdb->file_content;
     const uint8_t *record_pointer =
         &search_tree[(uint64_t)node_number * record_info.record_length];
+    if (record_pointer + record_info.record_length > mmdb->data_section) {
+        return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+    }
     node->left_record = record_info.left_record_getter(record_pointer);
     record_pointer += record_info.right_record_offset;
     node->right_record = record_info.right_record_getter(record_pointer);
