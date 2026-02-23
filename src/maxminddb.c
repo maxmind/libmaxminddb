@@ -1728,6 +1728,7 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
         case MMDB_DATA_TYPE_ARRAY: {
             uint32_t array_size = entry_data_list->entry_data.data_size;
             uint32_t array_offset = entry_data_list->entry_data.offset_to_next;
+            /* Each array element needs at least 1 byte. */
             if (array_offset >= mmdb->data_section_size ||
                 array_size > mmdb->data_section_size - array_offset) {
                 DEBUG_MSG("array size exceeds remaining data section");
