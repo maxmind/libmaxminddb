@@ -4,7 +4,7 @@ set -e
 set -x
 set -u
 
-DISTS=( groovy focal bionic xenial trusty )
+DISTS=( questing noble jammy )
 
 changelog_header=$(head -n 3 Changes.md)
 if [[ ! $changelog_header =~ ^##\ ([0-9]+\.[0-9]+\.[0-9]+)\ -\ ([0-9]{4}-[0-9]{2}-[0-9]{2}) ]]; then
@@ -12,6 +12,8 @@ if [[ ! $changelog_header =~ ^##\ ([0-9]+\.[0-9]+\.[0-9]+)\ -\ ([0-9]{4}-[0-9]{2
     exit 1
 fi
 VERSION="${BASH_REMATCH[1]}"
+
+git push
 
 RESULTS=/tmp/build-libmaxminddb-results/
 SRCDIR="$RESULTS/libmaxminddb"
@@ -49,3 +51,7 @@ dch -v "$VERSION-0+maxmind1" -D "${DISTS[0]}" -u low "New upstream release."
 git add debian/changelog
 git commit -m "Update debian/changelog for $VERSION"
 git push
+
+popd
+
+git pull
