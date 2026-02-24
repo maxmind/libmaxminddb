@@ -760,7 +760,7 @@ reference to an `MMDB_search_node_s` structure that will be populated by this
 function.
 
 The return value is a status code. If you pass a `node_number` that is greater
-than the number of nodes in the database, this function will return
+than or equal to the number of nodes in the database, this function will return
 `MMDB_INVALID_NODE_NUMBER_ERROR`, otherwise it will return `MMDB_SUCCESS`.
 
 The first node in the search tree is always node 0. If you wanted to iterate
