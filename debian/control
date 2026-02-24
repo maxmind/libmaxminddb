@@ -9,7 +9,6 @@ Build-Depends:
  libtest-output-perl <!nocheck>,
 # for dev-bin/make-man-pages.pl
  lowdown <!nodoc> | pandoc <!nodoc>,
- libfile-slurp-perl <!nodoc>,
  libfile-which-perl <!nodoc>,
 Standards-Version: 4.7.0
 Homepage: https://maxmind.github.io/libmaxminddb/
