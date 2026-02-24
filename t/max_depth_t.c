@@ -74,8 +74,7 @@ void test_valid_nesting_allowed(void) {
 }
 
 void test_deep_array_nesting_rejected(void) {
-    char *db_file =
-        bad_database_path("libmaxminddb-deep-array-nesting.mmdb");
+    char *db_file = bad_database_path("libmaxminddb-deep-array-nesting.mmdb");
 
     MMDB_s mmdb;
     int status = MMDB_open(db_file, MMDB_MODE_MMAP, &mmdb);

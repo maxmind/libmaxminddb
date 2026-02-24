@@ -17,8 +17,7 @@ void test_read_node_bounds(void) {
     MMDB_search_node_s node;
 
     /* node_count - 1 is the last valid node */
-    int status =
-        MMDB_read_node(mmdb, mmdb->metadata.node_count - 1, &node);
+    int status = MMDB_read_node(mmdb, mmdb->metadata.node_count - 1, &node);
     cmp_ok(status,
            "==",
            MMDB_SUCCESS,

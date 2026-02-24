@@ -51,9 +51,7 @@ int test_read(const char *path,
         MMDB_free_entry_data_list(entry_data_list);
 
         if (status != MMDB_SUCCESS) {
-            ok(1,
-               "received error from MMDB_get_entry_data_list for %s",
-               path);
+            ok(1, "received error from MMDB_get_entry_data_list for %s", path);
             MMDB_close(mmdb);
             free(mmdb);
             return 0;
@@ -63,7 +61,9 @@ int test_read(const char *path,
     // Some bad-data files (e.g. uint64-max-epoch) are valid databases with
     // extreme metadata values. They don't produce errors in libmaxminddb
     // but are useful for testing other reader implementations.
-    ok(1, "no error reading %s (database may have extreme but valid data)", path);
+    ok(1,
+       "no error reading %s (database may have extreme but valid data)",
+       path);
 
     MMDB_close(mmdb);
     free(mmdb);
