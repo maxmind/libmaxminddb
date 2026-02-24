@@ -92,7 +92,7 @@ typedef struct MMDB_entry_data_list_s {
 
 # DESCRIPTION
 
-The libmaxminddb library provides functions for working MaxMind DB files. See
+The libmaxminddb library provides functions for working with MaxMind DB files. See
 https://maxmind.github.io/MaxMind-DB/ for the MaxMind DB format
 specification. The database and results are all represented by different
 data structures. Databases are opened by calling `MMDB_open()`. You can
@@ -375,7 +375,7 @@ status codes are:
   includes missing metadata keys as well as impossible values (like an
   `ip_version` of 7).
 * `MMDB_UNKNOWN_DATABASE_FORMAT_ERROR` - The database metadata indicates that
-  it's major version is not 2. This library can only handle major version 2.
+  its major version is not 2. This library can only handle major version 2.
 * `MMDB_OUT_OF_MEMORY_ERROR` - a memory allocation call (`malloc`, etc.)
   failed.
 * `MMDB_INVALID_DATA_ERROR` - an entry in the data section contains invalid
@@ -765,7 +765,7 @@ than the number of nodes in the database, this function will return
 
 The first node in the search tree is always node 0. If you wanted to iterate
 over the whole search tree, you would start by reading node 0 and then
-following the the records that make up this node, based on the type of each
+following the records that make up this node, based on the type of each
 record. If the type is `MMDB_RECORD_TYPE_SEARCH_NODE` then the record contains
 an integer for the next node to look up.
 

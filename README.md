@@ -24,7 +24,7 @@ tarballs on the [Releases](https://github.com/maxmind/libmaxminddb/releases)
 page (e.g. `libmaxminddb-*.tar.gz`).
 
 This code is known to work with GCC 4.4+ and clang 3.2+. It should also work
-on other compilers that supports C99, POSIX.1-2001, and the `-fms-extensions
+on other compilers that support C99, POSIX.1-2001, and the `-fms-extensions
 flag` (or equivalent). The latter is needed to allow an anonymous union in a
 structure.
 
@@ -61,7 +61,7 @@ Code" archives also available on the
 [Releases](https://github.com/maxmind/libmaxminddb/releases) page (e.g.
 `X.Y.Z.zip` or `X.Y.Z.tar.gz`), as well as installation directly from a clone
 of the [Git repo](https://github.com/maxmind/libmaxminddb). Installation from
-these sources are possible but will present challenges to users not
+these sources is possible but will present challenges to users not
 comfortable with manual dependency resolution.
 
 You will need `automake`, `autoconf`, and `libtool` installed

@@ -6,7 +6,7 @@ We release by uploading the tarball to GitHub and uploading Ubuntu PPAs.
 You may want to refer to the section about prerequisites.
 
 * Check whether there are any open issues to fix while you're doing this.
-* Update `Changes.md` to include specify the new version, today's date, and
+* Update `Changes.md` to specify the new version, today's date, and
   list relevant changes. Commit this.
 * Create a new branch off of the latest `main` for the release.
 * Run `./dev-bin/release.sh` to update various files in the distro, our
