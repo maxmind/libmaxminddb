@@ -92,8 +92,8 @@ typedef struct MMDB_entry_data_list_s {
 
 # DESCRIPTION
 
-The libmaxminddb library provides functions for working with MaxMind DB files. See
-https://maxmind.github.io/MaxMind-DB/ for the MaxMind DB format
+The libmaxminddb library provides functions for working with MaxMind DB files.
+See https://maxmind.github.io/MaxMind-DB/ for the MaxMind DB format
 specification. The database and results are all represented by different
 data structures. Databases are opened by calling `MMDB_open()`. You can
 look up IP addresses as a string with `MMDB_lookup_string()` or as a
@@ -552,9 +552,9 @@ int MMDB_aget_value(
 The three functions allow three slightly different calling styles, but they
 all do the same thing.
 
-The first parameter is an `MMDB_entry_s` value. In most cases this will come
-from the `MMDB_lookup_result_s` value returned by `MMDB_lookup_string()` or
-`MMDB_lookup_sockaddr()`.
+The first parameter is a pointer to an `MMDB_entry_s` struct. In most cases
+this will be a pointer to the `entry` field of the `MMDB_lookup_result_s`
+value returned by `MMDB_lookup_string()` or `MMDB_lookup_sockaddr()`.
 
 The second parameter is a reference to an `MMDB_entry_data_s` structure. This
 will be populated with the data that is being looked up, if any is found. If
@@ -622,6 +622,10 @@ int MMDB_get_entry_data_list(
     MMDB_entry_s *start,
     MMDB_entry_data_list_s **const entry_data_list);
 ```
+
+The `start` parameter is a pointer to an `MMDB_entry_s` struct. In most cases
+this will be a pointer to the `entry` field of the `MMDB_lookup_result_s`
+value returned by `MMDB_lookup_string()` or `MMDB_lookup_sockaddr()`.
 
 This function allows you to get all of the data for a complex data structure
 at once, rather than looking up each piece using repeated calls to
