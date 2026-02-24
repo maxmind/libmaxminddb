@@ -9,5 +9,6 @@ disable_backends = [
 
 [tools]
 node = "latest"
+"pipx:clang-format" = "21.1.8"
 "github:houseabsolute/precious" = "latest"
 "npm:prettier" = "latest"
