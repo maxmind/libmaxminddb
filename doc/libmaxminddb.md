@@ -207,7 +207,7 @@ prefix length (from 0-128), even if that database *also* contains IPv4
 networks. If you look up an IPv4 address and would like to turn the netmask
 into an IPv4 netmask value, you can simply subtract `96` from the value.
 
-## `MMDB_result_s`
+## `MMDB_entry_s`
 
 You don't really need to dig around in this structure. You'll get this from a
 `MMDB_lookup_result_s` structure and pass it to various functions.
@@ -559,7 +559,7 @@ from the `MMDB_lookup_result_s` value returned by `MMDB_lookup_string()` or
 The second parameter is a reference to an `MMDB_entry_data_s` structure. This
 will be populated with the data that is being looked up, if any is found. If
 nothing is found, then the `has_data` member of this structure will be false.
-If `has_data` is true then you can look at the `data_type` member.
+If `has_data` is true then you can look at the `type` member.
 
 The final parameter is a lookup path. The path consists of a set of strings
 representing either map keys (e.g, "city") or array indexes (e.g., "0", "1",
