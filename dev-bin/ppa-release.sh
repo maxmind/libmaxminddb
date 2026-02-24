@@ -6,14 +6,12 @@ set -u
 
 DISTS=( groovy focal bionic xenial trusty )
 
-VERSION=$(perl -MFile::Slurp::Tiny=read_file -MDateTime <<EOF
-use v5.16;
-my \$log = read_file(q{Changes.md});
-\$log =~ /^## (\d+\.\d+\.\d+) - (\d{4}-\d{2}-\d{2})/;
-die 'Release time is not today!' unless DateTime->now->ymd eq \$2;
-say \$1;
-EOF
-)
+changelog_header=$(head -n 3 Changes.md)
+if [[ ! $changelog_header =~ ^##\ ([0-9]+\.[0-9]+\.[0-9]+)\ -\ ([0-9]{4}-[0-9]{2}-[0-9]{2}) ]]; then
+    echo "Could not find version in Changes.md!"
+    exit 1
+fi
+VERSION="${BASH_REMATCH[1]}"
 
 RESULTS=/tmp/build-libmaxminddb-results/
 SRCDIR="$RESULTS/libmaxminddb"

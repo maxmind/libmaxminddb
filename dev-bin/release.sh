@@ -81,17 +81,14 @@ if [ -n "$(git status --porcelain)" ]; then
     exit 1
 fi
 
-old_version=$(
-    perl -MFile::Slurp=read_file <<EOF
-use v5.16;
-my \$conf = read_file(q{configure.ac});
-\$conf =~ /AC_INIT.+\[(\d+\.\d+\.\d+)\]/;
-say \$1;
-EOF
-)
+ac_init=$(grep AC_INIT configure.ac)
+if [[ ! $ac_init =~ \[([0-9]+\.[0-9]+\.[0-9]+)\] ]]; then
+    echo "Could not find version in configure.ac!"
+    exit 1
+fi
+old_version="${BASH_REMATCH[1]}"
 
-perl -MFile::Slurp=edit_file -e \
-    "edit_file { s/\Q$old_version/$version/g } \$_ for qw( configure.ac include/maxminddb.h CMakeLists.txt )"
+perl -pi -e "s/\Q$old_version/$version/g" configure.ac include/maxminddb.h CMakeLists.txt
 
 if [ -n "$(git status --porcelain)" ]; then
     git diff
