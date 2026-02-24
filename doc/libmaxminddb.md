@@ -14,12 +14,12 @@ int MMDB_open(
 void MMDB_close(MMDB_s *const mmdb);
 
 MMDB_lookup_result_s MMDB_lookup_string(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     const char *const ipstr,
     int *const gai_error,
     int *const mmdb_error);
 MMDB_lookup_result_s MMDB_lookup_sockaddr(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     const struct sockaddr *const
     sockaddr,
     int *const mmdb_error);
@@ -43,7 +43,7 @@ int MMDB_get_entry_data_list(
 void MMDB_free_entry_data_list(
     MMDB_entry_data_list_s *const entry_data_list);
 int MMDB_get_metadata_as_entry_data_list(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     MMDB_entry_data_list_s **const entry_data_list);
 int MMDB_dump_entry_data_list(
     FILE *const stream,
@@ -51,7 +51,7 @@ int MMDB_dump_entry_data_list(
     int indent);
 
 int MMDB_read_node(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     uint32_t node_number,
     MMDB_search_node_s *const node);
 
@@ -463,7 +463,7 @@ freeing it.
 
 ```c
 MMDB_lookup_result_s MMDB_lookup_string(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     const char *const ipstr,
     int *const gai_error,
     int *const mmdb_error);
@@ -510,7 +510,7 @@ If you pass an IPv6 address to a database with only IPv4 data then the
 
 ```c
 MMDB_lookup_result_s MMDB_lookup_sockaddr(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     const struct sockaddr *const sockaddr,
     int *const mmdb_error);
 ```
@@ -698,7 +698,7 @@ function to free the `MMDB_entry_data_list_s` structure.
 
 ```c
 int MMDB_get_metadata_as_entry_data_list(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     MMDB_entry_data_list_s **const entry_data_list);
 ```
 
@@ -750,7 +750,7 @@ The return value of the function is a status code as defined above.
 
 ```c
 int MMDB_read_node(
-    MMDB_s *const mmdb,
+    const MMDB_s *const mmdb,
     uint32_t node_number,
     MMDB_search_node_s *const node);
 ```
