@@ -1,3 +1,7 @@
+## 1.13.1 - 2026-02-24
+
+- Re-release for Ubuntu PPA. No code changes.
+
 ## 1.13.0 - 2026-02-24
 
 - `MMDB_get_entry_data_list()` now validates that the claimed array/map size is
