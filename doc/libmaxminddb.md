@@ -255,6 +255,10 @@ The `data_size` member is only relevant for `utf8_string` and `bytes` data.
 determine its length.
 
 The `type` member can be compared to one of the `MMDB_DATA_TYPE_*` macros.
+When `type` is `MMDB_DATA_TYPE_MAP` or `MMDB_DATA_TYPE_ARRAY`, the entry
+represents a collection. To access individual items within the collection, use
+`MMDB_get_value()` with the appropriate lookup path from the original entry. To
+iterate over all items, use `MMDB_get_entry_data_list()`.
 
 ### 128-bit Integers
 
@@ -609,8 +613,12 @@ last element retrieved by `va_arg()` must be `NULL`.
 Finally, the `MMDB_aget_value` accepts an array of strings as the lookup
 path. The last member of this array must be `NULL`.
 
-If you want to get all of the entry data at once you can call
-`MMDB_get_entry_data_list()` instead.
+To look up multiple keys within the same map, use the full lookup path for
+each key. For example, to get both the `en` and `de` values from the `names`
+map, make separate calls with `"names", "en", NULL` and `"names", "de", NULL`.
+If you need all of the data from a complex structure rather than specific
+values, `MMDB_get_entry_data_list()` is more efficient than making many
+individual calls.
 
 For each of the three functions, the return value is a status code as
 defined above.
