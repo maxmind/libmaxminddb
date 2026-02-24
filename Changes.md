@@ -1,4 +1,4 @@
-## 1.13.0
+## 1.13.0 - 2026-02-24
 
 - `MMDB_get_entry_data_list()` now validates that the claimed array/map size is
   plausible given the remaining bytes in the data section. A crafted database
