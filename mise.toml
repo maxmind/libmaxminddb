@@ -1,0 +1,13 @@
+[settings]
+lockfile = true
+locked = true
+
+disable_backends = [
+    "asdf",
+    "vfox",
+]
+
+[tools]
+node = "latest"
+"github:houseabsolute/precious" = "latest"
+"npm:prettier" = "latest"
