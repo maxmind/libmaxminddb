@@ -1,7 +1,7 @@
 ---
 layout: default
 title: libmaxminddb - a library for working with MaxMind DB files
-version: 1.13.0
+version: 1.13.1
 ---
 # NAME
 
