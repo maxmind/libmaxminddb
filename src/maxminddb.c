@@ -1804,31 +1804,37 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
     #define __has_builtin(x) 0
 #endif
 
+// `sys/endian.h` on macOS defined `bswap32` and `bswap64` macros
+// Declaring these functions causes compilation failure
+#ifndef bswap32
 static inline uint32_t bswap32(uint32_t x) {
-#if defined(_MSC_VER)
+    #if defined(_MSC_VER)
     return _byteswap_ulong(x);
-#elif __has_builtin(__builtin_bswap32)
+    #elif __has_builtin(__builtin_bswap32)
     return __builtin_bswap32(x);
-#else
+    #else
     x = ((x << 8) & 0xFF00FF00) | ((x >> 8) & 0x00FF00FF);
     return (x << 16) | (x >> 16);
-#endif
+    #endif
 }
+#endif
 
+#ifndef bswap64
 static inline uint64_t bswap64(uint64_t x) {
-#if defined(_MSC_VER)
+    #if defined(_MSC_VER)
     return _byteswap_uint64(x);
-#elif __has_builtin(__builtin_bswap64)
+    #elif __has_builtin(__builtin_bswap64)
     return __builtin_bswap64(x);
-#else
+    #else
     x = ((x & 0x00000000FFFFFFFFULL) << 32) |
         ((x & 0xFFFFFFFF00000000ULL) >> 32);
     x = ((x & 0x0000FFFF0000FFFFULL) << 16) |
         ((x & 0xFFFF0000FFFF0000ULL) >> 16);
     return ((x & 0x00FF00FF00FF00FFULL) << 8) |
            ((x & 0xFF00FF00FF00FF00ULL) >> 8);
-#endif
+    #endif
 }
+#endif
 
 static float get_ieee754_float(const uint8_t *restrict p) {
     float f;
