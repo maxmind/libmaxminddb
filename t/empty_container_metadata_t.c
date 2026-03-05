@@ -16,6 +16,7 @@ static void test_db_opens_and_lookup_succeeds(const char *filename,
 
     int gai_error, mmdb_error;
     MMDB_lookup_string(&mmdb, "1.2.3.4", &gai_error, &mmdb_error);
+    cmp_ok(gai_error, "==", 0, "getaddrinfo succeeded");
     cmp_ok(mmdb_error, "==", MMDB_SUCCESS, "lookup succeeded");
 
     MMDB_close(&mmdb);
