@@ -11,7 +11,7 @@ m4_ifdef([PKG_INSTALLDIR], [PKG_INSTALLDIR], [AC_SUBST([pkgconfigdir], [${libdir
 AC_CONFIG_FILES([src/libmaxminddb.pc])
 
 LT_INIT
-AM_INIT_AUTOMAKE(foreign m4_esyscmd([case `automake --version | head -n 1` in
+AM_INIT_AUTOMAKE(foreign tar-ustar m4_esyscmd([case `automake --version | head -n 1` in
                                      *1.14*) echo subdir-objects;;
                                      *1.11*);;
                                      *) echo serial-tests;;
