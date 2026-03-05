@@ -1,4 +1,4 @@
-## 1.13.3 - 2026-XX-XX
+## 1.13.3 - 2026-03-05
 
 - Fixed validation of empty maps and arrays at the end of the metadata section.
   `MMDB_open` would incorrectly reject databases where a 0-element map or array
