@@ -8,7 +8,6 @@
 */.libs
 *~
 .\#*
-.gh-pages
 docs/.hugo_build.lock
 docs/public/
 /INSTALL
