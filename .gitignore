@@ -9,6 +9,8 @@
 *~
 .\#*
 .gh-pages
+docs/.hugo_build.lock
+docs/public/
 /INSTALL
 /autom4te.cache
 /bin/country_lookup
