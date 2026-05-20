@@ -1,5 +1,5 @@
 title = "libmaxminddb"
-disableKinds = ["taxonomy"]
+disableKinds = ["taxonomy", "term", "RSS"]
 
 [[cascade]]
   layout = "default"
