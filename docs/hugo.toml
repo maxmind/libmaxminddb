@@ -1,4 +1,5 @@
 title = "libmaxminddb"
+uglyURLs = true
 disableKinds = ["taxonomy", "term", "RSS"]
 
 [[cascade]]
