@@ -128,7 +128,7 @@ You can install libmaxminddb on macOS using [Homebrew](https://brew.sh):
 brew install libmaxminddb
 ```
 
-Or with [MacPorts](https://ports.macports.org/port/libmaxminddb):
+Or with [MacPorts](https://ports.macports.org/port/libmaxminddb/):
 
 ```bash
 sudo port install libmaxminddb
