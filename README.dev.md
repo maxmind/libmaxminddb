@@ -20,8 +20,8 @@ You may want to refer to the section about prerequisites.
 In order to upload a PPA, you have to create a launchpad.net account and
 register a GPG key with that account. You also need to be added to the MaxMind
 team. Ask in the dev channel for someone to add you. See
-https://ubuntu.com/docs/launchpad/user/reference/packaging/ppas/ppa/
-for more details.
+https://ubuntu.com/docs/launchpad/user/reference/packaging/ppas/ppa/ for more
+details.
 
 The PPA release script is at `dev-bin/ppa-release.sh`. Running it should guide
 you though the release, although it may require some changes to run on
