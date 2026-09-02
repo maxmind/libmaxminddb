@@ -395,6 +395,9 @@ status codes are:
   array where none exist.
 - `MMDB_INVALID_NETWORK_ADDRESS_ERROR` - `MMDB_lookup_sockaddr()` was given a
   `sockaddr` whose family is neither `AF_INET` nor `AF_INET6`.
+- `MMDB_DECODER_LIMIT_ERROR` - decoding an entry as a complete list would
+  exceed the configured value-count limit. The entry may still be valid
+  MaxMind DB data.
 
 All status codes should be treated as `int` values.
 
@@ -451,6 +454,11 @@ mode, as well as additional modes.
 You can also pass `0` as the `flags` value in which case the database will be
 opened with the default flags. However, these defaults may change in future
 releases. The current default is `MMDB_MODE_MMAP`.
+
+Opening a database decodes its `languages` and `description` metadata. If one
+of these structures exceeds the decoder resource limit described under
+`MMDB_get_entry_data_list()`, this function returns
+`MMDB_INVALID_METADATA_ERROR`.
 
 ## `MMDB_close()`
 
@@ -640,6 +648,22 @@ This function allows you to get all of the data for a complex data structure at
 once, rather than looking up each piece using repeated calls to
 `MMDB_get_value()`.
 
+To bound the work produced by crafted databases, this function decodes at most
+65,536 list values per call. A structure exactly at the limit is accepted. If a
+structure exceeds the limit, the function returns `MMDB_DECODER_LIMIT_ERROR`
+and sets `entry_data_list` to `NULL`.
+
+The limit is per call and may be changed when rebuilding libmaxminddb by
+defining the positive integer macro `MAXIMUM_DATA_STRUCTURE_VALUES`. For
+example, pass `-DMAXIMUM_DATA_STRUCTURE_VALUES=1000000` in the library's
+compiler flags. This requires rebuilding the library itself; defining the macro
+only while building an application does not change a packaged shared library.
+
+`MMDB_get_value()`, `MMDB_vget_value()`, and `MMDB_aget_value()` do not expand a
+complete structure and therefore do not charge this budget. Applications that
+cannot rebuild a packaged library can use those functions to retrieve a
+specific field from an otherwise over-limit record.
+
 ```c
 MMDB_lookup_result_s result =
     MMDB_lookup_sockaddr(&mmdb, address->ai_addr, &mmdb_error);
@@ -717,7 +741,9 @@ int MMDB_get_metadata_as_entry_data_list(
 
 This function allows you to retrieve the database metadata as a linked list of
 `MMDB_entry_data_list_s` structures. This can be a more convenient way to deal
-with the metadata than using the metadata structure directly.
+with the metadata than using the metadata structure directly. It uses the same
+per-call limit as `MMDB_get_entry_data_list()` and returns
+`MMDB_DECODER_LIMIT_ERROR` if the complete metadata list exceeds it.
 
 ```c
     MMDB_entry_data_list_s *entry_data_list, *first;

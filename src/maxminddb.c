@@ -35,6 +35,19 @@ typedef ADDRESS_FAMILY sa_family_t;
 
 #define MMDB_DATA_SECTION_SEPARATOR (16)
 #define MAXIMUM_DATA_STRUCTURE_DEPTH (512)
+// The maximum number of data-section values decoded for a single entry. This
+// bounds a pointer fan-out, where nested pointers to shared targets would
+// otherwise cost 2**depth decode operations. The largest real records decode a
+// few hundred values, so this leaves a wide margin. See the proposed "Reader
+// Resource Limits" guidance for the MaxMind DB specification.
+#ifndef MAXIMUM_DATA_STRUCTURE_VALUES
+    #define MAXIMUM_DATA_STRUCTURE_VALUES (1U << 16)
+#endif
+
+#if MAXIMUM_DATA_STRUCTURE_VALUES < 1 ||                                       \
+    MAXIMUM_DATA_STRUCTURE_VALUES > SIZE_MAX
+    #error "MAXIMUM_DATA_STRUCTURE_VALUES must be between 1 and SIZE_MAX"
+#endif
 
 #ifdef MMDB_DEBUG
     #define DEBUG_MSG(msg) fprintf(stderr, msg "\n")
@@ -131,6 +144,10 @@ typedef struct record_info_s {
     uint8_t right_record_offset;
 } record_info_s;
 
+typedef struct MMDB_decode_state_s {
+    size_t values;
+} MMDB_decode_state_s;
+
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
 #define METADATA_BLOCK_MAX_SIZE 131072
@@ -193,7 +210,12 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                                uint32_t offset,
                                MMDB_entry_data_list_s *const entry_data_list,
                                MMDB_data_pool_s *const pool,
+                               MMDB_decode_state_s *const decode_state,
                                int depth);
+static int
+alloc_entry_data_list(MMDB_data_pool_s *const pool,
+                      MMDB_decode_state_s *const decode_state,
+                      MMDB_entry_data_list_s **const entry_data_list);
 static float get_ieee754_float(const uint8_t *restrict p);
 static double get_ieee754_double(const uint8_t *restrict p);
 static uint32_t get_uint32(const uint8_t *p);
@@ -284,6 +306,11 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
     mmdb->metadata_section_size = metadata_size;
 
     status = read_metadata(mmdb);
+    if (MMDB_DECODER_LIMIT_ERROR == status) {
+        // The languages and description structures are decoded as complete
+        // lists. Metadata that exceeds the decoder limits is invalid metadata.
+        status = MMDB_INVALID_METADATA_ERROR;
+    }
     if (MMDB_SUCCESS != status) {
         goto cleanup;
     }
@@ -1688,19 +1715,23 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
                              MMDB_entry_data_list_s **const entry_data_list) {
     *entry_data_list = NULL;
 
-    MMDB_data_pool_s *const pool = data_pool_new(MMDB_POOL_INIT_SIZE);
+    size_t const maximum_values = (size_t)(MAXIMUM_DATA_STRUCTURE_VALUES);
+    MMDB_data_pool_s *const pool =
+        data_pool_new(MMDB_POOL_INIT_SIZE, maximum_values);
     if (!pool) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    MMDB_entry_data_list_s *const list = data_pool_alloc(pool);
-    if (!list) {
+    MMDB_decode_state_s decode_state = {0};
+    MMDB_entry_data_list_s *list = NULL;
+    int status = alloc_entry_data_list(pool, &decode_state, &list);
+    if (MMDB_SUCCESS != status) {
         data_pool_destroy(pool);
-        return MMDB_OUT_OF_MEMORY_ERROR;
+        return status;
     }
 
-    int const status =
-        get_entry_data_list(start->mmdb, start->offset, list, pool, 0);
+    status = get_entry_data_list(
+        start->mmdb, start->offset, list, pool, &decode_state, 0);
     if (MMDB_SUCCESS != status) {
         data_pool_destroy(pool);
         return status;
@@ -1715,10 +1746,29 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
     return status;
 }
 
+static int
+alloc_entry_data_list(MMDB_data_pool_s *const pool,
+                      MMDB_decode_state_s *const decode_state,
+                      MMDB_entry_data_list_s **const entry_data_list) {
+    size_t const maximum_values = (size_t)(MAXIMUM_DATA_STRUCTURE_VALUES);
+    if (decode_state->values >= maximum_values) {
+        DEBUG_MSG("reached the maximum number of data structure values");
+        return MMDB_DECODER_LIMIT_ERROR;
+    }
+
+    *entry_data_list = data_pool_alloc(pool);
+    if (!*entry_data_list) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
+    decode_state->values++;
+    return MMDB_SUCCESS;
+}
+
 static int get_entry_data_list(const MMDB_s *const mmdb,
                                uint32_t offset,
                                MMDB_entry_data_list_s *const entry_data_list,
                                MMDB_data_pool_s *const pool,
+                               MMDB_decode_state_s *const decode_state,
                                int depth) {
     if (depth >= MAXIMUM_DATA_STRUCTURE_DEPTH) {
         DEBUG_MSG("reached the maximum data structure depth");
@@ -1745,8 +1795,12 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
             if (entry_data_list->entry_data.type == MMDB_DATA_TYPE_ARRAY ||
                 entry_data_list->entry_data.type == MMDB_DATA_TYPE_MAP) {
 
-                int status = get_entry_data_list(
-                    mmdb, last_offset, entry_data_list, pool, depth);
+                int status = get_entry_data_list(mmdb,
+                                                 last_offset,
+                                                 entry_data_list,
+                                                 pool,
+                                                 decode_state,
+                                                 depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on pointer failed.");
                     return status;
@@ -1764,14 +1818,19 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                 return MMDB_INVALID_DATA_ERROR;
             }
             while (array_size-- > 0) {
-                MMDB_entry_data_list_s *entry_data_list_to =
-                    data_pool_alloc(pool);
-                if (!entry_data_list_to) {
-                    return MMDB_OUT_OF_MEMORY_ERROR;
+                MMDB_entry_data_list_s *entry_data_list_to = NULL;
+                int status = alloc_entry_data_list(
+                    pool, decode_state, &entry_data_list_to);
+                if (MMDB_SUCCESS != status) {
+                    return status;
                 }
 
-                int status = get_entry_data_list(
-                    mmdb, array_offset, entry_data_list_to, pool, depth);
+                status = get_entry_data_list(mmdb,
+                                             array_offset,
+                                             entry_data_list_to,
+                                             pool,
+                                             decode_state,
+                                             depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on array element failed.");
                     return status;
@@ -1793,13 +1852,15 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                 return MMDB_INVALID_DATA_ERROR;
             }
             while (size-- > 0) {
-                MMDB_entry_data_list_s *list_key = data_pool_alloc(pool);
-                if (!list_key) {
-                    return MMDB_OUT_OF_MEMORY_ERROR;
+                MMDB_entry_data_list_s *list_key = NULL;
+                int status =
+                    alloc_entry_data_list(pool, decode_state, &list_key);
+                if (MMDB_SUCCESS != status) {
+                    return status;
                 }
 
-                int status =
-                    get_entry_data_list(mmdb, offset, list_key, pool, depth);
+                status = get_entry_data_list(
+                    mmdb, offset, list_key, pool, decode_state, depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on map key failed.");
                     return status;
@@ -1807,13 +1868,14 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
 
                 offset = list_key->entry_data.offset_to_next;
 
-                MMDB_entry_data_list_s *list_value = data_pool_alloc(pool);
-                if (!list_value) {
-                    return MMDB_OUT_OF_MEMORY_ERROR;
+                MMDB_entry_data_list_s *list_value = NULL;
+                status = alloc_entry_data_list(pool, decode_state, &list_value);
+                if (MMDB_SUCCESS != status) {
+                    return status;
                 }
 
-                status =
-                    get_entry_data_list(mmdb, offset, list_value, pool, depth);
+                status = get_entry_data_list(
+                    mmdb, offset, list_value, pool, decode_state, depth);
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on map element failed.");
                     return status;
@@ -2286,6 +2348,9 @@ const char *MMDB_strerror(int error_code) {
         case MMDB_INVALID_NETWORK_ADDRESS_ERROR:
             return "The sockaddr family is unsupported; only AF_INET and "
                    "AF_INET6 are accepted";
+        case MMDB_DECODER_LIMIT_ERROR:
+            return "The decoded data structure exceeds the configured resource "
+                   "limits";
         default:
             return "Unknown error code";
     }

@@ -33,6 +33,12 @@ typedef struct MMDB_data_pool_s {
     // How many used in the current block, counting by structs.
     size_t used;
 
+    // Total number of structs reserved across all blocks.
+    size_t capacity;
+
+    // Maximum number of structs this pool may reserve.
+    size_t max_size;
+
     // The current block we're allocating out of.
     MMDB_entry_data_list_s *block;
 
@@ -45,7 +51,7 @@ typedef struct MMDB_data_pool_s {
 } MMDB_data_pool_s;
 
 bool can_multiply(size_t const, size_t const, size_t const);
-MMDB_data_pool_s *data_pool_new(size_t const);
+MMDB_data_pool_s *data_pool_new(size_t const, size_t const);
 void data_pool_destroy(MMDB_data_pool_s *const);
 MMDB_entry_data_list_s *data_pool_alloc(MMDB_data_pool_s *const);
 MMDB_entry_data_list_s *data_pool_to_list(MMDB_data_pool_s *const);
