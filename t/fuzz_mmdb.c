@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 #define kMinInputLength 2
-#define kMaxInputLength 4048
+#define kMaxInputLength (256 * 1024)
 
 extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
@@ -29,6 +29,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     status = MMDB_open(filename, MMDB_MODE_MMAP, &mmdb);
     if (status == MMDB_SUCCESS) {
+        int gai_error, mmdb_error;
+        MMDB_lookup_result_s result =
+            MMDB_lookup_string(&mmdb, "1.1.1.1", &gai_error, &mmdb_error);
+        if (gai_error == 0 && mmdb_error == MMDB_SUCCESS &&
+            result.found_entry) {
+            MMDB_entry_data_list_s *entry_data_list = NULL;
+            MMDB_get_entry_data_list(&result.entry, &entry_data_list);
+            MMDB_free_entry_data_list(entry_data_list);
+        }
         MMDB_close(&mmdb);
     }
 
