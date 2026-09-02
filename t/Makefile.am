@@ -11,7 +11,8 @@ CFLAGS += -I$(top_srcdir)/src
 noinst_LTLIBRARIES = libmmdbtest.la
 libmmdbtest_la_SOURCES = maxminddb_test_helper.c maxminddb_test_helper.h
 
-EXTRA_DIST = compile_c++_t.pl external_symbols_t.pl  mmdblookup_t.pl \
+EXTRA_DIST = compile_c++_t.pl decoder_limits_t.pl external_symbols_t.pl \
+	     mmdblookup_t.pl \
 	     libtap/COPYING libtap/INSTALL libtap/Makefile libtap/README.md \
 	     libtap/tap.c libtap/tap.h maxmind-db
 
@@ -24,7 +25,7 @@ check_PROGRAMS = \
 	get_value_pointer_bug_t invalid_sockaddr_t \
 	ipv4_start_cache_t ipv6_lookup_in_ipv4_t max_depth_t metadata_t \
 	metadata_marker_t metadata_pointers_t no_map_get_value_t \
-	overflow_bounds_t read_node_t \
+	overflow_bounds_t pointer_dos_t read_node_t \
 	threads_t version_t
 
 data_pool_t_LDFLAGS = $(AM_LDFLAGS) -lm
@@ -32,6 +33,7 @@ data_pool_t_SOURCES = data-pool-t.c ../src/data-pool.c
 
 threads_t_CFLAGS = $(CFLAGS) -pthread
 
-TESTS = $(check_PROGRAMS) compile_c++_t.pl external_symbols_t.pl mmdblookup_t.pl
+TESTS = $(check_PROGRAMS) compile_c++_t.pl decoder_limits_t.pl \
+	external_symbols_t.pl mmdblookup_t.pl
 
 LDADD = libmmdbtest.la libtap/libtap.a
