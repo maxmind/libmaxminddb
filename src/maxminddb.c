@@ -49,6 +49,23 @@ typedef ADDRESS_FAMILY sa_family_t;
     #error "MAXIMUM_DATA_STRUCTURE_VALUES must be between 1 and SIZE_MAX"
 #endif
 
+// The maximum total bytes of string and bytes payloads decoded for a single
+// entry. libmaxminddb borrows payload bytes (each node points into the data
+// section, it does not copy), so the value count above already bounds the
+// library's own memory. But a fan-out of pointers to one large value produces
+// many nodes that all reference it. A caller that copies each node into a
+// language string then materializes far more than the file holds. This bounds
+// that copied total. The largest real records hold about a kilobyte of
+// payload, so 2 MiB leaves a wide margin while stopping the amplification. It
+// can be raised at build time with -DMAXIMUM_DATA_STRUCTURE_BYTES=<n>.
+#ifndef MAXIMUM_DATA_STRUCTURE_BYTES
+    #define MAXIMUM_DATA_STRUCTURE_BYTES (1U << 21)
+#endif
+
+#if MAXIMUM_DATA_STRUCTURE_BYTES < 1
+    #error "MAXIMUM_DATA_STRUCTURE_BYTES must be at least 1"
+#endif
+
 #ifdef MMDB_DEBUG
     #define DEBUG_MSG(msg) fprintf(stderr, msg "\n")
     #define DEBUG_MSGF(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
@@ -146,6 +163,7 @@ typedef struct record_info_s {
 
 typedef struct MMDB_decode_state_s {
     size_t values;
+    uint64_t bytes;
 } MMDB_decode_state_s;
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
@@ -1886,6 +1904,26 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
         } break;
         default:
             break;
+    }
+
+    // Charge the copied payload. Only string and bytes carry a variable-length
+    // payload that a caller copies. Integers are size-validated and tiny,
+    // floats are fixed width, and container data_size is an element count, not
+    // bytes. Pointers have been resolved to their target above, so a pointer to
+    // a string is charged here as the string. This runs once per node, so a
+    // fan-out that references one large value many times is charged each time.
+    // Check before adding so even an overridden maximum cannot make the
+    // uint64 counter wrap.
+    if (entry_data_list->entry_data.type == MMDB_DATA_TYPE_UTF8_STRING ||
+        entry_data_list->entry_data.type == MMDB_DATA_TYPE_BYTES) {
+        uint64_t const maximum_bytes = (uint64_t)(MAXIMUM_DATA_STRUCTURE_BYTES);
+        uint64_t const data_size = entry_data_list->entry_data.data_size;
+        if (data_size > maximum_bytes ||
+            decode_state->bytes > maximum_bytes - data_size) {
+            DEBUG_MSG("reached the maximum data structure bytes");
+            return MMDB_DECODER_LIMIT_ERROR;
+        }
+        decode_state->bytes += data_size;
     }
 
     return MMDB_SUCCESS;
