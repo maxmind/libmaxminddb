@@ -1,5 +1,10 @@
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "maxminddb-compat-util.h"
 #include "maxminddb.h"
+#include <stdlib.h>
 #include <unistd.h>
 
 #define kMinInputLength 2
@@ -9,23 +14,30 @@ extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     int status;
-    FILE *fp;
     MMDB_s mmdb;
-    char filename[256];
+    char filename[] = "/tmp/libfuzzer.XXXXXX";
 
     if (size < kMinInputLength || size > kMaxInputLength) {
         return 0;
     }
 
-    snprintf(filename, sizeof(filename), "/tmp/libfuzzer.%d", getpid());
-
-    fp = fopen(filename, "wb");
+    int const fd = mkstemp(filename);
+    if (fd == -1) {
+        abort();
+    }
+    FILE *const fp = fdopen(fd, "wb");
     if (!fp) {
-        return 0;
+        close(fd);
+        unlink(filename);
+        abort();
     }
 
-    fwrite(data, size, sizeof(uint8_t), fp);
-    fclose(fp);
+    size_t const written = fwrite(data, sizeof(uint8_t), size, fp);
+    int const close_status = fclose(fp);
+    if (written != size || close_status != 0) {
+        unlink(filename);
+        abort();
+    }
 
     status = MMDB_open(filename, MMDB_MODE_MMAP, &mmdb);
     if (status == MMDB_SUCCESS) {
@@ -41,6 +53,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         MMDB_close(&mmdb);
     }
 
-    unlink(filename);
+    if (unlink(filename) != 0) {
+        abort();
+    }
     return 0;
 }
