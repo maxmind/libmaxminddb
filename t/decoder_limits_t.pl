@@ -26,8 +26,15 @@ my $cc          = $ENV{CC} || 'cc';
 # The checks below rebuild the library with -Werror. Only gcc and clang are
 # known to compile it cleanly with the flags used here, so skip elsewhere
 # instead of failing on a missing compiler or an unrelated warning.
-my $cc_version = `$cc --version 2>&1`;
-if ( $? != 0 || $cc_version !~ /gcc|clang|Free Software Foundation/ ) {
+my ( $cc_version, $cc_stderr ) = ( q{}, q{} );
+my $cc_status = eval {
+    run3( [ $cc, '--version' ], \undef, \$cc_version, \$cc_stderr );
+    $?;
+};
+$cc_version .= $cc_stderr;
+if ( !defined $cc_status
+    || $cc_status != 0
+    || $cc_version !~ /gcc|clang|Free Software Foundation/ ) {
     plan( skip_all => "decoder limit override tests need gcc or clang" );
 }
 
