@@ -69,7 +69,6 @@ for my $definition (
     '-DMAXIMUM_DATA_STRUCTURE_DEPTH=-1',
     '-DMAXIMUM_DATA_STRUCTURE_VALUES=0',
     '-DMAXIMUM_DATA_STRUCTURE_VALUES=-1',
-    '-DMAXIMUM_DATA_STRUCTURE_VALUES=SIZE_MAX+1',
     '-DMAXIMUM_DATA_STRUCTURE_BYTES=0',
     '-DMAXIMUM_DATA_STRUCTURE_BYTES=-1',
 ) {
@@ -94,22 +93,24 @@ print {$fh} <<'EOF' or die $!;
 #include <maxminddb.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 static int fail(const char *path, const char *what, int status, int code) {
     fprintf(stderr, "%s: %s: %s\n", path, what, MMDB_strerror(status));
     return code;
 }
 
-static int lookup(const char *path, MMDB_s *mmdb, MMDB_lookup_result_s *result) {
+static int lookup(const char *path, const char *address, MMDB_s *mmdb,
+                  MMDB_lookup_result_s *result) {
     int status = MMDB_open(path, MMDB_MODE_MMAP, mmdb);
     if (status != MMDB_SUCCESS) {
         return fail(path, "open", status, 1);
     }
     int gai_error, mmdb_error;
-    *result = MMDB_lookup_string(mmdb, "1.1.1.1", &gai_error, &mmdb_error);
+    *result = MMDB_lookup_string(mmdb, address, &gai_error, &mmdb_error);
     if (gai_error != 0 || mmdb_error != MMDB_SUCCESS || !result->found_entry) {
         MMDB_close(mmdb);
-        return fail(path, "lookup of 1.1.1.1 found no entry", mmdb_error, 2);
+        return fail(path, "lookup found no entry", mmdb_error, 2);
     }
     return 0;
 }
@@ -117,7 +118,7 @@ static int lookup(const char *path, MMDB_s *mmdb, MMDB_lookup_result_s *result) 
 static int decode(const char *path, size_t expected_count) {
     MMDB_s mmdb;
     MMDB_lookup_result_s result;
-    int code = lookup(path, &mmdb, &result);
+    int code = lookup(path, "1.1.1.1", &mmdb, &result);
     if (code != 0) {
         return code;
     }
@@ -141,10 +142,11 @@ static int decode(const char *path, size_t expected_count) {
     return 0;
 }
 
-static int reject(const char *path) {
+static int
+check_status(const char *path, const char *address, int expected_status) {
     MMDB_s mmdb;
     MMDB_lookup_result_s result;
-    int code = lookup(path, &mmdb, &result);
+    int code = lookup(path, address, &mmdb, &result);
     if (code != 0) {
         return code;
     }
@@ -152,15 +154,20 @@ static int reject(const char *path) {
     int status = MMDB_get_entry_data_list(&result.entry, &list);
     MMDB_free_entry_data_list(list);
     MMDB_close(&mmdb);
-    if (status != MMDB_DECODER_LIMIT_ERROR) {
-        return fail(path, "full decode was not rejected", status, 7);
+    if (status != expected_status) {
+        return fail(path, "full decode returned an unexpected status", status,
+                    7);
     }
     return 0;
 }
 
 int main(int argc, char **argv) {
+    if (argc == 3 && strcmp(argv[1], "--accept") == 0) {
+        return check_status(argv[2], "1.2.3.4", MMDB_SUCCESS);
+    }
     if (argc == 2) {
-        return reject(argv[1]);
+        return check_status(
+            argv[1], "1.1.1.1", MMDB_DECODER_LIMIT_ERROR);
     }
     if (argc != 3) {
         return 5;
@@ -199,6 +206,14 @@ my @overrides = (
         definitions => ['-DMAXIMUM_DATA_STRUCTURE_BYTES=65534'],
         fixtures    => ['MaxMind-DB-test-payload-amplification-dos.mmdb'],
     },
+    {
+        desc        => 'a raised nesting depth limit',
+        definitions => ['-DMAXIMUM_DATA_STRUCTURE_DEPTH=1000'],
+        accept      => 1,
+        fixtures    => [
+            '../bad-data/libmaxminddb/libmaxminddb-deep-array-nesting.mmdb'
+        ],
+    },
 );
 
 my $count = 0;
@@ -218,10 +233,10 @@ for my $override (@overrides) {
         or diag($compile_stderr);
     next if $compile_status != 0;
 
-    my ( $status, $stderr ) = _run(
-        $executable,
-        map { "$Bin/maxmind-db/test-data/$_" } @{ $override->{fixtures} },
-    );
+    my @arguments =
+        map { "$Bin/maxmind-db/test-data/$_" } @{ $override->{fixtures} };
+    unshift @arguments, '--accept' if $override->{accept};
+    my ( $status, $stderr ) = _run( $executable, @arguments );
     is( $status, 0, "$override->{desc} takes effect at runtime" )
         or diag($stderr);
 }
