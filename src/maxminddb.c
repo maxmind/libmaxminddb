@@ -38,8 +38,8 @@ typedef ADDRESS_FAMILY sa_family_t;
 // The maximum number of data-section values decoded for a single entry. This
 // bounds a pointer fan-out, where nested pointers to shared targets would
 // otherwise cost 2**depth decode operations. The largest real records decode a
-// few hundred values, so this leaves a wide margin. See the proposed "Reader
-// Resource Limits" guidance for the MaxMind DB specification.
+// few hundred values, so this leaves a wide margin. See "Reader Resource
+// Limits" in the MaxMind DB specification.
 #ifndef MAXIMUM_DATA_STRUCTURE_VALUES
     #define MAXIMUM_DATA_STRUCTURE_VALUES (1U << 16)
 #endif

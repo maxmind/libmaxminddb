@@ -4,9 +4,9 @@
   single entry. A crafted database could nest data-section pointers to shared
   targets so that decoding one entry cost exponential time and memory, or point
   many times at one large value so that a caller copying the result materialized
-  far more data than the file holds. The decoder now follows the proposed Reader
-  Resource Limits guidance for the MaxMind DB specification and stops at 65,536
-  values or 2 MiB of string and bytes payload per entry. See the
+  far more data than the file holds. The decoder now follows the Reader Resource
+  Limits section of the MaxMind DB specification and stops at 65,536 values or 2
+  MiB of string and bytes payload per entry. See the
   `MMDB_get_entry_data_list()` documentation for details.
   - Exceeding a limit returns the new `MMDB_DECODER_LIMIT_ERROR` status and
     leaves the output list set to `NULL`.
