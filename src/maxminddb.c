@@ -173,10 +173,10 @@ typedef struct record_info_s {
     uint8_t right_record_offset;
 } record_info_s;
 
-typedef struct MMDB_decode_state_s {
+typedef struct decode_state_s {
     size_t values;
     uint64_t bytes;
-} MMDB_decode_state_s;
+} decode_state_s;
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
@@ -240,11 +240,11 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                                uint32_t offset,
                                MMDB_entry_data_list_s *const entry_data_list,
                                MMDB_data_pool_s *const pool,
-                               MMDB_decode_state_s *const decode_state,
+                               decode_state_s *const decode_state,
                                int depth);
 static int
 alloc_entry_data_list(MMDB_data_pool_s *const pool,
-                      MMDB_decode_state_s *const decode_state,
+                      decode_state_s *const decode_state,
                       MMDB_entry_data_list_s **const entry_data_list);
 static float get_ieee754_float(const uint8_t *restrict p);
 static double get_ieee754_double(const uint8_t *restrict p);
@@ -1751,7 +1751,7 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    MMDB_decode_state_s decode_state = {0};
+    decode_state_s decode_state = {0};
     MMDB_entry_data_list_s *list = NULL;
     int status = alloc_entry_data_list(pool, &decode_state, &list);
     if (MMDB_SUCCESS != status) {
@@ -1777,7 +1777,7 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
 
 static int
 alloc_entry_data_list(MMDB_data_pool_s *const pool,
-                      MMDB_decode_state_s *const decode_state,
+                      decode_state_s *const decode_state,
                       MMDB_entry_data_list_s **const entry_data_list) {
     size_t const maximum_values = (size_t)(MAXIMUM_DATA_STRUCTURE_VALUES);
     if (decode_state->values >= maximum_values) {
@@ -1797,7 +1797,7 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                                uint32_t offset,
                                MMDB_entry_data_list_s *const entry_data_list,
                                MMDB_data_pool_s *const pool,
-                               MMDB_decode_state_s *const decode_state,
+                               decode_state_s *const decode_state,
                                int depth) {
     if (depth >= MAXIMUM_DATA_STRUCTURE_DEPTH) {
         DEBUG_MSG("reached the maximum data structure depth");
