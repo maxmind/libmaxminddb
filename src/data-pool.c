@@ -11,7 +11,7 @@
 
 // Allocate an MMDB_data_pool_s. It initially has space for up to size
 // MMDB_entry_data_list_s structs. Its total capacity will not exceed max_size.
-MMDB_data_pool_s *data_pool_new(size_t size, size_t const max_size) {
+MMDB_data_pool_s *data_pool_new(size_t const size, size_t const max_size) {
     MMDB_data_pool_s *const pool = calloc(1, sizeof(MMDB_data_pool_s));
     if (!pool) {
         return NULL;
@@ -21,14 +21,15 @@ MMDB_data_pool_s *data_pool_new(size_t size, size_t const max_size) {
         data_pool_destroy(pool);
         return NULL;
     }
-    if (size > max_size) {
-        size = max_size;
+    size_t initial_size = size;
+    if (initial_size > max_size) {
+        initial_size = max_size;
     }
-    if (!can_multiply(SIZE_MAX, size, sizeof(MMDB_entry_data_list_s))) {
+    if (!can_multiply(SIZE_MAX, initial_size, sizeof(MMDB_entry_data_list_s))) {
         data_pool_destroy(pool);
         return NULL;
     }
-    pool->size = size;
+    pool->size = initial_size;
     pool->blocks[0] = calloc(pool->size, sizeof(MMDB_entry_data_list_s));
     if (!pool->blocks[0]) {
         data_pool_destroy(pool);
@@ -36,8 +37,8 @@ MMDB_data_pool_s *data_pool_new(size_t size, size_t const max_size) {
     }
     pool->blocks[0]->pool = pool;
 
-    pool->sizes[0] = size;
-    pool->capacity = size;
+    pool->sizes[0] = initial_size;
+    pool->capacity = initial_size;
     pool->max_size = max_size;
 
     pool->block = pool->blocks[0];
