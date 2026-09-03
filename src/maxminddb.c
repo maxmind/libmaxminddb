@@ -34,7 +34,18 @@ typedef ADDRESS_FAMILY sa_family_t;
 #endif
 
 #define MMDB_DATA_SECTION_SEPARATOR (16)
-#define MAXIMUM_DATA_STRUCTURE_DEPTH (512)
+// The maximum nesting depth decoded for a single entry. Entering a map or an
+// array, or following a pointer, adds one level. This stops unbounded
+// recursion, including a pointer cycle. See "Reader Resource Limits" in the
+// MaxMind DB specification.
+#ifndef MAXIMUM_DATA_STRUCTURE_DEPTH
+    #define MAXIMUM_DATA_STRUCTURE_DEPTH (512)
+#endif
+
+#if MAXIMUM_DATA_STRUCTURE_DEPTH < 1 || MAXIMUM_DATA_STRUCTURE_DEPTH > INT_MAX
+    #error "MAXIMUM_DATA_STRUCTURE_DEPTH must be between 1 and INT_MAX"
+#endif
+
 // The maximum number of data-section values decoded for a single entry. This
 // bounds a pointer fan-out, where nested pointers to shared targets would
 // otherwise cost 2**depth decode operations. The largest real records decode a
@@ -1413,7 +1424,7 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
                              int depth) {
     if (depth >= MAXIMUM_DATA_STRUCTURE_DEPTH) {
         DEBUG_MSG("reached the maximum data structure depth");
-        return MMDB_INVALID_DATA_ERROR;
+        return MMDB_DECODER_LIMIT_ERROR;
     }
 
     if (entry_data->type == MMDB_DATA_TYPE_MAP) {
@@ -1790,7 +1801,7 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                                int depth) {
     if (depth >= MAXIMUM_DATA_STRUCTURE_DEPTH) {
         DEBUG_MSG("reached the maximum data structure depth");
-        return MMDB_INVALID_DATA_ERROR;
+        return MMDB_DECODER_LIMIT_ERROR;
     }
     depth++;
     CHECKED_DECODE_ONE(mmdb, offset, &entry_data_list->entry_data);

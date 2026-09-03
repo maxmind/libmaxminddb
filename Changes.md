@@ -5,15 +5,17 @@
   targets so that decoding one entry cost exponential time and memory, or point
   many times at one large value so that a caller copying the result materialized
   far more data than the file holds. The decoder now follows the Reader Resource
-  Limits section of the MaxMind DB specification and stops at 65,536 values or 2
-  MiB of string and bytes payload per entry. See the
+  Limits section of the MaxMind DB specification and stops at 512 nesting
+  levels, 65,536 values, or 2 MiB of string and bytes payload per entry. See the
   `MMDB_get_entry_data_list()` documentation for details.
   - Exceeding a limit returns the new `MMDB_DECODER_LIMIT_ERROR` status and
-    leaves the output list set to `NULL`.
+    leaves the output list set to `NULL`. Structures nested past the depth limit
+    previously returned `MMDB_INVALID_DATA_ERROR`.
   - `MMDB_open()` returns `MMDB_INVALID_METADATA_ERROR` when the `languages` or
     `description` metadata exceeds a limit.
   - The limits can be raised when building the library with
-    `-DMAXIMUM_DATA_STRUCTURE_VALUES` and `-DMAXIMUM_DATA_STRUCTURE_BYTES`.
+    `-DMAXIMUM_DATA_STRUCTURE_DEPTH`, `-DMAXIMUM_DATA_STRUCTURE_VALUES`, and
+    `-DMAXIMUM_DATA_STRUCTURE_BYTES`.
 - Fixed an out-of-bounds read in `MMDB_lookup_sockaddr()` when callers passed a
   `sockaddr` with an unsupported address family. The function now rejects any
   family other than `AF_INET` and `AF_INET6` with

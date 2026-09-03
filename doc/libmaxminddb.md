@@ -395,9 +395,9 @@ status codes are:
   array where none exist.
 - `MMDB_INVALID_NETWORK_ADDRESS_ERROR` - `MMDB_lookup_sockaddr()` was given a
   `sockaddr` whose family is neither `AF_INET` nor `AF_INET6`.
-- `MMDB_DECODER_LIMIT_ERROR` - decoding an entry as a complete list would exceed
-  the configured value-count or string/bytes payload limit. The entry may still
-  be valid MaxMind DB data.
+- `MMDB_DECODER_LIMIT_ERROR` - decoding a data structure would exceed the
+  configured nesting depth, value-count, or string/bytes payload limit. The
+  structure may still be valid MaxMind DB data.
 
 All status codes should be treated as `int` values.
 
@@ -649,24 +649,27 @@ once, rather than looking up each piece using repeated calls to
 `MMDB_get_value()`.
 
 A crafted database can make a full decode expensive, so this function bounds the
-work and the caller-visible payload. It decodes at most 65,536 list values and
-at most 2 MiB of UTF-8 string and bytes payload per call. A structure exactly at
-either limit is accepted. If a structure exceeds either limit, the function
-returns `MMDB_DECODER_LIMIT_ERROR` and sets `entry_data_list` to `NULL`.
+work and the caller-visible payload. It decodes at most 512 nesting levels,
+65,536 list values, and 2 MiB of UTF-8 string and bytes payload per call. A
+structure exactly at a limit is accepted. If a structure exceeds a limit, the
+function returns `MMDB_DECODER_LIMIT_ERROR` and sets `entry_data_list` to
+`NULL`.
 
 The limits are per call and can be changed when rebuilding libmaxminddb by
-defining the positive integer macros `MAXIMUM_DATA_STRUCTURE_VALUES` and
-`MAXIMUM_DATA_STRUCTURE_BYTES`. For example, pass
-`-DMAXIMUM_DATA_STRUCTURE_BYTES=3145728` in the library's compiler flags. Give
-the value as a plain integer. The compiler evaluates an expression such as
-`1<<31` as `int`, which overflows above 2,147,483,647. This requires rebuilding
-the library itself. Defining the macro only while building an application does
-not change a packaged shared library.
+defining the positive integer macros `MAXIMUM_DATA_STRUCTURE_DEPTH`,
+`MAXIMUM_DATA_STRUCTURE_VALUES`, and `MAXIMUM_DATA_STRUCTURE_BYTES`. For
+example, pass `-DMAXIMUM_DATA_STRUCTURE_BYTES=3145728` in the library's compiler
+flags. Give the value as a plain integer. The compiler evaluates an expression
+such as `1<<31` as `int`, which overflows above 2,147,483,647. This requires
+rebuilding the library itself. Defining the macro only while building an
+application does not change a packaged shared library.
 
 `MMDB_get_value()`, `MMDB_vget_value()`, and `MMDB_aget_value()` do not expand a
-complete structure and therefore do not charge these two budgets. Applications
-that cannot rebuild a packaged library can use those functions to retrieve a
-specific field from an otherwise over-limit record.
+complete structure and therefore do not charge the value-count or payload
+budgets. They apply the nesting depth limit while they follow the path and
+return `MMDB_DECODER_LIMIT_ERROR` past it. Applications that cannot rebuild a
+packaged library can use those functions to retrieve a specific field from an
+otherwise over-limit record.
 
 ```c
 MMDB_lookup_result_s result =

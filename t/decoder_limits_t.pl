@@ -50,7 +50,10 @@ my @base = (
     "-I$src_dir",
 );
 
-for my $definition ('-DMAXIMUM_DATA_STRUCTURE_VALUES=1000000') {
+for my $definition (
+    '-DMAXIMUM_DATA_STRUCTURE_DEPTH=1000',
+    '-DMAXIMUM_DATA_STRUCTURE_VALUES=1000000',
+) {
     my ( $status, $stderr ) = _run(
         @base,
         $definition,
@@ -62,6 +65,8 @@ for my $definition ('-DMAXIMUM_DATA_STRUCTURE_VALUES=1000000') {
 }
 
 for my $definition (
+    '-DMAXIMUM_DATA_STRUCTURE_DEPTH=0',
+    '-DMAXIMUM_DATA_STRUCTURE_DEPTH=-1',
     '-DMAXIMUM_DATA_STRUCTURE_VALUES=0',
     '-DMAXIMUM_DATA_STRUCTURE_VALUES=-1',
     '-DMAXIMUM_DATA_STRUCTURE_VALUES=SIZE_MAX+1',
