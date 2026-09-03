@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 // Allocate an MMDB_data_pool_s. It initially has space for up to size
-// MMDB_entry_data_list_s structs and will never reserve more than max_size.
+// MMDB_entry_data_list_s structs. Its total capacity will not exceed max_size.
 MMDB_data_pool_s *data_pool_new(size_t size, size_t const max_size) {
     MMDB_data_pool_s *const pool = calloc(1, sizeof(MMDB_data_pool_s));
     if (!pool) {
@@ -70,8 +70,9 @@ void data_pool_destroy(MMDB_data_pool_s *const pool) {
     free(pool);
 }
 
-// Claim a new struct from the pool. Doing this may cause the pool's size to
-// grow.
+// Claim a new struct from the pool. Doing this may grow the pool. NULL means an
+// allocation failed or the pool reached its maximum capacity. Decoder callers
+// check their logical limit before reaching the capacity limit.
 MMDB_entry_data_list_s *data_pool_alloc(MMDB_data_pool_s *const pool) {
     if (!pool) {
         return NULL;

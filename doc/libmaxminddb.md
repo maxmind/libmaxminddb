@@ -455,9 +455,8 @@ You can also pass `0` as the `flags` value in which case the database will be
 opened with the default flags. However, these defaults may change in future
 releases. The current default is `MMDB_MODE_MMAP`.
 
-Opening a database decodes its `languages` and `description` metadata. If one of
-these structures exceeds the decoder resource limits described under
-`MMDB_get_entry_data_list()`, this function returns
+If metadata processing exceeds one of the decoder resource limits described
+under `MMDB_get_entry_data_list()`, this function returns
 `MMDB_INVALID_METADATA_ERROR`.
 
 ## `MMDB_close()`
@@ -649,27 +648,29 @@ once, rather than looking up each piece using repeated calls to
 `MMDB_get_value()`.
 
 A crafted database can make a full decode expensive, so this function bounds the
-work and the caller-visible payload. It decodes at most 512 nesting levels,
-65,536 list values, and 2 MiB of UTF-8 string and bytes payload per call. A
-structure exactly at a limit is accepted. If a structure exceeds a limit, the
-function returns `MMDB_DECODER_LIMIT_ERROR` and sets `entry_data_list` to
-`NULL`.
+work and the caller-visible payload. Each call decodes at most 65,536 list
+values and 2 MiB of UTF-8 string and bytes payload. A structure exactly at
+either limit is accepted. The existing recursive-decoder depth limit of 512 also
+applies. Exceeding any limit returns `MMDB_DECODER_LIMIT_ERROR` and sets
+`entry_data_list` to `NULL`.
 
 The limits are per call and can be changed when rebuilding libmaxminddb by
 defining the positive integer macros `MAXIMUM_DATA_STRUCTURE_DEPTH`,
 `MAXIMUM_DATA_STRUCTURE_VALUES`, and `MAXIMUM_DATA_STRUCTURE_BYTES`. For
 example, pass `-DMAXIMUM_DATA_STRUCTURE_BYTES=3145728` in the library's compiler
-flags. Give the value as a plain integer. The compiler evaluates an expression
-such as `1<<31` as `int`, which overflows above 2,147,483,647. This requires
-rebuilding the library itself. Defining the macro only while building an
-application does not change a packaged shared library.
+flags. Use an integer constant rather than an expression. A bare shift such as
+`1<<31` is evaluated as `int` and does not express a 2 GiB limit. The depth
+value must fit in `int`, the value count in `size_t`, and the byte count in
+`uint64_t`. This requires rebuilding the library itself. Defining a macro only
+while building an application does not change a packaged shared library.
 
 `MMDB_get_value()`, `MMDB_vget_value()`, and `MMDB_aget_value()` do not expand a
 complete structure and therefore do not charge the value-count or payload
-budgets. They apply the nesting depth limit while they follow the path and
-return `MMDB_DECODER_LIMIT_ERROR` past it. Applications that cannot rebuild a
-packaged library can use those functions to retrieve a specific field from an
-otherwise over-limit record.
+budgets. When they skip an unselected map or array, the depth limit applies to
+that subtree and may return `MMDB_DECODER_LIMIT_ERROR`; it does not bound the
+selected lookup path itself. Applications that cannot rebuild a packaged library
+can use those functions to retrieve a specific field from an otherwise
+over-limit record.
 
 ```c
 MMDB_lookup_result_s result =
@@ -750,7 +751,7 @@ This function allows you to retrieve the database metadata as a linked list of
 `MMDB_entry_data_list_s` structures. This can be a more convenient way to deal
 with the metadata than using the metadata structure directly. It uses the same
 per-call limits as `MMDB_get_entry_data_list()` and returns
-`MMDB_DECODER_LIMIT_ERROR` if the complete metadata list exceeds either one.
+`MMDB_DECODER_LIMIT_ERROR` if the complete metadata list exceeds any of them.
 
 ```c
     MMDB_entry_data_list_s *entry_data_list, *first;

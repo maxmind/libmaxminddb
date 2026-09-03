@@ -5,14 +5,17 @@
   targets so that decoding one entry cost exponential time and memory, or point
   many times at one large value so that a caller copying the result materialized
   far more data than the file holds. The decoder now follows the Reader Resource
-  Limits section of the MaxMind DB specification and stops at 512 nesting
-  levels, 65,536 values, or 2 MiB of string and bytes payload per entry. See the
-  `MMDB_get_entry_data_list()` documentation for details.
-  - Exceeding a limit returns the new `MMDB_DECODER_LIMIT_ERROR` status and
-    leaves the output list set to `NULL`. Structures nested past the depth limit
-    previously returned `MMDB_INVALID_DATA_ERROR`.
-  - `MMDB_open()` returns `MMDB_INVALID_METADATA_ERROR` when the `languages` or
-    `description` metadata exceeds a limit.
+  Limits section of the MaxMind DB specification. Each call is limited to 65,536
+  values and 2 MiB of string and bytes payload, in addition to the existing
+  recursive-decoder depth limit of 512. See the `MMDB_get_entry_data_list()`
+  documentation for details.
+  - Exceeding a limit returns the new `MMDB_DECODER_LIMIT_ERROR` status. A
+    full-list failure leaves the output set to `NULL`.
+  - `MMDB_get_value()`, `MMDB_vget_value()`, and `MMDB_aget_value()` now return
+    `MMDB_DECODER_LIMIT_ERROR` instead of `MMDB_INVALID_DATA_ERROR` when they
+    skip a subtree past the depth limit.
+  - `MMDB_open()` returns `MMDB_INVALID_METADATA_ERROR` when metadata processing
+    exceeds a decoder limit.
   - The limits can be raised when building the library with
     `-DMAXIMUM_DATA_STRUCTURE_DEPTH`, `-DMAXIMUM_DATA_STRUCTURE_VALUES`, and
     `-DMAXIMUM_DATA_STRUCTURE_BYTES`.

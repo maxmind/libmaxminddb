@@ -34,8 +34,7 @@ typedef ADDRESS_FAMILY sa_family_t;
 #endif
 
 #define MMDB_DATA_SECTION_SEPARATOR (16)
-// The maximum nesting depth decoded for a single entry. Entering a map or an
-// array, or following a pointer, adds one level. This stops unbounded
+// The maximum recursive decoder depth for a single entry. This stops unbounded
 // recursion, including a pointer cycle. See "Reader Resource Limits" in the
 // MaxMind DB specification.
 #ifndef MAXIMUM_DATA_STRUCTURE_DEPTH
@@ -55,6 +54,8 @@ typedef ADDRESS_FAMILY sa_family_t;
     #define MAXIMUM_DATA_STRUCTURE_VALUES (1U << 16)
 #endif
 
+// The upper bound matters on platforms where size_t is narrower than the
+// preprocessor's integer arithmetic.
 #if MAXIMUM_DATA_STRUCTURE_VALUES < 1 ||                                       \
     MAXIMUM_DATA_STRUCTURE_VALUES > SIZE_MAX
     #error "MAXIMUM_DATA_STRUCTURE_VALUES must be between 1 and SIZE_MAX"
@@ -336,8 +337,7 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
 
     status = read_metadata(mmdb);
     if (MMDB_DECODER_LIMIT_ERROR == status) {
-        // The languages and description structures are decoded as complete
-        // lists. Metadata that exceeds the decoder limits is invalid metadata.
+        // Metadata that exceeds a decoder limit is invalid metadata.
         status = MMDB_INVALID_METADATA_ERROR;
     }
     if (MMDB_SUCCESS != status) {
