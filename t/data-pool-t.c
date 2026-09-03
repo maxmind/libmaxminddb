@@ -147,7 +147,9 @@ static void test_data_pool_alloc(void) {
         MMDB_data_pool_s *const pool = data_pool_new(64, maximum_size);
         ok(pool != NULL, "created a decoder-sized pool");
         for (size_t i = 0; i < maximum_size; i++) {
-            assert(data_pool_alloc(pool) != NULL);
+            MMDB_entry_data_list_s *const entry = data_pool_alloc(pool);
+            assert(entry != NULL);
+            (void)entry;
         }
         cmp_ok(pool->capacity,
                "==",
