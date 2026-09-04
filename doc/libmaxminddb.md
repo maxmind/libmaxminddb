@@ -650,8 +650,8 @@ once, rather than looking up each piece using repeated calls to
 A crafted database can make a full decode expensive, so this function bounds the
 work and the caller-visible payload. Each call decodes at most 65,536 list
 values and 2 MiB of UTF-8 string and bytes payload. A structure exactly at
-either limit is accepted. The existing recursive-decoder depth limit of 512 also
-applies. Exceeding any limit returns `MMDB_DECODER_LIMIT_ERROR` and sets
+either limit is accepted. The recursive-decoder depth limit of 512 also applies.
+Exceeding any limit returns `MMDB_DECODER_LIMIT_ERROR` and sets
 `entry_data_list` to `NULL`.
 
 The limits are per call and can be changed when rebuilding libmaxminddb by
