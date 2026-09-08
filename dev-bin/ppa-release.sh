@@ -4,7 +4,15 @@ set -e
 set -x
 set -u
 
-DISTS=( questing noble jammy )
+# Build for every Ubuntu release that is still supported, newest first. This
+# includes the development series. The list is derived, so it cannot go stale
+# between releases.
+mapfile -t DISTS < <(ubuntu-distro-info --supported | tac)
+
+if [[ ${#DISTS[@]} -eq 0 ]]; then
+    echo "Could not determine the supported Ubuntu releases!"
+    exit 1
+fi
 
 changelog_header=$(head -n 3 Changes.md)
 if [[ ! $changelog_header =~ ^##\ ([0-9]+\.[0-9]+\.[0-9]+)\ -\ ([0-9]{4}-[0-9]{2}-[0-9]{2}) ]]; then
