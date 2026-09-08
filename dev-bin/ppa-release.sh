@@ -22,8 +22,10 @@ fi
 VERSION="${BASH_REMATCH[1]}"
 DATE="${BASH_REMATCH[2]}"
 
-if [[ "$DATE" != "$(date +"%Y-%m-%d")" ]]; then
+if [[ "$DATE" != "$(date +"%Y-%m-%d")" && -z "${ALLOW_OLD_DATE:-}" ]]; then
     echo "$DATE is not today!"
+    echo "Set ALLOW_OLD_DATE=1 to release anyway, for example to resume a"
+    echo "release that failed on an earlier day."
     exit 1
 fi
 
