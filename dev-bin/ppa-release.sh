@@ -64,6 +64,38 @@ fi
 # Upload to launchpad
 dput ppa:maxmind/ppa ../*source.changes
 
+# dput proves only that the files reached Launchpad. Acceptance is decided
+# afterwards and is reported by email, so confirm it here. Query one series at
+# a time, as the unfiltered collection is paginated.
+published() {
+    curl -sf --get "https://api.launchpad.net/devel/~maxmind/+archive/ubuntu/ppa" \
+        --data-urlencode "ws.op=getPublishedSources" \
+        --data-urlencode "source_name=libmaxminddb" \
+        --data-urlencode "exact_match=true" \
+        --data-urlencode "version=$VERSION-0+maxmind1~$1" \
+        --data-urlencode "distro_series=https://api.launchpad.net/devel/ubuntu/$1" \
+        | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin)["entries"] else 1)'
+}
+
+rejected=""
+for dist in "${DISTS[@]}"; do
+    tries=18
+    until published "$dist"; do
+        tries=$(( tries - 1 ))
+        if [[ $tries -eq 0 ]]; then
+            rejected+=" $dist"
+            break
+        fi
+        sleep 10
+    done
+done
+
+if [[ -n "$rejected" ]]; then
+    echo "Launchpad did not accept:$rejected"
+    echo "Read the rejection email to find out why, then release again."
+    exit 1
+fi
+
 # Make the changelog up to date in git
 
 dch -v "$VERSION-0+maxmind1" -D "${DISTS[0]}" -u low "New upstream release."
