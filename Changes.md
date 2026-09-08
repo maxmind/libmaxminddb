@@ -1,4 +1,4 @@
-## next release
+## 1.14.0 - 2026-09-08
 
 - Bounded the resources that `MMDB_get_entry_data_list()` spends decoding a
   single entry. A crafted database could nest data-section pointers to shared
