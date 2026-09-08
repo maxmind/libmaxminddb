@@ -32,6 +32,10 @@ git push
 RESULTS=/tmp/build-libmaxminddb-results/
 SRCDIR="$RESULTS/libmaxminddb"
 
+# Start from an empty directory so that the script can be re-run after a
+# failure. git clone refuses a non-empty target, and dput would otherwise pick
+# up a stale *_source.changes from an earlier run.
+rm -rf "$RESULTS"
 mkdir -p "$SRCDIR"
 
 # gbp does weird things without a pristine checkout
