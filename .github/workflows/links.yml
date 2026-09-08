@@ -1,0 +1,32 @@
+name: Links
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 13 * * 1" # weekly, to catch external link rot without a commit
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linkChecker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          install: false
+
+      # Install only lychee (not the repo's full toolchain) and run the check.
+      - name: Check links
+        env:
+          MISE_AUTO_INSTALL: "false"
+        run: |
+          mise install lychee
+          mise run check-links
