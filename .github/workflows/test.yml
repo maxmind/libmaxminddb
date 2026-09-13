@@ -33,6 +33,34 @@ jobs:
       - run: make
       - run: make check
 
+  # ssize_t and long are 32 bits wide on i686, which exposes signedness and
+  # range problems that the 64-bit jobs cannot see. Build and test as 32-bit
+  # with -m32. The flags are set for the whole job so that the libtap build,
+  # which has its own Makefile, and the test scripts that compile code
+  # themselves pick them up too.
+  test-autoconf-32bit:
+    strategy:
+      matrix:
+        cc: [gcc, clang]
+    name: Autotools 32-bit build on ubuntu-latest using ${{matrix.cc}}
+    runs-on: ubuntu-latest
+    env:
+      CC: ${{ matrix.cc }}
+      CFLAGS: -m32 -std=c99 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter
+      LDFLAGS: -m32
+      CXXFLAGS: -m32
+      VERBOSE: 1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+      - run: sudo apt-get update && sudo apt-get install -y gcc-multilib g++-multilib libipc-run3-perl
+      - run: ./bootstrap
+      - run: ./configure
+      - run: make
+      - run: make check
+
   test-cmake:
     strategy:
       matrix:

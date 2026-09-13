@@ -38,9 +38,10 @@ if ( !defined $cc_status
     plan( skip_all => "decoder limit override tests need gcc or clang" );
 }
 
-# Keep instrumentation such as -fsanitize=address from the environment, but
-# not its warning flags. Those vary by CI job and would trip -Werror below.
-my @instrumentation = grep { /^-f/ }
+# Keep instrumentation such as -fsanitize=address and target flags such as
+# -m32 from the environment, but not its warning flags. Those vary by CI job
+# and would trip -Werror below.
+my @instrumentation = grep { /^-[fm]/ }
     map { split ' ' } grep { defined } @ENV{ 'CFLAGS', 'LDFLAGS' };
 
 my @base = (
