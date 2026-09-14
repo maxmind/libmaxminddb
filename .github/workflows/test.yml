@@ -6,16 +6,28 @@ on:
     - cron: '3 20 * * SUN'
 permissions: {}
 jobs:
+  # The -m32 variants build and test as 32-bit. ssize_t and long are 32 bits
+  # wide on i686, which exposes signedness and range problems that the 64-bit
+  # builds cannot see. The flag goes in CC rather than CFLAGS so that the
+  # libtap build, which has its own Makefile, and the test scripts that
+  # compile code themselves pick it up too. CFLAGS must stay out of the job
+  # environment: when it is set, even empty, make exports the configured
+  # CFLAGS to libtap, and libtap does not build on macOS with _POSIX_C_SOURCE.
   test-autoconf:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
         cc: [gcc, clang]
         posix: ['', -D_POSIX_C_SOURCE=200112L]
-    name: Autotools build on ${{matrix.os}} using ${{matrix.cc}} ${{matrix.posix}}
+        arch: ['', -m32]
+        exclude:
+          - os: macos-latest
+            arch: -m32
+    name: Autotools build on ${{matrix.os}} using ${{matrix.cc}} ${{matrix.posix}} ${{matrix.arch}}
     runs-on: ${{ matrix.os }}
     env:
-      CC: ${{ matrix.cc }}
+      CC: ${{ matrix.cc }} ${{ matrix.arch }}
+      CXXFLAGS: ${{ matrix.arch }}
       VERBOSE: 1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -24,40 +36,14 @@ jobs:
           persist-credentials: false
       - run: sudo apt install libipc-run3-perl
         if: ${{ matrix.os == 'ubuntu-latest' }}
+      - run: sudo apt-get update && sudo apt-get install -y gcc-multilib g++-multilib
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.arch == '-m32' }}
       - run: brew install autoconf automake libtool
         if: ${{ matrix.os == 'macos-latest' }}
       - run: ./bootstrap
       - run: ./configure
         env:
           CFLAGS: -std=c99 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter ${{ matrix.posix }}
-      - run: make
-      - run: make check
-
-  # ssize_t and long are 32 bits wide on i686, which exposes signedness and
-  # range problems that the 64-bit jobs cannot see. Build and test as 32-bit
-  # with -m32. The flags are set for the whole job so that the libtap build,
-  # which has its own Makefile, and the test scripts that compile code
-  # themselves pick them up too.
-  test-autoconf-32bit:
-    strategy:
-      matrix:
-        cc: [gcc, clang]
-    name: Autotools 32-bit build on ubuntu-latest using ${{matrix.cc}}
-    runs-on: ubuntu-latest
-    env:
-      CC: ${{ matrix.cc }}
-      CFLAGS: -m32 -std=c99 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter
-      LDFLAGS: -m32
-      CXXFLAGS: -m32
-      VERBOSE: 1
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          submodules: true
-          persist-credentials: false
-      - run: sudo apt-get update && sudo apt-get install -y gcc-multilib g++-multilib libipc-run3-perl
-      - run: ./bootstrap
-      - run: ./configure
       - run: make
       - run: make check
 
