@@ -374,9 +374,9 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
     mmdb->data_section_size = (uint32_t)data_section_size;
 
     // Although it is likely not possible to construct a database with valid
-    // valid metadata, as parsed above, and a data_section_size less than 3,
-    // we do this check as later we assume it is at least three when doing
-    // bound checks.
+    // metadata, as parsed above, and a data_section_size less than 3, we do
+    // this check as later we assume it is at least three when doing bound
+    // checks.
     if (mmdb->data_section_size < 3) {
         status = MMDB_INVALID_DATA_ERROR;
         goto cleanup;
