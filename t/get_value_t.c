@@ -3,65 +3,57 @@
 void test_array_0_result(int status,
                          MMDB_entry_data_s entry_data,
                          char *function) {
-    cmp_ok(status,
-           "==",
-           MMDB_SUCCESS,
-           "status for %s() is MMDB_SUCCESS - array[0]",
-           function);
-    ok(entry_data.has_data, "found a value for array[0]");
-    cmp_ok(entry_data.type,
-           "==",
-           MMDB_DATA_TYPE_UINT32,
-           "returned entry type is uint32 - array[0]");
-    cmp_ok(entry_data.uint32, "==", 1, "entry value is 1 - array[0]");
+    assert_int_equal_desc(status,
+                          MMDB_SUCCESS,
+                          "status for %s() is MMDB_SUCCESS - array[0]",
+                          function);
+    assert_true_desc(entry_data.has_data, "found a value for array[0]");
+    assert_int_equal_desc(entry_data.type,
+                          MMDB_DATA_TYPE_UINT32,
+                          "returned entry type is uint32 - array[0]");
+    assert_int_equal_desc(entry_data.uint32, 1, "entry value is 1 - array[0]");
 }
 
 void test_array_2_result(int status,
                          MMDB_entry_data_s entry_data,
                          char *function) {
-    cmp_ok(status,
-           "==",
-           MMDB_SUCCESS,
-           "status for %s() is MMDB_SUCCESS - array[2]",
-           function);
-    ok(entry_data.has_data, "found a value for array[2]");
-    cmp_ok(entry_data.type,
-           "==",
-           MMDB_DATA_TYPE_UINT32,
-           "returned entry type is uint32 - array[2]");
-    cmp_ok(entry_data.uint32, "==", 3, "entry value is 3 - array[2]");
+    assert_int_equal_desc(status,
+                          MMDB_SUCCESS,
+                          "status for %s() is MMDB_SUCCESS - array[2]",
+                          function);
+    assert_true_desc(entry_data.has_data, "found a value for array[2]");
+    assert_int_equal_desc(entry_data.type,
+                          MMDB_DATA_TYPE_UINT32,
+                          "returned entry type is uint32 - array[2]");
+    assert_int_equal_desc(entry_data.uint32, 3, "entry value is 3 - array[2]");
 }
 
 void test_array_minus_3_result(int status,
                                MMDB_entry_data_s entry_data,
                                char *function) {
-    cmp_ok(status,
-           "==",
-           MMDB_SUCCESS,
-           "status for %s() is MMDB_SUCCESS - array[-3]",
-           function);
-    ok(entry_data.has_data, "found a value for array[-3]");
-    cmp_ok(entry_data.type,
-           "==",
-           MMDB_DATA_TYPE_UINT32,
-           "returned entry type is uint32 - array[-3]");
-    cmp_ok(entry_data.uint32, "==", 1, "entry value is 1 - array[-3]");
+    assert_int_equal_desc(status,
+                          MMDB_SUCCESS,
+                          "status for %s() is MMDB_SUCCESS - array[-3]",
+                          function);
+    assert_true_desc(entry_data.has_data, "found a value for array[-3]");
+    assert_int_equal_desc(entry_data.type,
+                          MMDB_DATA_TYPE_UINT32,
+                          "returned entry type is uint32 - array[-3]");
+    assert_int_equal_desc(entry_data.uint32, 1, "entry value is 1 - array[-3]");
 }
 
 void test_array_minus_1_result(int status,
                                MMDB_entry_data_s entry_data,
                                char *function) {
-    cmp_ok(status,
-           "==",
-           MMDB_SUCCESS,
-           "status for %s() is MMDB_SUCCESS - array[-1]",
-           function);
-    ok(entry_data.has_data, "found a value for array[-1]");
-    cmp_ok(entry_data.type,
-           "==",
-           MMDB_DATA_TYPE_UINT32,
-           "returned entry type is uint32 - array[-1]");
-    cmp_ok(entry_data.uint32, "==", 3, "entry value is 3 - array[-1]");
+    assert_int_equal_desc(status,
+                          MMDB_SUCCESS,
+                          "status for %s() is MMDB_SUCCESS - array[-1]",
+                          function);
+    assert_true_desc(entry_data.has_data, "found a value for array[-1]");
+    assert_int_equal_desc(entry_data.type,
+                          MMDB_DATA_TYPE_UINT32,
+                          "returned entry type is uint32 - array[-1]");
+    assert_int_equal_desc(entry_data.uint32, 3, "entry value is 3 - array[-1]");
 }
 
 int call_vget_value(MMDB_entry_s *entry, MMDB_entry_data_s *entry_data, ...) {
@@ -117,10 +109,10 @@ void test_simple_structure(int mode, const char *mode_desc) {
         MMDB_entry_data_s entry_data;
         int status =
             MMDB_get_value(&result.entry, &entry_data, "array", "zero", NULL);
-        cmp_ok(status,
-               "==",
-               MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
-               "MMDB_get_value() returns error on non-integer array index");
+        assert_int_equal_desc(
+            status,
+            MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
+            "MMDB_get_value() returns error on non-integer array index");
     }
 
     {
@@ -157,19 +149,18 @@ void test_simple_structure(int mode, const char *mode_desc) {
         MMDB_entry_data_s entry_data;
         int status =
             MMDB_get_value(&result.entry, &entry_data, "array", "-4", NULL);
-        cmp_ok(status,
-               "==",
-               MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
-               "MMDB_get_value() returns error on too large negative integer");
+        assert_int_equal_desc(
+            status,
+            MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
+            "MMDB_get_value() returns error on too large negative integer");
     }
 
     {
         MMDB_entry_data_s entry_data;
         int status = MMDB_get_value(
             &result.entry, &entry_data, "array", "-18446744073709551616", NULL);
-        cmp_ok(
+        assert_int_equal_desc(
             status,
-            "==",
             MMDB_INVALID_LOOKUP_PATH_ERROR,
             "MMDB_get_value() returns error on integer smaller than LONG_MIN");
     }
@@ -178,9 +169,8 @@ void test_simple_structure(int mode, const char *mode_desc) {
         MMDB_entry_data_s entry_data;
         int status = MMDB_get_value(
             &result.entry, &entry_data, "array", "18446744073709551616", NULL);
-        cmp_ok(
+        assert_int_equal_desc(
             status,
-            "==",
             MMDB_INVALID_LOOKUP_PATH_ERROR,
             "MMDB_get_value() returns error on integer larger than LONG_MAX");
     }
@@ -192,52 +182,53 @@ void test_simple_structure(int mode, const char *mode_desc) {
 void test_complex_map_a_result(int status,
                                MMDB_entry_data_s entry_data,
                                char *function) {
-    cmp_ok(status,
-           "==",
-           MMDB_SUCCESS,
-           "status for %s() is MMDB_SUCCESS - map1{map2}{array}[0]{map3}{a}",
-           function);
-    ok(entry_data.has_data, "found a value for map1{map2}{array}[0]{map3}{a}");
-    cmp_ok(entry_data.type,
-           "==",
-           MMDB_DATA_TYPE_UINT32,
-           "returned entry type is uint32 - map1{map2}{array}[0]{map3}{a}");
-    cmp_ok(entry_data.uint32,
-           "==",
-           1,
-           "entry value is 1 - map1{map2}{array}[0]{map3}{a}");
+    assert_int_equal_desc(
+        status,
+        MMDB_SUCCESS,
+        "status for %s() is MMDB_SUCCESS - map1{map2}{array}[0]{map3}{a}",
+        function);
+    assert_true_desc(entry_data.has_data,
+                     "found a value for map1{map2}{array}[0]{map3}{a}");
+    assert_int_equal_desc(
+        entry_data.type,
+        MMDB_DATA_TYPE_UINT32,
+        "returned entry type is uint32 - map1{map2}{array}[0]{map3}{a}");
+    assert_int_equal_desc(entry_data.uint32,
+                          1,
+                          "entry value is 1 - map1{map2}{array}[0]{map3}{a}");
 }
 
 void test_complex_map_c_result(int status,
                                MMDB_entry_data_s entry_data,
                                char *function) {
-    cmp_ok(status,
-           "==",
-           MMDB_SUCCESS,
-           "status for %s() is MMDB_SUCCESS - map1{map2}{array}[0]{map3}{c}",
-           function);
-    ok(entry_data.has_data, "found a value for map1{map2}{array}[0]{map3}{c}");
-    cmp_ok(entry_data.type,
-           "==",
-           MMDB_DATA_TYPE_UINT32,
-           "returned entry type is uint32 - map1{map2}{array}[0]{map3}{c}");
-    cmp_ok(entry_data.uint32,
-           "==",
-           3,
-           "entry value is 3 - map1{map2}{array}[0]{map3}{c}");
+    assert_int_equal_desc(
+        status,
+        MMDB_SUCCESS,
+        "status for %s() is MMDB_SUCCESS - map1{map2}{array}[0]{map3}{c}",
+        function);
+    assert_true_desc(entry_data.has_data,
+                     "found a value for map1{map2}{array}[0]{map3}{c}");
+    assert_int_equal_desc(
+        entry_data.type,
+        MMDB_DATA_TYPE_UINT32,
+        "returned entry type is uint32 - map1{map2}{array}[0]{map3}{c}");
+    assert_int_equal_desc(entry_data.uint32,
+                          3,
+                          "entry value is 3 - map1{map2}{array}[0]{map3}{c}");
 }
 
 void test_no_result(int status,
                     MMDB_entry_data_s entry_data,
                     char *function,
                     char *path_description) {
-    cmp_ok(status,
-           "==",
-           MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
-           "status for %s() is MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR - %s",
-           function,
-           path_description);
-    ok(!entry_data.has_data, "did not find a value for %s", path_description);
+    assert_int_equal_desc(
+        status,
+        MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,
+        "status for %s() is MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR - %s",
+        function,
+        path_description);
+    assert_true_desc(
+        !entry_data.has_data, "did not find a value for %s", path_description);
 }
 
 void test_nested_structure(int mode, const char *mode_desc) {
@@ -397,8 +388,11 @@ void run_tests(int mode, const char *mode_desc) {
     test_nested_structure(mode, mode_desc);
 }
 
+static void test_get_value(void **UNUSED(state)) { for_all_modes(&run_tests); }
+
 int main(void) {
-    plan(NO_PLAN);
-    for_all_modes(&run_tests);
-    done_testing();
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_get_value),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

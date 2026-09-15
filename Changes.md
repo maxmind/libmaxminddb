@@ -1,5 +1,10 @@
 ## next release
 
+- The C tests now use [cmocka](https://cmocka.org/) instead of the bundled
+  `libtap` submodule. Building the tests requires cmocka to be installed. The
+  autotools build finds it with `pkg-config`. The CMake build finds it with
+  `find_package` and downloads it when it is not installed. The CMake build now
+  requires CMake 3.14 or later.
 - Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with
   `-Werror` on platforms where `ssize_t` is 32 bits, such as i686. Pull request
   by Robert Scheck. GitHub #487.

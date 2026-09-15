@@ -8,12 +8,19 @@
 #if HAVE_CONFIG_H
     #include <config.h>
 #endif
-#include "libtap/tap.h"
 #include "maxminddb-compat-util.h"
 #include "maxminddb.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+
+// cmocka.h needs these four headers included first.
+#include <setjmp.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <cmocka.h>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -41,6 +48,37 @@
     #endif
 
     #define MAX_DESCRIPTION_LENGTH 500
+
+// cmocka assertions do not take a description. These print a printf-style
+// description when the check fails and then hand off to the cmocka assertion,
+// which reports the values and the source location. The operands are
+// evaluated twice, so pass expressions without side effects.
+    #define assert_true_desc(c, ...)                                           \
+        do {                                                                   \
+            if (!(c)) {                                                        \
+                print_error(__VA_ARGS__);                                      \
+                print_error("\n");                                             \
+            }                                                                  \
+            assert_true(c);                                                    \
+        } while (0)
+
+    #define assert_int_equal_desc(a, b, ...)                                   \
+        do {                                                                   \
+            if ((intmax_t)(a) != (intmax_t)(b)) {                              \
+                print_error(__VA_ARGS__);                                      \
+                print_error("\n");                                             \
+            }                                                                  \
+            assert_int_equal(a, b);                                            \
+        } while (0)
+
+    #define assert_string_equal_desc(a, b, ...)                                \
+        do {                                                                   \
+            if (strcmp((a), (b)) != 0) {                                       \
+                print_error(__VA_ARGS__);                                      \
+                print_error("\n");                                             \
+            }                                                                  \
+            assert_string_equal(a, b);                                         \
+        } while (0)
 
 extern void for_all_record_sizes(const char *filename_fmt,
                                  void (*tests)(int record_size,

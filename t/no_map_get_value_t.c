@@ -13,22 +13,25 @@ void run_tests(int mode, const char *mode_desc) {
     MMDB_entry_data_s entry_data;
     int status = MMDB_get_value(&result.entry, &entry_data, NULL);
 
-    cmp_ok(status,
-           "==",
-           MMDB_SUCCESS,
-           "status for MMDB_get_value() is MMDB_SUCCESS");
-    ok(entry_data.has_data, "found a value when varargs list is just NULL");
-    cmp_ok(entry_data.type,
-           "==",
-           MMDB_DATA_TYPE_UTF8_STRING,
-           "returned entry type is utf8_string");
+    assert_int_equal_desc(
+        status, MMDB_SUCCESS, "status for MMDB_get_value() is MMDB_SUCCESS");
+    assert_true_desc(entry_data.has_data,
+                     "found a value when varargs list is just NULL");
+    assert_int_equal_desc(entry_data.type,
+                          MMDB_DATA_TYPE_UTF8_STRING,
+                          "returned entry type is utf8_string");
 
     MMDB_close(mmdb);
     free(mmdb);
 }
 
-int main(void) {
-    plan(NO_PLAN);
+static void test_no_map_get_value(void **UNUSED(state)) {
     for_all_modes(&run_tests);
-    done_testing();
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_no_map_get_value),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

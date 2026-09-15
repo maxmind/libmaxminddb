@@ -6,13 +6,14 @@ void test_entry_data(MMDB_s *mmdb,
                      char *node_record) {
     MMDB_entry_data_s entry_data;
     int status = MMDB_get_value(entry, &entry_data, "ip", NULL);
-    cmp_ok(status, "==", MMDB_SUCCESS, "successful data lookup for node");
-    cmp_ok(entry_data.type,
-           "==",
-           MMDB_DATA_TYPE_UTF8_STRING,
-           "returned entry type is UTF8_STRING for %s record of node %i",
-           node_record,
-           node_number);
+    assert_int_equal_desc(
+        status, MMDB_SUCCESS, "successful data lookup for node");
+    assert_int_equal_desc(
+        entry_data.type,
+        MMDB_DATA_TYPE_UTF8_STRING,
+        "returned entry type is UTF8_STRING for %s record of node %i",
+        node_record,
+        node_number);
 }
 
 void run_read_node_tests(MMDB_s *mmdb,
@@ -24,46 +25,43 @@ void run_read_node_tests(MMDB_s *mmdb,
         MMDB_search_node_s node;
         int status = MMDB_read_node(mmdb, node_number, &node);
         if (MMDB_SUCCESS == status) {
-            cmp_ok(node.left_record,
-                   "==",
-                   tests[i][1],
-                   "left record for node %i is %i - %i bit DB",
-                   node_number,
-                   tests[i][1],
-                   record_size);
-            cmp_ok(node.left_record_type,
-                   "==",
-                   tests[i][2],
-                   "left record type for node %i is %i",
-                   node_number,
-                   tests[i][2]);
+            assert_int_equal_desc(node.left_record,
+                                  tests[i][1],
+                                  "left record for node %i is %i - %i bit DB",
+                                  node_number,
+                                  tests[i][1],
+                                  record_size);
+            assert_int_equal_desc(node.left_record_type,
+                                  tests[i][2],
+                                  "left record type for node %i is %i",
+                                  node_number,
+                                  tests[i][2]);
             if (node.left_record_type == MMDB_RECORD_TYPE_DATA) {
                 test_entry_data(
                     mmdb, &node.left_record_entry, node_number, "left");
             }
 
-            cmp_ok(node.right_record,
-                   "==",
-                   tests[i][3],
-                   "right record for node %i is %i - %i bit DB",
-                   node_number,
-                   tests[i][3],
-                   record_size);
-            cmp_ok(node.right_record_type,
-                   "==",
-                   tests[i][4],
-                   "right record type for node %i is %i",
-                   node_number,
-                   tests[i][4]);
+            assert_int_equal_desc(node.right_record,
+                                  tests[i][3],
+                                  "right record for node %i is %i - %i bit DB",
+                                  node_number,
+                                  tests[i][3],
+                                  record_size);
+            assert_int_equal_desc(node.right_record_type,
+                                  tests[i][4],
+                                  "right record type for node %i is %i",
+                                  node_number,
+                                  tests[i][4]);
 
             if (node.right_record_type == MMDB_RECORD_TYPE_DATA) {
                 test_entry_data(
                     mmdb, &node.right_record_entry, node_number, "right");
             }
         } else {
-            diag("call to MMDB_read_node for node %i failed - %i bit DB",
-                 node_number,
-                 record_size);
+            print_message(
+                "call to MMDB_read_node for node %i failed - %i bit DB\n",
+                node_number,
+                record_size);
         }
     }
 }
@@ -266,19 +264,19 @@ void run_read_node_invalid_node_number_tests(int mode, const char *mode_desc) {
     /* node_count is one past the last valid node (nodes are 0-indexed).
      * This must be rejected. */
     status = MMDB_read_node(mmdb, node_count, &node);
-    cmp_ok(status,
-           "==",
-           MMDB_INVALID_NODE_NUMBER_ERROR,
-           "MMDB_read_node with node_number == node_count returns "
-           "MMDB_INVALID_NODE_NUMBER_ERROR");
+    assert_int_equal_desc(
+        status,
+        MMDB_INVALID_NODE_NUMBER_ERROR,
+        "MMDB_read_node with node_number == node_count returns "
+        "MMDB_INVALID_NODE_NUMBER_ERROR");
 
     /* node_count + 1 should also be rejected. */
     status = MMDB_read_node(mmdb, node_count + 1, &node);
-    cmp_ok(status,
-           "==",
-           MMDB_INVALID_NODE_NUMBER_ERROR,
-           "MMDB_read_node with node_number > node_count returns "
-           "MMDB_INVALID_NODE_NUMBER_ERROR");
+    assert_int_equal_desc(
+        status,
+        MMDB_INVALID_NODE_NUMBER_ERROR,
+        "MMDB_read_node with node_number > node_count returns "
+        "MMDB_INVALID_NODE_NUMBER_ERROR");
 
     MMDB_close(mmdb);
     free(mmdb);
@@ -291,8 +289,11 @@ void run_tests(int mode, const char *mode_desc) {
     run_read_node_invalid_node_number_tests(mode, mode_desc);
 }
 
+static void test_read_node(void **UNUSED(state)) { for_all_modes(&run_tests); }
+
 int main(void) {
-    plan(NO_PLAN);
-    for_all_modes(&run_tests);
-    done_testing();
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_read_node),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

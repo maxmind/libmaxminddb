@@ -130,6 +130,7 @@ AC_ARG_ENABLE([tests],
         [enable_tests=${enableval}],
         [enable_tests=yes])
 AM_CONDITIONAL([TESTS], [test "${enable_tests}" = "yes"])
+AS_IF([test "${enable_tests}" = "yes"], [PKG_CHECK_MODULES([CMOCKA], [cmocka])])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile

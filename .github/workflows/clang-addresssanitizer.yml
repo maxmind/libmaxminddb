@@ -21,7 +21,7 @@ jobs:
         with:
           submodules: true
           persist-credentials: false
-      - run: sudo apt install clang libipc-run3-perl
+      - run: sudo apt install clang libcmocka-dev libipc-run3-perl
       - run: ./bootstrap
       - run: ./configure
       - run: make

@@ -7,11 +7,12 @@ void test_one_ip(MMDB_s *mmdb,
     MMDB_lookup_result_s result =
         lookup_string_ok(mmdb, ip, filename, mode_desc);
 
-    ok(result.found_entry,
-       "got a result for an IPv4 address included in a larger-than-IPv4 subnet "
-       "- %s - %s",
-       ip,
-       mode_desc);
+    assert_true_desc(result.found_entry,
+                     "got a result for an IPv4 address included in a "
+                     "larger-than-IPv4 subnet "
+                     "- %s - %s",
+                     ip,
+                     mode_desc);
 
     data_ok(&result, MMDB_DATA_TYPE_UTF8_STRING, "string value for IP", NULL);
 }
@@ -29,8 +30,13 @@ void run_tests(int mode, const char *mode_desc) {
     free(mmdb);
 }
 
-int main(void) {
-    plan(NO_PLAN);
+static void test_ipv4_start_cache(void **UNUSED(state)) {
     for_all_modes(&run_tests);
-    done_testing();
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_ipv4_start_cache),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

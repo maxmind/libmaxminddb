@@ -1,7 +1,6 @@
 exclude = [
     ".git",
     "maxmind-db/**",
-    "t/libtap/**",
     "t/maxmind-db/**",
 ]
 

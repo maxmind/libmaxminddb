@@ -1,20 +1,13 @@
 include $(top_srcdir)/common.mk
 
-all-local:
-		cd libtap && $(MAKE) $(AM_MAKEFLAGS) all
-clean-local:
-		cd libtap && $(MAKE) $(AM_MAKEFLAGS) clean
-
 AM_LDFLAGS = $(top_builddir)/src/libmaxminddb.la
-CFLAGS += -I$(top_srcdir)/src
+CFLAGS += -I$(top_srcdir)/src $(CMOCKA_CFLAGS)
 
 noinst_LTLIBRARIES = libmmdbtest.la
 libmmdbtest_la_SOURCES = maxminddb_test_helper.c maxminddb_test_helper.h
 
 EXTRA_DIST = compile_c++_t.pl decoder_limits_t.pl external_symbols_t.pl \
-	     mmdblookup_t.pl \
-	     libtap/COPYING libtap/INSTALL libtap/Makefile libtap/README.md \
-	     libtap/tap.c libtap/tap.h maxmind-db
+	     mmdblookup_t.pl maxmind-db
 
 check_PROGRAMS = \
 	bad_pointers_t bad_databases_t bad_data_size_t bad_epoch_t bad_indent_t \
@@ -36,4 +29,4 @@ threads_t_CFLAGS = $(CFLAGS) -pthread
 TESTS = $(check_PROGRAMS) compile_c++_t.pl decoder_limits_t.pl \
 	external_symbols_t.pl mmdblookup_t.pl
 
-LDADD = libmmdbtest.la libtap/libtap.a
+LDADD = libmmdbtest.la $(CMOCKA_LIBS)

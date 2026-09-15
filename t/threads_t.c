@@ -67,7 +67,7 @@ void *run_one_thread(void *arg) {
 
     test_result_s *result = malloc(sizeof(test_result_s));
     if (!result) {
-        BAIL_OUT("could not allocate memory");
+        fail_msg("could not allocate memory");
     }
     test_one_ip(mmdb, ip, result);
 
@@ -77,52 +77,36 @@ void *run_one_thread(void *arg) {
 void process_result(test_result_s *result,
                     const char *expect,
                     const char *mode_desc) {
-    int is_ok;
-    is_ok = ok(!result->lookup_string_gai_error,
-               "no getaddrinfo error for %s - %s",
-               result->ip_looked_up,
-               mode_desc);
-    if (!is_ok) {
-        return;
-    }
+    assert_int_equal_desc(result->lookup_string_gai_error,
+                          0,
+                          "no getaddrinfo error for %s - %s",
+                          result->ip_looked_up,
+                          mode_desc);
+    assert_int_equal_desc(result->lookup_string_mmdb_error,
+                          0,
+                          "no mmdb error for %s - %s",
+                          result->ip_looked_up,
+                          mode_desc);
+    assert_true_desc(result->found_entry,
+                     "got a result for %s in the database - %s",
+                     result->ip_looked_up,
+                     mode_desc);
+    assert_int_equal_desc(result->get_value_status,
+                          0,
+                          "no error from MMDB_get_value for %s - %s",
+                          result->ip_looked_up,
+                          mode_desc);
+    assert_true_desc(
+        result->data_type_ok,
+        "MMDB_get_value found a utf8_string at 'ip' key for %s - %s",
+        result->ip_looked_up,
+        mode_desc);
 
-    is_ok = ok(!result->lookup_string_mmdb_error,
-               "no mmdb error for %s - %s",
-               result->ip_looked_up,
-               mode_desc);
-    if (!is_ok) {
-        return;
-    }
-
-    is_ok = ok(result->found_entry,
-               "got a result for %s in the database - %s",
-               result->ip_looked_up,
-               mode_desc);
-    if (!is_ok) {
-        return;
-    }
-
-    is_ok = ok(!result->get_value_status,
-               "no error from MMDB_get_value for %s - %s",
-               result->ip_looked_up,
-               mode_desc);
-    if (!is_ok) {
-        return;
-    }
-
-    is_ok = ok(result->data_type_ok,
-               "MMDB_get_value found a utf8_string at 'ip' key for %s - %s",
-               result->ip_looked_up,
-               mode_desc);
-    if (!is_ok) {
-        return;
-    }
-
-    is(result->data_value,
-       expect,
-       "found expected result for 'ip' key for %s - %s",
-       result->ip_looked_up,
-       mode_desc);
+    assert_string_equal_desc(result->data_value,
+                             expect,
+                             "found expected result for 'ip' key for %s - %s",
+                             result->ip_looked_up,
+                             mode_desc);
 }
 
 void run_ipX_tests(MMDB_s *mmdb,
@@ -141,7 +125,7 @@ void run_ipX_tests(MMDB_s *mmdb,
         int error =
             pthread_create(&threads[i], NULL, run_one_thread, &thread_args[i]);
         if (error) {
-            BAIL_OUT("pthread_create failed");
+            fail_msg("pthread_create failed");
         }
     }
 
@@ -149,7 +133,7 @@ void run_ipX_tests(MMDB_s *mmdb,
         void *thread_return;
         int error = pthread_join(threads[i], &thread_return);
         if (error) {
-            BAIL_OUT("pthread_join failed");
+            fail_msg("pthread_join failed");
         }
 
         test_result_s *test_result = (test_result_s *)thread_return;
@@ -199,9 +183,11 @@ void run_tests(int mode, const char *mode_desc) {
     free(mmdb);
 }
 
+static void test_threads(void **UNUSED(state)) { for_all_modes(&run_tests); }
+
 int main(void) {
-    plan(NO_PLAN);
-    for_all_modes(&run_tests);
-    done_testing();
-    pthread_exit(NULL);
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_threads),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
