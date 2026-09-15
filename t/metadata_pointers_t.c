@@ -8,24 +8,30 @@ void run_tests(int mode, const char *mode_desc) {
 
     char *repeated_string = "Lots of pointers in metadata";
 
-    is(mmdb->metadata.database_type,
-       repeated_string,
-       "decoded pointer database_type");
+    assert_string_equal_desc(mmdb->metadata.database_type,
+                             repeated_string,
+                             "decoded pointer database_type");
 
     for (uint16_t i = 0; i < mmdb->metadata.description.count; i++) {
         const char *language =
             mmdb->metadata.description.descriptions[i]->language;
         const char *description =
             mmdb->metadata.description.descriptions[i]->description;
-        is(description, repeated_string, "%s description", language);
+        assert_string_equal_desc(
+            description, repeated_string, "%s description", language);
     }
 
     MMDB_close(mmdb);
     free(mmdb);
 }
 
-int main(void) {
-    plan(NO_PLAN);
+static void test_metadata_pointers(void **UNUSED(state)) {
     for_all_modes(&run_tests);
-    done_testing();
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_metadata_pointers),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

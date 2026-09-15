@@ -35,7 +35,7 @@ jobs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
 
-    - run: sudo apt install libipc-run3-perl pandoc
+    - run: sudo apt install libcmocka-dev libipc-run3-perl pandoc
     - run: |
             ./bootstrap
             ./configure

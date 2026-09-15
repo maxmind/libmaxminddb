@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: sudo apt install clang-tools libipc-run3-perl
+      - run: sudo apt install clang-tools libcmocka-dev libipc-run3-perl
       - run: ./bootstrap
       - run: scan-build ./configure
         env:

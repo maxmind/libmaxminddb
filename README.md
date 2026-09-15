@@ -39,7 +39,9 @@ sudo ldconfig
 ```
 
 You can skip the `make check` step but it's always good to know that tests are
-passing on your platform.
+passing on your platform. The tests need [cmocka](https://cmocka.org/), for
+example the `libcmocka-dev` package on Debian and Ubuntu or the `cmocka`
+formula on Homebrew.
 
 The `configure` script takes the standard options to set where files are
 installed such as `--prefix`, etc. See `./configure --help` for details.

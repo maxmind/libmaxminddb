@@ -162,30 +162,22 @@ MMDB_entry_data_list_s *data_pool_to_list(MMDB_data_pool_s *const pool) {
 
 #ifdef TEST_DATA_POOL
 
-    #include <libtap/tap.h>
     #include <maxminddb_test_helper.h>
 
-static void test_can_multiply(void);
-
-int main(void) {
-    plan(NO_PLAN);
-    test_can_multiply();
-    done_testing();
+static void test_can_multiply(void **UNUSED(state)) {
+    assert_true_desc(can_multiply(SIZE_MAX, 1, SIZE_MAX), "1*SIZE_MAX is ok");
+    assert_true_desc(!can_multiply(SIZE_MAX, 2, SIZE_MAX),
+                     "2*SIZE_MAX is not ok");
+    assert_true_desc(
+        can_multiply(SIZE_MAX, 10240, sizeof(MMDB_entry_data_list_s)),
+        "1024 entry_data_list_s's are okay");
 }
 
-static void test_can_multiply(void) {
-    {
-        ok(can_multiply(SIZE_MAX, 1, SIZE_MAX), "1*SIZE_MAX is ok");
-    }
-
-    {
-        ok(!can_multiply(SIZE_MAX, 2, SIZE_MAX), "2*SIZE_MAX is not ok");
-    }
-
-    {
-        ok(can_multiply(SIZE_MAX, 10240, sizeof(MMDB_entry_data_list_s)),
-           "1024 entry_data_list_s's are okay");
-    }
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_can_multiply),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
 
 #endif

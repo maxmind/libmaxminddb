@@ -16,7 +16,8 @@ void run_tests(int mode, const char *mode_desc) {
     MMDB_entry_data_list_s *entry_data_list;
     int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
 
-    ok(MMDB_SUCCESS == status, "MMDB_get_entry_data_list is successful");
+    assert_true_desc(MMDB_SUCCESS == status,
+                     "MMDB_get_entry_data_list is successful");
 
     char *dump_output;
     size_t dump_size;
@@ -25,11 +26,12 @@ void run_tests(int mode, const char *mode_desc) {
     fclose(stream);
     MMDB_free_entry_data_list(entry_data_list);
 
-    ok(MMDB_SUCCESS == status,
-       "MMDB_dump_entry_data_list is successful - %s",
-       mode_desc);
+    assert_true_desc(MMDB_SUCCESS == status,
+                     "MMDB_dump_entry_data_list is successful - %s",
+                     mode_desc);
 
-    cmp_ok(dump_size, ">", 0, "MMDB_dump produced output - %s", mode_desc);
+    assert_true_desc(
+        dump_size > 0, "MMDB_dump produced output - %s", mode_desc);
 
     char *expect[] = {"{",
                       "  \"array\": ",
@@ -75,10 +77,10 @@ void run_tests(int mode, const char *mode_desc) {
                       "}"};
 
     for (int i = 0; i < 42; i++) {
-        ok((strstr(dump_output, expect[i]) != NULL),
-           "dump output contains expected line (%s) - %s",
-           expect[i],
-           mode_desc);
+        assert_true_desc(strstr(dump_output, expect[i]) != NULL,
+                         "dump output contains expected line (%s) - %s",
+                         expect[i],
+                         mode_desc);
     }
 
     free(dump_output);
@@ -87,13 +89,17 @@ void run_tests(int mode, const char *mode_desc) {
     free(mmdb);
 }
 
-int main(void) {
-    plan(NO_PLAN);
-    for_all_modes(&run_tests);
-    done_testing();
-}
+static void test_dump(void **UNUSED(state)) { for_all_modes(&run_tests); }
 #else
-int main(void) {
-    plan(SKIP_ALL, "This test requires the open_memstream() function");
+static void test_dump(void **UNUSED(state)) {
+    print_message("This test requires the open_memstream() function\n");
+    skip();
 }
 #endif
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_dump),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
+}

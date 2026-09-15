@@ -96,7 +96,7 @@ char *bad_database_path(const char *filename) {
 char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data) {
     char *string = mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
     if (NULL == string) {
-        BAIL_OUT("mmdb_strndup failed");
+        fail_msg("mmdb_strndup failed");
     }
 
     return string;
@@ -109,7 +109,7 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc) {
     int access_rv = access(db_file, R_OK);
 #endif
     if (access_rv != 0) {
-        BAIL_OUT("could not read the specified file - %s\nIf you are in a git "
+        fail_msg("could not read the specified file - %s\nIf you are in a git "
                  "checkout try running 'git submodule update --init'",
                  db_file);
     }
@@ -117,31 +117,21 @@ MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc) {
     MMDB_s *mmdb = (MMDB_s *)calloc(1, sizeof(MMDB_s));
 
     if (NULL == mmdb) {
-        BAIL_OUT("could not allocate memory for our MMDB_s struct");
+        fail_msg("could not allocate memory for our MMDB_s struct");
     }
 
     int status = MMDB_open(db_file, (uint32_t)mode, mmdb);
 
-    int is_ok = ok(MMDB_SUCCESS == status,
-                   "open %s status is success - %s",
-                   db_file,
-                   mode_desc);
-
-    if (!is_ok) {
-        diag("open status code = %d (%s)", status, MMDB_strerror(status));
-        free(mmdb);
-        return NULL;
-    }
-
-    is_ok = ok(mmdb->file_size > 0,
-               "mmdb struct has been set for %s - %s",
-               db_file,
-               mode_desc);
-
-    if (!is_ok) {
-        free(mmdb);
-        return NULL;
-    }
+    assert_int_equal_desc(status,
+                          MMDB_SUCCESS,
+                          "open %s status is success - %s (%s)",
+                          db_file,
+                          mode_desc,
+                          MMDB_strerror(status));
+    assert_true_desc(mmdb->file_size > 0,
+                     "mmdb struct has been set for %s - %s",
+                     db_file,
+                     mode_desc);
 
     return mmdb;
 }
@@ -202,30 +192,23 @@ void test_lookup_errors(int gai_error,
                         const char *ip,
                         const char *file,
                         const char *mode_desc) {
-
-    int is_ok = ok(0 == gai_error,
-                   "no getaddrinfo error in call to %s for %s - %s - %s",
-                   function,
-                   ip,
-                   file,
-                   mode_desc);
-
-    if (!is_ok) {
-        diag("error from call to getaddrinfo for %s - %s",
-             ip,
-             gai_strerror(gai_error));
-    }
-
-    is_ok = ok(0 == mmdb_error,
-               "no MMDB error in call to %s for %s - %s - %s",
-               function,
-               ip,
-               file,
-               mode_desc);
-
-    if (!is_ok) {
-        diag("MMDB error - %s", MMDB_strerror(mmdb_error));
-    }
+    assert_int_equal_desc(gai_error,
+                          0,
+                          "no getaddrinfo error in call to %s for %s - %s - %s "
+                          "(%s)",
+                          function,
+                          ip,
+                          file,
+                          mode_desc,
+                          gai_strerror(gai_error));
+    assert_int_equal_desc(mmdb_error,
+                          MMDB_SUCCESS,
+                          "no MMDB error in call to %s for %s - %s - %s (%s)",
+                          function,
+                          ip,
+                          file,
+                          mode_desc,
+                          MMDB_strerror(mmdb_error));
 }
 
 MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result,
@@ -240,43 +223,27 @@ MMDB_entry_data_s data_ok(MMDB_lookup_result_s *result,
 
     va_end(keys);
 
-    if (cmp_ok(status,
-               "==",
-               MMDB_SUCCESS,
-               "no error from call to MMDB_vget_value - %s",
-               description)) {
-
-        if (!cmp_ok((int)data.type,
-                    "==",
-                    (int)expect_type,
-                    "got the expected data type - %s",
-                    description)) {
-
-            diag("  data type value is %i but expected %i",
-                 data.type,
-                 expect_type);
-        }
-    } else {
-        diag("  error from MMDB_vget_value - %s", MMDB_strerror(status));
-    }
+    assert_int_equal_desc(status,
+                          MMDB_SUCCESS,
+                          "no error from call to MMDB_vget_value - %s (%s)",
+                          description,
+                          MMDB_strerror(status));
+    assert_int_equal_desc(
+        data.type, expect_type, "got the expected data type - %s", description);
 
     return data;
 }
 
 void compare_double(double got, double expect) {
-    double diff = fabs(got - expect);
-    int is_ok = ok(diff < 0.01, "double value was approximately %2.6f", expect);
-    if (!is_ok) {
-        diag(
-            "  got %2.6f but expected %2.6f (diff = %2.6f)", got, expect, diff);
-    }
+    assert_true_desc(fabs(got - expect) < 0.01,
+                     "double value %2.6f is approximately %2.6f",
+                     got,
+                     expect);
 }
 
 void compare_float(float got, float expect) {
-    float diff = fabsf(got - expect);
-    int is_ok = ok(diff < 0.01, "float value was approximately %2.1f", expect);
-    if (!is_ok) {
-        diag(
-            "  got %2.4f but expected %2.1f (diff = %2.1f)", got, expect, diff);
-    }
+    assert_true_desc(fabsf(got - expect) < 0.01,
+                     "float value %2.4f is approximately %2.1f",
+                     got,
+                     expect);
 }

@@ -1,6 +1,33 @@
-add_library(tap
-  libtap/tap.c
-)
+find_package(cmocka CONFIG QUIET)
+if(NOT cmocka_FOUND)
+  message(STATUS "cmocka not found, building it from source")
+  include(FetchContent)
+  # These only apply to the cmocka subdirectory.
+  set(BUILD_SHARED_LIBS OFF)
+  set(WITH_EXAMPLES OFF)
+  set(UNIT_TESTING OFF)
+  set(CMOCKA_URL https://cmocka.org/files/2.0/cmocka-2.0.1.tar.xz)
+  set(CMOCKA_SHA256 3f3533382ba29ab3abf5c4f4b27b79d165f0df51ea587de749b11b68b4019180)
+  # EXCLUDE_FROM_ALL keeps cmocka out of the install tree.
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
+    FetchContent_Declare(cmocka
+      URL ${CMOCKA_URL}
+      URL_HASH SHA256=${CMOCKA_SHA256}
+      EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(cmocka)
+  else()
+    FetchContent_Declare(cmocka
+      URL ${CMOCKA_URL}
+      URL_HASH SHA256=${CMOCKA_SHA256}
+    )
+    FetchContent_GetProperties(cmocka)
+    if(NOT cmocka_POPULATED)
+      FetchContent_Populate(cmocka)
+      add_subdirectory(${cmocka_SOURCE_DIR} ${cmocka_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+  endif()
+endif()
 
 # test programs
 set(TEST_TARGET_NAMES
@@ -41,17 +68,10 @@ if(UNIX)  # or if (NOT WIN32)
   find_package(Threads)
 endif()
 
-if(WIN32)
-  # 4244, 4267 - libtap causes a significant number of conversion warning in
-  #              our tests on Windows.
-  # 4996 - vsprintf used by libtap is unsafe.
-  add_definitions("/wd4244 /wd4267 /wd4996")
-endif(WIN32)
-
 foreach(TEST_TARGET_NAME ${TEST_TARGET_NAMES})
   add_executable(${TEST_TARGET_NAME} ${TEST_TARGET_NAME}.c maxminddb_test_helper.c)
   target_include_directories(${TEST_TARGET_NAME} PRIVATE ../src)
-  target_link_libraries(${TEST_TARGET_NAME} maxminddb tap)
+  target_link_libraries(${TEST_TARGET_NAME} maxminddb cmocka::cmocka)
   target_compile_definitions(${TEST_TARGET_NAME} PRIVATE PACKAGE_VERSION="${PROJECT_VERSION}")
 
   if(UNIX)

@@ -8,11 +8,9 @@ permissions: {}
 jobs:
   # The -m32 variants build and test as 32-bit. ssize_t and long are 32 bits
   # wide on i686, which exposes signedness and range problems that the 64-bit
-  # builds cannot see. The flag goes in CC rather than CFLAGS so that the
-  # libtap build, which has its own Makefile, and the test scripts that
-  # compile code themselves pick it up too. CFLAGS must stay out of the job
-  # environment: when it is set, even empty, make exports the configured
-  # CFLAGS to libtap, and libtap does not build on macOS with _POSIX_C_SOURCE.
+  # builds cannot see. The flag goes in CC rather than CFLAGS so that the test
+  # scripts that compile code themselves pick it up too. The -m32 jobs build
+  # cmocka from source because Ubuntu does not ship a 32-bit libcmocka-dev.
   test-autoconf:
     strategy:
       matrix:
@@ -36,9 +34,22 @@ jobs:
           persist-credentials: false
       - run: sudo apt install libipc-run3-perl
         if: ${{ matrix.os == 'ubuntu-latest' }}
+      - run: sudo apt install libcmocka-dev
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.arch == '' }}
       - run: sudo apt-get update && sudo apt-get install -y gcc-multilib g++-multilib
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.arch == '-m32' }}
-      - run: brew install autoconf automake libtool
+      - name: Build 32-bit cmocka
+        if: ${{ matrix.arch == '-m32' }}
+        run: |
+          curl -sSLO https://cmocka.org/files/2.0/cmocka-2.0.1.tar.xz
+          echo '3f3533382ba29ab3abf5c4f4b27b79d165f0df51ea587de749b11b68b4019180  cmocka-2.0.1.tar.xz' | sha256sum -c
+          tar xf cmocka-2.0.1.tar.xz
+          cmake -S cmocka-2.0.1 -B cmocka-build -DCMAKE_C_FLAGS=-m32 -DWITH_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX="$HOME/cmocka"
+          cmake --build cmocka-build
+          cmake --install cmocka-build
+          echo "PKG_CONFIG_PATH=$HOME/cmocka/lib/pkgconfig" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$HOME/cmocka/lib" >> "$GITHUB_ENV"
+      - run: brew install autoconf automake libtool cmocka pkgconf
         if: ${{ matrix.os == 'macos-latest' }}
       - run: ./bootstrap
       - run: ./configure

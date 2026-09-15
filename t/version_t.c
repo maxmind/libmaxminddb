@@ -1,9 +1,14 @@
 #include "maxminddb_test_helper.h"
 
-int main(void) {
+static void test_version(void **UNUSED(state)) {
     const char *version = MMDB_lib_version();
-    if (ok((version != NULL), "MMDB_lib_version exists")) {
-        is(version, PACKAGE_VERSION, "version is " PACKAGE_VERSION);
-    }
-    done_testing();
+    assert_non_null(version);
+    assert_string_equal(version, PACKAGE_VERSION);
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_version),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

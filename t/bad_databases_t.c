@@ -20,13 +20,12 @@ int test_read(const char *path,
     MMDB_s *mmdb = (MMDB_s *)calloc(1, sizeof(MMDB_s));
 
     if (NULL == mmdb) {
-        BAIL_OUT("could not allocate memory for our MMDB_s struct");
+        fail_msg("could not allocate memory for our MMDB_s struct");
     }
 
     int status = MMDB_open(path, MMDB_MODE_MMAP, mmdb);
 
     if (status != MMDB_SUCCESS) {
-        ok(1, "received error when opening %s", path);
         free(mmdb);
         return 0;
     }
@@ -35,11 +34,10 @@ int test_read(const char *path,
     MMDB_lookup_result_s result =
         MMDB_lookup_string(mmdb, "1.1.1.1", &gai_error, &mmdb_error);
     if (gai_error != 0) {
-        BAIL_OUT("could not parse IP address");
+        fail_msg("could not parse IP address");
     }
 
     if (mmdb_error != MMDB_SUCCESS) {
-        ok(1, "received error on lookup for %s", path);
         MMDB_close(mmdb);
         free(mmdb);
         return 0;
@@ -51,7 +49,6 @@ int test_read(const char *path,
         MMDB_free_entry_data_list(entry_data_list);
 
         if (status != MMDB_SUCCESS) {
-            ok(1, "received error from MMDB_get_entry_data_list for %s", path);
             MMDB_close(mmdb);
             free(mmdb);
             return 0;
@@ -61,16 +58,13 @@ int test_read(const char *path,
     // Some bad-data files (e.g. uint64-max-epoch) are valid databases with
     // extreme metadata values. They don't produce errors in libmaxminddb
     // but are useful for testing other reader implementations.
-    ok(1,
-       "no error reading %s (database may have extreme but valid data)",
-       path);
 
     MMDB_close(mmdb);
     free(mmdb);
     return 0;
 }
 
-int main(void) {
+static void test_bad_databases(void **UNUSED(state)) {
     char *test_db_dir;
 #ifdef _WIN32
     test_db_dir = "../t/maxmind-db/bad-data";
@@ -84,9 +78,13 @@ int main(void) {
         test_db_dir = "./t/maxmind-db/bad-data";
     }
 #endif
-    plan(NO_PLAN);
-    if (nftw(test_db_dir, test_read, 10, FTW_PHYS) != 0) {
-        BAIL_OUT("nftw failed");
-    }
-    done_testing();
+    assert_int_equal_desc(
+        nftw(test_db_dir, test_read, 10, FTW_PHYS), 0, "nftw succeeded");
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_bad_databases),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
