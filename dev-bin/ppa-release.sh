@@ -4,6 +4,11 @@ set -e
 set -x
 set -u
 
+# The release runs in a fresh clone that mise will not trust, and its shims then
+# fail instead of running the real command. Nothing here needs a mise-managed
+# tool, so drop the shims from PATH.
+PATH=$(echo "$PATH" | tr ':' '\n' | grep -v '/mise/shims$' | paste -sd:)
+
 # Build for every Ubuntu release that is still supported, newest first. This
 # includes the development series. The list is derived, so it cannot go stale
 # between releases.
@@ -65,15 +70,17 @@ fi
 dput ppa:maxmind/ppa ../*source.changes
 
 # dput proves only that the files reached Launchpad. Acceptance is decided
-# afterwards and is reported by email, so confirm it here. Query one series at
-# a time, as the unfiltered collection is paginated.
+# afterwards and is reported by email, so confirm it here. Query one version at
+# a time, as the unfiltered collection is paginated. The version carries the
+# series name, so it identifies the upload without a distro_series filter.
+# Launchpad returns nothing for the development series when both filters are
+# given.
 published() {
     curl -sf --get "https://api.launchpad.net/devel/~maxmind/+archive/ubuntu/ppa" \
         --data-urlencode "ws.op=getPublishedSources" \
         --data-urlencode "source_name=libmaxminddb" \
         --data-urlencode "exact_match=true" \
         --data-urlencode "version=$VERSION-0+maxmind1~$1" \
-        --data-urlencode "distro_series=https://api.launchpad.net/devel/ubuntu/$1" \
         | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin)["entries"] else 1)'
 }
 
