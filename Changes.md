@@ -1,4 +1,4 @@
-## next release
+## 1.14.1 - 2026-09-17
 
 - Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with
   `-Werror` on platforms where `ssize_t` is 32 bits, such as i686. Pull request
