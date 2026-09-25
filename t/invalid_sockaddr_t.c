@@ -8,29 +8,24 @@ static void test_invalid_sockaddr_family(const char *filename,
     MMDB_s *mmdb = open_ok(db_file, MMDB_MODE_MMAP, open_msg);
     free(db_file);
 
-    if (!mmdb) {
-        return;
-    }
-
     struct sockaddr addr = {.sa_family = family};
     int mmdb_error = MMDB_SUCCESS;
     MMDB_lookup_result_s result =
         MMDB_lookup_sockaddr(mmdb, &addr, &mmdb_error);
 
-    ok(!result.found_entry, "%s: no entry returned", family_msg);
-    cmp_ok(result.netmask, "==", 0, "%s: netmask left at zero", family_msg);
-    cmp_ok(mmdb_error,
-           "==",
-           MMDB_INVALID_NETWORK_ADDRESS_ERROR,
-           "%s: MMDB_lookup_sockaddr rejects unsupported family",
-           family_msg);
+    assert_true_desc(!result.found_entry, "%s: no entry returned", family_msg);
+    assert_int_equal_desc(
+        result.netmask, 0, "%s: netmask left at zero", family_msg);
+    assert_int_equal_desc(mmdb_error,
+                          MMDB_INVALID_NETWORK_ADDRESS_ERROR,
+                          "%s: MMDB_lookup_sockaddr rejects unsupported family",
+                          family_msg);
 
     MMDB_close(mmdb);
     free(mmdb);
 }
 
-int main(void) {
-    plan(NO_PLAN);
+static void test_invalid_sockaddr(void **UNUSED(state)) {
     test_invalid_sockaddr_family("MaxMind-DB-test-ipv4-24.mmdb",
                                  AF_UNIX,
                                  "opened IPv4 test database (AF_UNIX)",
@@ -47,5 +42,11 @@ int main(void) {
                                  AF_UNSPEC,
                                  "opened IPv6 test database (AF_UNSPEC)",
                                  "AF_UNSPEC against IPv6 db");
-    done_testing();
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_invalid_sockaddr),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

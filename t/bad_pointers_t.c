@@ -14,20 +14,20 @@ void run_tests(int mode, const char *mode_desc) {
         MMDB_entry_data_s entry_data;
         int status = MMDB_get_value(&result.entry, &entry_data, NULL);
 
-        cmp_ok(status,
-               "==",
-               MMDB_INVALID_DATA_ERROR,
-               "MMDB_get_value returns MMDB_INVALID_DATA_ERROR for bad pointer "
-               "in data section");
+        assert_int_equal_desc(
+            status,
+            MMDB_INVALID_DATA_ERROR,
+            "MMDB_get_value returns MMDB_INVALID_DATA_ERROR for bad pointer "
+            "in data section");
 
         MMDB_entry_data_list_s *entry_data_list;
         status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
 
-        cmp_ok(status,
-               "==",
-               MMDB_INVALID_DATA_ERROR,
-               "MMDB_get_entry_data_list returns MMDB_INVALID_DATA_ERROR for "
-               "bad pointer in data section");
+        assert_int_equal_desc(
+            status,
+            MMDB_INVALID_DATA_ERROR,
+            "MMDB_get_entry_data_list returns MMDB_INVALID_DATA_ERROR for "
+            "bad pointer in data section");
 
         // This is not necessary as on error we should not need to free
         // anything. However test that it is safe to do so. See change in
@@ -41,20 +41,25 @@ void run_tests(int mode, const char *mode_desc) {
         int gai_error, mmdb_error;
         MMDB_lookup_string(mmdb, ip, &gai_error, &mmdb_error);
 
-        cmp_ok(mmdb_error,
-               "==",
-               MMDB_CORRUPT_SEARCH_TREE_ERROR,
-               "MMDB_lookup_string sets mmdb_error to "
-               "MMDB_CORRUPT_SEARCH_TREE_ERROR when a search tree record "
-               "points outside the data section");
+        assert_int_equal_desc(
+            mmdb_error,
+            MMDB_CORRUPT_SEARCH_TREE_ERROR,
+            "MMDB_lookup_string sets mmdb_error to "
+            "MMDB_CORRUPT_SEARCH_TREE_ERROR when a search tree record "
+            "points outside the data section");
     }
 
     MMDB_close(mmdb);
     free(mmdb);
 }
 
-int main(void) {
-    plan(NO_PLAN);
+static void test_bad_pointers(void **UNUSED(state)) {
     for_all_modes(&run_tests);
-    done_testing();
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_bad_pointers),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

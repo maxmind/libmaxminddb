@@ -51,7 +51,7 @@ version updated promptly for some reason.
 
 - Required packages (Ubuntu 25.10): vim git-core dput build-essential autoconf
   automake libtool git-buildpackage lowdown dirmngr debhelper dh-autoreconf
-  libipc-run3-perl libtest-output-perl devscripts
+  libcmocka-dev libipc-run3-perl libtest-output-perl devscripts
 - Install [gh](https://github.com/cli/cli/releases).
 - GitHub ssh key (e.g. in `~/.ssh/id_rsa`)
 - Git config (e.g. `~/.gitconfig`)

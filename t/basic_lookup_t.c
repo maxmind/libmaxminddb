@@ -1,6 +1,6 @@
 #include "maxminddb_test_helper.h"
 
-static void test_big_lookup(void);
+static void test_big_lookup(void **UNUSED(state));
 
 /* These globals are gross but it's the easiest way to mix calling
  * for_all_modes() and for_all_record_sizes() */
@@ -14,16 +14,13 @@ void test_one_result(MMDB_s *mmdb,
                      const char *function,
                      const char *filename,
                      const char *mode_desc) {
-    int is_ok = ok(result.found_entry,
-                   "got a result for an IP in the database - %s - %s - %s - %s",
-                   function,
-                   ip,
-                   filename,
-                   mode_desc);
-
-    if (!is_ok) {
-        return;
-    }
+    assert_true_desc(
+        result.found_entry,
+        "got a result for an IP in the database - %s - %s - %s - %s",
+        function,
+        ip,
+        filename,
+        mode_desc);
 
     MMDB_entry_data_s data =
         data_ok(&result, MMDB_DATA_TYPE_UTF8_STRING, "result{ip}", "ip", NULL);
@@ -39,18 +36,19 @@ void test_one_result(MMDB_s *mmdb,
         size_t maxlen = strlen(expect) + 3;
         real_expect = malloc(maxlen);
         if (!real_expect) {
-            BAIL_OUT("could not allocate memory");
+            fail_msg("could not allocate memory");
         }
         snprintf(real_expect, maxlen, "::%s", expect);
     }
 
-    is(string,
-       real_expect,
-       "found expected result for ip key - %s - %s - %s - %s",
-       function,
-       ip,
-       filename,
-       mode_desc);
+    assert_string_equal_desc(
+        string,
+        real_expect,
+        "found expected result for ip key - %s - %s - %s - %s",
+        function,
+        ip,
+        filename,
+        mode_desc);
 
     free(real_expect);
     free(string);
@@ -93,21 +91,23 @@ void run_ipX_tests(const char *filename,
         MMDB_lookup_result_s result =
             lookup_string_ok(mmdb, ip, filename, mode_desc);
 
-        ok(!result.found_entry,
-           "no result entry struct returned for IP address not in the database "
-           "(string lookup) - %s - %s - %s",
-           ip,
-           filename,
-           mode_desc);
+        assert_true_desc(!result.found_entry,
+                         "no result entry struct returned for IP address not "
+                         "in the database "
+                         "(string lookup) - %s - %s - %s",
+                         ip,
+                         filename,
+                         mode_desc);
 
         result = lookup_sockaddr_ok(mmdb, ip, filename, mode_desc);
 
-        ok(!result.found_entry,
-           "no result entry struct returned for IP address not in the database "
-           "(ipv4 lookup) - %s - %s - %s",
-           ip,
-           filename,
-           mode_desc);
+        assert_true_desc(!result.found_entry,
+                         "no result entry struct returned for IP address not "
+                         "in the database "
+                         "(ipv4 lookup) - %s - %s - %s",
+                         ip,
+                         filename,
+                         mode_desc);
     }
 
     for (int i = 0; i < pairs_rows; i += 1) {
@@ -178,28 +178,29 @@ void all_record_sizes(int mode, const char *description) {
     }
 }
 
-static void test_big_lookup(void) {
+static void test_big_lookup(void **UNUSED(state)) {
     const char *const db_filename = "GeoIP2-Precision-Enterprise-Test.mmdb";
     char *db_path = test_database_path(db_filename);
-    ok(db_path != NULL, "got database path");
+    assert_true_desc(db_path != NULL, "got database path");
 
     MMDB_s *const mmdb = open_ok(db_path, MMDB_MODE_MMAP, "mmap mode");
-    ok(mmdb != NULL, "opened MMDB");
+    assert_true_desc(mmdb != NULL, "opened MMDB");
     free(db_path);
 
     int gai_err = 0, mmdb_err = 0;
     const char *const ip_address = "81.2.69.160";
     MMDB_lookup_result_s result =
         MMDB_lookup_string(mmdb, ip_address, &gai_err, &mmdb_err);
-    ok(gai_err == 0, "no getaddrinfo error");
-    ok(mmdb_err == MMDB_SUCCESS, "no error from maxminddb library");
-    ok(result.found_entry, "found IP");
+    assert_true_desc(gai_err == 0, "no getaddrinfo error");
+    assert_true_desc(mmdb_err == MMDB_SUCCESS,
+                     "no error from maxminddb library");
+    assert_true_desc(result.found_entry, "found IP");
 
     MMDB_entry_data_list_s *entry_data_list = NULL;
-    ok(MMDB_get_entry_data_list(&result.entry, &entry_data_list) ==
-           MMDB_SUCCESS,
-       "successfully looked up entry data list");
-    ok(entry_data_list != NULL, "got an entry_data_list");
+    int status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
+    assert_int_equal_desc(
+        status, MMDB_SUCCESS, "successfully looked up entry data list");
+    assert_true_desc(entry_data_list != NULL, "got an entry_data_list");
 
     MMDB_free_entry_data_list(entry_data_list);
 
@@ -207,9 +208,14 @@ static void test_big_lookup(void) {
     free(mmdb);
 }
 
-int main(void) {
-    plan(NO_PLAN);
+static void test_basic_lookup(void **UNUSED(state)) {
     for_all_modes(&all_record_sizes);
-    test_big_lookup();
-    done_testing();
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_basic_lookup),
+        cmocka_unit_test(test_big_lookup),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

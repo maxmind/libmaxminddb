@@ -29,20 +29,12 @@ void test_one_ip(MMDB_s *mmdb,
                                            "iso_code",
                                            NULL);
 
-    if (ok(entry_data.has_data, "found data for country{iso_code}")) {
-        char *string =
-            mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
-        if (!string) {
-            ok(0, "mmdb_strndup() call failed");
-            exit(1);
-        }
-        if (!ok(strcmp(string, country_code) == 0,
-                "iso_code is %s",
-                country_code)) {
-            diag("  value is %s", string);
-        }
-        free(string);
-    }
+    assert_true_desc(entry_data.has_data, "found data for country{iso_code}");
+    char *string = mmdb_strndup(entry_data.utf8_string, entry_data.data_size);
+    assert_non_null(string);
+    assert_string_equal_desc(
+        string, country_code, "iso_code is %s", country_code);
+    free(string);
 }
 
 void run_tests(int mode, const char *mode_desc) {
@@ -64,8 +56,13 @@ void run_tests(int mode, const char *mode_desc) {
     free(mmdb);
 }
 
-int main(void) {
-    plan(NO_PLAN);
+static void test_get_value_pointer_bug(void **UNUSED(state)) {
     for_all_modes(&run_tests);
-    done_testing();
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_get_value_pointer_bug),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
