@@ -25,9 +25,9 @@ my $src_dir     = "$root/src";
 # CC may carry flags, such as CC="gcc -m32".
 my @cc = split ' ', $ENV{CC} || 'cc';
 
-# The checks below rebuild the library with -Werror. Only gcc and clang are
-# known to compile it cleanly with the flags used here, so skip elsewhere
-# instead of failing on a missing compiler or an unrelated warning.
+# The checks below rebuild the library. Only gcc and clang are known to accept
+# the flags used here, so skip elsewhere instead of failing on a missing
+# compiler.
 my ( $cc_version, $cc_stderr ) = ( q{}, q{} );
 my $cc_status = eval {
     run3( [ @cc, '--version' ], \undef, \$cc_version, \$cc_stderr );
@@ -41,7 +41,7 @@ if ( !defined $cc_status
 }
 
 # Keep instrumentation such as -fsanitize=address from the environment, but
-# not its warning flags. Those vary by CI job and would trip -Werror below.
+# not its warning flags. Those vary by CI job and would trip -Werror in CI.
 my @instrumentation = grep { /^-f/ }
     map { split ' ' } grep { defined } @ENV{ 'CFLAGS', 'LDFLAGS' };
 
@@ -51,13 +51,17 @@ my @base = (
     '-std=c99',
     '-Wall',
     '-Wextra',
-    '-Werror',
     '-Wno-unused-function',
     '-Wno-unused-parameter',
     '-DPACKAGE_VERSION="test"',
     "-I$include_dir",
     "-I$src_dir",
 );
+
+# Warnings are errors only in CI. Newer compilers can warn about code that
+# older ones accept, and that should not fail a local build.
+my $werror = $ENV{CI};
+push @base, '-Werror' if $werror;
 
 for my $definition (
     '-DMAXIMUM_DATA_STRUCTURE_DEPTH=1000',
@@ -69,8 +73,10 @@ for my $definition (
         '-fsyntax-only',
         "$src_dir/maxminddb.c",
     );
-    is( $status, 0, "$definition compiles without warnings" )
-        or diag($stderr);
+    is(
+        $status, 0,
+        "$definition compiles" . ( $werror ? ' without warnings' : q{} )
+    ) or diag($stderr);
 }
 
 for my $definition (
