@@ -2067,6 +2067,10 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                     DEBUG_MSG("get_entry_data_list on map key failed.");
                     return status;
                 }
+                if (MMDB_DATA_TYPE_UTF8_STRING != list_key->entry_data.type) {
+                    DEBUG_MSG("map key is not a UTF-8 string");
+                    return MMDB_INVALID_DATA_ERROR;
+                }
 
                 offset = list_key->entry_data.offset_to_next;
 

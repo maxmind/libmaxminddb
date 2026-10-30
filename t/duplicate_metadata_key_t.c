@@ -13,9 +13,10 @@
     "\xAB\xCD\xEF"                                                             \
     "MaxMind.com"
 
-// The metadata keys that MMDB_open requires, except description, without the
-// map header. database_type starts at metadata offset 0x29.
-#define REQUIRED_KEYS_BEFORE_DESCRIPTION                                       \
+// The metadata keys that MMDB_open requires before languages, without the map
+// header. The record_size value starts at metadata offset 0x1A, and
+// database_type starts at 0x29.
+#define REQUIRED_KEYS_BEFORE_LANGUAGES                                         \
     "\x4A"                                                                     \
     "node_count"                                                               \
     "\xC1\x01"                                                                 \
@@ -28,10 +29,11 @@
     "\x4D"                                                                     \
     "database_type"                                                            \
     "\x44"                                                                     \
-    "Test"                                                                     \
-    "\x49"                                                                     \
-    "languages"                                                                \
-    "\x00\x04"                                                                 \
+    "Test"
+
+// The metadata keys that MMDB_open requires between languages and
+// description.
+#define REQUIRED_KEYS_AFTER_LANGUAGES                                          \
     "\x5B"                                                                     \
     "binary_format_major_version"                                              \
     "\xA1\x02"                                                                 \
@@ -41,6 +43,14 @@
     "\x4B"                                                                     \
     "build_epoch"                                                              \
     "\x01\x02\x01"
+
+// The metadata keys that MMDB_open requires, except description, without the
+// map header.
+#define REQUIRED_KEYS_BEFORE_DESCRIPTION                                       \
+    REQUIRED_KEYS_BEFORE_LANGUAGES                                             \
+    "\x49"                                                                     \
+    "languages"                                                                \
+    "\x00\x04" REQUIRED_KEYS_AFTER_LANGUAGES
 
 // The nine metadata keys that MMDB_open requires, without the map header.
 #define REQUIRED_METADATA_KEYS                                                 \
@@ -430,8 +440,31 @@ int main(void) {
                         "\xA1\x01"
                         "\x41"
                         "B",
-              MMDB_INVALID_METADATA_ERROR,
+              MMDB_INVALID_DATA_ERROR,
               "MMDB_open rejects a non-string key in the description map");
+
+    // The key points at the record_size value, a uint16, at offset 0x1A.
+    TEST_OPEN(DB_PREFIX "\xE9" REQUIRED_KEYS_BEFORE_DESCRIPTION "\x4B"
+                        "description"
+                        "\xE1"
+                        "\x20\x1A"
+                        "\x41"
+                        "B",
+              MMDB_INVALID_DATA_ERROR,
+              "MMDB_open rejects a description key that points to a uint16");
+
+    // languages is [{1: "x"}].
+    TEST_OPEN(DB_PREFIX "\xE9" REQUIRED_KEYS_BEFORE_LANGUAGES "\x49"
+                        "languages"
+                        "\x01\x04"
+                        "\xE1"
+                        "\xA1\x01"
+                        "\x41"
+                        "x" REQUIRED_KEYS_AFTER_LANGUAGES "\x4B"
+                        "description"
+                        "\xE0",
+              MMDB_INVALID_DATA_ERROR,
+              "MMDB_open rejects a non-string key in a map in languages");
 
     TEST_OPEN(DB_PREFIX "\xEB" REQUIRED_METADATA_KEYS,
               MMDB_INVALID_DATA_ERROR,

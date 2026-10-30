@@ -382,8 +382,8 @@ status codes are:
 - `MMDB_OUT_OF_MEMORY_ERROR` - a memory allocation call (`malloc`, etc.) failed.
 - `MMDB_INVALID_DATA_ERROR` - an entry in the data section contains invalid
   data. For example, a `uint16` field is claiming to be more than 2 bytes long,
-  or a map has a key that is a map or an array. The database is probably damaged
-  or was generated incorrectly.
+  or a map has a key that is not a UTF-8 string. The database is probably
+  damaged or was generated incorrectly.
 - `MMDB_INVALID_LOOKUP_PATH_ERROR` - The lookup path passed to `MMDB_get_value`,
   `MMDB_vget_value`, or `MMDB_aget_value` contains an array offset that is
   larger than LONG_MAX or smaller than LONG_MIN.
@@ -467,7 +467,9 @@ byte, so keys that differ only after a NUL count as repeated.
 
 If a top-level metadata key or value is malformed, this function returns
 `MMDB_INVALID_DATA_ERROR`. It does not follow pointers in values that it does
-not use, so it does not detect a bad pointer target there.
+not use, so it does not detect a bad pointer target there. If a map key in the
+`description` or `languages` value is not a UTF-8 string, this function also
+returns `MMDB_INVALID_DATA_ERROR`.
 
 ## `MMDB_close()`
 
@@ -660,6 +662,9 @@ This function allows you to get all of the data for a complex data structure at
 once, rather than looking up each piece using repeated calls to
 `MMDB_get_value()`.
 
+If a map key is not a UTF-8 string, this function returns
+`MMDB_INVALID_DATA_ERROR`.
+
 A crafted database can make a full decode expensive, so this function bounds the
 work and the caller-visible payload. Each call decodes at most 65,536 list
 values and 2 MiB of UTF-8 string and bytes payload. A structure exactly at
@@ -765,6 +770,8 @@ This function allows you to retrieve the database metadata as a linked list of
 with the metadata than using the metadata structure directly. It uses the same
 per-call limits as `MMDB_get_entry_data_list()` and returns
 `MMDB_DECODER_LIMIT_ERROR` if the complete metadata list exceeds any of them.
+Like that function, it returns `MMDB_INVALID_DATA_ERROR` when a map key is not a
+UTF-8 string.
 
 ```c
     MMDB_entry_data_list_s *entry_data_list, *first;
