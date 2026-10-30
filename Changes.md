@@ -1,5 +1,11 @@
 ## next release
 
+- `MMDB_open()` now ends the data section where the metadata marker starts. The
+  `data_section_size` field of `MMDB_s` no longer includes the metadata marker
+  and the metadata. Malformed databases with data section values, pointers, or
+  search tree records that reach into the metadata now return an error instead
+  of reading the metadata as data. Databases with a data section of fewer than
+  three bytes, such as an empty data section, remain valid.
 - Fixed an out-of-bounds read when a value in a metadata section of one or two
   bytes declares a size that needs more size bytes than the section holds.
   `MMDB_open()` now returns `MMDB_INVALID_DATA_ERROR` for such a database.
