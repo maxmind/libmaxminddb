@@ -1,3 +1,16 @@
+## next release
+
+- `MMDB_open()` now returns `MMDB_INVALID_METADATA_ERROR` for a database whose
+  top-level metadata map or `description` map repeats a key. Previously, the
+  library read only the first value for a repeated key and did not validate the
+  others, while other readers may use the last value. Databases with repeated
+  metadata keys that opened before will no longer open.
+- `MMDB_open()` now decodes every top-level metadata key and skips its value. A
+  malformed key or value after the required keys now causes
+  `MMDB_INVALID_DATA_ERROR`, or `MMDB_INVALID_METADATA_ERROR` if it exceeds a
+  decoder limit. It does not follow a pointer used as a value. Metadata whose
+  root is not a map now causes `MMDB_INVALID_METADATA_ERROR`.
+
 ## 1.14.1 - 2026-09-17
 
 - Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with
