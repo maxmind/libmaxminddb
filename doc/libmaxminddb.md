@@ -459,6 +459,14 @@ If metadata processing exceeds one of the decoder resource limits described
 under `MMDB_get_entry_data_list()`, this function returns
 `MMDB_INVALID_METADATA_ERROR`.
 
+If the metadata root is not a map, or the top-level metadata map or the
+`description` map repeats a key, this function returns
+`MMDB_INVALID_METADATA_ERROR`.
+
+If a top-level metadata key or value is malformed, this function returns
+`MMDB_INVALID_DATA_ERROR`. It does not follow pointers in values that it does
+not use, so it does not detect a bad pointer target there.
+
 ## `MMDB_close()`
 
 ```c

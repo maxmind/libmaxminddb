@@ -178,6 +178,11 @@ typedef struct decode_state_s {
     uint64_t bytes;
 } decode_state_s;
 
+typedef struct metadata_key_s {
+    const char *name;
+    uint32_t size;
+} metadata_key_s;
+
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
 #define METADATA_BLOCK_MAX_SIZE 131072
@@ -191,6 +196,12 @@ static const uint8_t *find_metadata(const uint8_t *file_content,
                                     uint32_t *metadata_size);
 static int read_metadata(MMDB_s *mmdb);
 static MMDB_s make_fake_metadata_db(const MMDB_s *const mmdb);
+static int check_metadata_keys_unique(const MMDB_s *const metadata_db);
+static int next_map_key(const MMDB_s *const mmdb,
+                        uint32_t *offset,
+                        MMDB_entry_data_s *key);
+static int check_keys_unique(metadata_key_s *keys, uint32_t count);
+static int compare_metadata_keys(const void *a, const void *b);
 static int
 value_for_key_as_uint16(MMDB_entry_s *start, char *key, uint16_t *value);
 static int
@@ -205,6 +216,8 @@ static int populate_languages_metadata(MMDB_s *mmdb,
 static int populate_description_metadata(MMDB_s *mmdb,
                                          MMDB_s *metadata_db,
                                          MMDB_entry_s *metadata_start);
+static int check_languages_unique(MMDB_description_s **descriptions,
+                                  size_t count);
 static int resolve_any_address(const char *ipstr, struct addrinfo **addresses);
 static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        uint8_t const *address,
@@ -590,9 +603,16 @@ static int read_metadata(MMDB_s *mmdb) {
        metadata values. */
     MMDB_s metadata_db = make_fake_metadata_db(mmdb);
 
+    // Key lookups return the first match, but other readers can keep the
+    // last one. A repeated key could give each reader a different value.
+    int status = check_metadata_keys_unique(&metadata_db);
+    if (MMDB_SUCCESS != status) {
+        return status;
+    }
+
     MMDB_entry_s metadata_start = {.mmdb = &metadata_db, .offset = 0};
 
-    int status = value_for_key_as_uint32(
+    status = value_for_key_as_uint32(
         &metadata_start, "node_count", &mmdb->metadata.node_count);
     if (MMDB_SUCCESS != status) {
         return status;
@@ -697,6 +717,115 @@ static MMDB_s make_fake_metadata_db(const MMDB_s *const mmdb) {
                                    mmdb->metadata_section_size};
 
     return fake_metadata_db;
+}
+
+static int check_metadata_keys_unique(const MMDB_s *const metadata_db) {
+    MMDB_entry_data_s map;
+    CHECKED_DECODE_ONE_FOLLOW(metadata_db, 0, &map);
+    if (MMDB_DATA_TYPE_MAP != map.type) {
+        DEBUG_MSG("metadata value is not a map");
+        return MMDB_INVALID_METADATA_ERROR;
+    }
+    if (map.data_size < 2) {
+        return MMDB_SUCCESS;
+    }
+    // Each entry takes at least a key byte and a value byte. Reject a larger
+    // count before it sizes the allocation, with the error the walk would
+    // return when it reaches the end of the section.
+    if (map.offset_to_next > metadata_db->data_section_size ||
+        map.data_size >
+            (metadata_db->data_section_size - map.offset_to_next) / 2) {
+        DEBUG_MSG("metadata map size exceeds the metadata section");
+        return MMDB_INVALID_DATA_ERROR;
+    }
+
+    metadata_key_s *keys = calloc(map.data_size, sizeof(metadata_key_s));
+    if (NULL == keys) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
+
+    int status = MMDB_SUCCESS;
+    uint32_t offset = map.offset_to_next;
+    uint64_t key_bytes = 0;
+    for (uint32_t i = 0; i < map.data_size; i++) {
+        MMDB_entry_data_s key;
+        status = next_map_key(metadata_db, &offset, &key);
+        if (MMDB_SUCCESS != status) {
+            goto cleanup;
+        }
+        // Pointer keys can reuse one long string many times. Charge each key
+        // against the payload budget to bound the scan and the sort below.
+        key_bytes += key.data_size;
+        if (key_bytes > (uint64_t)(MAXIMUM_DATA_STRUCTURE_BYTES)) {
+            DEBUG_MSG("metadata keys exceed the payload budget");
+            status = MMDB_DECODER_LIMIT_ERROR;
+            goto cleanup;
+        }
+        // Compare up to the first NUL, as check_languages_unique does. Some
+        // callers, such as the PHP extension, cut keys there.
+        const char *nul = memchr(key.utf8_string, '\0', key.data_size);
+        keys[i].name = key.utf8_string;
+        if (NULL == nul) {
+            keys[i].size = key.data_size;
+        } else {
+            keys[i].size = (uint32_t)(nul - key.utf8_string);
+        }
+    }
+
+    status = check_keys_unique(keys, map.data_size);
+
+cleanup:
+    free(keys);
+    return status;
+}
+
+/* Decodes the map key at *offset, skips its value, and sets *offset to the
+ * next key. */
+static int next_map_key(const MMDB_s *const mmdb,
+                        uint32_t *offset,
+                        MMDB_entry_data_s *key) {
+    CHECKED_DECODE_ONE_FOLLOW(mmdb, *offset, key);
+    if (MMDB_DATA_TYPE_UTF8_STRING != key->type) {
+        return MMDB_INVALID_DATA_ERROR;
+    }
+
+    MMDB_entry_data_s value;
+    CHECKED_DECODE_ONE(mmdb, key->offset_to_next, &value);
+    int status = skip_map_or_array(mmdb, &value, 0);
+    if (MMDB_SUCCESS != status) {
+        return status;
+    }
+    *offset = value.offset_to_next;
+
+    return MMDB_SUCCESS;
+}
+
+/* Sorts keys and returns MMDB_INVALID_METADATA_ERROR if two are equal. */
+static int check_keys_unique(metadata_key_s *keys, uint32_t count) {
+    qsort(keys, count, sizeof(metadata_key_s), compare_metadata_keys);
+    for (uint32_t i = 1; i < count; i++) {
+        if (0 == compare_metadata_keys(&keys[i - 1], &keys[i])) {
+            DEBUG_MSG("duplicate key in metadata");
+            return MMDB_INVALID_METADATA_ERROR;
+        }
+    }
+    return MMDB_SUCCESS;
+}
+
+static int compare_metadata_keys(const void *a, const void *b) {
+    const metadata_key_s *key_a = a;
+    const metadata_key_s *key_b = b;
+    if (key_a->size < key_b->size) {
+        return -1;
+    }
+    if (key_a->size > key_b->size) {
+        return 1;
+    }
+    // Pointer keys can share one long string. Skip comparing it to itself.
+    if (key_a->name == key_b->name) {
+        return 0;
+    }
+    return memcmp(key_a->name, key_b->name, key_a->size);
 }
 
 static int
@@ -925,9 +1054,32 @@ static int populate_description_metadata(MMDB_s *mmdb,
         }
     }
 
+    // Compare the languages as stored, so keys that differ only after a NUL
+    // count as repeated.
+    status = check_languages_unique(mmdb->metadata.description.descriptions,
+                                    mmdb->metadata.description.count);
+
 cleanup:
     MMDB_free_entry_data_list(first_member);
 
+    return status;
+}
+
+static int check_languages_unique(MMDB_description_s **descriptions,
+                                  size_t count) {
+    if (count < 2) {
+        return MMDB_SUCCESS;
+    }
+    metadata_key_s *keys = calloc(count, sizeof(metadata_key_s));
+    if (NULL == keys) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
+    for (size_t i = 0; i < count; i++) {
+        keys[i].name = descriptions[i]->language;
+        keys[i].size = (uint32_t)strlen(keys[i].name);
+    }
+    int status = check_keys_unique(keys, (uint32_t)count);
+    free(keys);
     return status;
 }
 
