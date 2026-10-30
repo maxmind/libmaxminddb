@@ -1,3 +1,9 @@
+## next release
+
+- Fixed an out-of-bounds read when a value in a metadata section of one or two
+  bytes declares a size that needs more size bytes than the section holds.
+  `MMDB_open()` now returns `MMDB_INVALID_DATA_ERROR` for such a database.
+
 ## 1.14.1 - 2026-09-17
 
 - Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with
