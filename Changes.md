@@ -19,6 +19,9 @@
   `MMDB_INVALID_DATA_ERROR` when they skip a nested map whose key is a map or an
   array. Before, they skipped only the key's header and read the data after it
   out of step. A lookup could return the wrong value.
+- Fixed an out-of-bounds read when a value in a metadata section of one or two
+  bytes declares a size that needs more size bytes than the section holds.
+  `MMDB_open()` now returns `MMDB_INVALID_DATA_ERROR` for such a database.
 
 ## 1.14.1 - 2026-09-17
 

@@ -1750,7 +1750,8 @@ static int decode_one(const MMDB_s *const mmdb,
             break;
         case 30:
             // We subtract when checking offset to avoid possible overflow
-            if (offset > mmdb->data_section_size - 2) {
+            if (mmdb->data_section_size < 2 ||
+                offset > mmdb->data_section_size - 2) {
                 DEBUG_MSGF("String end (%d, case 30) past data section (%d)",
                            offset,
                            mmdb->data_section_size);
@@ -1761,7 +1762,8 @@ static int decode_one(const MMDB_s *const mmdb,
             break;
         case 31:
             // We subtract when checking offset to avoid possible overflow
-            if (offset > mmdb->data_section_size - 3) {
+            if (mmdb->data_section_size < 3 ||
+                offset > mmdb->data_section_size - 3) {
                 DEBUG_MSGF("String end (%d, case 31) past data section (%d)",
                            offset,
                            mmdb->data_section_size);
