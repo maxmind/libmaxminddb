@@ -1022,8 +1022,10 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        uint8_t const *address,
                                        sa_family_t address_family,
                                        MMDB_lookup_result_s *result) {
-    record_info_s record_info = record_info_for_database(mmdb);
-    if (record_info.right_record_offset == 0) {
+    /* Each node contains two 24-, 28-, or 32-bit records, occupying 6, 7, or
+     * 8 bytes in total. Reject unsupported sizes before traversing the tree. */
+    uint16_t record_length = mmdb->full_record_byte_size;
+    if (record_length < 6 || record_length > 8) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
@@ -1036,23 +1038,45 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
 
     uint32_t node_count = mmdb->metadata.node_count;
     const uint8_t *search_tree = mmdb->file_content;
-    const uint8_t *record_pointer;
-    for (; current_bit < mmdb->depth && value < node_count; current_bit++) {
-        uint8_t bit =
-            1U & (address[current_bit >> 3] >> (7 - (current_bit % 8)));
+    uint64_t tree_size = (uint64_t)(mmdb->data_section - search_tree);
 
-        // Note that value*record_info.record_length can be larger than 2**32
-        record_pointer = &search_tree[value * record_info.record_length];
-        if (record_pointer + record_info.record_length > mmdb->data_section) {
-            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
-        }
-        if (bit) {
-            record_pointer += record_info.right_record_offset;
-            value = record_info.right_record_getter(record_pointer);
-        } else {
-            value = record_info.left_record_getter(record_pointer);
-        }
+    /* Specialize the loop so that record decoding can be inlined and selecting
+     * a child does not require a branch or an indirect call for every bit.
+     * Check byte offsets before forming pointers, including on 32-bit systems.
+     * Keep the loop shared so each record format has the same bounds checks. */
+#define WALK_SEARCH_TREE(record_length, record_value)                          \
+    do {                                                                       \
+        for (; current_bit < mmdb->depth && value < node_count;                \
+             current_bit++) {                                                  \
+            uint8_t bit =                                                      \
+                1U & (address[current_bit >> 3] >> (7 - (current_bit % 8)));   \
+            uint64_t offset = value * (record_length);                         \
+            if (offset + (record_length) > tree_size) {                        \
+                return MMDB_CORRUPT_SEARCH_TREE_ERROR;                         \
+            }                                                                  \
+            const uint8_t *record_pointer = &search_tree[offset];              \
+            value = (record_value);                                            \
+        }                                                                      \
+    } while (0)
+
+    /* Dispatch once per lookup so each loop uses a constant node size and the
+     * compiler can inline the matching decoder without per-bit dispatch. */
+    switch (record_length) {
+        case 6:
+            WALK_SEARCH_TREE(6, get_uint24(record_pointer + 3 * bit));
+            break;
+        case 7:
+            WALK_SEARCH_TREE(
+                7,
+                get_uint24(record_pointer + 4 * bit) |
+                    (((uint32_t)record_pointer[3] >> (4 * (1 - bit))) & 15)
+                        << 24);
+            break;
+        case 8:
+            WALK_SEARCH_TREE(8, get_uint32(record_pointer + 4 * bit));
+            break;
     }
+#undef WALK_SEARCH_TREE
 
     result->netmask = current_bit;
 

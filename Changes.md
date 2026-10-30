@@ -1,3 +1,8 @@
+## Unreleased
+
+- Improved packed search-tree traversal by specializing record decoding and
+  selecting children without per-bit indirect calls or branches.
+
 ## 1.14.1 - 2026-09-17
 
 - Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with

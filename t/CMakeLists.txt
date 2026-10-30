@@ -15,6 +15,7 @@ set(TEST_TARGET_NAMES
   gai_error_t
   get_value_pointer_bug_t
   get_value_t
+  lookup_specialization_t
   ipv4_start_cache_t
   ipv6_lookup_in_ipv4_t
   metadata_marker_t
