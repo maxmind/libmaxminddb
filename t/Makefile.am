@@ -25,7 +25,7 @@ check_PROGRAMS = \
 	get_value_pointer_bug_t invalid_sockaddr_t \
 	ipv4_start_cache_t ipv6_lookup_in_ipv4_t max_depth_t metadata_t \
 	metadata_marker_t metadata_pointers_t no_map_get_value_t \
-	overflow_bounds_t pointer_dos_t read_node_t \
+	non_string_map_key_t overflow_bounds_t pointer_dos_t read_node_t \
 	threads_t version_t
 
 data_pool_t_LDFLAGS = $(AM_LDFLAGS) -lm
