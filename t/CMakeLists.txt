@@ -4,6 +4,7 @@ add_library(tap
 
 # test programs
 set(TEST_TARGET_NAMES
+  abi_compat_t
   bad_pointers_t
   bad_search_tree_t
   basic_lookup_t
@@ -15,6 +16,7 @@ set(TEST_TARGET_NAMES
   gai_error_t
   get_value_pointer_bug_t
   get_value_t
+  lookup_context_t
   lookup_specialization_t
   ipv4_start_cache_t
   ipv6_lookup_in_ipv4_t
@@ -65,6 +67,8 @@ foreach(TEST_TARGET_NAME ${TEST_TARGET_NAMES})
 
   add_test( NAME ${TEST_TARGET_NAME} COMMAND ${TEST_TARGET_NAME} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/t)
 endforeach()
+
+target_sources(abi_compat_t PRIVATE abi_legacy_client.c)
 
 if(BUILD_FUZZING)
   add_executable(fuzz_mmdb fuzz_mmdb.c)

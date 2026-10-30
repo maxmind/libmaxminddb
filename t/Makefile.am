@@ -17,8 +17,8 @@ EXTRA_DIST = compile_c++_t.pl decoder_limits_t.pl external_symbols_t.pl \
 	     libtap/tap.c libtap/tap.h maxmind-db
 
 check_PROGRAMS = \
-	bad_pointers_t bad_databases_t bad_data_size_t bad_epoch_t bad_indent_t \
-	bad_search_tree_t lookup_specialization_t \
+	abi_compat_t bad_pointers_t bad_databases_t bad_data_size_t bad_epoch_t bad_indent_t \
+	bad_search_tree_t lookup_context_t lookup_specialization_t \
 	basic_lookup_t data_entry_list_t \
 	data-pool-t data_types_t double_close_t dump_t empty_container_metadata_t \
 	gai_error_t get_value_t \
@@ -30,8 +30,15 @@ check_PROGRAMS = \
 
 data_pool_t_LDFLAGS = $(AM_LDFLAGS) -lm
 data_pool_t_SOURCES = data-pool-t.c ../src/data-pool.c
+abi_compat_t_SOURCES = abi_compat_t.c abi_legacy_client.c abi_legacy.h abi_layout.h
 
 threads_t_CFLAGS = $(CFLAGS) -pthread
+
+if WINDOWS
+lookup_context_t_CFLAGS = $(CFLAGS)
+else
+lookup_context_t_CFLAGS = $(CFLAGS) -pthread
+endif
 
 TESTS = $(check_PROGRAMS) compile_c++_t.pl decoder_limits_t.pl \
 	external_symbols_t.pl mmdblookup_t.pl

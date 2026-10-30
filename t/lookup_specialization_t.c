@@ -130,6 +130,7 @@ static void run_database(int UNUSED(record_size),
     /* A shortened tree view must fail before any packed child is read. This
      * shallow copy borrows the open reader's mapping and is never closed. */
     MMDB_s truncated = *mmdb;
+    truncated.flags |= MMDB_NO_PREPARE;
     truncated.data_section =
         truncated.file_content + truncated.full_record_byte_size - 1;
     struct sockaddr_in v4 = {.sin_family = AF_INET};

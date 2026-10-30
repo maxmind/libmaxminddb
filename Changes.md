@@ -1,5 +1,15 @@
 ## Unreleased
 
+- Prepared 16-bit prefix tables and native child records automatically in
+  `MMDB_open()` for ordinary string and sockaddr lookups. Preparation requires
+  additional time and memory; `MMDB_NO_PREPARE` disables it. Lookups fall back to
+  the compact mapped tree if preparation cannot allocate memory or exceeds its
+  native-node budget.
+  Explicit lookup contexts remain available and can be shared by threads.
+- Preserved the original public structure layouts and shared-library SONAME 0
+  by keeping automatically owned lookup state in private allocations. The
+  reader's `flags` may include private state bits; inspect only documented flags
+  with masks.
 - Improved packed search-tree traversal by specializing record decoding and
   selecting children without per-bit indirect calls or branches.
 - Avoided heap allocations in `MMDB_get_value()` and `MMDB_vget_value()` for
