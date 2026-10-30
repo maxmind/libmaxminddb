@@ -33,6 +33,7 @@ if(UNIX)  # or if (NOT WIN32)
     bad_data_size_t
     bad_epoch_t
     bad_indent_t
+    duplicate_metadata_key_t
     empty_container_metadata_t
     invalid_sockaddr_t
     max_depth_t
