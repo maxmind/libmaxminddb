@@ -344,6 +344,32 @@ static void test_newer_major_version(void) {
               size,
               MMDB_UNKNOWN_DATABASE_FORMAT_ERROR,
               "MMDB_open reports a newer major version before bad metadata");
+
+    // The MaxMind-DB database has major version 3. Before the version key,
+    // the value of "new" has extended type byte 9, which this version cannot
+    // decode.
+    char *path = bad_database_path("libmaxminddb-major-version-3.mmdb");
+    MMDB_s mmdb;
+    int status = MMDB_open(path, MMDB_MODE_MMAP, &mmdb);
+    free(path);
+    cmp_ok(status,
+           "==",
+           MMDB_UNKNOWN_DATABASE_FORMAT_ERROR,
+           "MMDB_open reports a newer major version after a value of an "
+           "unknown type");
+    if (MMDB_SUCCESS == status) {
+        MMDB_close(&mmdb);
+    }
+
+    // The same metadata with major version 2 is invalid data.
+    TEST_OPEN(DB_PREFIX "\xEA"
+                        "\x43"
+                        "new"
+                        "\x02\x09"
+                        "ab" REQUIRED_METADATA_KEYS,
+              MMDB_INVALID_DATA_ERROR,
+              "MMDB_open reports invalid data for major version 2 with a "
+              "value of an unknown type");
 }
 
 int main(void) {
@@ -358,6 +384,12 @@ int main(void) {
                         "\xA1\x05",
               MMDB_SUCCESS,
               "MMDB_open accepts an extra distinct metadata key");
+
+    TEST_OPEN(DB_PREFIX "\xEA" REQUIRED_METADATA_KEYS "\x45"
+                        "extra"
+                        "\x00\x09",
+              MMDB_INVALID_DATA_ERROR,
+              "MMDB_open rejects an extra key with extended type byte 9");
 
     // The key points at the database_type value, "Test", at offset 0x37.
     TEST_OPEN(DB_PREFIX "\xEA" REQUIRED_METADATA_KEYS "\x20\x37"

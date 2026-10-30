@@ -199,6 +199,7 @@ static const uint8_t *find_metadata(const uint8_t *file_content,
                                     uint32_t *metadata_size);
 static int read_metadata(MMDB_s *mmdb);
 static MMDB_s make_fake_metadata_db(const MMDB_s *const mmdb);
+static bool has_unsupported_major_version(const MMDB_s *const metadata_db);
 static int check_metadata_keys_unique(const MMDB_s *const metadata_db);
 static int next_map_key(const MMDB_s *const mmdb,
                         uint32_t *offset,
@@ -609,12 +610,18 @@ static int read_metadata(MMDB_s *mmdb) {
     // Check the major version before the strict walk below. A newer format
     // can have metadata that this version cannot decode, and the caller must
     // still get MMDB_UNKNOWN_DATABASE_FORMAT_ERROR for it. If this lookup
-    // fails or finds 0, the full read below reports the error.
+    // cannot decode a value, a byte search looks for the version. In all
+    // other cases, the full read below reports the error.
     uint16_t major_version = 0;
     int status = value_for_key_as_uint16(
         &metadata_start, "binary_format_major_version", &major_version);
     if (MMDB_SUCCESS == status && 0 != major_version && 2 != major_version) {
         DEBUG_MSGF("unsupported binary_format_major_version %i", major_version);
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
+    }
+    if (MMDB_INVALID_DATA_ERROR == status &&
+        has_unsupported_major_version(&metadata_db)) {
+        DEBUG_MSG("unsupported binary_format_major_version found by search");
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
@@ -730,6 +737,35 @@ static MMDB_s make_fake_metadata_db(const MMDB_s *const mmdb) {
                                    mmdb->metadata_section_size};
 
     return fake_metadata_db;
+}
+
+// The lookup in read_metadata cannot step past a value that this version
+// cannot decode, so this function finds the key by its bytes. It runs only
+// after that lookup fails on invalid data. The database does not open in
+// either case, so the search can change only the error code.
+//
+// The search uses the first match. It also matches the key bytes in a string
+// value or in a nested map, and it does not find a key that the map stores as
+// a pointer.
+static bool has_unsupported_major_version(const MMDB_s *const metadata_db) {
+    static const char key[] = "\x5B"
+                              "binary_format_major_version";
+    const uint8_t *found = mmdb_memmem(metadata_db->data_section,
+                                       metadata_db->data_section_size,
+                                       key,
+                                       sizeof(key) - 1);
+    if (NULL == found) {
+        return false;
+    }
+
+    uint32_t offset =
+        (uint32_t)(found - metadata_db->data_section) + sizeof(key) - 1;
+    MMDB_entry_data_s value;
+    if (MMDB_SUCCESS != decode_one_follow(metadata_db, offset, &value) ||
+        MMDB_DATA_TYPE_UINT16 != value.type) {
+        return false;
+    }
+    return 0 != value.uint16 && 2 != value.uint16;
 }
 
 static int check_metadata_keys_unique(const MMDB_s *const metadata_db) {
@@ -1710,6 +1746,10 @@ static int decode_one(const MMDB_s *const mmdb,
             return MMDB_INVALID_DATA_ERROR;
         }
         type = get_ext_type(mem[offset++]);
+        if (type < MMDB_DATA_TYPE_INT32 || type > MMDB_DATA_TYPE_FLOAT) {
+            DEBUG_MSGF("Invalid extended type byte: %i", type - 7);
+            return MMDB_INVALID_DATA_ERROR;
+        }
         DEBUG_MSGF("Extended type: %i (%s)", type, type_num_to_name(type));
     }
 

@@ -382,8 +382,8 @@ status codes are:
 - `MMDB_OUT_OF_MEMORY_ERROR` - a memory allocation call (`malloc`, etc.) failed.
 - `MMDB_INVALID_DATA_ERROR` - an entry in the data section contains invalid
   data. For example, a `uint16` field is claiming to be more than 2 bytes long,
-  or a map has a key that is a map or an array. The database is probably damaged
-  or was generated incorrectly.
+  a map has a key that is a map or an array, or a value has an unknown type. The
+  database is probably damaged or was generated incorrectly.
 - `MMDB_INVALID_LOOKUP_PATH_ERROR` - The lookup path passed to `MMDB_get_value`,
   `MMDB_vget_value`, or `MMDB_aget_value` contains an array offset that is
   larger than LONG_MAX or smaller than LONG_MIN.
