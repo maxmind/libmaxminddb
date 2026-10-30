@@ -4,6 +4,7 @@ add_library(tap
 
 # test programs
 set(TEST_TARGET_NAMES
+  bad_extended_type_t
   bad_pointers_t
   bad_search_tree_t
   basic_lookup_t
