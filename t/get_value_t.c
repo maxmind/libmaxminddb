@@ -392,6 +392,139 @@ void test_nested_structure(int mode, const char *mode_desc) {
     free(mmdb);
 }
 
+static void test_variadic_path_lengths(void) {
+    /* Build nested single-key maps so every argument must be consumed. Seven
+     * keys fit the common-path buffer; eight or more use its heap fallback. */
+    uint8_t encoded[64];
+    const unsigned int lengths[] = {0, 1, 7, 8, 9, 12};
+    for (unsigned int i = 0; i < sizeof(lengths) / sizeof(lengths[0]); i++) {
+        unsigned int length = lengths[i];
+        unsigned int offset = 0;
+        for (unsigned int j = 0; j < length; j++) {
+            encoded[offset++] = 0xe1; /* map with one pair */
+            encoded[offset++] = 0x41; /* string with one byte */
+            encoded[offset++] = 'k';
+        }
+        encoded[offset++] = 0xc1; /* uint32 with one byte */
+        encoded[offset++] = 42;
+        MMDB_s mmdb = {.data_section = encoded, .data_section_size = offset};
+        MMDB_entry_s entry = {.mmdb = &mmdb};
+        MMDB_entry_data_s data;
+        MMDB_entry_data_s vdata;
+        int status;
+        int vstatus;
+        switch (length) {
+            case 0:
+                status = MMDB_get_value(&entry, &data, NULL);
+                vstatus = call_vget_value(&entry, &vdata, NULL);
+                break;
+            case 1:
+                status = MMDB_get_value(&entry, &data, "k", NULL);
+                vstatus = call_vget_value(&entry, &vdata, "k", NULL);
+                break;
+            case 7:
+                status = MMDB_get_value(
+                    &entry, &data, "k", "k", "k", "k", "k", "k", "k", NULL);
+                vstatus = call_vget_value(
+                    &entry, &vdata, "k", "k", "k", "k", "k", "k", "k", NULL);
+                break;
+            case 8:
+                status = MMDB_get_value(&entry,
+                                        &data,
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        NULL);
+                vstatus = call_vget_value(&entry,
+                                          &vdata,
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          NULL);
+                break;
+            case 9:
+                status = MMDB_get_value(&entry,
+                                        &data,
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        NULL);
+                vstatus = call_vget_value(&entry,
+                                          &vdata,
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          NULL);
+                break;
+            default:
+                status = MMDB_get_value(&entry,
+                                        &data,
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        "k",
+                                        NULL);
+                vstatus = call_vget_value(&entry,
+                                          &vdata,
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          "k",
+                                          NULL);
+                break;
+        }
+        cmp_ok(
+            status, "==", MMDB_SUCCESS, "get_value consumes %u keys", length);
+        cmp_ok(
+            vstatus, "==", MMDB_SUCCESS, "vget_value consumes %u keys", length);
+        cmp_ok(data.type, "==", MMDB_DATA_TYPE_UINT32, "nested scalar type");
+        cmp_ok(data.uint32, "==", 42, "nested scalar value");
+        cmp_ok(vdata.type,
+               "==",
+               MMDB_DATA_TYPE_UINT32,
+               "nested variadic scalar type");
+        cmp_ok(vdata.uint32, "==", 42, "nested variadic scalar value");
+    }
+}
+
 void run_tests(int mode, const char *mode_desc) {
     test_simple_structure(mode, mode_desc);
     test_nested_structure(mode, mode_desc);
@@ -399,6 +532,7 @@ void run_tests(int mode, const char *mode_desc) {
 
 int main(void) {
     plan(NO_PLAN);
+    test_variadic_path_lengths();
     for_all_modes(&run_tests);
     done_testing();
 }

@@ -2,6 +2,8 @@
 
 - Improved packed search-tree traversal by specializing record decoding and
   selecting children without per-bit indirect calls or branches.
+- Avoided heap allocations in `MMDB_get_value()` and `MMDB_vget_value()` for
+  lookup paths with up to seven components.
 
 ## 1.14.1 - 2026-09-17
 

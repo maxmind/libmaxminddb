@@ -1270,7 +1270,9 @@ int MMDB_vget_value(MMDB_entry_s *const start,
         return MMDB_INVALID_METADATA_ERROR;
     }
 
-    const char **path = calloc(length + 1, sizeof(const char *));
+    const char *stack_path[8];
+    const char **path =
+        length < 8 ? stack_path : calloc(length + 1, sizeof(const char *));
     if (NULL == path) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
@@ -1283,7 +1285,9 @@ int MMDB_vget_value(MMDB_entry_s *const start,
 
     int status = MMDB_aget_value(start, entry_data, path);
 
-    free(path);
+    if (path != stack_path) {
+        free(path);
+    }
 
     return status;
 }
