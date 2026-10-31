@@ -1260,7 +1260,8 @@ static void fill_lookup_context_root(const MMDB_lookup_context_s *context,
                                      uint32_t key) {
     bool terminal = node >= context->mmdb->metadata.node_count ||
                     depth == LOOKUP_CONTEXT_RADIX_BITS;
-    bool unreadable = !terminal && node >= context->indexed_nodes;
+    bool unreadable =
+        !terminal && (NULL == context->nodes || node >= context->indexed_nodes);
     if (terminal || unreadable) {
         /* Store the destination and exact depth, including early matches.
          * Defer unreadable-branch errors until that table entry is selected. */

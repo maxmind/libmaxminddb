@@ -542,7 +542,7 @@ failure. A preparation failure leaves the original reader usable.
 
 Ordinary lookups already use automatically prepared state after a default
 `MMDB_open()`. Explicit contexts are useful after opening with
-`MMDB_NO_PREPARE`. Creating an explicit context for a reader that already has
+`MMDB_NO_PREPARE`. Creating an explicit context for a reader that has already
 prepared state allocates a second independent accelerator.
 
 Packed 24-, 28-, or 32-bit child records are decoded into native 32-bit pairs,
