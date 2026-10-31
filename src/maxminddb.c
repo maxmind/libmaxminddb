@@ -176,6 +176,7 @@ typedef struct record_info_s {
 typedef struct decode_state_s {
     size_t values;
     uint64_t bytes;
+    bool allow_non_string_keys;
 } decode_state_s;
 
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
@@ -236,6 +237,9 @@ static int decode_one(const MMDB_s *const mmdb,
 static int get_ext_type(int raw_ext_type);
 static uint32_t
 get_ptr_from(uint8_t ctrl, uint8_t const *const ptr, int ptr_size);
+static int entry_data_list_for(MMDB_entry_s *start,
+                               MMDB_entry_data_list_s **const entry_data_list,
+                               bool allow_non_string_keys);
 static int get_entry_data_list(const MMDB_s *const mmdb,
                                uint32_t offset,
                                MMDB_entry_data_list_s *const entry_data_list,
@@ -791,8 +795,10 @@ static int populate_languages_metadata(MMDB_s *mmdb,
     MMDB_entry_s array_start = {.mmdb = metadata_db,
                                 .offset = entry_data.offset};
 
+    // The type checks below report a non-string key in the languages value as
+    // MMDB_INVALID_METADATA_ERROR.
     MMDB_entry_data_list_s *member;
-    status = MMDB_get_entry_data_list(&array_start, &member);
+    status = entry_data_list_for(&array_start, &member, true);
     if (MMDB_SUCCESS != status) {
         return status;
     }
@@ -852,14 +858,15 @@ static int populate_description_metadata(MMDB_s *mmdb,
 
     MMDB_entry_s map_start = {.mmdb = metadata_db, .offset = entry_data.offset};
 
+    // The type checks below report a non-string key in the description value
+    // as MMDB_INVALID_METADATA_ERROR.
     MMDB_entry_data_list_s *member;
-    status = MMDB_get_entry_data_list(&map_start, &member);
+    status = entry_data_list_for(&map_start, &member, true);
     if (MMDB_SUCCESS != status) {
-        DEBUG_MSGF(
-            "MMDB_get_entry_data_list failed while populating description."
-            " status = %d (%s)",
-            status,
-            MMDB_strerror(status));
+        DEBUG_MSGF("entry_data_list_for failed while populating description."
+                   " status = %d (%s)",
+                   status,
+                   MMDB_strerror(status));
         return status;
     }
 
@@ -1742,6 +1749,12 @@ int MMDB_get_metadata_as_entry_data_list(
 
 int MMDB_get_entry_data_list(MMDB_entry_s *start,
                              MMDB_entry_data_list_s **const entry_data_list) {
+    return entry_data_list_for(start, entry_data_list, false);
+}
+
+static int entry_data_list_for(MMDB_entry_s *start,
+                               MMDB_entry_data_list_s **const entry_data_list,
+                               bool allow_non_string_keys) {
     *entry_data_list = NULL;
 
     size_t const maximum_values = (size_t)(MAXIMUM_DATA_STRUCTURE_VALUES);
@@ -1751,7 +1764,8 @@ int MMDB_get_entry_data_list(MMDB_entry_s *start,
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
 
-    decode_state_s decode_state = {0};
+    decode_state_s decode_state = {.allow_non_string_keys =
+                                       allow_non_string_keys};
     MMDB_entry_data_list_s *list = NULL;
     int status = alloc_entry_data_list(pool, &decode_state, &list);
     if (MMDB_SUCCESS != status) {
@@ -1893,6 +1907,11 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on map key failed.");
                     return status;
+                }
+                if (!decode_state->allow_non_string_keys &&
+                    MMDB_DATA_TYPE_UTF8_STRING != list_key->entry_data.type) {
+                    DEBUG_MSG("map key is not a UTF-8 string");
+                    return MMDB_INVALID_DATA_ERROR;
                 }
 
                 offset = list_key->entry_data.offset_to_next;

@@ -1,3 +1,15 @@
+## next release
+
+- `MMDB_get_entry_data_list()` now returns `MMDB_INVALID_DATA_ERROR` when a map
+  key is not a UTF-8 string, as the MaxMind DB specification requires.
+  Previously, it added the key to the list with its original type. A caller that
+  read the key as a string read the wrong union member. From this version on,
+  code that walks the list can rely on every map key being a
+  `MMDB_DATA_TYPE_UTF8_STRING` entry. `MMDB_get_metadata_as_entry_data_list()`
+  has the same check. `MMDB_open()` still returns `MMDB_INVALID_METADATA_ERROR`
+  when the `description` or `languages` metadata contains a map with a
+  non-string key.
+
 ## 1.14.1 - 2026-09-17
 
 - Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with
