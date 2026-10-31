@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -178,6 +179,26 @@ typedef struct decode_state_s {
     uint64_t bytes;
 } decode_state_s;
 
+/* Explicit contexts borrow a reader. Automatically owned contexts receive the
+ * current reader at lookup time so returning MMDB_s by value remains valid. */
+struct MMDB_lookup_context_s {
+    const MMDB_s *mmdb;
+    uint32_t (*nodes)[2];
+    uint64_t *root;
+    uint64_t *ipv4_root;
+    void *nodes_allocation;
+    void *root_allocation;
+    void *ipv4_root_allocation;
+    uint32_t indexed_nodes;
+};
+
+/* The filename remains a normal borrowed string. Its private allocation also
+ * owns prepared state, without changing any public structure's layout. */
+typedef struct reader_state_s {
+    MMDB_lookup_context_s *lookup_context;
+    char filename[];
+} reader_state_s;
+
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
 #define METADATA_BLOCK_MAX_SIZE 131072
@@ -185,6 +206,14 @@ typedef struct decode_state_s {
 // 64 leads us to allocating 4 KiB on a 64bit system.
 #define MMDB_POOL_INIT_SIZE 64
 
+#define LOOKUP_CONTEXT_NATIVE_LIMIT (UINT64_C(64) << 20)
+#define LOOKUP_CONTEXT_RADIX_BITS 16
+#define LOOKUP_CONTEXT_RADIX_ENTRIES (UINT32_C(1) << LOOKUP_CONTEXT_RADIX_BITS)
+#define LOOKUP_CONTEXT_ENTRY_ERROR (UINT64_C(1) << 63)
+#define LOOKUP_CONTEXT_OWNED_READER (UINT32_C(1) << 31)
+
+static void prepare_reader_state(MMDB_s *mmdb);
+static const reader_state_s *reader_state_for(const MMDB_s *mmdb);
 static int map_file(MMDB_s *const mmdb);
 static const uint8_t *find_metadata(const uint8_t *file_content,
                                     ssize_t file_size,
@@ -210,6 +239,11 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        uint8_t const *address,
                                        sa_family_t address_family,
                                        MMDB_lookup_result_s *result);
+static int find_address_with_context(const MMDB_s *mmdb,
+                                     const MMDB_lookup_context_s *context,
+                                     const uint8_t *address,
+                                     sa_family_t address_family,
+                                     MMDB_lookup_result_s *result);
 static record_info_s record_info_for_database(const MMDB_s *const mmdb);
 static int find_ipv4_start_node(MMDB_s *const mmdb);
 static uint8_t record_type(const MMDB_s *const mmdb, uint64_t record);
@@ -253,7 +287,7 @@ static uint32_t get_uint24(const uint8_t *p);
 static uint32_t get_uint16(const uint8_t *p);
 static uint64_t get_uintX(const uint8_t *p, int length);
 static int32_t get_sintX(const uint8_t *p, int length);
-static void free_mmdb_struct(MMDB_s *const mmdb);
+static void free_mmdb_struct(MMDB_s *const mmdb, bool may_own_state);
 static void free_languages_metadata(MMDB_s *mmdb);
 static void free_descriptions_metadata(MMDB_s *mmdb);
 static MMDB_entry_data_list_s *
@@ -297,6 +331,9 @@ static char *bytes_to_hex(uint8_t const *bytes, uint32_t size);
 int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
     int status = MMDB_SUCCESS;
 
+    /* The private ownership marker is never accepted from caller flags. */
+    flags &= ~LOOKUP_CONTEXT_OWNED_READER;
+    mmdb->flags = flags;
     mmdb->file_content = NULL;
     mmdb->data_section = NULL;
     mmdb->metadata.database_type = NULL;
@@ -395,10 +432,16 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
         }
     }
 
+    if (!(flags & MMDB_NO_PREPARE)) {
+        prepare_reader_state(mmdb);
+    }
+
 cleanup:
     if (MMDB_SUCCESS != status) {
         int saved_errno = errno;
-        free_mmdb_struct(mmdb);
+        /* Every error precedes preparation, so the filename is still the plain
+         * copy made above. */
+        free_mmdb_struct(mmdb, false);
         errno = saved_errno;
     }
     return status;
@@ -931,10 +974,12 @@ cleanup:
     return status;
 }
 
-MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
-                                        const char *const ipstr,
-                                        int *const gai_error,
-                                        int *const mmdb_error) {
+static MMDB_lookup_result_s
+lookup_string(const MMDB_s *const mmdb,
+              const MMDB_lookup_context_s *const context,
+              const char *const ipstr,
+              int *const gai_error,
+              int *const mmdb_error) {
     MMDB_lookup_result_s result = {.found_entry = false,
                                    .netmask = 0,
                                    .entry = {.mmdb = mmdb, .offset = 0}};
@@ -943,7 +988,12 @@ MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
     *gai_error = resolve_any_address(ipstr, &addresses);
 
     if (!*gai_error) {
-        result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
+        if (context) {
+            result = MMDB_lookup_sockaddr_with_context(
+                context, addresses->ai_addr, mmdb_error);
+        } else {
+            result = MMDB_lookup_sockaddr(mmdb, addresses->ai_addr, mmdb_error);
+        }
     } else {
         /* No MMDB error occurred; the GAI failure is reported via
          * *gai_error. Set *mmdb_error to a defined value so callers
@@ -956,6 +1006,26 @@ MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
     }
 
     return result;
+}
+
+MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
+                                        const char *const ipstr,
+                                        int *const gai_error,
+                                        int *const mmdb_error) {
+    return lookup_string(mmdb, NULL, ipstr, gai_error, mmdb_error);
+}
+
+MMDB_lookup_result_s
+MMDB_lookup_string_with_context(const MMDB_lookup_context_s *const context,
+                                const char *const ipstr,
+                                int *const gai_error,
+                                int *const mmdb_error) {
+    if (NULL == context) {
+        *gai_error = 0;
+        *mmdb_error = MMDB_INVALID_METADATA_ERROR;
+        return (MMDB_lookup_result_s){0};
+    }
+    return lookup_string(context->mmdb, context, ipstr, gai_error, mmdb_error);
 }
 
 static int resolve_any_address(const char *ipstr, struct addrinfo **addresses) {
@@ -973,9 +1043,11 @@ static int resolve_any_address(const char *ipstr, struct addrinfo **addresses) {
     return 0;
 }
 
-MMDB_lookup_result_s MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
-                                          const struct sockaddr *const sockaddr,
-                                          int *const mmdb_error) {
+static MMDB_lookup_result_s
+lookup_sockaddr(const MMDB_s *const mmdb,
+                const MMDB_lookup_context_s *const context,
+                const struct sockaddr *const sockaddr,
+                int *const mmdb_error) {
     MMDB_lookup_result_s result = {.found_entry = false,
                                    .netmask = 0,
                                    .entry = {.mmdb = mmdb, .offset = 0}};
@@ -1012,18 +1084,49 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
         }
     }
 
-    *mmdb_error = find_address_in_search_tree(
-        mmdb, address, sockaddr->sa_family, &result);
+    if (context) {
+        *mmdb_error = find_address_with_context(
+            mmdb, context, address, sockaddr->sa_family, &result);
+    } else {
+        *mmdb_error = find_address_in_search_tree(
+            mmdb, address, sockaddr->sa_family, &result);
+    }
 
     return result;
+}
+
+MMDB_lookup_result_s MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
+                                          const struct sockaddr *const sockaddr,
+                                          int *const mmdb_error) {
+    const reader_state_s *state =
+        mmdb->flags & MMDB_NO_PREPARE ? NULL : reader_state_for(mmdb);
+    return lookup_sockaddr(
+        mmdb, state ? state->lookup_context : NULL, sockaddr, mmdb_error);
+}
+
+MMDB_lookup_result_s
+MMDB_lookup_sockaddr_with_context(const MMDB_lookup_context_s *const context,
+                                  const struct sockaddr *const sockaddr,
+                                  int *const mmdb_error) {
+    if (NULL == context) {
+        *mmdb_error = MMDB_INVALID_METADATA_ERROR;
+        return (MMDB_lookup_result_s){0};
+    }
+    if (NULL == sockaddr) {
+        *mmdb_error = MMDB_INVALID_NETWORK_ADDRESS_ERROR;
+        return (MMDB_lookup_result_s){.entry = {.mmdb = context->mmdb}};
+    }
+    return lookup_sockaddr(context->mmdb, context, sockaddr, mmdb_error);
 }
 
 static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        uint8_t const *address,
                                        sa_family_t address_family,
                                        MMDB_lookup_result_s *result) {
-    record_info_s record_info = record_info_for_database(mmdb);
-    if (record_info.right_record_offset == 0) {
+    /* Each node contains two 24-, 28-, or 32-bit records, occupying 6, 7, or
+     * 8 bytes in total. Reject unsupported sizes before traversing the tree. */
+    uint16_t record_length = mmdb->full_record_byte_size;
+    if (record_length < 6 || record_length > 8) {
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
@@ -1036,23 +1139,45 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
 
     uint32_t node_count = mmdb->metadata.node_count;
     const uint8_t *search_tree = mmdb->file_content;
-    const uint8_t *record_pointer;
-    for (; current_bit < mmdb->depth && value < node_count; current_bit++) {
-        uint8_t bit =
-            1U & (address[current_bit >> 3] >> (7 - (current_bit % 8)));
+    uint64_t tree_size = (uint64_t)(mmdb->data_section - search_tree);
 
-        // Note that value*record_info.record_length can be larger than 2**32
-        record_pointer = &search_tree[value * record_info.record_length];
-        if (record_pointer + record_info.record_length > mmdb->data_section) {
-            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
-        }
-        if (bit) {
-            record_pointer += record_info.right_record_offset;
-            value = record_info.right_record_getter(record_pointer);
-        } else {
-            value = record_info.left_record_getter(record_pointer);
-        }
+    /* Specialize the loop so that record decoding can be inlined and selecting
+     * a child does not require a branch or an indirect call for every bit.
+     * Check byte offsets before forming pointers, including on 32-bit systems.
+     * Keep the loop shared so each record format has the same bounds checks. */
+#define WALK_SEARCH_TREE(record_length, record_value)                          \
+    do {                                                                       \
+        for (; current_bit < mmdb->depth && value < node_count;                \
+             current_bit++) {                                                  \
+            uint8_t bit =                                                      \
+                1U & (address[current_bit >> 3] >> (7 - (current_bit % 8)));   \
+            uint64_t offset = value * (record_length);                         \
+            if (offset + (record_length) > tree_size) {                        \
+                return MMDB_CORRUPT_SEARCH_TREE_ERROR;                         \
+            }                                                                  \
+            const uint8_t *record_pointer = &search_tree[offset];              \
+            value = (record_value);                                            \
+        }                                                                      \
+    } while (0)
+
+    /* Dispatch once per lookup so each loop uses a constant node size and the
+     * compiler can inline the matching decoder without per-bit dispatch. */
+    switch (record_length) {
+        case 6:
+            WALK_SEARCH_TREE(6, get_uint24(record_pointer + 3 * bit));
+            break;
+        case 7:
+            WALK_SEARCH_TREE(
+                7,
+                get_uint24(record_pointer + 4 * bit) |
+                    (((uint32_t)record_pointer[3] >> (4 * (1 - bit))) & 15)
+                        << 24);
+            break;
+        case 8:
+            WALK_SEARCH_TREE(8, get_uint32(record_pointer + 4 * bit));
+            break;
     }
+#undef WALK_SEARCH_TREE
 
     result->netmask = current_bit;
 
@@ -1069,6 +1194,234 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
     result->found_entry = true;
     result->entry.offset = data_section_offset_for_record(mmdb, value);
 
+    return MMDB_SUCCESS;
+}
+
+/* Portable aligned storage, retaining the malloc pointer for deallocation.
+ * Compute a displacement instead of rounding an integer pointer upward. */
+static void *allocate_lookup_context_array(size_t size, void **allocation) {
+    if (size > SIZE_MAX - 63) {
+        return NULL;
+    }
+    *allocation = malloc(size + 63);
+    if (NULL == *allocation) {
+        return NULL;
+    }
+    size_t displacement = (64 - ((uintptr_t)*allocation & 63)) & 63;
+    return (uint8_t *)*allocation + displacement;
+}
+
+static const reader_state_s *reader_state_for(const MMDB_s *mmdb) {
+    if (!(mmdb->flags & LOOKUP_CONTEXT_OWNED_READER) ||
+        mmdb->filename == NULL) {
+        return NULL;
+    }
+    /* Only filenames allocated by prepare_reader_state carry this marker.
+     * Never probe before an ordinary or caller-provided filename. */
+    return (const reader_state_s *)(mmdb->filename -
+                                    offsetof(reader_state_s, filename));
+}
+
+static void prepare_reader_state(MMDB_s *mmdb) {
+    MMDB_lookup_context_s *context = NULL;
+    if (MMDB_create_lookup_context(mmdb, &context) != MMDB_SUCCESS) {
+        return;
+    }
+    size_t length = strlen(mmdb->filename);
+    reader_state_s *state = NULL;
+    if (length <= SIZE_MAX - sizeof(*state) - 1) {
+        state = malloc(sizeof(*state) + length + 1);
+    }
+    if (state == NULL) {
+        MMDB_free_lookup_context(context);
+        return;
+    }
+    state->lookup_context = context;
+    memcpy(state->filename, mmdb->filename, length + 1);
+    /* Lookups pass the current reader, which may have been returned by value.
+     */
+    context->mmdb = NULL;
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-qual"
+#endif
+    free((void *)mmdb->filename);
+#if defined(__clang__)
+    #pragma clang diagnostic pop
+#endif
+    mmdb->filename = state->filename;
+    mmdb->flags |= LOOKUP_CONTEXT_OWNED_READER;
+}
+
+static void fill_lookup_context_root(const MMDB_lookup_context_s *context,
+                                     uint64_t *table,
+                                     uint32_t node,
+                                     unsigned int depth,
+                                     uint32_t key) {
+    bool terminal = node >= context->mmdb->metadata.node_count ||
+                    depth == LOOKUP_CONTEXT_RADIX_BITS;
+    bool unreadable =
+        !terminal && (NULL == context->nodes || node >= context->indexed_nodes);
+    if (terminal || unreadable) {
+        /* Store the destination and exact depth, including early matches.
+         * Defer unreadable-branch errors until that table entry is selected. */
+        uint64_t entry = node | (uint64_t)depth << 32;
+        if (unreadable) {
+            entry |= LOOKUP_CONTEXT_ENTRY_ERROR;
+        }
+        uint32_t span = UINT32_C(1) << (LOOKUP_CONTEXT_RADIX_BITS - depth);
+        uint32_t first = key << (LOOKUP_CONTEXT_RADIX_BITS - depth);
+        for (uint32_t i = 0; i < span; i++) {
+            table[first + i] = entry;
+        }
+        return;
+    }
+    /* Do not validate unvisited children while preparing the index. Corruption
+     * must be reported only when a lookup follows the corresponding branch. */
+    fill_lookup_context_root(
+        context, table, context->nodes[node][0], depth + 1, key * 2);
+    fill_lookup_context_root(
+        context, table, context->nodes[node][1], depth + 1, key * 2 + 1);
+}
+
+int MMDB_create_lookup_context(const MMDB_s *const mmdb,
+                               MMDB_lookup_context_s **const context) {
+    if (NULL == context) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
+    *context = NULL;
+    if (NULL == mmdb || NULL == mmdb->file_content ||
+        NULL == mmdb->data_section ||
+        (uintptr_t)mmdb->data_section < (uintptr_t)mmdb->file_content ||
+        (mmdb->metadata.ip_version != 4 && mmdb->metadata.ip_version != 6) ||
+        mmdb->depth > (mmdb->metadata.ip_version == 4 ? 32 : 128)) {
+        return MMDB_INVALID_METADATA_ERROR;
+    }
+    record_info_s record_info = record_info_for_database(mmdb);
+    if (record_info.right_record_offset == 0) {
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
+    }
+    uint16_t width = record_info.record_length;
+    uint64_t tree_size =
+        (uintptr_t)mmdb->data_section - (uintptr_t)mmdb->file_content;
+    uint64_t available = tree_size / width;
+    if (available > mmdb->metadata.node_count) {
+        available = mmdb->metadata.node_count;
+    }
+    uint64_t native_bytes = available * 2 * sizeof(uint32_t);
+    if (native_bytes > LOOKUP_CONTEXT_NATIVE_LIMIT ||
+        native_bytes > SIZE_MAX - 63) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
+    MMDB_lookup_context_s *prepared = calloc(1, sizeof(*prepared));
+    if (NULL == prepared) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
+    prepared->mmdb = mmdb;
+    prepared->indexed_nodes = (uint32_t)available;
+    /* Without indexed nodes nodes stays NULL: every step past the root tables
+     * is then reported as a corrupt search tree before it is read. */
+    if (available != 0) {
+        prepared->nodes = allocate_lookup_context_array(
+            (size_t)native_bytes, &prepared->nodes_allocation);
+        if (NULL == prepared->nodes) {
+            goto out_of_memory;
+        }
+        for (uint32_t i = 0; i < prepared->indexed_nodes; i++) {
+            const uint8_t *record = mmdb->file_content + (size_t)i * width;
+            /* Direct calls let the compiler specialize this sequential copy. */
+            if (width == 6) {
+                prepared->nodes[i][0] = get_uint24(record);
+                prepared->nodes[i][1] = get_uint24(record + 3);
+            } else if (width == 7) {
+                prepared->nodes[i][0] = get_left_28_bit_record(record);
+                prepared->nodes[i][1] = get_right_28_bit_record(record + 3);
+            } else {
+                prepared->nodes[i][0] = get_uint32(record);
+                prepared->nodes[i][1] = get_uint32(record + 4);
+            }
+        }
+    }
+    size_t root_bytes = (size_t)LOOKUP_CONTEXT_RADIX_ENTRIES * sizeof(uint64_t);
+    prepared->root =
+        allocate_lookup_context_array(root_bytes, &prepared->root_allocation);
+    if (NULL == prepared->root) {
+        goto out_of_memory;
+    }
+    fill_lookup_context_root(prepared, prepared->root, 0, 0, 0);
+    uint32_t ipv4_start = mmdb->ipv4_start_node.node_value;
+    if (mmdb->metadata.ip_version == 6 && ipv4_start != 0 &&
+        ipv4_start < mmdb->metadata.node_count) {
+        prepared->ipv4_root = allocate_lookup_context_array(
+            root_bytes, &prepared->ipv4_root_allocation);
+        if (NULL == prepared->ipv4_root) {
+            goto out_of_memory;
+        }
+        fill_lookup_context_root(
+            prepared, prepared->ipv4_root, ipv4_start, 0, 0);
+    }
+    *context = prepared;
+    return MMDB_SUCCESS;
+
+out_of_memory:
+    MMDB_free_lookup_context(prepared);
+    return MMDB_OUT_OF_MEMORY_ERROR;
+}
+
+void MMDB_free_lookup_context(MMDB_lookup_context_s *const context) {
+    if (NULL == context) {
+        return;
+    }
+    free(context->nodes_allocation);
+    free(context->root_allocation);
+    free(context->ipv4_root_allocation);
+    free(context);
+}
+
+static int find_address_with_context(const MMDB_s *mmdb,
+                                     const MMDB_lookup_context_s *context,
+                                     const uint8_t *address,
+                                     sa_family_t address_family,
+                                     MMDB_lookup_result_s *result) {
+    uint32_t value = 0;
+    uint16_t bit = 0;
+    if (mmdb->metadata.ip_version == 6 && address_family == AF_INET) {
+        value = mmdb->ipv4_start_node.node_value;
+        bit = mmdb->ipv4_start_node.netmask;
+    }
+    uint32_t count = mmdb->metadata.node_count;
+    const uint64_t *root = value == 0 ? context->root : context->ipv4_root;
+    if (value < count && bit + LOOKUP_CONTEXT_RADIX_BITS <= mmdb->depth &&
+        root != NULL) {
+        unsigned int byte = bit / 8;
+        unsigned int shift = bit % 8;
+        uint32_t key = (uint32_t)address[byte] << 8 | address[byte + 1];
+        if (shift) {
+            key = (key << shift) | (address[byte + 2] >> (8 - shift));
+        }
+        uint64_t entry = root[key & UINT32_C(0xffff)];
+        if (entry & LOOKUP_CONTEXT_ENTRY_ERROR) {
+            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+        }
+        value = (uint32_t)entry;
+        bit += (uint16_t)((entry >> 32) & 255);
+    }
+    for (; bit < mmdb->depth && value < count; bit++) {
+        if (value >= context->indexed_nodes) {
+            return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+        }
+        uint8_t side = (address[bit / 8] >> (7 - bit % 8)) & 1;
+        value = context->nodes[value][side];
+    }
+    result->netmask = bit;
+    uint8_t type = record_type(mmdb, value);
+    if (type == MMDB_RECORD_TYPE_INVALID) {
+        return MMDB_CORRUPT_SEARCH_TREE_ERROR;
+    }
+    if (type != MMDB_RECORD_TYPE_EMPTY) {
+        result->found_entry = true;
+        result->entry.offset = data_section_offset_for_record(mmdb, value);
+    }
     return MMDB_SUCCESS;
 }
 
@@ -1246,7 +1599,9 @@ int MMDB_vget_value(MMDB_entry_s *const start,
         return MMDB_INVALID_METADATA_ERROR;
     }
 
-    const char **path = calloc(length + 1, sizeof(const char *));
+    const char *stack_path[8];
+    const char **path =
+        length < 8 ? stack_path : calloc(length + 1, sizeof(const char *));
     if (NULL == path) {
         return MMDB_OUT_OF_MEMORY_ERROR;
     }
@@ -1259,7 +1614,9 @@ int MMDB_vget_value(MMDB_entry_s *const start,
 
     int status = MMDB_aget_value(start, entry_data, path);
 
-    free(path);
+    if (path != stack_path) {
+        free(path);
+    }
 
     return status;
 }
@@ -2030,9 +2387,10 @@ void MMDB_free_entry_data_list(MMDB_entry_data_list_s *const entry_data_list) {
     data_pool_destroy(entry_data_list->pool);
 }
 
-void MMDB_close(MMDB_s *const mmdb) { free_mmdb_struct(mmdb); }
+void MMDB_close(MMDB_s *const mmdb) { free_mmdb_struct(mmdb, true); }
 
-static void free_mmdb_struct(MMDB_s *const mmdb) {
+/* may_own_state is false when the reader cannot have prepared state yet. */
+static void free_mmdb_struct(MMDB_s *const mmdb, bool may_own_state) {
     if (!mmdb) {
         return;
     }
@@ -2044,11 +2402,20 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wcast-qual"
 #endif
-        FREE_AND_SET_NULL(mmdb->filename);
+        const reader_state_s *state =
+            may_own_state ? reader_state_for(mmdb) : NULL;
+        if (state != NULL) {
+            MMDB_free_lookup_context(state->lookup_context);
+            free((void *)state);
+            mmdb->filename = NULL;
+        } else {
+            FREE_AND_SET_NULL(mmdb->filename);
+        }
 #if defined(__clang__)
     #pragma clang diagnostic pop
 #endif
     }
+    mmdb->flags &= ~LOOKUP_CONTEXT_OWNED_READER;
     if (NULL != mmdb->file_content) {
 #ifdef _WIN32
         UnmapViewOfFile(mmdb->file_content);

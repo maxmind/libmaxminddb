@@ -13,6 +13,13 @@ int MMDB_open(
     MMDB_s *const mmdb);
 void MMDB_close(MMDB_s *const mmdb);
 
+typedef struct MMDB_lookup_context_s MMDB_lookup_context_s;
+
+int MMDB_create_lookup_context(
+    const MMDB_s *const mmdb,
+    MMDB_lookup_context_s **const context);
+void MMDB_free_lookup_context(MMDB_lookup_context_s *const context);
+
 MMDB_lookup_result_s MMDB_lookup_string(
     const MMDB_s *const mmdb,
     const char *const ipstr,
@@ -22,6 +29,15 @@ MMDB_lookup_result_s MMDB_lookup_sockaddr(
     const MMDB_s *const mmdb,
     const struct sockaddr *const
     sockaddr,
+    int *const mmdb_error);
+MMDB_lookup_result_s MMDB_lookup_string_with_context(
+    const MMDB_lookup_context_s *const context,
+    const char *const ipstr,
+    int *const gai_error,
+    int *const mmdb_error);
+MMDB_lookup_result_s MMDB_lookup_sockaddr_with_context(
+    const MMDB_lookup_context_s *const context,
+    const struct sockaddr *const sockaddr,
     int *const mmdb_error);
 
 int MMDB_get_value(
@@ -107,6 +123,12 @@ See the function documentation below for more details.
 
 When you are done with the database handle you should call `MMDB_close()`.
 
+`MMDB_open()` prepares 16-bit prefix tables and native child records for the
+ordinary lookup functions. Preparation takes extra time and memory. Pass
+`MMDB_NO_PREPARE` to skip it; if preparation exceeds its memory budget or an
+allocation fails, lookups use the compact mapped tree. The explicit context API
+also allows preparation after opening a reader.
+
 All publicly visible functions, structures, and macros begin with "MMDB\_".
 
 # DATA STRUCTURES
@@ -132,11 +154,30 @@ typedef struct MMDB_s {
 } MMDB_s;
 ```
 
-- `uint32_t flags` - the flags this database was opened with. See the
-  `MMDB_open()` documentation for more details.
+- `uint32_t flags` - the open flags, which may also include private state bits.
+  Inspect the mode with `MMDB_MODE_MASK` and individual documented options with
+  bitwise tests. Do not compare the entire value to a single flag or overwrite
+  this field. See the `MMDB_open()` documentation for more details.
 - `const char *filename` - the name of the file which was opened, as passed to
   `MMDB_open()`.
 - `MMDB_metadata_s metadata` - the metadata for the database.
+
+Automatic preparation preserves the original size and field layout of `MMDB_s`
+and shared-library SONAME 0. Existing applications and bindings built for SONAME
+0 do not need recompilation.
+
+## `MMDB_lookup_context_s`
+
+This opaque lookup accelerator can be allocated explicitly by
+`MMDB_create_lookup_context()` and released by `MMDB_free_lookup_context()`.
+`MMDB_open()` also owns an internal accelerator, which is released automatically
+by `MMDB_close()`.
+
+An explicitly created context borrows its original reader and mapping. Keep the
+reader open and unmodified, and wait for all lookup threads before freeing the
+context. Free it before closing the reader. Returned entries refer to the
+original reader and remain valid after the context is freed, while the reader
+remains open.
 
 ## `MMDB_metadata_s` and `MMDB_description_s`
 
@@ -446,14 +487,27 @@ before returning.
 The flags currently provided are:
 
 - `MMDB_MODE_MMAP` - open the database with `mmap()`.
+- `MMDB_NO_PREPARE` - skip automatic lookup preparation. Combine this with the
+  mode using bitwise OR, for example `MMDB_MODE_MMAP | MMDB_NO_PREPARE`.
 
 Passing in other values for `flags` may yield unpredictable results. In the
 future we may add additional flags that you can bitwise-or together with the
 mode, as well as additional modes.
 
+The returned reader's `flags` field may include private bits. Inspect only
+documented flags using masks, and leave the open reader's fields unmodified.
+
 You can also pass `0` as the `flags` value in which case the database will be
 opened with the default flags. However, these defaults may change in future
 releases. The current default is `MMDB_MODE_MMAP`.
+
+Unless `MMDB_NO_PREPARE` is set, the function prepares native child records and
+16-bit prefix tables before returning. `MMDB_lookup_string()` and
+`MMDB_lookup_sockaddr()` use this state automatically. Preparation adds the time
+and memory costs described under `MMDB_create_lookup_context()`. If an
+allocation fails or the native-node budget would be exceeded, opening still
+succeeds and lookups use the compact mapped tree. No preparation is deferred
+until the first lookup.
 
 If metadata processing exceeds one of the decoder resource limits described
 under `MMDB_get_entry_data_list()`, this function returns
@@ -469,6 +523,75 @@ This frees any allocated or mmap'd memory that is held from the `MMDB_s`
 structure. _It does not free the memory allocated for the structure itself!_ If
 you allocated the structure from the heap then you are responsible for freeing
 it.
+
+This also releases the automatically prepared lookup state. Free every
+explicitly created lookup context borrowing this reader before calling
+`MMDB_close()`.
+
+## `MMDB_create_lookup_context()`
+
+```c
+int MMDB_create_lookup_context(
+    const MMDB_s *const mmdb,
+    MMDB_lookup_context_s **const context);
+```
+
+This prepares a context for an already-open reader. It returns `MMDB_SUCCESS`
+and stores the allocated context in `*context`, or sets `*context` to `NULL` on
+failure. A preparation failure leaves the original reader usable.
+
+Ordinary lookups already use automatically prepared state after a default
+`MMDB_open()`. Explicit contexts are useful after opening with
+`MMDB_NO_PREPARE`. Creating an explicit context for a reader that has already
+prepared state allocates a second independent accelerator.
+
+Packed 24-, 28-, or 32-bit child records are decoded into native 32-bit pairs,
+eight bytes per indexed node, with a maximum native-node allocation of 64 MiB.
+Each 16-bit prefix table uses 512 KiB. An IPv6 reader with a distinct live IPv4
+subtree has a second table, so root tables use at most 1 MiB. This memory is in
+addition to the database mapping and metadata.
+
+`MMDB_OUT_OF_MEMORY_ERROR` indicates an allocation failure or exceeding the
+native-node budget. Unsupported record widths return
+`MMDB_UNKNOWN_DATABASE_FORMAT_ERROR`. Errors in corrupt branches remain deferred
+until a lookup visits them.
+
+Preparation completes before returning and uses portable scalar code. No index
+is allocated during lookups. Its cost may outweigh lookup savings for readers
+used only briefly.
+
+For example, after opening `mmdb` with `MMDB_NO_PREPARE`:
+
+```c
+MMDB_lookup_context_s *context = NULL;
+int status = MMDB_create_lookup_context(&mmdb, &context);
+if (status == MMDB_SUCCESS) {
+    int gai_error, mmdb_error;
+    MMDB_lookup_result_s result = MMDB_lookup_string_with_context(
+        context, "1.2.3.4", &gai_error, &mmdb_error);
+    status = gai_error ? MMDB_INVALID_NETWORK_ADDRESS_ERROR : mmdb_error;
+    if (status == MMDB_SUCCESS && result.found_entry) {
+        MMDB_entry_data_s data;
+        status = MMDB_get_value(&result.entry, &data,
+                                "country", "iso_code", NULL);
+        if (status == MMDB_SUCCESS && data.has_data) {
+            /* Use data here, while mmdb remains open. */
+        }
+    }
+}
+MMDB_free_lookup_context(context);
+MMDB_close(&mmdb);
+```
+
+## `MMDB_free_lookup_context()`
+
+```c
+void MMDB_free_lookup_context(MMDB_lookup_context_s *const context);
+```
+
+This releases an explicitly created context and its tables without closing the
+original reader. Passing `NULL` is allowed. All lookups using the context must
+have finished.
 
 ## `MMDB_lookup_string()`
 
@@ -541,6 +664,34 @@ if (MMDB_SUCCESS != mmdb_error) { ... }
 
 if (result.found_entry) { ... }
 ```
+
+## `MMDB_lookup_string_with_context()`
+
+```c
+MMDB_lookup_result_s MMDB_lookup_string_with_context(
+    const MMDB_lookup_context_s *const context,
+    const char *const ipstr,
+    int *const gai_error,
+    int *const mmdb_error);
+```
+
+This uses the prepared context with the same parsing, error and result semantics
+as `MMDB_lookup_string()`. Check `*gai_error`, then `*mmdb_error`, then
+`result.found_entry`. Returned entries work with the usual data lookup
+functions.
+
+## `MMDB_lookup_sockaddr_with_context()`
+
+```c
+MMDB_lookup_result_s MMDB_lookup_sockaddr_with_context(
+    const MMDB_lookup_context_s *const context,
+    const struct sockaddr *const sockaddr,
+    int *const mmdb_error);
+```
+
+This uses the prepared context for an `AF_INET` or `AF_INET6` address, with the
+same errors and results as `MMDB_lookup_sockaddr()`, including exact prefix
+lengths. Both `_with_context()` functions support concurrent lookups.
 
 ## Data Lookup Functions
 
@@ -914,6 +1065,9 @@ compilation time, it defaults to requesting POSIX.1-2008 support.
 
 This library is thread safe when compiled and linked with a thread-safe `malloc`
 and `free` implementation.
+
+A prepared lookup context may be shared by threads. Its lifetime requirements
+are described under `MMDB_lookup_context_s`.
 
 # INSTALLATION AND SOURCE
 

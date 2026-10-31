@@ -24,15 +24,31 @@ my $test_db = "$Bin/maxmind-db/test-data/GeoIP2-City-Test.mmdb";
 my $cpp_code = <<"EOF";
 #include <maxminddb.h>
 
-int main(int argc, char *argv[])
+int main()
 {
     const char *fname = "$test_db";
     MMDB_s mmdb;
     if (MMDB_open(fname, MMDB_MODE_MMAP, &mmdb) != MMDB_SUCCESS) {
         return 1;
     }
+
+    MMDB_lookup_context_s *context = NULL;
+    int status = MMDB_create_lookup_context(&mmdb, &context);
+    if (status == MMDB_SUCCESS) {
+        struct sockaddr_in address = {};
+        address.sin_family = AF_INET;
+        int gai_error, socket_error;
+        MMDB_lookup_sockaddr_with_context(
+            context, reinterpret_cast<const struct sockaddr *>(&address),
+            &socket_error);
+        MMDB_lookup_string_with_context(
+            context, "81.2.69.160", &gai_error, &status);
+        status = status || gai_error || socket_error;
+    }
+
+    MMDB_free_lookup_context(context);
     MMDB_close(&mmdb);
-    return 0;
+    return status;
 }
 EOF
 
