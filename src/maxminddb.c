@@ -287,7 +287,7 @@ static uint32_t get_uint24(const uint8_t *p);
 static uint32_t get_uint16(const uint8_t *p);
 static uint64_t get_uintX(const uint8_t *p, int length);
 static int32_t get_sintX(const uint8_t *p, int length);
-static void free_mmdb_struct(MMDB_s *const mmdb);
+static void free_mmdb_struct(MMDB_s *const mmdb, bool may_own_state);
 static void free_languages_metadata(MMDB_s *mmdb);
 static void free_descriptions_metadata(MMDB_s *mmdb);
 static MMDB_entry_data_list_s *
@@ -439,7 +439,9 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
 cleanup:
     if (MMDB_SUCCESS != status) {
         int saved_errno = errno;
-        free_mmdb_struct(mmdb);
+        /* Every error precedes preparation, so the filename is still the plain
+         * copy made above. */
+        free_mmdb_struct(mmdb, false);
         errno = saved_errno;
     }
     return status;
@@ -1316,7 +1318,9 @@ int MMDB_create_lookup_context(const MMDB_s *const mmdb,
     }
     prepared->mmdb = mmdb;
     prepared->indexed_nodes = (uint32_t)available;
-    if (native_bytes) {
+    /* Without indexed nodes nodes stays NULL: every step past the root tables
+     * is then reported as a corrupt search tree before it is read. */
+    if (available != 0) {
         prepared->nodes = allocate_lookup_context_array(
             (size_t)native_bytes, &prepared->nodes_allocation);
         if (NULL == prepared->nodes) {
@@ -2382,9 +2386,10 @@ void MMDB_free_entry_data_list(MMDB_entry_data_list_s *const entry_data_list) {
     data_pool_destroy(entry_data_list->pool);
 }
 
-void MMDB_close(MMDB_s *const mmdb) { free_mmdb_struct(mmdb); }
+void MMDB_close(MMDB_s *const mmdb) { free_mmdb_struct(mmdb, true); }
 
-static void free_mmdb_struct(MMDB_s *const mmdb) {
+/* may_own_state is false when the reader cannot have prepared state yet. */
+static void free_mmdb_struct(MMDB_s *const mmdb, bool may_own_state) {
     if (!mmdb) {
         return;
     }
@@ -2396,7 +2401,8 @@ static void free_mmdb_struct(MMDB_s *const mmdb) {
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wcast-qual"
 #endif
-        const reader_state_s *state = reader_state_for(mmdb);
+        const reader_state_s *state =
+            may_own_state ? reader_state_for(mmdb) : NULL;
         if (state != NULL) {
             MMDB_free_lookup_context(state->lookup_context);
             free((void *)state);

@@ -163,8 +163,8 @@ typedef struct MMDB_s {
 - `MMDB_metadata_s metadata` - the metadata for the database.
 
 Automatic preparation preserves the original size and field layout of `MMDB_s`
-and shared-library SONAME 0. Existing applications and bindings built for
-SONAME 0 do not need recompilation.
+and shared-library SONAME 0. Existing applications and bindings built for SONAME
+0 do not need recompilation.
 
 ## `MMDB_lookup_context_s`
 
@@ -503,8 +503,8 @@ releases. The current default is `MMDB_MODE_MMAP`.
 
 Unless `MMDB_NO_PREPARE` is set, the function prepares native child records and
 16-bit prefix tables before returning. `MMDB_lookup_string()` and
-`MMDB_lookup_sockaddr()` use this state automatically. Preparation adds the
-time and memory costs described under `MMDB_create_lookup_context()`. If an
+`MMDB_lookup_sockaddr()` use this state automatically. Preparation adds the time
+and memory costs described under `MMDB_create_lookup_context()`. If an
 allocation fails or the native-node budget would be exceeded, opening still
 succeeds and lookups use the compact mapped tree. No preparation is deferred
 until the first lookup.
@@ -541,9 +541,9 @@ and stores the allocated context in `*context`, or sets `*context` to `NULL` on
 failure. A preparation failure leaves the original reader usable.
 
 Ordinary lookups already use automatically prepared state after a default
-`MMDB_open()`. Explicit contexts are useful after opening with `MMDB_NO_PREPARE`.
-Creating an explicit context for a reader that already has prepared state
-allocates a second independent accelerator.
+`MMDB_open()`. Explicit contexts are useful after opening with
+`MMDB_NO_PREPARE`. Creating an explicit context for a reader that already has
+prepared state allocates a second independent accelerator.
 
 Packed 24-, 28-, or 32-bit child records are decoded into native 32-bit pairs,
 eight bytes per indexed node, with a maximum native-node allocation of 64 MiB.
@@ -675,9 +675,10 @@ MMDB_lookup_result_s MMDB_lookup_string_with_context(
     int *const mmdb_error);
 ```
 
-This uses the prepared context with the same parsing, error and result
-semantics as `MMDB_lookup_string()`. Check `*gai_error`, then `*mmdb_error`, then
-`result.found_entry`. Returned entries work with the usual data lookup functions.
+This uses the prepared context with the same parsing, error and result semantics
+as `MMDB_lookup_string()`. Check `*gai_error`, then `*mmdb_error`, then
+`result.found_entry`. Returned entries work with the usual data lookup
+functions.
 
 ## `MMDB_lookup_sockaddr_with_context()`
 
