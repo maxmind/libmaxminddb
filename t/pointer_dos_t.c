@@ -227,8 +227,8 @@ int main(void) {
 
     test_record_allowed("GeoIP2-City-Test.mmdb",
                         "81.2.69.142",
-                        120,
-                        679,
+                        130,
+                        727,
                         "normal production-style record");
     test_per_call_state();
     test_targeted_lookup_bypasses_full_decode_limit();

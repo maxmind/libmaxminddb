@@ -179,7 +179,7 @@ void all_record_sizes(int mode, const char *description) {
 }
 
 static void test_big_lookup(void) {
-    const char *const db_filename = "GeoIP2-Precision-Enterprise-Test.mmdb";
+    const char *const db_filename = "GeoIP2-Enterprise-Test.mmdb";
     char *db_path = test_database_path(db_filename);
     ok(db_path != NULL, "got database path");
 
