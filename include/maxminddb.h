@@ -72,6 +72,7 @@ extern "C" {
     /* flags for open */
     #define MMDB_MODE_MMAP (1)
     #define MMDB_MODE_MASK (7)
+    #define MMDB_NO_PREPARE (1U << 3)
 
     /* error codes */
     #define MMDB_SUCCESS (0)
@@ -209,6 +210,9 @@ typedef struct MMDB_s {
     /* See above warning before adding fields */
 } MMDB_s;
 
+/* Optional prepared search state. This borrows an open, immutable MMDB_s. */
+typedef struct MMDB_lookup_context_s MMDB_lookup_context_s;
+
 typedef struct MMDB_search_node_s {
     uint64_t left_record;
     uint64_t right_record;
@@ -228,6 +232,18 @@ extern MMDB_lookup_result_s
 MMDB_lookup_sockaddr(const MMDB_s *const mmdb,
                      const struct sockaddr *const sockaddr,
                      int *const mmdb_error);
+extern int MMDB_create_lookup_context(const MMDB_s *const mmdb,
+                                      MMDB_lookup_context_s **const context);
+extern void MMDB_free_lookup_context(MMDB_lookup_context_s *const context);
+extern MMDB_lookup_result_s
+MMDB_lookup_string_with_context(const MMDB_lookup_context_s *const context,
+                                const char *const ipstr,
+                                int *const gai_error,
+                                int *const mmdb_error);
+extern MMDB_lookup_result_s
+MMDB_lookup_sockaddr_with_context(const MMDB_lookup_context_s *const context,
+                                  const struct sockaddr *const sockaddr,
+                                  int *const mmdb_error);
 extern int MMDB_read_node(const MMDB_s *const mmdb,
                           uint32_t node_number,
                           MMDB_search_node_s *const node);

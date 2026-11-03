@@ -4,7 +4,7 @@ project(maxminddb
   LANGUAGES C
   VERSION 1.14.1
 )
-set(MAXMINDDB_SOVERSION 0.0.7)
+set(MAXMINDDB_SOVERSION 0.1.0)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -49,7 +49,10 @@ add_library(maxminddb
 )
 add_library(maxminddb::maxminddb ALIAS maxminddb)
 
-set_target_properties(maxminddb PROPERTIES VERSION ${MAXMINDDB_SOVERSION})
+set_target_properties(maxminddb PROPERTIES
+  VERSION ${MAXMINDDB_SOVERSION}
+  SOVERSION 0
+)
 
 target_compile_definitions(maxminddb PRIVATE PACKAGE_VERSION="${PROJECT_VERSION}")
 
