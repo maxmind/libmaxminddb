@@ -1537,6 +1537,10 @@ static int decode_one(const MMDB_s *const mmdb,
             return MMDB_INVALID_DATA_ERROR;
         }
         type = get_ext_type(mem[offset++]);
+        if (type < MMDB_DATA_TYPE_INT32 || type > MMDB_DATA_TYPE_FLOAT) {
+            DEBUG_MSGF("Invalid extended type: %i", type);
+            return MMDB_INVALID_DATA_ERROR;
+        }
         DEBUG_MSGF("Extended type: %i (%s)", type, type_num_to_name(type));
     }
 

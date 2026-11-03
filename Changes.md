@@ -1,3 +1,11 @@
+## next release
+
+- The decoder now returns `MMDB_INVALID_DATA_ERROR` for a value whose extended
+  type byte is 0 or greater than 8. Previously, it decoded an extended type byte
+  of 0 as a map, and it decoded a byte greater than 8 as a value whose `type`
+  matches no `MMDB_DATA_TYPE_*` constant. This also applies to the metadata, so
+  `MMDB_open()` can now fail on a database whose metadata contains such a value.
+
 ## 1.14.1 - 2026-09-17
 
 - Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with
