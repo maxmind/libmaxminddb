@@ -18,8 +18,7 @@
 - `MMDB_get_value()` and its variants, and `MMDB_open()`, now return
   `MMDB_INVALID_DATA_ERROR` when they skip a nested map whose key is a map or an
   array. Before, they skipped only the key's header and read the data after it
-  out of step. A lookup could return the wrong value, and a repeated metadata
-  key could go undetected.
+  out of step. A lookup could return the wrong value.
 
 ## 1.14.1 - 2026-09-17
 
