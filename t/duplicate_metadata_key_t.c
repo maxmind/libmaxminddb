@@ -158,6 +158,21 @@ static void test_long_pointer_keys(void) {
     free(db);
 }
 
+static void test_bad_data_file(const char *filename) {
+    char *path = bad_database_path(filename);
+    MMDB_s mmdb;
+    int status = MMDB_open(path, MMDB_MODE_MMAP, &mmdb);
+    cmp_ok(status,
+           "==",
+           MMDB_INVALID_METADATA_ERROR,
+           "MMDB_open rejects %s",
+           filename);
+    if (MMDB_SUCCESS == status) {
+        MMDB_close(&mmdb);
+    }
+    free(path);
+}
+
 int main(void) {
     plan(NO_PLAN);
 
@@ -271,6 +286,9 @@ int main(void) {
 
     test_deep_extra_value();
     test_long_pointer_keys();
+
+    test_bad_data_file("libmaxminddb-repeated-metadata-key.mmdb");
+    test_bad_data_file("libmaxminddb-repeated-description-key.mmdb");
 
     done_testing();
 }
