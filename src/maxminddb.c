@@ -726,7 +726,7 @@ static int check_metadata_keys_unique(const MMDB_s *const metadata_db) {
         DEBUG_MSG("metadata value is not a map");
         return MMDB_INVALID_METADATA_ERROR;
     }
-    if (map.data_size < 2) {
+    if (0 == map.data_size) {
         return MMDB_SUCCESS;
     }
     // Each entry takes at least a key byte and a value byte. Reject a larger
