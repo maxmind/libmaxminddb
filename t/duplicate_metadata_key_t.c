@@ -2,6 +2,7 @@
 
 #include "maxminddb_test_helper.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 // One IPv4 node whose 24-bit records both mark "no data", the data section
@@ -158,6 +159,54 @@ static void test_long_pointer_keys(void) {
     free(db);
 }
 
+// Builds metadata with count distinct keys, either in the top-level map
+// (counting the nine required keys) or in the description map, and checks
+// the MMDB_open status. count must be at least 285.
+static void test_key_count(bool in_description,
+                           size_t count,
+                           int expected,
+                           const char *message) {
+    const char required[] = REQUIRED_METADATA_KEYS;
+    const char before_description[] =
+        REQUIRED_KEYS_BEFORE_DESCRIPTION "\x4B"
+                                         "description";
+    size_t size = sizeof(DB_PREFIX) + sizeof(required) + 3 + count * 8;
+    char *db = malloc(size);
+    if (NULL == db) {
+        BAIL_OUT("could not allocate the key-count test database");
+    }
+    size_t pos = sizeof(DB_PREFIX) - 1;
+    memcpy(db, DB_PREFIX, pos);
+    size_t keys = count;
+    if (in_description) {
+        db[pos++] = '\xE9';
+        memcpy(db + pos, before_description, sizeof(before_description) - 1);
+        pos += sizeof(before_description) - 1;
+    } else {
+        keys = count - 9;
+    }
+    // A map header with the 2-byte size form, for 285 through 65,820.
+    db[pos++] = '\xFE';
+    db[pos++] = (char)((count - 285) >> 8);
+    db[pos++] = (char)((count - 285) & 0xFF);
+    if (!in_description) {
+        memcpy(db + pos, required, sizeof(required) - 1);
+        pos += sizeof(required) - 1;
+    }
+    for (size_t i = 0; i < keys; i++) {
+        char key[24];
+        snprintf(key, sizeof(key), "k%04zu", i);
+        db[pos++] = '\x45';
+        memcpy(db + pos, key, 5);
+        pos += 5;
+        db[pos++] = '\x41';
+        db[pos++] = 'x';
+    }
+
+    test_open(db, pos, expected, message);
+    free(db);
+}
+
 static void test_bad_data_file(const char *filename) {
     char *path = bad_database_path(filename);
     MMDB_s mmdb;
@@ -304,6 +353,22 @@ int main(void) {
 
     test_deep_extra_value();
     test_long_pointer_keys();
+    test_key_count(false,
+                   1024,
+                   MMDB_SUCCESS,
+                   "MMDB_open accepts 1,024 top-level metadata keys");
+    test_key_count(false,
+                   1025,
+                   MMDB_INVALID_METADATA_ERROR,
+                   "MMDB_open rejects 1,025 top-level metadata keys");
+    test_key_count(true,
+                   1024,
+                   MMDB_SUCCESS,
+                   "MMDB_open accepts 1,024 description languages");
+    test_key_count(true,
+                   1025,
+                   MMDB_INVALID_METADATA_ERROR,
+                   "MMDB_open rejects 1,025 description languages");
 
     test_bad_data_file("libmaxminddb-repeated-metadata-key.mmdb");
     test_bad_data_file("libmaxminddb-repeated-description-key.mmdb");

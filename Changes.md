@@ -5,8 +5,9 @@
   metadata lookups used only the first value of a repeated key, and the
   `description` list kept every pair, while other readers may keep the last
   value. Keys are compared up to the first NUL byte, so keys that differ only
-  after a NUL count as repeated. Databases with repeated metadata keys no longer
-  open.
+  after a NUL count as repeated. A top-level metadata map or `description` map
+  with more than 1,024 keys also causes `MMDB_INVALID_METADATA_ERROR`. Databases
+  with repeated metadata keys no longer open.
 - `MMDB_open()` now reads every top-level metadata key, not only the required
   keys, and skips each value without following pointers in it. A malformed key
   or value, or a map that claims more entries than it has, now causes

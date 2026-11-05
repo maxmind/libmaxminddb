@@ -186,6 +186,9 @@ typedef struct metadata_key_s {
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
 #define METADATA_BLOCK_MAX_SIZE 131072
+/* Real metadata has about 10 top-level keys and a few description languages.
+ * The cap bounds the key sort, because C does not bound the cost of qsort. */
+#define METADATA_MAP_MAX_KEYS 1024
 
 // 64 leads us to allocating 4 KiB on a 64bit system.
 #define MMDB_POOL_INIT_SIZE 64
@@ -738,6 +741,10 @@ static int check_metadata_keys_unique(const MMDB_s *const metadata_db) {
         DEBUG_MSG("metadata map size exceeds the metadata section");
         return MMDB_INVALID_DATA_ERROR;
     }
+    if (map.data_size > METADATA_MAP_MAX_KEYS) {
+        DEBUG_MSG("metadata map has too many keys");
+        return MMDB_INVALID_METADATA_ERROR;
+    }
 
     metadata_key_s *keys = calloc(map.data_size, sizeof(metadata_key_s));
     if (NULL == keys) {
@@ -1065,6 +1072,10 @@ static int check_languages_unique(MMDB_description_s **descriptions,
                                   size_t count) {
     if (count < 2) {
         return MMDB_SUCCESS;
+    }
+    if (count > METADATA_MAP_MAX_KEYS) {
+        DEBUG_MSG("description map has too many keys");
+        return MMDB_INVALID_METADATA_ERROR;
     }
     metadata_key_s *keys = calloc(count, sizeof(metadata_key_s));
     if (NULL == keys) {
