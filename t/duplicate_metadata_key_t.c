@@ -284,6 +284,24 @@ int main(void) {
               MMDB_INVALID_DATA_ERROR,
               "MMDB_open rejects a truncated value after the required keys");
 
+    // The extra value is {["x"]: "fake"}. Skipping only the header of the
+    // array key would make the walk read "fake" as a top-level key and miss
+    // the repeated database_type.
+    TEST_OPEN(DB_PREFIX "\xEB" REQUIRED_METADATA_KEYS "\x45"
+                        "extra"
+                        "\xE1"
+                        "\x01\x04"
+                        "\x41"
+                        "x"
+                        "\x44"
+                        "fake"
+                        "\x4D"
+                        "database_type"
+                        "\x44"
+                        "Evil",
+              MMDB_INVALID_DATA_ERROR,
+              "MMDB_open rejects a nested map key that is an array");
+
     test_deep_extra_value();
     test_long_pointer_keys();
 

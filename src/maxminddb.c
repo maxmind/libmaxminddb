@@ -1584,6 +1584,14 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
         while (size-- > 0) {
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // key
+            // Keys must be strings. This loop skips only a key's header, so
+            // the contents of a map or array key would be read as the keys and
+            // values that follow it.
+            if (MMDB_DATA_TYPE_MAP == entry_data->type ||
+                MMDB_DATA_TYPE_ARRAY == entry_data->type) {
+                DEBUG_MSG("map key is a map or an array");
+                return MMDB_INVALID_DATA_ERROR;
+            }
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // value
             int status = skip_map_or_array(mmdb, entry_data, depth + 1);
