@@ -24,6 +24,7 @@ set(TEST_TARGET_NAMES
   overflow_bounds_t
   pointer_dos_t
   read_node_t
+  repeated_metadata_key_t
   version_t
 )
 
