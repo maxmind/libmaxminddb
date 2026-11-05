@@ -52,18 +52,18 @@
 #define TEST_OPEN(db, expected, message)                                       \
     test_open(db, sizeof(db) - 1, expected, message)
 
-static void
-test_open(const char *db, size_t size, int expected, const char *message) {
+// Writes db to a new file in TMPDIR, or /tmp, and puts its path in filename.
+static void write_temp_db(const char *db,
+                          size_t size,
+                          char *filename,
+                          size_t filename_size) {
     const char *tmpdir = getenv("TMPDIR");
     if (NULL == tmpdir || '\0' == tmpdir[0]) {
         tmpdir = "/tmp";
     }
-    char filename[4096];
-    int length = snprintf(filename,
-                          sizeof(filename),
-                          "%s/duplicate_metadata_key_t_XXXXXX",
-                          tmpdir);
-    if (length < 0 || (size_t)length >= sizeof(filename)) {
+    int length = snprintf(
+        filename, filename_size, "%s/duplicate_metadata_key_t_XXXXXX", tmpdir);
+    if (length < 0 || (size_t)length >= filename_size) {
         BAIL_OUT("TMPDIR is too long");
     }
     int fd = mkstemp(filename);
@@ -78,6 +78,12 @@ test_open(const char *db, size_t size, int expected, const char *message) {
     if (0 != fclose(fp) || written != size) {
         BAIL_OUT("could not write %s", filename);
     }
+}
+
+static void
+test_open(const char *db, size_t size, int expected, const char *message) {
+    char filename[4096];
+    write_temp_db(db, size, filename, sizeof(filename));
 
     MMDB_s mmdb;
     int status = MMDB_open(filename, MMDB_MODE_MMAP, &mmdb);
@@ -205,6 +211,54 @@ static void test_key_count(bool in_description,
 
     test_open(db, pos, expected, message);
     free(db);
+}
+
+// A record {"a": {["x"]: "y"}, "b": "z"}. Both search-tree records point to
+// it. Looking up "b" skips the value of "a", which has an array key.
+static void test_lookup_after_array_key(void) {
+    const char db[] = "\x00\x00\x11\x00\x00\x11"
+                      "\x00\x00\x00\x00\x00\x00\x00\x00"
+                      "\x00\x00\x00\x00\x00\x00\x00\x00"
+                      "\xE2"
+                      "\x41"
+                      "a"
+                      "\xE1"
+                      "\x01\x04"
+                      "\x41"
+                      "x"
+                      "\x41"
+                      "y"
+                      "\x41"
+                      "b"
+                      "\x41"
+                      "z"
+                      "\xAB\xCD\xEF"
+                      "MaxMind.com"
+                      "\xE9" REQUIRED_METADATA_KEYS;
+    char filename[4096];
+    write_temp_db(db, sizeof(db) - 1, filename, sizeof(filename));
+
+    MMDB_s mmdb;
+    int status = MMDB_open(filename, MMDB_MODE_MMAP, &mmdb);
+    cmp_ok(status, "==", MMDB_SUCCESS, "MMDB_open opens the array-key record");
+    if (MMDB_SUCCESS == status) {
+        int gai_error, mmdb_error;
+        MMDB_lookup_result_s result =
+            MMDB_lookup_string(&mmdb, "1.1.1.1", &gai_error, &mmdb_error);
+        cmp_ok(mmdb_error, "==", MMDB_SUCCESS, "lookup succeeded");
+        ok(result.found_entry, "lookup found the record");
+        MMDB_entry_data_s data;
+        status = MMDB_get_value(&result.entry, &data, "b", NULL);
+        cmp_ok(status,
+               "==",
+               MMDB_INVALID_DATA_ERROR,
+               "MMDB_get_value rejects a nested map key that is an array");
+        MMDB_close(&mmdb);
+    }
+
+    if (0 != remove(filename)) {
+        BAIL_OUT("could not remove %s", filename);
+    }
 }
 
 int main(void) {
@@ -354,6 +408,8 @@ int main(void) {
                    1025,
                    MMDB_INVALID_METADATA_ERROR,
                    "MMDB_open rejects 1,025 description languages");
+
+    test_lookup_after_array_key();
 
     done_testing();
 }
