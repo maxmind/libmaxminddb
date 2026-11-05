@@ -461,7 +461,8 @@ under `MMDB_get_entry_data_list()`, this function returns
 
 If the metadata root is not a map, or the top-level metadata map or the
 `description` map repeats a key or has more than 1,024 keys, this function
-returns `MMDB_INVALID_METADATA_ERROR`.
+returns `MMDB_INVALID_METADATA_ERROR`. It compares keys up to the first NUL
+byte, so keys that differ only after a NUL count as repeated.
 
 If a top-level metadata key or value is malformed, this function returns
 `MMDB_INVALID_DATA_ERROR`. It does not follow pointers in values that it does
