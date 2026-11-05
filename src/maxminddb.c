@@ -821,10 +821,6 @@ static int compare_metadata_keys(const void *a, const void *b) {
     if (key_a->size > key_b->size) {
         return 1;
     }
-    // Pointer keys can share one long string. Skip comparing it to itself.
-    if (key_a->name == key_b->name) {
-        return 0;
-    }
     return memcmp(key_a->name, key_b->name, key_a->size);
 }
 
