@@ -203,6 +203,7 @@ static int check_metadata_keys_unique(const MMDB_s *const metadata_db);
 static int next_map_key(const MMDB_s *const mmdb,
                         uint32_t *offset,
                         MMDB_entry_data_s *key);
+static metadata_key_s metadata_key(const char *name, uint32_t size);
 static int check_keys_unique(metadata_key_s *keys, uint32_t count);
 static int compare_metadata_keys(const void *a, const void *b);
 static int
@@ -219,8 +220,6 @@ static int populate_languages_metadata(MMDB_s *mmdb,
 static int populate_description_metadata(MMDB_s *mmdb,
                                          MMDB_s *metadata_db,
                                          MMDB_entry_s *metadata_start);
-static int check_languages_unique(MMDB_description_s **descriptions,
-                                  size_t count);
 static int resolve_any_address(const char *ipstr, struct addrinfo **addresses);
 static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        uint8_t const *address,
@@ -779,15 +778,7 @@ static int check_metadata_keys_unique(const MMDB_s *const metadata_db) {
             status = MMDB_DECODER_LIMIT_ERROR;
             goto cleanup;
         }
-        // Compare up to the first NUL, as check_languages_unique does. Some
-        // callers, such as the PHP extension, cut keys there.
-        const char *nul = memchr(key.utf8_string, '\0', key.data_size);
-        keys[i].name = key.utf8_string;
-        if (NULL == nul) {
-            keys[i].size = key.data_size;
-        } else {
-            keys[i].size = (uint32_t)(nul - key.utf8_string);
-        }
+        keys[i] = metadata_key(key.utf8_string, key.data_size);
     }
 
     status = check_keys_unique(keys, map.data_size);
@@ -818,6 +809,18 @@ static int next_map_key(const MMDB_s *const mmdb,
     *offset = value.offset_to_next;
 
     return MMDB_SUCCESS;
+}
+
+/* Returns the key to compare for a metadata map key. Keys are compared up to
+ * the first NUL, because some callers, such as the PHP extension, cut keys
+ * there. */
+static metadata_key_s metadata_key(const char *name, uint32_t size) {
+    metadata_key_s key = {.name = name, .size = size};
+    const char *nul = memchr(name, '\0', size);
+    if (NULL != nul) {
+        key.size = (uint32_t)(nul - name);
+    }
+    return key;
 }
 
 /* Sorts keys and returns MMDB_INVALID_METADATA_ERROR if two are equal. */
@@ -1009,6 +1012,7 @@ static int populate_description_metadata(MMDB_s *mmdb,
     }
 
     MMDB_entry_data_list_s *first_member = member;
+    metadata_key_s *keys = NULL;
 
     uint32_t map_size = member->entry_data.data_size;
     mmdb->metadata.description.count = 0;
@@ -1019,6 +1023,17 @@ static int populate_description_metadata(MMDB_s *mmdb,
     MAYBE_CHECK_SIZE_OVERFLOW(map_size,
                               SIZE_MAX / sizeof(MMDB_description_s *),
                               MMDB_INVALID_METADATA_ERROR);
+    if (map_size > METADATA_MAP_MAX_KEYS) {
+        DEBUG_MSG("description map has too many keys");
+        status = MMDB_INVALID_METADATA_ERROR;
+        goto cleanup;
+    }
+
+    keys = calloc(map_size, sizeof(metadata_key_s));
+    if (NULL == keys) {
+        status = MMDB_OUT_OF_MEMORY_ERROR;
+        goto cleanup;
+    }
 
     mmdb->metadata.description.descriptions =
         calloc(map_size, sizeof(MMDB_description_s *));
@@ -1046,6 +1061,8 @@ static int populate_description_metadata(MMDB_s *mmdb,
             goto cleanup;
         }
 
+        keys[i] = metadata_key(member->entry_data.utf8_string,
+                               member->entry_data.data_size);
         mmdb->metadata.description.descriptions[i]->language = mmdb_strndup(
             member->entry_data.utf8_string, member->entry_data.data_size);
 
@@ -1070,36 +1087,12 @@ static int populate_description_metadata(MMDB_s *mmdb,
         }
     }
 
-    // Compare the languages as stored, so keys that differ only after a NUL
-    // count as repeated.
-    status = check_languages_unique(mmdb->metadata.description.descriptions,
-                                    mmdb->metadata.description.count);
+    status = check_keys_unique(keys, map_size);
 
 cleanup:
+    free(keys);
     MMDB_free_entry_data_list(first_member);
 
-    return status;
-}
-
-static int check_languages_unique(MMDB_description_s **descriptions,
-                                  size_t count) {
-    if (count < 2) {
-        return MMDB_SUCCESS;
-    }
-    if (count > METADATA_MAP_MAX_KEYS) {
-        DEBUG_MSG("description map has too many keys");
-        return MMDB_INVALID_METADATA_ERROR;
-    }
-    metadata_key_s *keys = calloc(count, sizeof(metadata_key_s));
-    if (NULL == keys) {
-        return MMDB_OUT_OF_MEMORY_ERROR;
-    }
-    for (size_t i = 0; i < count; i++) {
-        keys[i].name = descriptions[i]->language;
-        keys[i].size = (uint32_t)strlen(keys[i].name);
-    }
-    int status = check_keys_unique(keys, (uint32_t)count);
-    free(keys);
     return status;
 }
 
