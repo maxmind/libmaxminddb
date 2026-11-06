@@ -97,30 +97,56 @@ test_open(const char *db, size_t size, int expected, const char *message) {
     }
 }
 
-// An extra key whose value is 600 nested one-element arrays, deeper than the
-// default MAXIMUM_DATA_STRUCTURE_DEPTH of 512.
-static void test_deep_extra_value(void) {
+#ifndef MAXIMUM_DATA_STRUCTURE_DEPTH
+    #define MAXIMUM_DATA_STRUCTURE_DEPTH 512
+#endif
+
+// An extra key whose value is a chain of `arrays` nested one-element arrays
+// around a uint16. The value is at depth 1, and the uint16 is at depth
+// arrays + 1.
+// MMDB_get_metadata_as_entry_data_list fails when a value reaches
+// MAXIMUM_DATA_STRUCTURE_DEPTH, and MMDB_open must agree with it.
+static void test_deep_extra_value(size_t arrays, int expected) {
     const char head[] = DB_PREFIX "\xEA" REQUIRED_METADATA_KEYS "\x45"
                                   "extra";
     const size_t head_size = sizeof(head) - 1;
-    const size_t depth = 600;
-    size_t size = head_size + depth * 2 + 1;
+    size_t size = head_size + arrays * 2 + 1;
     char *db = malloc(size);
     if (NULL == db) {
         BAIL_OUT("could not allocate the deep test database");
     }
     memcpy(db, head, head_size);
-    for (size_t i = 0; i < depth; i++) {
+    for (size_t i = 0; i < arrays; i++) {
         db[head_size + i * 2] = '\x01';
         db[head_size + i * 2 + 1] = '\x04';
     }
     db[size - 1] = '\xA0';
 
-    test_open(db,
-              size,
-              MMDB_INVALID_METADATA_ERROR,
-              "MMDB_open rejects an extra value nested past the depth limit");
+    char filename[4096];
+    write_temp_db(db, size, filename, sizeof(filename));
     free(db);
+
+    MMDB_s mmdb;
+    int status = MMDB_open(filename, MMDB_MODE_MMAP, &mmdb);
+    cmp_ok(status,
+           "==",
+           expected,
+           "MMDB_open status for an extra value with %zu nested arrays",
+           arrays);
+    if (MMDB_SUCCESS == status) {
+        MMDB_entry_data_list_s *list = NULL;
+        status = MMDB_get_metadata_as_entry_data_list(&mmdb, &list);
+        cmp_ok(status,
+               "==",
+               MMDB_SUCCESS,
+               "MMDB_get_metadata_as_entry_data_list reads the same metadata");
+        MMDB_free_entry_data_list(list);
+        MMDB_close(&mmdb);
+    }
+
+    if (0 != remove(filename)) {
+        BAIL_OUT("could not remove %s", filename);
+    }
 }
 
 // Pointer keys into a run of 0x5E bytes. The key at run offset j is a
@@ -390,7 +416,9 @@ int main(void) {
               MMDB_INVALID_DATA_ERROR,
               "MMDB_open rejects a nested map key that is an array");
 
-    test_deep_extra_value();
+    test_deep_extra_value(MAXIMUM_DATA_STRUCTURE_DEPTH - 2, MMDB_SUCCESS);
+    test_deep_extra_value(MAXIMUM_DATA_STRUCTURE_DEPTH - 1,
+                          MMDB_INVALID_METADATA_ERROR);
     test_long_pointer_keys();
     test_key_count(false,
                    1024,

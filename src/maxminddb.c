@@ -796,9 +796,11 @@ static int next_map_key(const MMDB_s *const mmdb,
         return MMDB_INVALID_DATA_ERROR;
     }
 
+    // A top-level value is at depth 1, as in
+    // MMDB_get_metadata_as_entry_data_list, so both apply the same limit.
     MMDB_entry_data_s value;
     CHECKED_DECODE_ONE(mmdb, key->offset_to_next, &value);
-    int status = skip_map_or_array(mmdb, &value, 0);
+    int status = skip_map_or_array(mmdb, &value, 1);
     if (MMDB_SUCCESS != status) {
         return status;
     }
