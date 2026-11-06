@@ -203,9 +203,6 @@ static int check_metadata_keys_unique(const MMDB_s *const metadata_db);
 static int next_map_key(const MMDB_s *const mmdb,
                         uint32_t *offset,
                         MMDB_entry_data_s *key);
-static metadata_key_s metadata_key(const char *name, uint32_t size);
-static int check_keys_unique(metadata_key_s *keys, uint32_t count);
-static int compare_metadata_keys(const void *a, const void *b);
 static int
 value_for_key_as_uint16(MMDB_entry_s *start, char *key, uint16_t *value);
 static int
@@ -220,6 +217,9 @@ static int populate_languages_metadata(MMDB_s *mmdb,
 static int populate_description_metadata(MMDB_s *mmdb,
                                          MMDB_s *metadata_db,
                                          MMDB_entry_s *metadata_start);
+static metadata_key_s metadata_key(const char *name, uint32_t size);
+static int check_keys_unique(metadata_key_s *keys, uint32_t count);
+static int compare_metadata_keys(const void *a, const void *b);
 static int resolve_any_address(const char *ipstr, struct addrinfo **addresses);
 static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        uint8_t const *address,
@@ -811,42 +811,6 @@ static int next_map_key(const MMDB_s *const mmdb,
     return MMDB_SUCCESS;
 }
 
-/* Returns the key to compare for a metadata map key. Keys are compared up to
- * the first NUL, because some callers, such as the PHP extension, cut keys
- * there. */
-static metadata_key_s metadata_key(const char *name, uint32_t size) {
-    metadata_key_s key = {.name = name, .size = size};
-    const char *nul = memchr(name, '\0', size);
-    if (NULL != nul) {
-        key.size = (uint32_t)(nul - name);
-    }
-    return key;
-}
-
-/* Sorts keys and returns MMDB_INVALID_METADATA_ERROR if two are equal. */
-static int check_keys_unique(metadata_key_s *keys, uint32_t count) {
-    qsort(keys, count, sizeof(metadata_key_s), compare_metadata_keys);
-    for (uint32_t i = 1; i < count; i++) {
-        if (0 == compare_metadata_keys(&keys[i - 1], &keys[i])) {
-            DEBUG_MSG("duplicate key in metadata");
-            return MMDB_INVALID_METADATA_ERROR;
-        }
-    }
-    return MMDB_SUCCESS;
-}
-
-static int compare_metadata_keys(const void *a, const void *b) {
-    const metadata_key_s *key_a = a;
-    const metadata_key_s *key_b = b;
-    if (key_a->size < key_b->size) {
-        return -1;
-    }
-    if (key_a->size > key_b->size) {
-        return 1;
-    }
-    return memcmp(key_a->name, key_b->name, key_a->size);
-}
-
 static int
 value_for_key_as_uint16(MMDB_entry_s *start, char *key, uint16_t *value) {
     MMDB_entry_data_s entry_data;
@@ -1094,6 +1058,42 @@ cleanup:
     MMDB_free_entry_data_list(first_member);
 
     return status;
+}
+
+/* Returns the key to compare for a metadata map key. Keys are compared up to
+ * the first NUL, because some callers, such as the PHP extension, cut keys
+ * there. */
+static metadata_key_s metadata_key(const char *name, uint32_t size) {
+    metadata_key_s key = {.name = name, .size = size};
+    const char *nul = memchr(name, '\0', size);
+    if (NULL != nul) {
+        key.size = (uint32_t)(nul - name);
+    }
+    return key;
+}
+
+/* Sorts keys and returns MMDB_INVALID_METADATA_ERROR if two are equal. */
+static int check_keys_unique(metadata_key_s *keys, uint32_t count) {
+    qsort(keys, count, sizeof(metadata_key_s), compare_metadata_keys);
+    for (uint32_t i = 1; i < count; i++) {
+        if (0 == compare_metadata_keys(&keys[i - 1], &keys[i])) {
+            DEBUG_MSG("duplicate key in metadata");
+            return MMDB_INVALID_METADATA_ERROR;
+        }
+    }
+    return MMDB_SUCCESS;
+}
+
+static int compare_metadata_keys(const void *a, const void *b) {
+    const metadata_key_s *key_a = a;
+    const metadata_key_s *key_b = b;
+    if (key_a->size < key_b->size) {
+        return -1;
+    }
+    if (key_a->size > key_b->size) {
+        return 1;
+    }
+    return memcmp(key_a->name, key_b->name, key_a->size);
 }
 
 MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
