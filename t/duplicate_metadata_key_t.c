@@ -149,31 +149,61 @@ static void test_deep_extra_value(size_t arrays, int expected) {
     }
 }
 
-// Pointer keys into a run of 0x5E bytes. The key at run offset j is a
-// 24,443-byte string that starts with 100 - j bytes of 0x5E, so the keys are
-// distinct, but together they exceed the 2 MiB payload budget.
-static void test_long_pointer_keys(void) {
-    const size_t key_count = 100;
-    const size_t run = key_count + 3;
-    const size_t key_size = 285 + 0x5E5E;
-    const size_t blob_size = run + key_size;
-    const char head[] = DB_PREFIX "\xFD\x51" REQUIRED_METADATA_KEYS "\x44"
-                                  "blob"
-                                  "\x5E";
-    const size_t head_size = sizeof(head) - 1;
-    const size_t prefix_size = sizeof(DB_PREFIX) - 1;
-    // The metadata offset of the blob content, after its 3-byte header.
-    const size_t blob_offset = head_size + 2 - prefix_size;
+#ifndef MAXIMUM_DATA_STRUCTURE_BYTES
+    #define MAXIMUM_DATA_STRUCTURE_BYTES (1U << 21)
+#endif
 
-    size_t size = head_size + 2 + blob_size + key_count * 3;
+// Writes a map header for count pairs and returns its size.
+static size_t write_map_header(char *buf, size_t count) {
+    if (count <= 28) {
+        buf[0] = (char)(0xE0 | count);
+        return 1;
+    }
+    if (count <= 284) {
+        buf[0] = '\xFD';
+        buf[1] = (char)(count - 29);
+        return 2;
+    }
+    buf[0] = '\xFE';
+    buf[1] = (char)((count - 285) >> 8);
+    buf[2] = (char)((count - 285) & 0xFF);
+    return 3;
+}
+
+// Pointer keys into a run of 0x5E bytes. The key at run offset j is a
+// 24,443-byte string that starts with key_count - j bytes of 0x5E, so the keys
+// are distinct, but together they exceed MAXIMUM_DATA_STRUCTURE_BYTES.
+static void test_long_pointer_keys(void) {
+    const size_t key_size = 285 + 0x5E5E;
+    const size_t key_count = MAXIMUM_DATA_STRUCTURE_BYTES / key_size + 1;
+    // The keys must fit the map key cap, and each pointer has a one-byte
+    // offset payload.
+    skip(key_count > 1000,
+         1,
+         "MAXIMUM_DATA_STRUCTURE_BYTES is too large for this fixture");
+
+    const size_t run = key_count + 3;
+    const size_t blob_size = run + key_size;
+    const char keys[] = REQUIRED_METADATA_KEYS "\x44"
+                                               "blob"
+                                               "\x5E";
+    const size_t prefix_size = sizeof(DB_PREFIX) - 1;
+    const size_t keys_size = sizeof(keys) - 1;
+
+    size_t size = prefix_size + 3 + keys_size + 2 + blob_size + key_count * 3;
     char *db = malloc(size);
     if (NULL == db) {
         BAIL_OUT("could not allocate the long-key test database");
     }
-    memcpy(db, head, head_size);
-    size_t pos = head_size;
+    memcpy(db, DB_PREFIX, prefix_size);
+    size_t pos = prefix_size;
+    pos += write_map_header(db + pos, 10 + key_count);
+    memcpy(db + pos, keys, keys_size);
+    pos += keys_size;
     db[pos++] = (char)((blob_size - 285) >> 8);
     db[pos++] = (char)((blob_size - 285) & 0xFF);
+    // The metadata offset of the blob content.
+    const size_t blob_offset = pos - prefix_size;
     memset(db + pos, 0x5E, run);
     memset(db + pos + run, 'a', key_size);
     pos += blob_size;
@@ -185,10 +215,12 @@ static void test_long_pointer_keys(void) {
     }
 
     test_open(db,
-              size,
+              pos,
               MMDB_INVALID_METADATA_ERROR,
               "MMDB_open rejects metadata keys past the payload budget");
     free(db);
+
+    end_skip;
 }
 
 // Builds metadata with count distinct keys, either in the top-level map
