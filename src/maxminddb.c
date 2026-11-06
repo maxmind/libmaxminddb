@@ -605,15 +605,26 @@ static int read_metadata(MMDB_s *mmdb) {
        want to use the same functions we use for the data section to get
        metadata values. */
     MMDB_s metadata_db = make_fake_metadata_db(mmdb);
+    MMDB_entry_s metadata_start = {.mmdb = &metadata_db, .offset = 0};
+
+    // Check the major version before the strict walk below. A newer format
+    // can have metadata that this version cannot decode, and the caller must
+    // still get MMDB_UNKNOWN_DATABASE_FORMAT_ERROR for it. If this lookup
+    // fails or finds 0, the full read below reports the error.
+    uint16_t major_version = 0;
+    int status = value_for_key_as_uint16(
+        &metadata_start, "binary_format_major_version", &major_version);
+    if (MMDB_SUCCESS == status && 0 != major_version && 2 != major_version) {
+        DEBUG_MSGF("unsupported binary_format_major_version %i", major_version);
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
+    }
 
     // Key lookups return the first match, but other readers can keep the
     // last one. A repeated key could give each reader a different value.
-    int status = check_metadata_keys_unique(&metadata_db);
+    status = check_metadata_keys_unique(&metadata_db);
     if (MMDB_SUCCESS != status) {
         return status;
     }
-
-    MMDB_entry_s metadata_start = {.mmdb = &metadata_db, .offset = 0};
 
     status = value_for_key_as_uint32(
         &metadata_start, "node_count", &mmdb->metadata.node_count);

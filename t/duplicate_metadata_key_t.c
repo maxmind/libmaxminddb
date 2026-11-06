@@ -287,6 +287,33 @@ static void test_lookup_after_array_key(void) {
     }
 }
 
+// Major version 3 metadata with an extra value that this version cannot
+// decode. MMDB_open must report the unknown format, not the bad value.
+static void test_newer_major_version(void) {
+    char db[] = DB_PREFIX "\xEA" REQUIRED_METADATA_KEYS "\x45"
+                          "extra"
+                          "\x44"
+                          "ab";
+    const char key[] = "binary_format_major_version";
+    size_t size = sizeof(db) - 1;
+    size_t version = 0;
+    for (size_t i = 0; i + sizeof(key) + 1 < size; i++) {
+        if (0 == memcmp(db + i, key, sizeof(key) - 1)) {
+            version = i + sizeof(key) - 1 + 1;
+            break;
+        }
+    }
+    if (0 == version || '\x02' != db[version]) {
+        BAIL_OUT("could not find binary_format_major_version in the fixture");
+    }
+    db[version] = '\x03';
+
+    test_open(db,
+              size,
+              MMDB_UNKNOWN_DATABASE_FORMAT_ERROR,
+              "MMDB_open reports a newer major version before bad metadata");
+}
+
 int main(void) {
     plan(NO_PLAN);
 
@@ -438,6 +465,7 @@ int main(void) {
                    "MMDB_open rejects 1,025 description languages");
 
     test_lookup_after_array_key();
+    test_newer_major_version();
 
     done_testing();
 }
