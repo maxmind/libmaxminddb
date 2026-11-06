@@ -381,8 +381,9 @@ status codes are:
   its major version is not 2. This library can only handle major version 2.
 - `MMDB_OUT_OF_MEMORY_ERROR` - a memory allocation call (`malloc`, etc.) failed.
 - `MMDB_INVALID_DATA_ERROR` - an entry in the data section contains invalid
-  data. For example, a `uint16` field is claiming to be more than 2 bytes long.
-  The database is probably damaged or was generated incorrectly.
+  data. For example, a `uint16` field is claiming to be more than 2 bytes long,
+  or a map has a key that is a map or an array. The database is probably damaged
+  or was generated incorrectly.
 - `MMDB_INVALID_LOOKUP_PATH_ERROR` - The lookup path passed to `MMDB_get_value`,
   `MMDB_vget_value`, or `MMDB_aget_value` contains an array offset that is
   larger than LONG_MAX or smaller than LONG_MIN.
@@ -458,6 +459,15 @@ releases. The current default is `MMDB_MODE_MMAP`.
 If metadata processing exceeds one of the decoder resource limits described
 under `MMDB_get_entry_data_list()`, this function returns
 `MMDB_INVALID_METADATA_ERROR`.
+
+If the metadata root is not a map, or the top-level metadata map or the
+`description` map repeats a key or has more than 1,024 keys, this function
+returns `MMDB_INVALID_METADATA_ERROR`. It compares keys up to the first NUL
+byte, so keys that differ only after a NUL count as repeated.
+
+If a top-level metadata key or value is malformed, this function returns
+`MMDB_INVALID_DATA_ERROR`. It does not follow pointers in values that it does
+not use, so it does not detect a bad pointer target there.
 
 ## `MMDB_close()`
 
@@ -630,6 +640,9 @@ calls.
 
 For each of the three functions, the return value is a status code as defined
 above.
+
+Map keys must be strings. If a lookup skips a nested map whose key is a map or
+an array, these functions return `MMDB_INVALID_DATA_ERROR`.
 
 ## `MMDB_get_entry_data_list()`
 

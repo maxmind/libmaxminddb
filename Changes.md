@@ -1,3 +1,25 @@
+## next release
+
+- `MMDB_open()` now returns `MMDB_INVALID_METADATA_ERROR` if the top-level
+  metadata map or the `description` map repeats a key. Before, top-level
+  metadata lookups used only the first value of a repeated key, and the
+  `description` list kept every pair, while other readers may keep the last
+  value. Keys are compared up to the first NUL byte, so keys that differ only
+  after a NUL count as repeated. A top-level metadata map or `description` map
+  with more than 1,024 keys also causes `MMDB_INVALID_METADATA_ERROR`. Databases
+  with repeated metadata keys no longer open.
+- `MMDB_open()` now reads every top-level metadata key, not only the required
+  keys, and skips each value without following pointers in it. A malformed key
+  or value, or a map that claims more entries than it has, now causes
+  `MMDB_INVALID_DATA_ERROR`. A value nested deeper than the depth limit, or keys
+  whose total size exceeds the payload limit, causes
+  `MMDB_INVALID_METADATA_ERROR`. Some of these databases opened before. Metadata
+  whose root is not a map now causes `MMDB_INVALID_METADATA_ERROR`.
+- `MMDB_get_value()` and its variants, and `MMDB_open()`, now return
+  `MMDB_INVALID_DATA_ERROR` when they skip a nested map whose key is a map or an
+  array. Before, they skipped only the key's header and read the data after it
+  out of step. A lookup could return the wrong value.
+
 ## 1.14.1 - 2026-09-17
 
 - Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with

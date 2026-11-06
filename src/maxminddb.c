@@ -178,9 +178,17 @@ typedef struct decode_state_s {
     uint64_t bytes;
 } decode_state_s;
 
+typedef struct metadata_key_s {
+    const char *name;
+    uint32_t size;
+} metadata_key_s;
+
 #define METADATA_MARKER "\xab\xcd\xefMaxMind.com"
 /* This is 128kb */
 #define METADATA_BLOCK_MAX_SIZE 131072
+/* Real metadata has about 10 top-level keys and a few description languages.
+ * The cap bounds the key sort, because C does not bound the cost of qsort. */
+#define METADATA_MAP_MAX_KEYS 1024
 
 // 64 leads us to allocating 4 KiB on a 64bit system.
 #define MMDB_POOL_INIT_SIZE 64
@@ -191,6 +199,10 @@ static const uint8_t *find_metadata(const uint8_t *file_content,
                                     uint32_t *metadata_size);
 static int read_metadata(MMDB_s *mmdb);
 static MMDB_s make_fake_metadata_db(const MMDB_s *const mmdb);
+static int check_metadata_keys_unique(const MMDB_s *const metadata_db);
+static int next_map_key(const MMDB_s *const mmdb,
+                        uint32_t *offset,
+                        MMDB_entry_data_s *key);
 static int
 value_for_key_as_uint16(MMDB_entry_s *start, char *key, uint16_t *value);
 static int
@@ -205,6 +217,9 @@ static int populate_languages_metadata(MMDB_s *mmdb,
 static int populate_description_metadata(MMDB_s *mmdb,
                                          MMDB_s *metadata_db,
                                          MMDB_entry_s *metadata_start);
+static metadata_key_s metadata_key(const char *name, uint32_t size);
+static int check_keys_unique(metadata_key_s *keys, uint32_t count);
+static int compare_metadata_keys(const void *a, const void *b);
 static int resolve_any_address(const char *ipstr, struct addrinfo **addresses);
 static int find_address_in_search_tree(const MMDB_s *const mmdb,
                                        uint8_t const *address,
@@ -589,10 +604,28 @@ static int read_metadata(MMDB_s *mmdb) {
        want to use the same functions we use for the data section to get
        metadata values. */
     MMDB_s metadata_db = make_fake_metadata_db(mmdb);
-
     MMDB_entry_s metadata_start = {.mmdb = &metadata_db, .offset = 0};
 
-    int status = value_for_key_as_uint32(
+    // Check the major version before the strict walk below. A newer format
+    // can have metadata that this version cannot decode, and the caller must
+    // still get MMDB_UNKNOWN_DATABASE_FORMAT_ERROR for it. If this lookup
+    // fails or finds 0, the full read below reports the error.
+    uint16_t major_version = 0;
+    int status = value_for_key_as_uint16(
+        &metadata_start, "binary_format_major_version", &major_version);
+    if (MMDB_SUCCESS == status && 0 != major_version && 2 != major_version) {
+        DEBUG_MSGF("unsupported binary_format_major_version %i", major_version);
+        return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
+    }
+
+    // Key lookups return the first match, but other readers can keep the
+    // last one. A repeated key could give each reader a different value.
+    status = check_metadata_keys_unique(&metadata_db);
+    if (MMDB_SUCCESS != status) {
+        return status;
+    }
+
+    status = value_for_key_as_uint32(
         &metadata_start, "node_count", &mmdb->metadata.node_count);
     if (MMDB_SUCCESS != status) {
         return status;
@@ -697,6 +730,85 @@ static MMDB_s make_fake_metadata_db(const MMDB_s *const mmdb) {
                                    mmdb->metadata_section_size};
 
     return fake_metadata_db;
+}
+
+static int check_metadata_keys_unique(const MMDB_s *const metadata_db) {
+    MMDB_entry_data_s map;
+    CHECKED_DECODE_ONE_FOLLOW(metadata_db, 0, &map);
+    if (MMDB_DATA_TYPE_MAP != map.type) {
+        DEBUG_MSG("metadata value is not a map");
+        return MMDB_INVALID_METADATA_ERROR;
+    }
+    if (0 == map.data_size) {
+        return MMDB_SUCCESS;
+    }
+    // Each entry takes at least a key byte and a value byte. Reject a larger
+    // count before it sizes the allocation, with the error the walk would
+    // return when it reaches the end of the section.
+    if (map.offset_to_next > metadata_db->data_section_size ||
+        map.data_size >
+            (metadata_db->data_section_size - map.offset_to_next) / 2) {
+        DEBUG_MSG("metadata map size exceeds the metadata section");
+        return MMDB_INVALID_DATA_ERROR;
+    }
+    if (map.data_size > METADATA_MAP_MAX_KEYS) {
+        DEBUG_MSG("metadata map has too many keys");
+        return MMDB_INVALID_METADATA_ERROR;
+    }
+
+    metadata_key_s *keys = calloc(map.data_size, sizeof(metadata_key_s));
+    if (NULL == keys) {
+        return MMDB_OUT_OF_MEMORY_ERROR;
+    }
+
+    int status = MMDB_SUCCESS;
+    uint32_t offset = map.offset_to_next;
+    uint64_t key_bytes = 0;
+    for (uint32_t i = 0; i < map.data_size; i++) {
+        MMDB_entry_data_s key;
+        status = next_map_key(metadata_db, &offset, &key);
+        if (MMDB_SUCCESS != status) {
+            goto cleanup;
+        }
+        // Pointer keys can reuse one long string many times. Charge each key
+        // against the payload budget to bound the scan and the sort below.
+        key_bytes += key.data_size;
+        if (key_bytes > (uint64_t)(MAXIMUM_DATA_STRUCTURE_BYTES)) {
+            DEBUG_MSG("metadata keys exceed the payload budget");
+            status = MMDB_DECODER_LIMIT_ERROR;
+            goto cleanup;
+        }
+        keys[i] = metadata_key(key.utf8_string, key.data_size);
+    }
+
+    status = check_keys_unique(keys, map.data_size);
+
+cleanup:
+    free(keys);
+    return status;
+}
+
+/* Decodes the map key at *offset, skips its value, and sets *offset to the
+ * next key. */
+static int next_map_key(const MMDB_s *const mmdb,
+                        uint32_t *offset,
+                        MMDB_entry_data_s *key) {
+    CHECKED_DECODE_ONE_FOLLOW(mmdb, *offset, key);
+    if (MMDB_DATA_TYPE_UTF8_STRING != key->type) {
+        return MMDB_INVALID_DATA_ERROR;
+    }
+
+    // A top-level value is at depth 1, as in
+    // MMDB_get_metadata_as_entry_data_list, so both apply the same limit.
+    MMDB_entry_data_s value;
+    CHECKED_DECODE_ONE(mmdb, key->offset_to_next, &value);
+    int status = skip_map_or_array(mmdb, &value, 1);
+    if (MMDB_SUCCESS != status) {
+        return status;
+    }
+    *offset = value.offset_to_next;
+
+    return MMDB_SUCCESS;
 }
 
 static int
@@ -864,6 +976,7 @@ static int populate_description_metadata(MMDB_s *mmdb,
     }
 
     MMDB_entry_data_list_s *first_member = member;
+    metadata_key_s *keys = NULL;
 
     uint32_t map_size = member->entry_data.data_size;
     mmdb->metadata.description.count = 0;
@@ -874,6 +987,17 @@ static int populate_description_metadata(MMDB_s *mmdb,
     MAYBE_CHECK_SIZE_OVERFLOW(map_size,
                               SIZE_MAX / sizeof(MMDB_description_s *),
                               MMDB_INVALID_METADATA_ERROR);
+    if (map_size > METADATA_MAP_MAX_KEYS) {
+        DEBUG_MSG("description map has too many keys");
+        status = MMDB_INVALID_METADATA_ERROR;
+        goto cleanup;
+    }
+
+    keys = calloc(map_size, sizeof(metadata_key_s));
+    if (NULL == keys) {
+        status = MMDB_OUT_OF_MEMORY_ERROR;
+        goto cleanup;
+    }
 
     mmdb->metadata.description.descriptions =
         calloc(map_size, sizeof(MMDB_description_s *));
@@ -901,6 +1025,8 @@ static int populate_description_metadata(MMDB_s *mmdb,
             goto cleanup;
         }
 
+        keys[i] = metadata_key(member->entry_data.utf8_string,
+                               member->entry_data.data_size);
         mmdb->metadata.description.descriptions[i]->language = mmdb_strndup(
             member->entry_data.utf8_string, member->entry_data.data_size);
 
@@ -925,10 +1051,49 @@ static int populate_description_metadata(MMDB_s *mmdb,
         }
     }
 
+    status = check_keys_unique(keys, map_size);
+
 cleanup:
+    free(keys);
     MMDB_free_entry_data_list(first_member);
 
     return status;
+}
+
+/* Returns the key to compare for a metadata map key. Keys are compared up to
+ * the first NUL, because some callers, such as the PHP extension, cut keys
+ * there. */
+static metadata_key_s metadata_key(const char *name, uint32_t size) {
+    metadata_key_s key = {.name = name, .size = size};
+    const char *nul = memchr(name, '\0', size);
+    if (NULL != nul) {
+        key.size = (uint32_t)(nul - name);
+    }
+    return key;
+}
+
+/* Sorts keys and returns MMDB_INVALID_METADATA_ERROR if two are equal. */
+static int check_keys_unique(metadata_key_s *keys, uint32_t count) {
+    qsort(keys, count, sizeof(metadata_key_s), compare_metadata_keys);
+    for (uint32_t i = 1; i < count; i++) {
+        if (0 == compare_metadata_keys(&keys[i - 1], &keys[i])) {
+            DEBUG_MSG("duplicate key in metadata");
+            return MMDB_INVALID_METADATA_ERROR;
+        }
+    }
+    return MMDB_SUCCESS;
+}
+
+static int compare_metadata_keys(const void *a, const void *b) {
+    const metadata_key_s *key_a = a;
+    const metadata_key_s *key_b = b;
+    if (key_a->size < key_b->size) {
+        return -1;
+    }
+    if (key_a->size > key_b->size) {
+        return 1;
+    }
+    return memcmp(key_a->name, key_b->name, key_a->size);
 }
 
 MMDB_lookup_result_s MMDB_lookup_string(const MMDB_s *const mmdb,
@@ -1432,6 +1597,14 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
         while (size-- > 0) {
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // key
+            // Keys must be strings. This loop skips only a key's header, so
+            // the contents of a map or array key would be read as the keys and
+            // values that follow it.
+            if (MMDB_DATA_TYPE_MAP == entry_data->type ||
+                MMDB_DATA_TYPE_ARRAY == entry_data->type) {
+                DEBUG_MSG("map key is a map or an array");
+                return MMDB_INVALID_DATA_ERROR;
+            }
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // value
             int status = skip_map_or_array(mmdb, entry_data, depth + 1);
