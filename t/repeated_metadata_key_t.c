@@ -21,5 +21,7 @@ int main(void) {
     plan(NO_PLAN);
     test_bad_data_file("libmaxminddb-repeated-metadata-key.mmdb");
     test_bad_data_file("libmaxminddb-repeated-description-key.mmdb");
+    test_bad_data_file("libmaxminddb-repeated-node-count.mmdb");
+    test_bad_data_file("libmaxminddb-repeated-pointer-key.mmdb");
     done_testing();
 }
