@@ -76,6 +76,13 @@ _test_stdout(
     'output for 2.125.160.216 with lookup path'
 );
 
+_test_stdout(
+    ['--file', "$test_data_dir/MaxMind-DB-test-decoder-value-limit.mmdb", '--ip', '1.1.1.1', '0'],
+    qr/^\s*\d+ <uint16>\s*$/s,
+    0,
+    'output for a lookup path that ends at data section offset 0'
+);
+
 _test_stderr(
     [ qw( --file this/path/better/not/exist.mmdb --ip 1.2.3.4 ) ],
     qr{Can't open this/path/better/not/exist.mmdb}s,

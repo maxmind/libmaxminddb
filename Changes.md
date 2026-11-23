@@ -28,6 +28,8 @@
   the value does not use. Before, `data_size` and the unused bytes of the value
   could hold other data for a number or a boolean. This occurred when the lookup
   path had at least one element or the value was behind a pointer.
+- `mmdblookup` no longer prints "No data was found at the lookup path you
+  provided" for a lookup path that ends at a value at data section offset 0.
 
 ## 1.14.1 - 2026-09-17
 
