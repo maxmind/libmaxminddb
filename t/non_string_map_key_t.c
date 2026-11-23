@@ -56,6 +56,52 @@ static void check_metadata_as_entry_data_list(void) {
     MMDB_free_entry_data_list(entry_data_list);
 }
 
+// The non-string-key databases from MaxMind-DB.
+static void check_bad_data_files(void) {
+    // The data record is {1: "test"}, where the key is a uint16.
+    char *path = bad_database_path("libmaxminddb-non-string-map-key.mmdb");
+    MMDB_s mmdb;
+    int status = MMDB_open(path, MMDB_MODE_MMAP, &mmdb);
+    free(path);
+    cmp_ok(status, "==", MMDB_SUCCESS, "MMDB_open opens the uint16 key record");
+    if (MMDB_SUCCESS == status) {
+        int gai_error, mmdb_error;
+        MMDB_lookup_result_s result =
+            MMDB_lookup_string(&mmdb, "1.1.1.1", &gai_error, &mmdb_error);
+        ok(0 == gai_error && MMDB_SUCCESS == mmdb_error && result.found_entry,
+           "lookup found the record");
+
+        MMDB_entry_data_list_s *entry_data_list = NULL;
+        status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);
+        cmp_ok(status,
+               "==",
+               MMDB_INVALID_DATA_ERROR,
+               "MMDB_get_entry_data_list rejects the record");
+        ok(NULL == entry_data_list, "the record list is NULL");
+        MMDB_free_entry_data_list(entry_data_list);
+
+        MMDB_entry_data_s entry_data;
+        status = MMDB_get_value(&result.entry, &entry_data, "ip", NULL);
+        cmp_ok(status,
+               "==",
+               MMDB_INVALID_DATA_ERROR,
+               "MMDB_get_value rejects the record");
+        MMDB_close(&mmdb);
+    }
+
+    // The description metadata is {1: "Test"}.
+    path = bad_database_path("libmaxminddb-non-string-description-key.mmdb");
+    status = MMDB_open(path, MMDB_MODE_MMAP, &mmdb);
+    free(path);
+    cmp_ok(status,
+           "==",
+           MMDB_INVALID_DATA_ERROR,
+           "MMDB_open rejects a uint16 key in the description map");
+    if (MMDB_SUCCESS == status) {
+        MMDB_close(&mmdb);
+    }
+}
+
 int main(void) {
     plan(NO_PLAN);
 
@@ -152,6 +198,8 @@ int main(void) {
                           "a uint16 key in a map in an array is rejected");
 
     check_metadata_as_entry_data_list();
+
+    check_bad_data_files();
 
     done_testing();
 }
