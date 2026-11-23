@@ -483,6 +483,16 @@ int main(void) {
               MMDB_INVALID_DATA_ERROR,
               "MMDB_open rejects a non-string key after the required keys");
 
+    // The extra value is {1: "x"}, where the key is a uint16.
+    TEST_OPEN(DB_PREFIX "\xEA" REQUIRED_METADATA_KEYS "\x45"
+                        "extra"
+                        "\xE1"
+                        "\xA1\x01"
+                        "\x41"
+                        "x",
+              MMDB_INVALID_DATA_ERROR,
+              "MMDB_open rejects a uint16 key in a map that it skips");
+
     TEST_OPEN(DB_PREFIX "\xEA" REQUIRED_METADATA_KEYS "\x45"
                         "extra"
                         "\x44"

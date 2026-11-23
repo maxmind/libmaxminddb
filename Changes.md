@@ -19,6 +19,11 @@
   `MMDB_INVALID_DATA_ERROR` when they skip a nested map whose key is a map or an
   array. Before, they skipped only the key's header and read the data after it
   out of step. A lookup could return the wrong value.
+- `MMDB_get_value()` and its variants, and `MMDB_open()`, now also return
+  `MMDB_INVALID_DATA_ERROR` when they skip a nested map that has a key of
+  another non-string type, such as a `uint16`. Before, a database could open and
+  then fail in `MMDB_get_metadata_as_entry_data_list()`. They do not follow a
+  pointer key in a map that they skip, so they do not check its target.
 - `MMDB_get_entry_data_list()` and `MMDB_get_metadata_as_entry_data_list()` now
   return `MMDB_INVALID_DATA_ERROR` when a map key is not a UTF-8 string, as the
   MaxMind DB specification requires. Before, they added the key to the list with

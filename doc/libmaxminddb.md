@@ -643,8 +643,9 @@ calls.
 For each of the three functions, the return value is a status code as defined
 above.
 
-Map keys must be strings. If a lookup skips a nested map whose key is a map or
-an array, these functions return `MMDB_INVALID_DATA_ERROR`.
+Map keys must be strings. If a lookup skips a nested map that has a key of
+another type, these functions return `MMDB_INVALID_DATA_ERROR`. They do not
+follow a pointer key in a map that they skip, so they do not check its target.
 
 ## `MMDB_get_entry_data_list()`
 
