@@ -21,7 +21,9 @@
   out of step. A lookup could return the wrong value.
 - `MMDB_get_value()`, `MMDB_vget_value()`, and `MMDB_aget_value()` now clear
   `entry_data` when the decode of the first value fails. Previously, `has_data`
-  could stay true after such an error.
+  could stay true after such an error. `MMDB_get_value()` and
+  `MMDB_vget_value()` now also clear `entry_data` when they cannot allocate
+  memory for the lookup path.
 
 ## 1.14.1 - 2026-09-17
 

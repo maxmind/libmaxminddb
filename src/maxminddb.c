@@ -1410,6 +1410,8 @@ int MMDB_vget_value(MMDB_entry_s *const start,
     const char *path_elem;
     int i = 0;
 
+    memset(entry_data, 0, sizeof(MMDB_entry_data_s));
+
     if (length == SIZE_MAX) {
         return MMDB_INVALID_METADATA_ERROR;
     }
