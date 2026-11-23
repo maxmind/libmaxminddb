@@ -233,6 +233,9 @@ static uint32_t get_right_28_bit_record(const uint8_t *record);
 static uint32_t data_section_offset_for_record(const MMDB_s *const mmdb,
                                                uint64_t record);
 static size_t path_length(va_list va_path);
+static int aget_value(MMDB_entry_s *const start,
+                      MMDB_entry_data_s *const entry_data,
+                      const char *const *const path);
 static int lookup_path_in_array(const char *path_elem,
                                 const MMDB_s *const mmdb,
                                 MMDB_entry_data_s *entry_data);
@@ -1446,6 +1449,16 @@ static size_t path_length(va_list va_path) {
 int MMDB_aget_value(MMDB_entry_s *const start,
                     MMDB_entry_data_s *const entry_data,
                     const char *const *const path) {
+    int status = aget_value(start, entry_data, path);
+    if (MMDB_SUCCESS != status) {
+        memset(entry_data, 0, sizeof(MMDB_entry_data_s));
+    }
+    return status;
+}
+
+static int aget_value(MMDB_entry_s *const start,
+                      MMDB_entry_data_s *const entry_data,
+                      const char *const *const path) {
     const MMDB_s *const mmdb = start->mmdb;
     uint32_t offset = start->offset;
 
@@ -1479,19 +1492,16 @@ int MMDB_aget_value(MMDB_entry_s *const start,
         if (entry_data->type == MMDB_DATA_TYPE_ARRAY) {
             int status = lookup_path_in_array(path_elem, mmdb, entry_data);
             if (MMDB_SUCCESS != status) {
-                memset(entry_data, 0, sizeof(MMDB_entry_data_s));
                 return status;
             }
         } else if (entry_data->type == MMDB_DATA_TYPE_MAP) {
             int status = lookup_path_in_map(path_elem, mmdb, entry_data);
             if (MMDB_SUCCESS != status) {
-                memset(entry_data, 0, sizeof(MMDB_entry_data_s));
                 return status;
             }
         } else {
             /* Once we make the code traverse maps & arrays without calling
              * decode_one() we can get rid of this. */
-            memset(entry_data, 0, sizeof(MMDB_entry_data_s));
             return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
         }
     }
@@ -1580,7 +1590,6 @@ static int lookup_path_in_map(const char *path_elem,
         }
     }
 
-    memset(entry_data, 0, sizeof(MMDB_entry_data_s));
     return MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR;
 }
 

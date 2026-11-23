@@ -19,6 +19,9 @@
   `MMDB_INVALID_DATA_ERROR` when they skip a nested map whose key is a map or an
   array. Before, they skipped only the key's header and read the data after it
   out of step. A lookup could return the wrong value.
+- `MMDB_get_value()`, `MMDB_vget_value()`, and `MMDB_aget_value()` now clear
+  `entry_data` when the decode of the first value fails. Previously, `has_data`
+  could stay true after such an error.
 
 ## 1.14.1 - 2026-09-17
 
