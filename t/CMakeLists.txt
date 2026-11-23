@@ -4,6 +4,7 @@ add_library(tap
 
 # test programs
 set(TEST_TARGET_NAMES
+  bad_data_size_t
   bad_pointers_t
   bad_search_tree_t
   basic_lookup_t
@@ -31,7 +32,6 @@ set(TEST_TARGET_NAMES
 if(UNIX)  # or if (NOT WIN32)
   list(APPEND TEST_TARGET_NAMES
     bad_databases_t
-    bad_data_size_t
     bad_epoch_t
     bad_indent_t
     duplicate_metadata_key_t
