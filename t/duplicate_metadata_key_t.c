@@ -391,6 +391,12 @@ int main(void) {
               MMDB_INVALID_DATA_ERROR,
               "MMDB_open rejects an extra key with extended type byte 9");
 
+    TEST_OPEN(DB_PREFIX "\xEA" REQUIRED_METADATA_KEYS "\x45"
+                        "extra"
+                        "\x00\x05",
+              MMDB_INVALID_DATA_ERROR,
+              "MMDB_open rejects an extra key with extended type byte 5");
+
     // The key points at the database_type value, "Test", at offset 0x37.
     TEST_OPEN(DB_PREFIX "\xEA" REQUIRED_METADATA_KEYS "\x20\x37"
                         "\xA1\x05",

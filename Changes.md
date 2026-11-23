@@ -25,6 +25,11 @@
   `MMDB_DATA_TYPE_*` constant. A lookup that skips such a value now fails too.
   This also applies to the metadata, so `MMDB_open()` can now fail on a database
   that opened before.
+- The decoder now returns `MMDB_INVALID_DATA_ERROR` for a value of the
+  deprecated container or end marker type (extended type byte 5 or 6).
+  Previously, it returned such a value with the type `MMDB_DATA_TYPE_CONTAINER`
+  or `MMDB_DATA_TYPE_END_MARKER`. `MMDB_open()` can now fail on a database whose
+  metadata contains such a value.
 
 ## 1.14.1 - 2026-09-17
 

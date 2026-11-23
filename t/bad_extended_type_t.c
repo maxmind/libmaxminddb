@@ -50,6 +50,14 @@ void test_extended_type_range(void) {
                           MMDB_SUCCESS,
                           MMDB_DATA_TYPE_INT32,
                           "extended type byte 1 is an int32");
+    CHECK_ENTRY_DATA_LIST("\x00\x04",
+                          MMDB_SUCCESS,
+                          MMDB_DATA_TYPE_ARRAY,
+                          "extended type byte 4 is an array");
+    CHECK_ENTRY_DATA_LIST("\x00\x07",
+                          MMDB_SUCCESS,
+                          MMDB_DATA_TYPE_BOOLEAN,
+                          "extended type byte 7 is a boolean");
     CHECK_ENTRY_DATA_LIST("\x04\x08\x00\x00\x00\x00",
                           MMDB_SUCCESS,
                           MMDB_DATA_TYPE_FLOAT,
@@ -83,6 +91,8 @@ static void test_bad_data_files(void) {
     const char *const filenames[] = {
         "libmaxminddb-extended-type-0.mmdb",
         "libmaxminddb-extended-type-9.mmdb",
+        "libmaxminddb-container-type.mmdb",
+        "libmaxminddb-end-marker-type.mmdb",
     };
     for (size_t i = 0; i < sizeof(filenames) / sizeof(filenames[0]); i++) {
         const char *filename = filenames[i];

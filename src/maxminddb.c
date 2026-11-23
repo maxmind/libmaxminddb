@@ -1746,7 +1746,10 @@ static int decode_one(const MMDB_s *const mmdb,
             return MMDB_INVALID_DATA_ERROR;
         }
         type = get_ext_type(mem[offset++]);
-        if (type < MMDB_DATA_TYPE_INT32 || type > MMDB_DATA_TYPE_FLOAT) {
+        // The spec deprecates the container and end marker types.
+        if (type < MMDB_DATA_TYPE_INT32 || type > MMDB_DATA_TYPE_FLOAT ||
+            type == MMDB_DATA_TYPE_CONTAINER ||
+            type == MMDB_DATA_TYPE_END_MARKER) {
             DEBUG_MSGF("Invalid extended type byte: %i", type - 7);
             return MMDB_INVALID_DATA_ERROR;
         }

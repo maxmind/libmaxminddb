@@ -299,12 +299,14 @@ There are also a few types that are for internal use only:
 
 - `MMDB_DATA_TYPE_EXTENDED`
 - `MMDB_DATA_TYPE_POINTER`
-- `MMDB_DATA_TYPE_CONTAINER`
-- `MMDB_DATA_TYPE_END_MARKER`
 
 If you see one of these in returned data then something has gone very wrong. The
 database is damaged or was generated incorrectly or there is a bug in the
 libmaxminddb code.
+
+`MMDB_DATA_TYPE_CONTAINER` and `MMDB_DATA_TYPE_END_MARKER` are deprecated types.
+The decoder never returns them. It returns `MMDB_INVALID_DATA_ERROR` for a value
+of either type.
 
 ### Pointer Values and `MMDB_close()`
 
