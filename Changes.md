@@ -34,6 +34,11 @@
 - `MMDB_lookup_string()` and `MMDB_lookup_sockaddr()` now set `*mmdb_error` to
   `MMDB_CORRUPT_SEARCH_TREE_ERROR` when the search tree is deeper than the IP
   address is long. Before, they reported a found entry with an invalid offset.
+- The decoder now returns `MMDB_INVALID_DATA_ERROR` for a boolean with a size
+  larger than 1. Before, it read the value as `true`. The check also applies to
+  values that the decoder skips. `MMDB_open()` fails when the metadata contains
+  such a boolean, and `MMDB_get_value()` and its variants fail for each key that
+  follows one in a map.
 
 ## 1.14.1 - 2026-09-17
 

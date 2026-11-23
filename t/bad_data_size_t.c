@@ -214,6 +214,15 @@ void test_data_section_bounded_at_metadata_marker(void) {
                 MMDB_SUCCESS);
 }
 
+// The size field of a boolean holds its value, so only 0 and 1 are valid.
+void test_boolean_size(void) {
+    check_entry("libmaxminddb-boolean-size-2.mmdb",
+                2,
+                "1.2.3.4",
+                MMDB_SUCCESS,
+                MMDB_INVALID_DATA_ERROR);
+}
+
 void test_empty_data_section(void) {
     char *db_file = bad_database_path("libmaxminddb-data-section-empty.mmdb");
     MMDB_s mmdb;
@@ -266,6 +275,7 @@ int main(void) {
     test_truncated_size_in_tiny_metadata_section();
     test_tiny_data_section();
     test_data_section_bounded_at_metadata_marker();
+    test_boolean_size();
     test_empty_data_section();
     test_search_tree_overlaps_metadata_marker();
     test_node_count_larger_than_file();

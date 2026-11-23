@@ -1781,6 +1781,11 @@ static int decode_one(const MMDB_s *const mmdb,
     }
 
     if (type == MMDB_DATA_TYPE_BOOLEAN) {
+        // The size field holds the value, so it must be 0 or 1.
+        if (size > 1) {
+            DEBUG_MSGF("Invalid boolean size: %i", size);
+            return MMDB_INVALID_DATA_ERROR;
+        }
         entry_data->boolean = size ? true : false;
         entry_data->data_size = 0;
         entry_data->offset_to_next = offset;
