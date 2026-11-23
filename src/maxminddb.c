@@ -916,6 +916,12 @@ static int populate_languages_metadata(MMDB_s *mmdb,
         array_size, SIZE_MAX / sizeof(char *), MMDB_INVALID_METADATA_ERROR);
 
     mmdb->metadata.languages.count = 0;
+    if (0 == array_size) {
+        // calloc() can return NULL for a zero size.
+        mmdb->metadata.languages.names = NULL;
+        MMDB_free_entry_data_list(first_member);
+        return MMDB_SUCCESS;
+    }
     mmdb->metadata.languages.names = calloc(array_size, sizeof(char *));
     if (NULL == mmdb->metadata.languages.names) {
         MMDB_free_entry_data_list(first_member);

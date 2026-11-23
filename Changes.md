@@ -31,6 +31,10 @@
   union member. `MMDB_open()` now returns `MMDB_INVALID_DATA_ERROR`, not
   `MMDB_INVALID_METADATA_ERROR`, for such a key in the `description` or
   `languages` metadata.
+- `MMDB_open()` no longer calls `calloc()` with a zero size for an empty
+  `languages` array. On a platform where that call returns `NULL`, the open
+  failed with `MMDB_OUT_OF_MEMORY_ERROR`. `metadata.languages.names` is now
+  `NULL` when `metadata.languages.count` is 0.
 
 ## 1.14.1 - 2026-09-17
 
