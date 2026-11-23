@@ -1216,7 +1216,9 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
     result->netmask = current_bit;
 
     uint8_t type = record_type(mmdb, value);
-    if (type == MMDB_RECORD_TYPE_INVALID) {
+    // A search node here means the tree is deeper than the address is long.
+    if (type == MMDB_RECORD_TYPE_INVALID ||
+        type == MMDB_RECORD_TYPE_SEARCH_NODE) {
         return MMDB_CORRUPT_SEARCH_TREE_ERROR;
     }
 

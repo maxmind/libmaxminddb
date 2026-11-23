@@ -31,6 +31,9 @@
   `MMDB_INVALID_DATA_ERROR`, and a search tree record that points into the
   metadata causes `MMDB_CORRUPT_SEARCH_TREE_ERROR`. Before, these read the
   metadata as data.
+- `MMDB_lookup_string()` and `MMDB_lookup_sockaddr()` now set `*mmdb_error` to
+  `MMDB_CORRUPT_SEARCH_TREE_ERROR` when the search tree is deeper than the IP
+  address is long. Before, they reported a found entry with an invalid offset.
 
 ## 1.14.1 - 2026-09-17
 
