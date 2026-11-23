@@ -24,6 +24,10 @@
   could stay true after such an error. `MMDB_get_value()` and
   `MMDB_vget_value()` now also clear `entry_data` when they cannot allocate
   memory for the lookup path.
+- `MMDB_get_value()` and its variants now zero the members of `entry_data` that
+  the value does not use. Before, `data_size` and the unused bytes of the value
+  could hold other data for a number or a boolean. This occurred when the lookup
+  path had at least one element or the value was behind a pointer.
 
 ## 1.14.1 - 2026-09-17
 

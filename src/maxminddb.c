@@ -1464,7 +1464,6 @@ static int aget_value(MMDB_entry_s *const start,
     const MMDB_s *const mmdb = start->mmdb;
     uint32_t offset = start->offset;
 
-    memset(entry_data, 0, sizeof(MMDB_entry_data_s));
     DEBUG_NL;
     DEBUG_MSG("looking up value by path");
 
@@ -1641,10 +1640,15 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
 static int decode_one_follow(const MMDB_s *const mmdb,
                              uint32_t offset,
                              MMDB_entry_data_s *entry_data) {
+    // decode_one does not set every member for every type.
+    memset(entry_data, 0, sizeof(MMDB_entry_data_s));
     CHECKED_DECODE_ONE(mmdb, offset, entry_data);
     if (entry_data->type == MMDB_DATA_TYPE_POINTER) {
         uint32_t next = entry_data->offset_to_next;
-        CHECKED_DECODE_ONE(mmdb, entry_data->pointer, entry_data);
+        uint32_t pointer = entry_data->pointer;
+        // The target must not keep the size and bytes of the pointer.
+        memset(entry_data, 0, sizeof(MMDB_entry_data_s));
+        CHECKED_DECODE_ONE(mmdb, pointer, entry_data);
         /* Pointers to pointers are illegal under the spec */
         if (entry_data->type == MMDB_DATA_TYPE_POINTER) {
             DEBUG_MSG("pointer points to another pointer");

@@ -14,6 +14,7 @@ void test_array_0_result(int status,
            MMDB_DATA_TYPE_UINT32,
            "returned entry type is uint32 - array[0]");
     cmp_ok(entry_data.uint32, "==", 1, "entry value is 1 - array[0]");
+    cmp_ok(entry_data.data_size, "==", 0, "data_size is 0 - array[0]");
 }
 
 void test_array_2_result(int status,
@@ -206,6 +207,10 @@ void test_complex_map_a_result(int status,
            "==",
            1,
            "entry value is 1 - map1{map2}{array}[0]{map3}{a}");
+    cmp_ok(entry_data.data_size,
+           "==",
+           0,
+           "data_size is 0 - map1{map2}{array}[0]{map3}{a}");
 }
 
 void test_complex_map_c_result(int status,
@@ -397,8 +402,59 @@ void run_tests(int mode, const char *mode_desc) {
     test_nested_structure(mode, mode_desc);
 }
 
+static void check_pointer_target(MMDB_s *mmdb,
+                                 uint32_t offset,
+                                 const char *const *path,
+                                 uint32_t expected_type,
+                                 const char *message) {
+    MMDB_entry_s entry = {.mmdb = mmdb, .offset = offset};
+    MMDB_entry_data_s entry_data;
+    // The call must replace all of these bytes.
+    memset(&entry_data, 0xFF, sizeof(MMDB_entry_data_s));
+
+    int status = MMDB_aget_value(&entry, &entry_data, path);
+    cmp_ok(status, "==", MMDB_SUCCESS, "status: %s", message);
+    cmp_ok(entry_data.type, "==", expected_type, "type: %s", message);
+    cmp_ok(entry_data.data_size, "==", 0, "data_size is 0: %s", message);
+    // uint32 shares its bytes with the pointer that the decoder followed.
+    cmp_ok(entry_data.uint32, "==", 0, "unused bytes are 0: %s", message);
+}
+
+// A pointer sets data_size and four bytes of the value. The target of the
+// pointer must not keep them.
+void test_pointer_to_number_or_boolean(void) {
+    // A map with the keys "a" and "b". Each value is a pointer.
+    static const char map[] = "\xE2"
+                              "\x41"
+                              "a"
+                              "\x38\x00\x00\x01\x00"
+                              "\x41"
+                              "b"
+                              "\x38\x00\x00\x01\x02";
+    uint8_t data[0x0103] = {0};
+    memcpy(data, map, sizeof(map) - 1);
+    // Offset 0x0100 holds a false boolean, which sets one byte of the value.
+    data[0x0101] = 0x07;
+    // Offset 0x0102 holds a uint16 of 0, which does not set data_size.
+    data[0x0102] = 0xA0;
+    MMDB_s mmdb = {.data_section = data, .data_section_size = sizeof(data)};
+
+    const char *const path_a[] = {"a", NULL};
+    const char *const path_b[] = {"b", NULL};
+    const char *const no_path[] = {NULL};
+    check_pointer_target(
+        &mmdb, 0, path_a, MMDB_DATA_TYPE_BOOLEAN, "boolean in a map");
+    check_pointer_target(
+        &mmdb, 0, path_b, MMDB_DATA_TYPE_UINT16, "uint16 in a map");
+    check_pointer_target(
+        &mmdb, 3, no_path, MMDB_DATA_TYPE_BOOLEAN, "boolean with no path");
+    check_pointer_target(
+        &mmdb, 10, no_path, MMDB_DATA_TYPE_UINT16, "uint16 with no path");
+}
+
 int main(void) {
     plan(NO_PLAN);
     for_all_modes(&run_tests);
+    test_pointer_to_number_or_boolean();
     done_testing();
 }
