@@ -21,6 +21,7 @@ set(TEST_TARGET_NAMES
   metadata_pointers_t
   metadata_t
   no_map_get_value_t
+  non_string_map_key_t
   overflow_bounds_t
   pointer_dos_t
   read_node_t

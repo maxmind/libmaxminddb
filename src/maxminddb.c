@@ -916,6 +916,12 @@ static int populate_languages_metadata(MMDB_s *mmdb,
         array_size, SIZE_MAX / sizeof(char *), MMDB_INVALID_METADATA_ERROR);
 
     mmdb->metadata.languages.count = 0;
+    if (0 == array_size) {
+        // calloc() can return NULL for a zero size.
+        mmdb->metadata.languages.names = NULL;
+        MMDB_free_entry_data_list(first_member);
+        return MMDB_SUCCESS;
+    }
     mmdb->metadata.languages.names = calloc(array_size, sizeof(char *));
     if (NULL == mmdb->metadata.languages.names) {
         MMDB_free_entry_data_list(first_member);
@@ -1597,12 +1603,11 @@ static int skip_map_or_array(const MMDB_s *const mmdb,
         while (size-- > 0) {
             CHECKED_DECODE_ONE(
                 mmdb, entry_data->offset_to_next, entry_data); // key
-            // Keys must be strings. This loop skips only a key's header, so
-            // the contents of a map or array key would be read as the keys and
-            // values that follow it.
-            if (MMDB_DATA_TYPE_MAP == entry_data->type ||
-                MMDB_DATA_TYPE_ARRAY == entry_data->type) {
-                DEBUG_MSG("map key is a map or an array");
+            // Keys must be strings. This loop does not follow a pointer key,
+            // so it does not check the type of the target.
+            if (MMDB_DATA_TYPE_UTF8_STRING != entry_data->type &&
+                MMDB_DATA_TYPE_POINTER != entry_data->type) {
+                DEBUG_MSG("map key is not a UTF-8 string");
                 return MMDB_INVALID_DATA_ERROR;
             }
             CHECKED_DECODE_ONE(
@@ -2066,6 +2071,10 @@ static int get_entry_data_list(const MMDB_s *const mmdb,
                 if (MMDB_SUCCESS != status) {
                     DEBUG_MSG("get_entry_data_list on map key failed.");
                     return status;
+                }
+                if (MMDB_DATA_TYPE_UTF8_STRING != list_key->entry_data.type) {
+                    DEBUG_MSG("map key is not a UTF-8 string");
+                    return MMDB_INVALID_DATA_ERROR;
                 }
 
                 offset = list_key->entry_data.offset_to_next;
