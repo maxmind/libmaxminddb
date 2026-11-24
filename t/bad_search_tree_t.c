@@ -95,9 +95,37 @@ void test_separator_record_rejected(void) {
                          "1.1.1.1");
 }
 
+// The database has 34 nodes in one chain, so a lookup uses all 32 bits of
+// the address and still ends on a search node.
+void test_tree_deeper_than_address_rejected(void) {
+    char *db_file =
+        bad_database_path("libmaxminddb-search-tree-deeper-than-address.mmdb");
+    MMDB_s *mmdb = open_ok(db_file, MMDB_MODE_MMAP, "deep search tree");
+    free(db_file);
+
+    if (!mmdb) {
+        return;
+    }
+
+    int gai_error = 0;
+    int mmdb_error = 0;
+    MMDB_lookup_result_s result =
+        MMDB_lookup_string(mmdb, "1.2.3.4", &gai_error, &mmdb_error);
+    cmp_ok(gai_error, "==", 0, "deep search tree: lookup string parse");
+    cmp_ok(mmdb_error,
+           "==",
+           MMDB_CORRUPT_SEARCH_TREE_ERROR,
+           "deep search tree: lookup status");
+    ok(!result.found_entry, "deep search tree: lookup reports no entry");
+
+    MMDB_close(mmdb);
+    free(mmdb);
+}
+
 int main(void) {
     plan(NO_PLAN);
     test_read_node_bounds();
     test_separator_record_rejected();
+    test_tree_deeper_than_address_rejected();
     done_testing();
 }

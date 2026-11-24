@@ -469,6 +469,9 @@ If a top-level metadata key or value is malformed, this function returns
 `MMDB_INVALID_DATA_ERROR`. It does not follow pointers in values that it does
 not use, so it does not detect a bad pointer target there.
 
+If the search tree and the 16-byte data section separator do not fit before the
+metadata marker, this function returns `MMDB_INVALID_METADATA_ERROR`.
+
 ## `MMDB_close()`
 
 ```c

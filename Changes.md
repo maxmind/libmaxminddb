@@ -19,6 +19,26 @@
   `MMDB_INVALID_DATA_ERROR` when they skip a nested map whose key is a map or an
   array. Before, they skipped only the key's header and read the data after it
   out of step. A lookup could return the wrong value.
+- Fixed an out-of-bounds read when a value in a metadata section of one or two
+  bytes declares a size that needs more size bytes than the section holds.
+  `MMDB_open()` now returns `MMDB_INVALID_DATA_ERROR` for such a database.
+- `MMDB_open()` now ends the data section where the metadata marker starts. The
+  `data_section_size` field of `MMDB_s` no longer includes the metadata marker
+  and the metadata. `MMDB_open()` now returns `MMDB_INVALID_METADATA_ERROR` when
+  the search tree and the 16-byte data section separator do not fit before the
+  metadata marker. Some of these databases opened before. A data section value
+  or pointer that reaches into the metadata now causes
+  `MMDB_INVALID_DATA_ERROR`, and a search tree record that points into the
+  metadata causes `MMDB_CORRUPT_SEARCH_TREE_ERROR`. Before, these read the
+  metadata as data.
+- `MMDB_lookup_string()` and `MMDB_lookup_sockaddr()` now set `*mmdb_error` to
+  `MMDB_CORRUPT_SEARCH_TREE_ERROR` when the search tree is deeper than the IP
+  address is long. Before, they reported a found entry with an invalid offset.
+- The decoder now returns `MMDB_INVALID_DATA_ERROR` for a boolean with a size
+  larger than 1. Before, it read the value as `true`. The check also applies to
+  values that the decoder skips. `MMDB_open()` fails when the metadata contains
+  such a boolean, and `MMDB_get_value()` and its variants fail for each key that
+  follows one in a map.
 
 ## 1.14.1 - 2026-09-17
 

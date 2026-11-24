@@ -373,31 +373,25 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
     ssize_t search_tree_size = (ssize_t)mmdb->metadata.node_count *
                                (ssize_t)mmdb->full_record_byte_size;
 
-    mmdb->data_section =
-        mmdb->file_content + search_tree_size + MMDB_DATA_SECTION_SEPARATOR;
-    if (mmdb->file_size < MMDB_DATA_SECTION_SEPARATOR ||
-        search_tree_size > mmdb->file_size - MMDB_DATA_SECTION_SEPARATOR) {
+    // The data section ends where the metadata marker starts.
+    ssize_t metadata_marker_offset =
+        metadata - mmdb->file_content - (ssize_t)(sizeof(METADATA_MARKER) - 1);
+    if (metadata_marker_offset < MMDB_DATA_SECTION_SEPARATOR ||
+        search_tree_size >
+            metadata_marker_offset - MMDB_DATA_SECTION_SEPARATOR) {
         status = MMDB_INVALID_METADATA_ERROR;
         goto cleanup;
     }
     ssize_t data_section_size =
-        mmdb->file_size - search_tree_size - MMDB_DATA_SECTION_SEPARATOR;
-    if (data_section_size <= 0 || (uint64_t)data_section_size > UINT32_MAX) {
+        metadata_marker_offset - search_tree_size - MMDB_DATA_SECTION_SEPARATOR;
+    if ((uint64_t)data_section_size > UINT32_MAX) {
         status = MMDB_INVALID_METADATA_ERROR;
         goto cleanup;
     }
+    mmdb->data_section =
+        mmdb->file_content + search_tree_size + MMDB_DATA_SECTION_SEPARATOR;
     mmdb->data_section_size = (uint32_t)data_section_size;
 
-    // Although it is likely not possible to construct a database with valid
-    // metadata, as parsed above, and a data_section_size less than 3, we do
-    // this check as later we assume it is at least three when doing bound
-    // checks.
-    if (mmdb->data_section_size < 3) {
-        status = MMDB_INVALID_DATA_ERROR;
-        goto cleanup;
-    }
-
-    mmdb->metadata_section = metadata;
     mmdb->ipv4_start_node.node_value = 0;
     mmdb->ipv4_start_node.netmask = 0;
 
@@ -1222,7 +1216,9 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
     result->netmask = current_bit;
 
     uint8_t type = record_type(mmdb, value);
-    if (type == MMDB_RECORD_TYPE_INVALID) {
+    // A search node here means the tree is deeper than the address is long.
+    if (type == MMDB_RECORD_TYPE_INVALID ||
+        type == MMDB_RECORD_TYPE_SEARCH_NODE) {
         return MMDB_CORRUPT_SEARCH_TREE_ERROR;
     }
 
@@ -1325,7 +1321,7 @@ static uint8_t record_type(const MMDB_s *const mmdb, uint64_t record) {
         return MMDB_RECORD_TYPE_DATA;
     }
 
-    DEBUG_MSG("record has a value that points outside of the database");
+    DEBUG_MSG("record has a value that points outside of the data section");
     return MMDB_RECORD_TYPE_INVALID;
 }
 
@@ -1674,7 +1670,7 @@ static int decode_one(const MMDB_s *const mmdb,
 
     if (mmdb->data_section_size == 0) {
         // decode_one is also called with a fake mmdb whose data_section
-        // points at the metadata; either way an empty section is invalid.
+        // points at the metadata. An empty section has no value to decode.
         DEBUG_MSG("decode_one called with an empty section");
         return MMDB_INVALID_DATA_ERROR;
     }
@@ -1720,7 +1716,7 @@ static int decode_one(const MMDB_s *const mmdb,
         DEBUG_MSGF("Pointer size: %i", psize);
 
         // We check that the offset does not extend past the end of the
-        // database and that the subtraction of psize did not underflow.
+        // data section and that the subtraction of psize did not underflow.
         if (offset > mmdb->data_section_size - psize ||
             mmdb->data_section_size < psize) {
             DEBUG_MSGF("Pointer offset (%d) past data section (%d)",
@@ -1750,7 +1746,8 @@ static int decode_one(const MMDB_s *const mmdb,
             break;
         case 30:
             // We subtract when checking offset to avoid possible overflow
-            if (offset > mmdb->data_section_size - 2) {
+            if (mmdb->data_section_size < 2 ||
+                offset > mmdb->data_section_size - 2) {
                 DEBUG_MSGF("String end (%d, case 30) past data section (%d)",
                            offset,
                            mmdb->data_section_size);
@@ -1761,7 +1758,8 @@ static int decode_one(const MMDB_s *const mmdb,
             break;
         case 31:
             // We subtract when checking offset to avoid possible overflow
-            if (offset > mmdb->data_section_size - 3) {
+            if (mmdb->data_section_size < 3 ||
+                offset > mmdb->data_section_size - 3) {
                 DEBUG_MSGF("String end (%d, case 31) past data section (%d)",
                            offset,
                            mmdb->data_section_size);
@@ -1783,6 +1781,11 @@ static int decode_one(const MMDB_s *const mmdb,
     }
 
     if (type == MMDB_DATA_TYPE_BOOLEAN) {
+        // The size field holds the value, so it must be 0 or 1.
+        if (size > 1) {
+            DEBUG_MSGF("Invalid boolean size: %i", size);
+            return MMDB_INVALID_DATA_ERROR;
+        }
         entry_data->boolean = size ? true : false;
         entry_data->data_size = 0;
         entry_data->offset_to_next = offset;
