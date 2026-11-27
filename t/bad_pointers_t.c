@@ -19,6 +19,8 @@ void run_tests(int mode, const char *mode_desc) {
                MMDB_INVALID_DATA_ERROR,
                "MMDB_get_value returns MMDB_INVALID_DATA_ERROR for bad pointer "
                "in data section");
+        ok(!entry_data.has_data, "has_data is false after a decode failure");
+        cmp_ok(entry_data.type, "==", 0, "type is 0 after a decode failure");
 
         MMDB_entry_data_list_s *entry_data_list;
         status = MMDB_get_entry_data_list(&result.entry, &entry_data_list);

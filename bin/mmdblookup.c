@@ -520,7 +520,7 @@ static int lookup_and_print(MMDB_s *mmdb,
             MMDB_entry_data_s entry_data;
             status = MMDB_aget_value(&result.entry, &entry_data, lookup_path);
             if (MMDB_SUCCESS == status) {
-                if (entry_data.offset) {
+                if (entry_data.has_data) {
                     MMDB_entry_s entry = {.mmdb = mmdb,
                                           .offset = entry_data.offset};
                     status = MMDB_get_entry_data_list(&entry, &entry_data_list);

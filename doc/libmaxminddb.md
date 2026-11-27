@@ -581,7 +581,8 @@ returned by `MMDB_lookup_string()` or `MMDB_lookup_sockaddr()`.
 The second parameter is a reference to an `MMDB_entry_data_s` structure. This
 will be populated with the data that is being looked up, if any is found. If
 nothing is found, then the `has_data` member of this structure will be false. If
-`has_data` is true then you can look at the `type` member.
+`has_data` is true then you can look at the `type` member. If the function
+returns an error, it clears this structure, so `has_data` is false.
 
 The final parameter is a lookup path. The path consists of a set of strings
 representing either map keys (e.g, "city") or array indexes (e.g., "0", "1",

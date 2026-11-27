@@ -19,6 +19,17 @@
   `MMDB_INVALID_DATA_ERROR` when they skip a nested map whose key is a map or an
   array. Before, they skipped only the key's header and read the data after it
   out of step. A lookup could return the wrong value.
+- `MMDB_get_value()`, `MMDB_vget_value()`, and `MMDB_aget_value()` now clear
+  `entry_data` when the decode of the first value fails. Previously, `has_data`
+  could stay true after such an error. `MMDB_get_value()` and
+  `MMDB_vget_value()` now also clear `entry_data` when they cannot allocate
+  memory for the lookup path.
+- `MMDB_get_value()` and its variants now zero the members of `entry_data` that
+  the value does not use. Before, `data_size` and the unused bytes of the value
+  could hold other data for a number or a boolean. This occurred when the lookup
+  path had at least one element or the value was behind a pointer.
+- `mmdblookup` no longer prints "No data was found at the lookup path you
+  provided" for a lookup path that ends at a value at data section offset 0.
 
 ## 1.14.1 - 2026-09-17
 
